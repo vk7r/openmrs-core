@@ -35,15 +35,21 @@ import org.springframework.util.StringUtils;
  */
 @Handler(supports = Person.class)
 public class PersonSaveHandler implements SaveHandler<Person> {
-	
+
 	/**
 	 * @see org.openmrs.api.handler.SaveHandler#handle(org.openmrs.OpenmrsObject, org.openmrs.User,
 	 *      java.util.Date, java.lang.String)
 	 */
 	@Override
 	public void handle(Person person, User creator, Date dateCreated, String other) {
-		
-		// address collection
+		handleAddresses(person);
+		handleNames(person);
+		handleAttributes(person);
+		handleDeathStatus(person);
+		handleVoidChecks(person, creator, dateCreated);
+	}
+	
+	private void handleAddresses(Person person) {
 		if (person.getAddresses() != null && !person.getAddresses().isEmpty()) {
 			Set<Address> blankAddresses = new HashSet<>();
 			for (PersonAddress pAddress : person.getAddresses()) {
@@ -53,36 +59,37 @@ public class PersonSaveHandler implements SaveHandler<Person> {
 				}
 				pAddress.setPerson(person);
 			}
-
 			person.getAddresses().removeAll(blankAddresses);
 		}
-		
-		// name collection
+	}
+
+	private void handleNames(Person person) {
 		if (person.getNames() != null && !person.getNames().isEmpty()) {
 			for (PersonName pName : person.getNames()) {
 				pName.setPerson(person);
 			}
 		}
-		
-		// attribute collection
+	}
+
+	private void handleAttributes(Person person) {
 		if (person.getAttributes() != null && !person.getAttributes().isEmpty()) {
 			for (PersonAttribute pAttr : person.getAttributes()) {
 				pAttr.setPerson(person);
 			}
 		}
-		
-		//if the patient was marked as dead and reversed, drop the cause of death
+	}
+
+	private void handleDeathStatus(Person person) {
 		if (!person.getDead() && person.getCauseOfDeath() != null) {
 			person.setCauseOfDeath(null);
 		}
-		
-		// do the checks for voided attributes (also in PersonVoidHandler)
+	}
+
+	private void handleVoidChecks(Person person, User creator, Date dateCreated) {
 		if (person.getPersonVoided()) {
-			
 			if (!StringUtils.hasLength(person.getPersonVoidReason())) {
 				throw new APIException("Person.voided.bit", new Object[] { person });
 			}
-			
 			if (person.getPersonVoidedBy() == null) {
 				person.setPersonVoidedBy(creator);
 			}
@@ -90,10 +97,9 @@ public class PersonSaveHandler implements SaveHandler<Person> {
 				person.setPersonDateVoided(dateCreated);
 			}
 		} else {
-			// voided is set to false
 			person.setPersonVoidedBy(null);
-			person.setPersonDateVoided(null);
 			person.setPersonVoidReason(null);
+			person.setPersonDateVoided(null);
 		}
 	}
 }
