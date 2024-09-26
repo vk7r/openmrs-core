@@ -1,0 +1,1399 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Obs</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Obs (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Obs</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,9%
+  </span>
+  <span class="absValue">
+    (77/82)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,4%
+  </span>
+  <span class="absValue">
+    (221/301)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Obs$HibernateProxy$6o6yahNb</td>
+  </tr>
+  <tr>
+    <td class="name">Obs$Interpretation</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Obs$Status</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    94,2%
+  </span>
+  <span class="absValue">
+    (81/86)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,8%
+  </span>
+  <span class="absValue">
+    (225/305)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.DecimalFormat;
+&nbsp;import java.text.NumberFormat;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.annotation.AllowDirectAccess;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.hibernate.HibernateUtil;
+&nbsp;import org.openmrs.obs.ComplexData;
+&nbsp;import org.openmrs.obs.ComplexObsHandler;
+&nbsp;import org.openmrs.util.Format;
+&nbsp;import org.openmrs.util.Format.FORMAT_TYPE;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * An observation is a single unit of clinical information. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Observations are collected and grouped together into one Encounter (one visit). Obs can be
+&nbsp; * grouped in a hierarchical fashion. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * &lt;p&gt;
+&nbsp; * The {@link #getObsGroup()} method returns an optional parent. That parent object is also an Obs.
+&nbsp; * The parent Obs object knows about its child objects through the {@link #getGroupMembers()}
+&nbsp; * method.
+&nbsp; * &lt;/p&gt;
+&nbsp; * &lt;p&gt;
+&nbsp; * (Multi-level hierarchies are achieved by an Obs parent object being a member of another Obs
+&nbsp; * (grand)parent object) Read up on the obs table: http://openmrs.org/wiki/Obs_Table_Primer In an
+&nbsp; * OpenMRS installation, there may be an occasion need to change an Obs.
+&nbsp; * &lt;/p&gt;
+&nbsp; * &lt;p&gt;
+&nbsp; * For example, a site may decide to replace a concept in the dictionary with a more specific set of
+&nbsp; * concepts. An observation is part of the official record of an encounter. There may be legal,
+&nbsp; * ethical, and auditing consequences from altering a record. It is recommended that you create a
+&nbsp; * new Obs and void the old one:
+&nbsp; * &lt;/p&gt;
+&nbsp; * Obs newObs = Obs.newInstance(oldObs); //copies values from oldObs
+&nbsp; * newObs.setPreviousVersion(oldObs);
+&nbsp; * Context.getObsService().saveObs(newObs,&quot;Your reason for the change here&quot;);
+&nbsp; * Context.getObsService().voidObs(oldObs, &quot;Your reason for the change here&quot;);
+&nbsp; * 
+&nbsp; * @see Encounter
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Obs extends BaseFormRecordableOpenmrsData {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum Interpretation {</b>
+<b class="fc">&nbsp;		NORMAL, ABNORMAL, CRITICALLY_ABNORMAL, NEGATIVE, POSITIVE, CRITICALLY_LOW, LOW, HIGH, CRITICALLY_HIGH, VERY_SUSCEPTIBLE, SUSCEPTIBLE, INTERMEDIATE, RESISTANT, SIGNIFICANT_CHANGE_DOWN, SIGNIFICANT_CHANGE_UP, OFF_SCALE_LOW, OFF_SCALE_HIGH</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum Status {</b>
+<b class="fc">&nbsp;		PRELIMINARY, FINAL, AMENDED</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static final String DATE_TIME_PATTERN = &quot;yyyy-MM-dd HH:mm&quot;;
+&nbsp;	
+&nbsp;	private static final String TIME_PATTERN = &quot;HH:mm&quot;;
+&nbsp;	
+&nbsp;	private static final String DATE_PATTERN = &quot;yyyy-MM-dd&quot;;
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 112342333L;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Obs.class);</b>
+&nbsp;	
+&nbsp;	protected Integer obsId;
+&nbsp;	
+&nbsp;	protected Concept concept;
+&nbsp;	
+&nbsp;	protected Date obsDatetime;
+&nbsp;	
+&nbsp;	protected String accessionNumber;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The &quot;parent&quot; of this obs. It is the grouping that brings other obs together. note:
+&nbsp;	 * obsGroup.getConcept().isSet() should be true This will be non-null if this obs is a member of
+&nbsp;	 * another groupedObs
+&nbsp;	 * 
+&nbsp;	 * @see #isObsGrouping() (??)
+&nbsp;	 */
+&nbsp;	protected Obs obsGroup;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The list of obs grouped under this obs.
+&nbsp;	 */
+&nbsp;	@AllowDirectAccess
+&nbsp;	protected Set&lt;Obs&gt; groupMembers;
+&nbsp;	
+&nbsp;	protected Concept valueCoded;
+&nbsp;	
+&nbsp;	protected ConceptName valueCodedName;
+&nbsp;	
+&nbsp;	protected Drug valueDrug;
+&nbsp;	
+&nbsp;	protected Integer valueGroupId;
+&nbsp;	
+&nbsp;	protected Date valueDatetime;
+&nbsp;	
+&nbsp;	protected Double valueNumeric;
+&nbsp;	
+&nbsp;	protected String valueModifier;
+&nbsp;	
+&nbsp;	protected String valueText;
+&nbsp;	
+&nbsp;	protected String valueComplex;
+&nbsp;	
+&nbsp;	// ComplexData is not persisted in the database.
+&nbsp;	protected transient ComplexData complexData;
+&nbsp;	
+&nbsp;	protected String comment;
+&nbsp;	
+&nbsp;	protected transient Integer personId;
+&nbsp;	
+&nbsp;	protected Person person;
+&nbsp;	
+&nbsp;	protected Order order;
+&nbsp;	
+&nbsp;	protected Location location;
+&nbsp;	
+&nbsp;	protected Encounter encounter;
+&nbsp;	
+&nbsp;	private Obs previousVersion;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean dirty = Boolean.FALSE;</b>
+&nbsp;	
+&nbsp;	private Interpretation interpretation;
+&nbsp;	
+<b class="fc">&nbsp;	private Status status = Status.FINAL;</b>
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Obs() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Required parameters constructor A value is also required, but that can be one of: valueCoded,
+&nbsp;	 * valueDrug, valueNumeric, or valueText
+&nbsp;	 * 
+&nbsp;	 * @param person The Person this obs is acting on
+&nbsp;	 * @param question The question concept this obs is related to
+&nbsp;	 * @param obsDatetime The time this obs took place
+&nbsp;	 * @param location The location this obs took place
+&nbsp;	 */
+<b class="fc">&nbsp;	public Obs(Person person, Concept question, Date obsDatetime, Location location) {</b>
+<b class="fc">&nbsp;		this.person = person;</b>
+<b class="fc">&nbsp;		if (person != null) {</b>
+<b class="fc">&nbsp;			this.personId = person.getPersonId();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		this.concept = question;</b>
+<b class="fc">&nbsp;		this.obsDatetime = obsDatetime;</b>
+<b class="fc">&nbsp;		this.location = location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public Obs(Integer obsId) {</b>
+<b class="fc">&nbsp;		this.obsId = obsId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is an equivalent to a copy constructor. Creates a new copy of the given
+&nbsp;	 * &lt;code&gt;obsToCopy&lt;/code&gt; with a null obs id
+&nbsp;	 * 
+&nbsp;	 * @param obsToCopy The Obs that is going to be copied
+&nbsp;	 * @return a new Obs object with all the same attributes as the given obs
+&nbsp;	 */
+&nbsp;	public static Obs newInstance(Obs obsToCopy) {
+<b class="fc">&nbsp;		Obs newObs = new Obs(obsToCopy.getPerson(), obsToCopy.getConcept(), obsToCopy.getObsDatetime(),</b>
+<b class="fc">&nbsp;		        obsToCopy.getLocation());</b>
+&nbsp;		
+<b class="fc">&nbsp;		newObs.setObsGroup(obsToCopy.getObsGroup());</b>
+<b class="fc">&nbsp;		newObs.setAccessionNumber(obsToCopy.getAccessionNumber());</b>
+<b class="fc">&nbsp;		newObs.setValueCoded(obsToCopy.getValueCoded());</b>
+<b class="fc">&nbsp;		newObs.setValueDrug(obsToCopy.getValueDrug());</b>
+<b class="fc">&nbsp;		newObs.setValueGroupId(obsToCopy.getValueGroupId());</b>
+<b class="fc">&nbsp;		newObs.setValueDatetime(obsToCopy.getValueDatetime());</b>
+<b class="fc">&nbsp;		newObs.setValueNumeric(obsToCopy.getValueNumeric());</b>
+<b class="fc">&nbsp;		newObs.setValueModifier(obsToCopy.getValueModifier());</b>
+<b class="fc">&nbsp;		newObs.setValueText(obsToCopy.getValueText());</b>
+<b class="fc">&nbsp;		newObs.setComment(obsToCopy.getComment());</b>
+<b class="fc">&nbsp;		newObs.setEncounter(obsToCopy.getEncounter());</b>
+<b class="fc">&nbsp;		newObs.setCreator(obsToCopy.getCreator());</b>
+<b class="fc">&nbsp;		newObs.setDateCreated(obsToCopy.getDateCreated());</b>
+<b class="fc">&nbsp;		newObs.setVoided(obsToCopy.getVoided());</b>
+<b class="fc">&nbsp;		newObs.setVoidedBy(obsToCopy.getVoidedBy());</b>
+<b class="fc">&nbsp;		newObs.setDateVoided(obsToCopy.getDateVoided());</b>
+<b class="fc">&nbsp;		newObs.setVoidReason(obsToCopy.getVoidReason());</b>
+<b class="fc">&nbsp;		newObs.setStatus(obsToCopy.getStatus());</b>
+<b class="fc">&nbsp;		newObs.setInterpretation(obsToCopy.getInterpretation());</b>
+<b class="fc">&nbsp;		newObs.setOrder(obsToCopy.getOrder());</b>
+&nbsp;		
+<b class="fc">&nbsp;		newObs.setValueComplex(obsToCopy.getValueComplex());</b>
+<b class="fc">&nbsp;		newObs.setComplexData(obsToCopy.getComplexData());</b>
+<b class="fc">&nbsp;		newObs.setFormField(obsToCopy.getFormFieldNamespace(), obsToCopy.getFormFieldPath());</b>
+&nbsp;		
+&nbsp;		// Copy list of all members, including voided, and put them in respective groups
+<b class="fc">&nbsp;		if (obsToCopy.hasGroupMembers(true)) {</b>
+<b class="fc">&nbsp;			for (Obs member : obsToCopy.getGroupMembers(true)) {</b>
+&nbsp;				// if the obs hasn&#39;t been saved yet, no need to duplicate it
+<b class="fc">&nbsp;				if (member.getObsId() == null) {</b>
+<b class="fc">&nbsp;					newObs.addGroupMember(member);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					Obs newMember = Obs.newInstance(member);</b>
+<b class="fc">&nbsp;					newMember.setPreviousVersion(member);</b>
+<b class="fc">&nbsp;					newObs.addGroupMember(newMember);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return newObs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the comment.
+&nbsp;	 */
+&nbsp;	public String getComment() {
+<b class="fc">&nbsp;		return comment;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param comment The comment to set.
+&nbsp;	 */
+&nbsp;	public void setComment(String comment) {
+<b class="fc">&nbsp;		markAsDirty(this.comment, comment);</b>
+<b class="fc">&nbsp;		this.comment = comment;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the concept.
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept The concept to set.
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		markAsDirty(this.concept, concept);</b>
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the concept description that is tied to the concept name that was used when making this
+&nbsp;	 * observation
+&nbsp;	 * 
+&nbsp;	 * @return ConceptDescription the description used
+&nbsp;	 */
+&nbsp;	public ConceptDescription getConceptDescription() {
+&nbsp;		// if we don&#39;t have a question for this concept,
+&nbsp;		// then don&#39;t bother looking for a description
+<b class="nc">&nbsp;		if (getConcept() == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// ABKTOD: description in which locale?
+<b class="nc">&nbsp;		return concept.getDescription();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the encounter.
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounter The encounter to set.
+&nbsp;	 */
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		markAsDirty(this.encounter, encounter);</b>
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the location.
+&nbsp;	 */
+&nbsp;	public Location getLocation() {
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param location The location to set.
+&nbsp;	 */
+&nbsp;	public void setLocation(Location location) {
+<b class="fc">&nbsp;		markAsDirty(this.location, location);</b>
+<b class="fc">&nbsp;		this.location = location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the obsDatetime.
+&nbsp;	 */
+&nbsp;	public Date getObsDatetime() {
+<b class="fc">&nbsp;		return obsDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param obsDatetime The obsDatetime to set.
+&nbsp;	 */
+&nbsp;	public void setObsDatetime(Date obsDatetime) {
+<b class="fc">&nbsp;		markAsDirty(this.obsDatetime, obsDatetime);</b>
+<b class="fc">&nbsp;		this.obsDatetime = obsDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * An obs grouping occurs when the question (#getConcept()) is a set. (@link
+&nbsp;	 * org.openmrs.Concept#isSet()) If this is non-null, it means the current Obs is in the list
+&nbsp;	 * returned by &lt;code&gt;obsGroup&lt;/code&gt;.{@link #getGroupMembers()}
+&nbsp;	 * 
+&nbsp;	 * @return the Obs that is the grouping factor
+&nbsp;	 */
+&nbsp;	public Obs getObsGroup() {
+<b class="fc">&nbsp;		return obsGroup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method does NOT add this current obs to the list of obs in obsGroup.getGroupMembers().
+&nbsp;	 * That must be done (and should be done) manually. (I am not doing it here for fear of screwing
+&nbsp;	 * up the normal loading and creation of this object via hibernate/spring)
+&nbsp;	 * 
+&nbsp;	 * @param obsGroup the obsGroup to set
+&nbsp;	 */
+&nbsp;	public void setObsGroup(Obs obsGroup) {
+<b class="fc">&nbsp;		markAsDirty(this.obsGroup, obsGroup);</b>
+<b class="fc">&nbsp;		this.obsGroup = obsGroup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that checks for if this obs has 1 or more group members (either voided or
+&nbsp;	 * non-voided) Note this method differs from hasGroupMembers(), as that method excludes voided
+&nbsp;	 * obs; logic is that while a obs that has only voided group members should be seen as
+&nbsp;	 * &quot;having no group members&quot; it still should be considered an &quot;obs grouping&quot;
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * NOTE: This method could also be called &quot;isObsGroup&quot; for a little less confusion on names.
+&nbsp;	 * However, jstl in a web layer (or any psuedo-getter) access isn&#39;t good with both an
+&nbsp;	 * &quot;isObsGroup&quot; method and a &quot;getObsGroup&quot; method. Which one should be returned with a
+&nbsp;	 * simplified jstl call like ${obs.obsGroup} ? With this setup, ${obs.obsGrouping} returns a
+&nbsp;	 * boolean of whether this obs is a parent and has members. ${obs.obsGroup} returns the parent
+&nbsp;	 * object to this obs if this obs is a group member of some other group.
+&nbsp;	 * 
+&nbsp;	 * @return true if this is the parent group of other obs
+&nbsp;	 */
+&nbsp;	public boolean isObsGrouping() {
+<b class="fc">&nbsp;		return hasGroupMembers(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A convenience method to check for nullity and length to determine if this obs has group
+&nbsp;	 * members. By default, this ignores voided-objects. To include voided, use
+&nbsp;	 * {@link #hasGroupMembers(boolean)} with value true.
+&nbsp;	 * 
+&nbsp;	 * @return true if this is the parent group of other obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include voided obs
+&nbsp;	 */
+&nbsp;	public boolean hasGroupMembers() {
+<b class="fc">&nbsp;		return hasGroupMembers(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that checks for nullity and length to determine if this obs has group
+&nbsp;	 * members. The parameter specifies if this method whether or not voided obs should be
+&nbsp;	 * considered.
+&nbsp;	 * 
+&nbsp;	 * @param includeVoided determines if Voided members should be considered as group members.
+&nbsp;	 * @return true if this is the parent group of other Obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if this obs has group members based on parameter
+&nbsp;	 */
+&nbsp;	public boolean hasGroupMembers(boolean includeVoided) {
+&nbsp;		// ! symbol used because if it&#39;s not empty, we want true
+<b class="fc">&nbsp;		return !org.springframework.util.CollectionUtils.isEmpty(getGroupMembers(includeVoided));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the non-voided members of the obs group, if this obs is a group. By default this method
+&nbsp;	 * only returns non-voided group members. To get all group members, use
+&nbsp;	 * {@link #getGroupMembers(boolean)} with value true.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If it&#39;s not a group (i.e. {@link #getConcept()}.{@link org.openmrs.Concept#getSet()} is not
+&nbsp;	 * true, then this returns null.
+&nbsp;	 * 
+&nbsp;	 * @return a Set&amp;lt;Obs&amp;gt; of the members of this group.
+&nbsp;	 * @see #addGroupMember(Obs)
+&nbsp;	 * @see #hasGroupMembers()
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getGroupMembers() {
+&nbsp;		//same as just returning groupMembers
+<b class="fc">&nbsp;		return getGroupMembers(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the group members of this obs group, if this obs is a group. This method will either
+&nbsp;	 * return all group members, or only non-voided group members, depending on if the argument is
+&nbsp;	 * set to be true or false respectively.
+&nbsp;	 * 
+&nbsp;	 * @param includeVoided
+&nbsp;	 * @return the set of group members in this obs group
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; Get all group members if passed true, and non-voided if passed false
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getGroupMembers(boolean includeVoided) {
+<b class="fc">&nbsp;		if (includeVoided) {</b>
+&nbsp;			//just return all group members
+<b class="fc">&nbsp;			return groupMembers;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (groupMembers == null) {</b>
+&nbsp;			//Empty set so return null
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Set&lt;Obs&gt; nonVoided = new LinkedHashSet&lt;&gt;(groupMembers);</b>
+<b class="fc">&nbsp;		nonVoided.removeIf(BaseOpenmrsData::getVoided);</b>
+<b class="fc">&nbsp;		return nonVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the members of the obs group, if this obs is a group.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If it&#39;s not a group (i.e. {@link #getConcept()}.{@link org.openmrs.Concept#getSet()} is not
+&nbsp;	 * true, then this returns null.
+&nbsp;	 * 
+&nbsp;	 * @param groupMembers the groupedObs to set
+&nbsp;	 * @see #addGroupMember(Obs)
+&nbsp;	 * @see #hasGroupMembers()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark the obs as dirty when the set is changed from null to a non empty one
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not mark the obs as dirty when the set is changed from null to an empty one
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark the obs as dirty when the set is replaced with another with different members
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not mark the obs as dirty when the set is replaced with another with same members
+&nbsp;	 */
+&nbsp;	public void setGroupMembers(Set&lt;Obs&gt; groupMembers) {
+&nbsp;		//Copy over the entire list
+<b class="fc">&nbsp;		this.groupMembers = groupMembers;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to add the given &lt;code&gt;obs&lt;/code&gt; to this grouping. Will implicitly make
+&nbsp;	 * this obs an ObsGroup.
+&nbsp;	 * 
+&nbsp;	 * @param member Obs to add to this group
+&nbsp;	 * @see #setGroupMembers(Set)
+&nbsp;	 * @see #getGroupMembers()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when a new obs is added as a member
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when a duplicate obs is added as a member
+&nbsp;	 */
+&nbsp;	public void addGroupMember(Obs member) {
+<b class="fc">&nbsp;		if (member == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (getGroupMembers() == null) {</b>
+<b class="fc">&nbsp;			groupMembers = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// a quick sanity check to make sure someone isn&#39;t adding
+&nbsp;		// itself to the group
+<b class="fc">&nbsp;		if (member.equals(this)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Obs.error.groupCannotHaveItselfAsAMentor&quot;, new Object[] { this, member });</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		member.setObsGroup(this);</b>
+<b class="fc">&nbsp;		groupMembers.add(member);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to remove an Obs from this grouping This also removes the link in the
+&nbsp;	 * given &lt;code&gt;obs&lt;/code&gt;object to this obs grouper
+&nbsp;	 * 
+&nbsp;	 * @param member Obs to remove from this group
+&nbsp;	 * @see #setGroupMembers(Set)
+&nbsp;	 * @see #getGroupMembers()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when an obs is removed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when a non existent obs is removed
+&nbsp;	 */
+&nbsp;	public void removeGroupMember(Obs member) {
+<b class="fc">&nbsp;		if (member == null || getGroupMembers() == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (groupMembers.remove(member)) {</b>
+<b class="fc">&nbsp;			member.setObsGroup(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that returns related Obs If the Obs argument is not an ObsGroup: a
+&nbsp;	 * Set&amp;lt;Obs&amp;gt; will be returned containing all of the children of this Obs&#39; parent that are
+&nbsp;	 * not ObsGroups themselves. This will include this Obs by default, unless getObsGroup() returns
+&nbsp;	 * null, in which case an empty set is returned. If the Obs argument is an ObsGroup: a
+&nbsp;	 * Set&amp;lt;Obs&amp;gt; will be returned containing 1. all of this Obs&#39; group members, and 2. all
+&nbsp;	 * ancestor Obs that are not themselves obsGroups.
+&nbsp;	 * 
+&nbsp;	 * @return Set&amp;lt;Obs&amp;gt;
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getRelatedObservations() {
+<b class="fc">&nbsp;		Set&lt;Obs&gt; ret = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (this.isObsGrouping()) {</b>
+<b class="fc">&nbsp;			ret.addAll(this.getGroupMembers());</b>
+<b class="fc">&nbsp;			Obs parentObs = this;</b>
+<b class="fc">&nbsp;			while (parentObs.getObsGroup() != null) {</b>
+<b class="fc">&nbsp;				for (Obs obsSibling : parentObs.getObsGroup().getGroupMembers()) {</b>
+<b class="fc">&nbsp;					if (!obsSibling.isObsGrouping()) {</b>
+<b class="fc">&nbsp;						ret.add(obsSibling);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;				parentObs = parentObs.getObsGroup();</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (this.getObsGroup() != null) {</b>
+<b class="fc">&nbsp;			for (Obs obsSibling : this.getObsGroup().getGroupMembers()) {</b>
+<b class="fc">&nbsp;				if (!obsSibling.isObsGrouping()) {</b>
+<b class="fc">&nbsp;					ret.add(obsSibling);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the obsId.
+&nbsp;	 */
+&nbsp;	public Integer getObsId() {
+<b class="fc">&nbsp;		return obsId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param obsId The obsId to set.
+&nbsp;	 */
+&nbsp;	public void setObsId(Integer obsId) {
+<b class="fc">&nbsp;		this.obsId = obsId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the order.
+&nbsp;	 */
+&nbsp;	public Order getOrder() {
+<b class="fc">&nbsp;		return order;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param order The order to set.
+&nbsp;	 */
+&nbsp;	public void setOrder(Order order) {
+<b class="fc">&nbsp;		markAsDirty(this.order, order);</b>
+<b class="fc">&nbsp;		this.order = order;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The person id of the person on this object. This should be the same as
+&nbsp;	 * &lt;code&gt;{@link #getPerson()}.getPersonId()&lt;/code&gt;. It is duplicated here for speed and
+&nbsp;	 * simplicity reasons
+&nbsp;	 * 
+&nbsp;	 * @return the integer person id of the person this obs is acting on
+&nbsp;	 */
+&nbsp;	public Integer getPersonId() {
+<b class="fc">&nbsp;		return personId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the person id on this obs object. This method is here for convenience, but really the
+&nbsp;	 * {@link #setPerson(Person)} method should be used like
+&nbsp;	 * &lt;code&gt;setPerson(new Person(personId))&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @see #setPerson(Person)
+&nbsp;	 * @param personId
+&nbsp;	 */
+&nbsp;	protected void setPersonId(Integer personId) {
+<b class="fc">&nbsp;		markAsDirty(this.personId, personId);</b>
+<b class="fc">&nbsp;		this.personId = personId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the person object that this obs is acting on.
+&nbsp;	 * 
+&nbsp;	 * @see #getPersonId()
+&nbsp;	 * @return the person object
+&nbsp;	 */
+&nbsp;	public Person getPerson() {
+<b class="fc">&nbsp;		return person;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the person object to this obs object. This will also set the personId on this obs object
+&nbsp;	 * 
+&nbsp;	 * @see #setPersonId(Integer)
+&nbsp;	 * @param person the Patient/Person object that this obs is acting on
+&nbsp;	 */
+&nbsp;	public void setPerson(Person person) {
+<b class="fc">&nbsp;		markAsDirty(this.person, person);</b>
+<b class="fc">&nbsp;		this.person = person;</b>
+<b class="fc">&nbsp;		if (person != null) {</b>
+<b class="fc">&nbsp;			setPersonId(person.getPersonId());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the value of this obs to the specified valueBoolean if this obs has a boolean concept.
+&nbsp;	 * 
+&nbsp;	 * @param valueBoolean the boolean value matching the boolean coded concept to set to
+&nbsp;	 */
+&nbsp;	public void setValueBoolean(Boolean valueBoolean) {
+<b class="fc">&nbsp;		if (getConcept() != null &amp;&amp; getConcept().getDatatype() != null &amp;&amp; getConcept().getDatatype().isBoolean()) {</b>
+<b class="fc">&nbsp;			if (valueBoolean != null) {</b>
+<b class="fc">&nbsp;				setValueCoded(valueBoolean ? Context.getConceptService().getTrueConcept() : Context.getConceptService()</b>
+<b class="fc">&nbsp;				        .getFalseConcept());</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				setValueCoded(null);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Coerces a value to a Boolean representation
+&nbsp;	 * 
+&nbsp;	 * @return Boolean representation of the obs value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true for value_numeric concepts if value is 1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for value_numeric concepts if value is 0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null for value_numeric concepts if value is neither 1 nor 0
+&nbsp;	 */
+&nbsp;	public Boolean getValueAsBoolean() {
+&nbsp;		
+<b class="fc">&nbsp;		if (getValueCoded() != null) {</b>
+<b class="nc">&nbsp;			if (getValueCoded().equals(Context.getConceptService().getTrueConcept())) {</b>
+<b class="nc">&nbsp;				return Boolean.TRUE;</b>
+<b class="nc">&nbsp;			} else if (getValueCoded().equals(Context.getConceptService().getFalseConcept())) {</b>
+<b class="nc">&nbsp;				return Boolean.FALSE;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (getValueNumeric() != null) {</b>
+<b class="fc">&nbsp;			if (getValueNumeric() == 1) {</b>
+<b class="fc">&nbsp;				return Boolean.TRUE;</b>
+<b class="fc">&nbsp;			} else if (getValueNumeric() == 0) {</b>
+<b class="fc">&nbsp;				return Boolean.FALSE;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		//returning null is preferred to defaulting to false to support validation of user input is from a form
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the boolean value if the concept of this obs is of boolean datatype
+&nbsp;	 * 
+&nbsp;	 * @return true or false if value is set otherwise null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if value coded answer concept is true concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if value coded answer concept is false concept
+&nbsp;	 */
+&nbsp;	public Boolean getValueBoolean() {
+<b class="fc">&nbsp;		if (getConcept() != null &amp;&amp; valueCoded != null &amp;&amp; getConcept().getDatatype().isBoolean()) {</b>
+<b class="fc">&nbsp;			Concept trueConcept = Context.getConceptService().getTrueConcept();</b>
+<b class="fc">&nbsp;			return trueConcept != null &amp;&amp; valueCoded.getId().equals(trueConcept.getId());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueCoded.
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public Concept getValueCoded() {
+<b class="fc">&nbsp;		return valueCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueCoded The valueCoded to set.
+&nbsp;	 */
+&nbsp;	public void setValueCoded(Concept valueCoded) {
+<b class="fc">&nbsp;		markAsDirty(this.valueCoded, valueCoded);</b>
+<b class="fc">&nbsp;		this.valueCoded = valueCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the specific name used for the coded value.
+&nbsp;	 * 
+&nbsp;	 * @return the name of the coded value
+&nbsp;	 */
+&nbsp;	public ConceptName getValueCodedName() {
+<b class="fc">&nbsp;		return valueCodedName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the specific name used for the coded value.
+&nbsp;	 * 
+&nbsp;	 * @param valueCodedName the name of the coded value
+&nbsp;	 */
+&nbsp;	public void setValueCodedName(ConceptName valueCodedName) {
+<b class="fc">&nbsp;		markAsDirty(this.valueCodedName, valueCodedName);</b>
+<b class="fc">&nbsp;		this.valueCodedName = valueCodedName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueDrug
+&nbsp;	 */
+&nbsp;	public Drug getValueDrug() {
+<b class="fc">&nbsp;		return valueDrug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueDrug The valueDrug to set.
+&nbsp;	 */
+&nbsp;	public void setValueDrug(Drug valueDrug) {
+<b class="fc">&nbsp;		markAsDirty(this.valueDrug, valueDrug);</b>
+<b class="fc">&nbsp;		this.valueDrug = valueDrug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueDatetime.
+&nbsp;	 */
+&nbsp;	public Date getValueDatetime() {
+<b class="fc">&nbsp;		return valueDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueDatetime The valueDatetime to set.
+&nbsp;	 */
+&nbsp;	public void setValueDatetime(Date valueDatetime) {
+<b class="fc">&nbsp;		markAsDirty(this.valueDatetime, valueDatetime);</b>
+<b class="fc">&nbsp;		this.valueDatetime = valueDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the value of this obs as a Date. Note that this uses a java.util.Date, so it includes
+&nbsp;	 *         a time component, that should be ignored.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Date getValueDate() {
+<b class="nc">&nbsp;		return valueDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueDate The date value to set.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setValueDate(Date valueDate) {
+<b class="nc">&nbsp;		markAsDirty(this.valueDatetime, valueDate);</b>
+<b class="nc">&nbsp;		this.valueDatetime = valueDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the time value of this obs. Note that this uses a java.util.Date, so it includes a
+&nbsp;	 *         date component, that should be ignored.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Date getValueTime() {
+<b class="nc">&nbsp;		return valueDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueTime the time value to set
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setValueTime(Date valueTime) {
+<b class="nc">&nbsp;		markAsDirty(this.valueDatetime, valueTime);</b>
+<b class="nc">&nbsp;		this.valueDatetime = valueTime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueGroupId.
+&nbsp;	 */
+&nbsp;	public Integer getValueGroupId() {
+<b class="fc">&nbsp;		return valueGroupId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueGroupId The valueGroupId to set.
+&nbsp;	 */
+&nbsp;	public void setValueGroupId(Integer valueGroupId) {
+<b class="fc">&nbsp;		markAsDirty(this.valueGroupId, valueGroupId);</b>
+<b class="fc">&nbsp;		this.valueGroupId = valueGroupId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueModifier.
+&nbsp;	 */
+&nbsp;	public String getValueModifier() {
+<b class="fc">&nbsp;		return valueModifier;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueModifier The valueModifier to set.
+&nbsp;	 */
+&nbsp;	public void setValueModifier(String valueModifier) {
+<b class="fc">&nbsp;		markAsDirty(this.valueModifier, valueModifier);</b>
+<b class="fc">&nbsp;		this.valueModifier = valueModifier;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueNumeric.
+&nbsp;	 */
+&nbsp;	public Double getValueNumeric() {
+<b class="fc">&nbsp;		return valueNumeric;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueNumeric The valueNumeric to set.
+&nbsp;	 */
+&nbsp;	public void setValueNumeric(Double valueNumeric) {
+<b class="fc">&nbsp;		markAsDirty(this.valueNumeric, valueNumeric);</b>
+<b class="fc">&nbsp;		this.valueNumeric = valueNumeric;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the valueText.
+&nbsp;	 */
+&nbsp;	public String getValueText() {
+<b class="fc">&nbsp;		return valueText;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param valueText The valueText to set.
+&nbsp;	 */
+&nbsp;	public void setValueText(String valueText) {
+<b class="fc">&nbsp;		markAsDirty(this.valueText, valueText);</b>
+<b class="fc">&nbsp;		this.valueText = valueText;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns true if this Obs is complex.
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the concept is complex
+&nbsp;	 */
+&nbsp;	public boolean isComplex() {
+<b class="fc">&nbsp;		if (getConcept() != null) {</b>
+<b class="fc">&nbsp;			return getConcept().isComplex();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the value for the ComplexData. This method is used by the ComplexObsHandler. The
+&nbsp;	 * valueComplex has two parts separated by a bar &#39;|&#39; character: part A) the title; and part B)
+&nbsp;	 * the URI. The title is the readable description of the valueComplex that is returned by
+&nbsp;	 * {@link Obs#getValueAsString(java.util.Locale)}. The URI is the location where the ComplexData is stored.
+&nbsp;	 * 
+&nbsp;	 * @return readable title and URI for the location of the ComplexData binary object.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public String getValueComplex() {
+<b class="fc">&nbsp;		return this.valueComplex;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the value for the ComplexData. This method is used by the ComplexObsHandler. The
+&nbsp;	 * valueComplex has two parts separated by a bar &#39;|&#39; character: part A) the title; and part B)
+&nbsp;	 * the URI. The title is the readable description of the valueComplex that is returned by
+&nbsp;	 * {@link Obs#getValueAsString(java.util.Locale)}. The URI is the location where the ComplexData is stored.
+&nbsp;	 * 
+&nbsp;	 * @param valueComplex readable title and URI for the location of the ComplexData binary object.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setValueComplex(String valueComplex) {
+<b class="fc">&nbsp;		markAsDirty(this.valueComplex, valueComplex);</b>
+<b class="fc">&nbsp;		this.valueComplex = valueComplex;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the ComplexData for this Obs. The ComplexData is stored in the file system or elsewhere,
+&nbsp;	 * but is not persisted to the database. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * {@link ComplexObsHandler}s that are registered to {@link ConceptComplex}s will persist the
+&nbsp;	 * {@link ComplexData#getData()} object to the correct place for the given concept.
+&nbsp;	 * 
+&nbsp;	 * @param complexData
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setComplexData(ComplexData complexData) {
+<b class="fc">&nbsp;		markAsDirty(this.complexData, complexData);</b>
+<b class="fc">&nbsp;		this.complexData = complexData;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the ComplexData. This is retrieved by the {@link ComplexObsHandler} from the file system
+&nbsp;	 * or another location, not from the database. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This will be null unless you call:
+&nbsp;	 * 
+&nbsp;	 * &lt;pre&gt;
+&nbsp;	 * Obs obsWithComplexData =
+&nbsp;	 * Context.getObsService().getComplexObs(obsId, OpenmrsConstants.RAW_VIEW);
+&nbsp;	 * 
+&nbsp;	 * &lt;pre/&gt;
+&nbsp;	 *
+&nbsp;	 * @return the complex data for this obs (if its a complex obs)
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public ComplexData getComplexData() {
+<b class="fc">&nbsp;		return this.complexData;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the accessionNumber.
+&nbsp;	 */
+&nbsp;	public String getAccessionNumber() {
+<b class="fc">&nbsp;		return accessionNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param accessionNumber The accessionNumber to set.
+&nbsp;	 */
+&nbsp;	public void setAccessionNumber(String accessionNumber) {
+<b class="fc">&nbsp;		markAsDirty(this.accessionNumber, accessionNumber);</b>
+<b class="fc">&nbsp;		this.accessionNumber = accessionNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/***************************************************************************
+&nbsp;	 * Convenience methods
+&nbsp;	 **************************************************************************/
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for obtaining the observation&#39;s value as a string If the Obs is complex,
+&nbsp;	 * returns the title of the complexData denoted by the section of getValueComplex() before the
+&nbsp;	 * first bar &#39;|&#39; character; or returns the entire getValueComplex() if the bar &#39;|&#39; character is
+&nbsp;	 * missing.
+&nbsp;	 *
+&nbsp;	 * @param locale locale for locale-specific depictions of value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return first part of valueComplex for complex obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return first part of valueComplex for non null valueComplexes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return non precise values for NumericConcepts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return date in correct format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return long decimal numbers as scientific notation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; use commas or decimal places depending on locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not use thousand separator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return regular number for size of zero to or greater than ten digits
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return regular number if decimal places are as high as six
+&nbsp;	 */
+&nbsp;	public String getValueAsString(Locale locale) {
+&nbsp;		// formatting for the return of numbers of type double
+<b class="fc">&nbsp;		NumberFormat nf = NumberFormat.getNumberInstance(locale);</b>
+<b class="fc">&nbsp;		DecimalFormat df = (DecimalFormat) nf;</b>
+&nbsp;		// formatting style up to 6 digits
+<b class="fc">&nbsp;		df.applyPattern(&quot;#0.0#####&quot;);</b>
+&nbsp;		//branch on hl7 abbreviations
+<b class="fc">&nbsp;		if (getConcept() != null) {</b>
+<b class="fc">&nbsp;			String abbrev = getConcept().getDatatype().getHl7Abbreviation();</b>
+<b class="fc">&nbsp;			if (&quot;BIT&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				return getValueAsBoolean() == null ? &quot;&quot; : getValueAsBoolean().toString();</b>
+<b class="fc">&nbsp;			} else if (&quot;CWE&quot;.equals(abbrev)) {</b>
+<b class="fc">&nbsp;				if (getValueCoded() == null) {</b>
+<b class="nc">&nbsp;					return &quot;&quot;;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (getValueDrug() != null) {</b>
+<b class="nc">&nbsp;					return getValueDrug().getFullName(locale);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					ConceptName codedName = getValueCodedName();</b>
+<b class="fc">&nbsp;					if (codedName != null) {</b>
+<b class="fc">&nbsp;						return getValueCoded().getName(locale, false).getName();</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						ConceptName fallbackName = getValueCoded().getName();</b>
+<b class="nc">&nbsp;						if (fallbackName != null) {</b>
+<b class="nc">&nbsp;							return fallbackName.getName();</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							return &quot;&quot;;</b>
+&nbsp;						}
+&nbsp;						
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;			} else if (&quot;NM&quot;.equals(abbrev) || &quot;SN&quot;.equals(abbrev)) {</b>
+<b class="fc">&nbsp;				if (getValueNumeric() == null) {</b>
+<b class="nc">&nbsp;					return &quot;&quot;;</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					Concept deproxiedConcept = HibernateUtil.getRealObjectFromProxy(getConcept());</b>
+<b class="fc">&nbsp;					if (deproxiedConcept instanceof ConceptNumeric) {</b>
+<b class="fc">&nbsp;						ConceptNumeric cn = (ConceptNumeric) deproxiedConcept;</b>
+<b class="fc">&nbsp;						if (!cn.getAllowDecimal()) {</b>
+<b class="fc">&nbsp;							double d = getValueNumeric();</b>
+<b class="fc">&nbsp;							int i = (int) d;</b>
+<b class="fc">&nbsp;							return Integer.toString(i);</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							df.format(getValueNumeric());</b>
+&nbsp;						}
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+<b class="fc">&nbsp;			} else if (&quot;DT&quot;.equals(abbrev)) {</b>
+<b class="fc">&nbsp;				DateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);</b>
+<b class="fc">&nbsp;				return (getValueDatetime() == null ? &quot;&quot; : dateFormat.format(getValueDatetime()));</b>
+<b class="nc">&nbsp;			} else if (&quot;TM&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				return (getValueDatetime() == null ? &quot;&quot; : Format.format(getValueDatetime(), locale, FORMAT_TYPE.TIME));</b>
+<b class="nc">&nbsp;			} else if (&quot;TS&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				return (getValueDatetime() == null ? &quot;&quot; : Format.format(getValueDatetime(), locale, FORMAT_TYPE.TIMESTAMP));</b>
+<b class="nc">&nbsp;			} else if (&quot;ST&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				return getValueText();</b>
+<b class="nc">&nbsp;			} else if (&quot;ED&quot;.equals(abbrev) &amp;&amp; getValueComplex() != null) {</b>
+<b class="nc">&nbsp;				String[] valuesComplex = getValueComplex().split(&quot;\\|&quot;);</b>
+<b class="nc">&nbsp;				for (String value : valuesComplex) {</b>
+<b class="nc">&nbsp;					if (StringUtils.isNotEmpty(value)) {</b>
+<b class="nc">&nbsp;						return value.trim();</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if the datatype is &#39;unknown&#39;, default to just returning what is not null
+<b class="fc">&nbsp;		if (getValueNumeric() != null) {</b>
+<b class="fc">&nbsp;			return df.format(getValueNumeric());</b>
+<b class="nc">&nbsp;		} else if (getValueCoded() != null) {</b>
+<b class="nc">&nbsp;			if (getValueDrug() != null) {</b>
+<b class="nc">&nbsp;				return getValueDrug().getFullName(locale);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				ConceptName valudeCodedName = getValueCodedName();</b>
+<b class="nc">&nbsp;				if (valudeCodedName != null) {</b>
+<b class="nc">&nbsp;					return valudeCodedName.getName();</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					return &quot;&quot;;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;		} else if (getValueDatetime() != null) {</b>
+<b class="nc">&nbsp;			return Format.format(getValueDatetime(), locale, FORMAT_TYPE.DATE);</b>
+<b class="nc">&nbsp;		} else if (getValueText() != null) {</b>
+<b class="nc">&nbsp;			return getValueText();</b>
+<b class="nc">&nbsp;		} else if (hasGroupMembers()) {</b>
+&nbsp;			// all of the values are null and we&#39;re an obs group...so loop
+&nbsp;			// over the members and just do a getValueAsString on those
+&nbsp;			// this could potentially cause an infinite loop if an obs group
+&nbsp;			// is a member of its own group at some point in the hierarchy
+<b class="nc">&nbsp;			StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;			for (Obs groupMember : getGroupMembers()) {</b>
+<b class="nc">&nbsp;				if (sb.length() &gt; 0) {</b>
+<b class="nc">&nbsp;					sb.append(&quot;, &quot;);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				sb.append(groupMember.getValueAsString(locale));</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			return sb.toString();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// returns the title portion of the valueComplex
+&nbsp;		// which is everything before the first bar &#39;|&#39; character.
+<b class="nc">&nbsp;		if (getValueComplex() != null) {</b>
+<b class="nc">&nbsp;			String[] valuesComplex = getValueComplex().split(&quot;\\|&quot;);</b>
+<b class="nc">&nbsp;			for (String value : valuesComplex) {</b>
+<b class="nc">&nbsp;				if (StringUtils.isNotEmpty(value)) {</b>
+<b class="nc">&nbsp;					return value.trim();</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the value for the obs from a string depending on the datatype of the question concept
+&nbsp;	 *
+&nbsp;	 * @param s the string to coerce to a boolean
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set value as boolean if the datatype of the question concept is boolean
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the value of the string is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the value of the string is empty
+&nbsp;	 */
+&nbsp;	public void setValueAsString(String s) throws ParseException {
+<b class="fc">&nbsp;		log.debug(&quot;getConcept() == {}&quot;, getConcept());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (getConcept() != null &amp;&amp; !StringUtils.isBlank(s)) {</b>
+<b class="nc">&nbsp;			String abbrev = getConcept().getDatatype().getHl7Abbreviation();</b>
+<b class="nc">&nbsp;			if (&quot;BIT&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				setValueBoolean(Boolean.valueOf(s));</b>
+<b class="nc">&nbsp;			} else if (&quot;CWE&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				throw new RuntimeException(&quot;Not Yet Implemented&quot;);</b>
+<b class="nc">&nbsp;			} else if (&quot;NM&quot;.equals(abbrev) || &quot;SN&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				setValueNumeric(Double.valueOf(s));</b>
+<b class="nc">&nbsp;			} else if (&quot;DT&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				DateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);</b>
+<b class="nc">&nbsp;				setValueDatetime(dateFormat.parse(s));</b>
+<b class="nc">&nbsp;			} else if (&quot;TM&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				DateFormat timeFormat = new SimpleDateFormat(TIME_PATTERN);</b>
+<b class="nc">&nbsp;				setValueDatetime(timeFormat.parse(s));</b>
+<b class="nc">&nbsp;			} else if (&quot;TS&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				DateFormat datetimeFormat = new SimpleDateFormat(DATE_TIME_PATTERN);</b>
+<b class="nc">&nbsp;				setValueDatetime(datetimeFormat.parse(s));</b>
+<b class="nc">&nbsp;			} else if (&quot;ST&quot;.equals(abbrev)) {</b>
+<b class="nc">&nbsp;				setValueText(s);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new RuntimeException(&quot;Don&#39;t know how to handle &quot; + abbrev + &quot; for concept: &quot; + getConcept().getName().getName());</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			throw new RuntimeException(&quot;concept is null for &quot; + this);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (obsId == null) {</b>
+<b class="fc">&nbsp;			return &quot;obs id is null&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return &quot;Obs #&quot; + obsId.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getObsId();</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setObsId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * When ObsService updates an obs, it voids the old version, creates a new Obs with the updates,
+&nbsp;	 * and adds a reference to the previousVersion in the new Obs. getPreviousVersion returns the
+&nbsp;	 * last version of this Obs.
+&nbsp;	 */
+&nbsp;	public Obs getPreviousVersion() {
+<b class="fc">&nbsp;		return previousVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A previousVersion indicates that this Obs replaces an earlier one.
+&nbsp;	 *
+&nbsp;	 * @param previousVersion the Obs that this Obs superceeds
+&nbsp;	 */
+&nbsp;	public void setPreviousVersion(Obs previousVersion) {
+<b class="fc">&nbsp;		markAsDirty(this.previousVersion, previousVersion);</b>
+<b class="fc">&nbsp;		this.previousVersion = previousVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean hasPreviousVersion() {
+<b class="fc">&nbsp;		return getPreviousVersion() != null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator
+&nbsp;	 * @see Auditable#setCreator(User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		markAsDirty(getCreator(), creator);</b>
+<b class="fc">&nbsp;		super.setCreator(creator);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated
+&nbsp;	 * @see Auditable#setDateCreated(Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		markAsDirty(getDateCreated(), dateCreated);</b>
+<b class="fc">&nbsp;		super.setDateCreated(dateCreated);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.FormRecordable#setFormField(String,String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFormField(String namespace, String formFieldPath) {
+<b class="fc">&nbsp;		String oldValue = formNamespaceAndPath;</b>
+<b class="fc">&nbsp;		super.setFormField(namespace, formFieldPath);</b>
+<b class="fc">&nbsp;		markAsDirty(oldValue, formNamespaceAndPath);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns true if any change has been made to an Obs instance. In general, the only time
+&nbsp;	 * isDirty() is going to return false is when a new Obs has just been instantiated or loaded
+&nbsp;	 * from the database and no method that modifies it internally has been invoked.
+&nbsp;	 *
+&nbsp;	 * @return true if not changed otherwise false
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when no change has been made
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when any immutable field has been changed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when only mutable fields are changed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when an immutable field is changed from a null to a non null value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when an immutable field is changed from a non null to a null value
+&nbsp;	 */
+&nbsp;	public boolean isDirty() {
+<b class="fc">&nbsp;		return dirty;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	protected void markAsDirty(Object oldValue, Object newValue) {
+&nbsp;		//Should we ignore the case for Strings?
+<b class="fc">&nbsp;		if (!isDirty() &amp;&amp; obsId != null &amp;&amp; !OpenmrsUtil.nullSafeEquals(oldValue, newValue)) {</b>
+<b class="fc">&nbsp;			dirty = true;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Similar to FHIR&#39;s Observation.interpretation. Supports a subset of FHIR&#39;s Observation
+&nbsp;	 * Interpretation Codes. See https://www.hl7.org/fhir/valueset-observation-interpretation.html
+&nbsp;	 * 
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public Interpretation getInterpretation() {
+<b class="fc">&nbsp;		return interpretation;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public void setInterpretation(Interpretation interpretation) {
+<b class="fc">&nbsp;		markAsDirty(this.interpretation, interpretation);</b>
+<b class="fc">&nbsp;		this.interpretation = interpretation;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Similar to FHIR&#39;s Observation.status. Supports a subset of FHIR&#39;s ObservationStatus values.
+&nbsp;	 * At present OpenMRS does not support FHIR&#39;s REGISTERED and CANCELLED statuses, because we
+&nbsp;	 * don&#39;t support obs with null values. See:
+&nbsp;	 * https://www.hl7.org/fhir/valueset-observation-status.html
+&nbsp;	 * 
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public Status getStatus() {
+<b class="fc">&nbsp;		return status;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public void setStatus(Status status) {
+<b class="fc">&nbsp;		markAsDirty(this.status, status);</b>
+<b class="fc">&nbsp;		this.status = status;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

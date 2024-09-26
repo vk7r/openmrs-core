@@ -1,0 +1,275 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AddressSupport</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.layout.address</a>
+</div>
+
+<h1>Coverage Summary for Class: AddressSupport (org.openmrs.layout.address)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AddressSupport</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/60)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.layout.address;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.api.GlobalPropertyListener;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.layout.LayoutSupport;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;public class AddressSupport extends LayoutSupport&lt;AddressTemplate&gt; implements GlobalPropertyListener {
+&nbsp;	
+&nbsp;	private static AddressSupport singleton;
+&nbsp;	
+<b class="nc">&nbsp;	private boolean initialized = false;</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(AddressSupport.class);</b>
+&nbsp;	
+<b class="nc">&nbsp;	private AddressSupport() {</b>
+<b class="nc">&nbsp;		if (singleton == null) {</b>
+<b class="nc">&nbsp;			singleton = this;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		log.debug(&quot;Setting singleton: &quot; + singleton);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static AddressSupport getInstance() {
+<b class="nc">&nbsp;		synchronized (AddressSupport.class) {</b>
+<b class="nc">&nbsp;			if (singleton == null) {</b>
+<b class="nc">&nbsp;				singleton = new AddressSupport();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		singleton.init();</b>
+<b class="nc">&nbsp;		return singleton;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void init() {
+<b class="nc">&nbsp;		if (!initialized) {</b>
+<b class="nc">&nbsp;			Context.getAdministrationService().addGlobalPropertyListener(singleton);</b>
+&nbsp;			
+<b class="nc">&nbsp;			String layoutTemplateXml = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;			    OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE);
+<b class="nc">&nbsp;			setAddressTemplate(layoutTemplateXml);</b>
+&nbsp;			
+<b class="nc">&nbsp;			List&lt;String&gt; specialTokens = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;address1&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;address2&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;address3&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;address4&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;address5&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;address6&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;cityVillage&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;countyDistrict&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;stateProvince&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;country&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;latitude&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;longitude&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;postalCode&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;startDate&quot;);</b>
+<b class="nc">&nbsp;			specialTokens.add(&quot;endDate&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			setSpecialTokens(specialTokens);</b>
+<b class="nc">&nbsp;			initialized = true;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the defaultLayoutFormat
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDefaultLayoutFormat() {
+<b class="nc">&nbsp;		return defaultLayoutFormat;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param addressTemplates The addressTemplates to set.
+&nbsp;	 */
+&nbsp;	public void setAddressTemplate(List&lt;AddressTemplate&gt; addressTemplates) {
+<b class="nc">&nbsp;		this.layoutTemplates = addressTemplates;</b>
+<b class="nc">&nbsp;		setDefaultLayoutFormat(layoutTemplates.get(0).getCodeName());</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the addressTemplates.
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public List&lt;AddressTemplate&gt; getAddressTemplate() {
+<b class="nc">&nbsp;		if (layoutTemplates == null) {</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				String xml = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;				    OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE);
+<b class="nc">&nbsp;				setAddressTemplate(xml);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception ex) {</b>
+&nbsp;				//The old AddressTemplate prevails
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return layoutTemplates;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.GlobalPropertyListener#supportsPropertyName(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supportsPropertyName(String propertyName) {
+<b class="nc">&nbsp;		return OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE.equals(propertyName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.GlobalPropertyListener#globalPropertyChanged(org.openmrs.GlobalProperty)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void globalPropertyChanged(GlobalProperty newValue) {
+<b class="nc">&nbsp;		if (!OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE.equals(newValue.getProperty())) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		try {
+<b class="nc">&nbsp;			setAddressTemplate(newValue.getPropertyValue());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error in new xml global property value&quot;, ex);</b>
+<b class="nc">&nbsp;			setAddressTemplate(new ArrayList&lt;&gt;());</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void setAddressTemplate(String xml) {
+&nbsp;		AddressTemplate addressTemplate;
+&nbsp;		try {
+&nbsp;			
+<b class="nc">&nbsp;			addressTemplate = Context.getSerializationService().getDefaultSerializer().deserialize(xml,</b>
+&nbsp;			    AddressTemplate.class);
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SerializationException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error in deserializing address template&quot;, e);</b>
+<b class="nc">&nbsp;			addressTemplate = new AddressTemplate(&quot;Error while deserializing address layout template.&quot;);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		List&lt;AddressTemplate&gt; list = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		list.add(addressTemplate);</b>
+<b class="nc">&nbsp;		setAddressTemplate(list);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.GlobalPropertyListener#globalPropertyDeleted(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void globalPropertyDeleted(String propertyName) {
+<b class="nc">&nbsp;		if (!OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE.equals(propertyName)) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="nc">&nbsp;		setAddressTemplate(new ArrayList&lt;&gt;());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

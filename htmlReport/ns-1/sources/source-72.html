@@ -1,0 +1,390 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Visit</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Visit (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Visit</td>
+<td class="coverageStat">
+  <span class="percent">
+    79,2%
+  </span>
+  <span class="absValue">
+    (19/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,8%
+  </span>
+  <span class="absValue">
+    (28/33)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Visit$HibernateProxy$I2LAUgHt</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    79,2%
+  </span>
+  <span class="absValue">
+    (19/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,8%
+  </span>
+  <span class="absValue">
+    (28/33)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.persistence.Access;
+&nbsp;import javax.persistence.AccessType;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.OrderBy;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.hibernate.annotations.BatchSize;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.customdatatype.Customizable;
+&nbsp;
+&nbsp;/**
+&nbsp; * A &#39;visit&#39; is a contiguous time period where encounters occur between patients and healthcare
+&nbsp; * providers. This can function as a grouper for encounters
+&nbsp; * 
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;visit&quot;)
+&nbsp;@Audited
+&nbsp;public class Visit extends BaseCustomizableData&lt;VisitAttribute&gt; implements Auditable, Customizable&lt;VisitAttribute&gt; {
+&nbsp;	
+&nbsp;	@Id
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	@Column(name = &quot;visit_id&quot;)
+&nbsp;	private Integer visitId;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;patient_id&quot;)
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;visit_type_id&quot;)
+&nbsp;	private VisitType visitType;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;indication_concept_id&quot;)
+&nbsp;	private Concept indication;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;location_id&quot;)
+&nbsp;	private Location location;
+&nbsp;	
+&nbsp;	@Column(name = &quot;date_started&quot;, nullable = false, length = 19)
+&nbsp;	private Date startDatetime;
+&nbsp;	
+&nbsp;	@Column(name = &quot;date_stopped&quot;, length = 19)
+&nbsp;	private Date stopDatetime;
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;visit&quot;)
+&nbsp;	@OrderBy(&quot;encounter_datetime desc, encounter_id desc&quot;)
+&nbsp;	private Set&lt;Encounter&gt; encounters;
+&nbsp;	
+<b class="fc">&nbsp;	@Access(AccessType.PROPERTY)</b>
+&nbsp;	@OneToMany(mappedBy = &quot;visit&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;	@OrderBy(&quot;voided asc&quot;)
+&nbsp;	@BatchSize(size = 100)
+&nbsp;	private Set&lt;VisitAttribute&gt; attributes = new LinkedHashSet&lt;&gt;();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default Constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public Visit() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor that takes in a visitId
+&nbsp;	 * 
+&nbsp;	 * @param visitId
+&nbsp;	 */
+<b class="fc">&nbsp;	public Visit(Integer visitId) {</b>
+<b class="fc">&nbsp;		this.visitId = visitId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor that takes in the required fields i.e {@link Patient},
+&nbsp;	 * {@link VisitType} and dateStarted
+&nbsp;	 * 
+&nbsp;	 * @see VisitType
+&nbsp;	 * @param patient the patient associated to this visit
+&nbsp;	 * @param visitType The type of visit
+&nbsp;	 * @param startDatetime the date this visit was started
+&nbsp;	 */
+<b class="fc">&nbsp;	public Visit(Patient patient, VisitType visitType, Date startDatetime) {</b>
+<b class="fc">&nbsp;		this.patient = patient;</b>
+<b class="fc">&nbsp;		this.visitType = visitType;</b>
+<b class="fc">&nbsp;		this.startDatetime = startDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the visitId
+&nbsp;	 */
+&nbsp;	public Integer getVisitId() {
+<b class="fc">&nbsp;		return visitId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param visitId the visitId to set
+&nbsp;	 */
+&nbsp;	public void setVisitId(Integer visitId) {
+<b class="nc">&nbsp;		this.visitId = visitId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the patient
+&nbsp;	 */
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patient the patient to set
+&nbsp;	 */
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the visitType
+&nbsp;	 */
+&nbsp;	public VisitType getVisitType() {
+<b class="fc">&nbsp;		return visitType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param visitType the visitType to set
+&nbsp;	 */
+&nbsp;	public void setVisitType(VisitType visitType) {
+<b class="fc">&nbsp;		this.visitType = visitType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the indication
+&nbsp;	 */
+&nbsp;	public Concept getIndication() {
+<b class="fc">&nbsp;		return indication;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param indication the indication to set
+&nbsp;	 */
+&nbsp;	public void setIndication(Concept indication) {
+<b class="nc">&nbsp;		this.indication = indication;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the location
+&nbsp;	 */
+&nbsp;	public Location getLocation() {
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param location the location to set
+&nbsp;	 */
+&nbsp;	public void setLocation(Location location) {
+<b class="fc">&nbsp;		this.location = location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the startDatetime
+&nbsp;	 */
+&nbsp;	public Date getStartDatetime() {
+<b class="fc">&nbsp;		return startDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param startDatetime the startDatetime to set
+&nbsp;	 */
+&nbsp;	public void setStartDatetime(Date startDatetime) {
+<b class="fc">&nbsp;		this.startDatetime = startDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the stopDatetime
+&nbsp;	 */
+&nbsp;	public Date getStopDatetime() {
+<b class="fc">&nbsp;		return stopDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param stopDatetime the stopDatetime to set
+&nbsp;	 */
+&nbsp;	public void setStopDatetime(Date stopDatetime) {
+<b class="fc">&nbsp;		this.stopDatetime = stopDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return visitId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		visitId = id;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;Visit #&quot; + visitId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the encounters
+&nbsp;	 */
+&nbsp;	public Set&lt;Encounter&gt; getEncounters() {
+<b class="fc">&nbsp;		if (encounters == null) {</b>
+<b class="fc">&nbsp;			encounters = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return encounters;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounters the encounters to set
+&nbsp;	 */
+&nbsp;	public void setEncounters(Set&lt;Encounter&gt; encounters) {
+<b class="nc">&nbsp;		this.encounters = encounters;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a list of non voided encounters
+&nbsp;	 * 
+&nbsp;	 * @return the non voided encounter list
+&nbsp;	 * @since 1.11.0, 1.12.0
+&nbsp;	 */
+&nbsp;	public List&lt;Encounter&gt; getNonVoidedEncounters() {
+<b class="nc">&nbsp;		return getEncounters().stream().filter(e -&gt; !e.getVoided()).collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * adds an individual encounter to a visit
+&nbsp;	 *
+&nbsp;	 * @param encounter the encounter to add
+&nbsp;	 * @since 1.9.2, 1.10.0
+&nbsp;	 */
+&nbsp;	public void addEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		if (encounter != null) {</b>
+<b class="fc">&nbsp;			encounter.setVisit(this);</b>
+<b class="fc">&nbsp;			getEncounters().add(encounter);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

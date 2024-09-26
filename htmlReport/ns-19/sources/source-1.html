@@ -1,0 +1,242 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > NameSupport</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.layout.name</a>
+</div>
+
+<h1>Coverage Summary for Class: NameSupport (org.openmrs.layout.name)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NameSupport</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,5%
+  </span>
+  <span class="absValue">
+    (32/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.layout.name;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.GlobalPropertyListener;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.layout.LayoutSupport;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;public class NameSupport extends LayoutSupport&lt;NameTemplate&gt; implements GlobalPropertyListener {
+&nbsp;
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(NameSupport.class);</b>
+&nbsp;	private static NameSupport singleton;
+<b class="fc">&nbsp;	private boolean initialized = false;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public NameSupport() {</b>
+<b class="fc">&nbsp;		if (singleton == null) {</b>
+<b class="fc">&nbsp;			singleton = this;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static NameSupport getInstance() {
+<b class="fc">&nbsp;		if (singleton == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Not Yet Instantiated&quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			singleton.init();</b>
+<b class="fc">&nbsp;			return singleton;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Initializes layout templates with a custom template configured
+&nbsp;	 * via the &quot;layout.name.template&quot; GP.
+&nbsp;	 */
+&nbsp;	private void init() {
+<b class="fc">&nbsp;		if (initialized) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		Context.getAdministrationService().addGlobalPropertyListener(singleton);</b>
+&nbsp;		// Get configured name template to override the existing one if any
+<b class="fc">&nbsp;		String layoutTemplateXml = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;			OpenmrsConstants.GLOBAL_PROPERTY_LAYOUT_NAME_TEMPLATE);
+<b class="fc">&nbsp;		NameTemplate nameTemplate = deserializeXmlTemplate(layoutTemplateXml);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (nameTemplate != null) {</b>
+<b class="nc">&nbsp;			updateLayoutTemplates(nameTemplate);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		initialized = true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update existing layout templates if present with the provided template
+&nbsp;	 */
+&nbsp;	private void updateLayoutTemplates(NameTemplate nameTemplate) {
+<b class="fc">&nbsp;		if (getLayoutTemplates() == null) {</b>
+<b class="fc">&nbsp;			setLayoutTemplates(new ArrayList&lt;&gt;());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		List&lt;NameTemplate&gt; list = new ArrayList&lt;&gt;();</b>
+&nbsp;		// filter out unaffected templates to keep
+<b class="fc">&nbsp;		list.addAll(getLayoutTemplates().stream().filter(existingTemplate -&gt; existingTemplate.getCodeName() != nameTemplate.getCodeName()).collect(Collectors.toList()));</b>
+<b class="fc">&nbsp;		list.add(nameTemplate);</b>
+<b class="fc">&nbsp;		setLayoutTemplates(list);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the defaultLayoutFormat
+&nbsp;	 */
+&nbsp;	private NameTemplate deserializeXmlTemplate(String xml) {
+<b class="fc">&nbsp;		NameTemplate nameTemplate = null;</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(xml)) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		try {
+<b class="fc">&nbsp;			nameTemplate = Context.getSerializationService().getDefaultSerializer().deserialize(xml,</b>
+&nbsp;				NameTemplate.class);
+<b class="nc">&nbsp;		} catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error in deserializing provided name template&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return nameTemplate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return Returns the defaultLayoutFormat
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDefaultLayoutFormat() {
+<b class="fc">&nbsp;		String ret = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT);</b>
+<b class="fc">&nbsp;		return (ret != null &amp;&amp; ret.length() &gt; 0) ? ret : defaultLayoutFormat;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.GlobalPropertyListener#supportsPropertyName(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supportsPropertyName(String propertyName) {
+<b class="fc">&nbsp;		return OpenmrsConstants.GLOBAL_PROPERTY_LAYOUT_NAME_TEMPLATE.equals(propertyName);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.GlobalPropertyListener#globalPropertyChanged(org.openmrs.GlobalProperty)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void globalPropertyChanged(GlobalProperty newValue) {
+<b class="fc">&nbsp;		NameTemplate nameTemplate = deserializeXmlTemplate(newValue.getPropertyValue());</b>
+<b class="fc">&nbsp;		if (nameTemplate != null) {</b>
+<b class="fc">&nbsp;			updateLayoutTemplates(nameTemplate);</b>
+&nbsp;		}	
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.GlobalPropertyListener#globalPropertyDeleted(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void globalPropertyDeleted(String propertyName) {
+&nbsp;
+<b class="nc">&nbsp;	}</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

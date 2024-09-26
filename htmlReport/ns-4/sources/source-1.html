@@ -1,0 +1,164 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > APIAuthenticationException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: APIAuthenticationException (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">APIAuthenticationException</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents often fatal errors that occur within the API infrastructure involving a user&#39;s lack of
+&nbsp; * privileges. In certain presentation environments, this exception is caught and the user is
+&nbsp; * redirected to the login page where they can provide new or higher credentials.
+&nbsp; */
+&nbsp;public class APIAuthenticationException extends APIException {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 12121213L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default empty constructor. It is more common to use the
+&nbsp;	 * {@link #APIAuthenticationException(String)} constructor to provide some context to the user
+&nbsp;	 * as to where/why the authentication has failed
+&nbsp;	 */
+<b class="nc">&nbsp;	public APIAuthenticationException() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Common constructor taking in a message to give the user some context as to where/why the
+&nbsp;	 * authentication failed.
+&nbsp;	 * 
+&nbsp;	 * @param message String describing where/why the authentication failed
+&nbsp;	 */
+&nbsp;	public APIAuthenticationException(String message) {
+<b class="fc">&nbsp;		super(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Common constructor taking in a message to give the user some context as to where/why the
+&nbsp;	 * authentication failed.
+&nbsp;	 * 
+&nbsp;	 * @param message String describing where/why the authentication failed
+&nbsp;	 * @param cause error further up the stream that caused this authentication failure
+&nbsp;	 */
+&nbsp;	public APIAuthenticationException(String message, Throwable cause) {
+<b class="nc">&nbsp;		super(message, cause);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor giving the user a further cause exception reason that caused this authentication
+&nbsp;	 * failure
+&nbsp;	 * 
+&nbsp;	 * @param cause error further up the stream that caused this authentication failure
+&nbsp;	 */
+&nbsp;	public APIAuthenticationException(Throwable cause) {
+<b class="nc">&nbsp;		super(cause);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

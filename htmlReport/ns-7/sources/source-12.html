@@ -1,0 +1,184 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CohortDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: CohortDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">CohortDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.CohortMembership;
+&nbsp;
+&nbsp;/**
+&nbsp; * Database methods for cohort objects.
+&nbsp; * 
+&nbsp; * @see org.openmrs.Cohort
+&nbsp; * @see org.openmrs.api.CohortService
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;public interface CohortDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the cohort with the given primary key
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 * @return The cohort with the given cohortId, or null if none exists
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	Cohort getCohort(Integer id) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds a cohort by name
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return The Cohort with the given name, or null if none exists
+&nbsp;	 */
+&nbsp;	Cohort getCohort(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all cohorts in the database
+&nbsp;	 * 
+&nbsp;	 * @param includeVoided whether to include voided cohorts
+&nbsp;	 * @return All cohorts in the database, possibly including voided ones
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	List&lt;Cohort&gt; getAllCohorts(boolean includeVoided) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds all cohorts that contain the given patientId
+&nbsp;	 *
+&nbsp;	 * @param patientId patient id to get the cohorts containing the patient
+&nbsp;	 * @param includeVoided voided true/false whether or not to include voided cohorts
+&nbsp;	 * @param asOfDate
+&nbsp;	 * @return matching cohorts
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	List&lt;Cohort&gt; getCohortsContainingPatientId(Integer patientId, boolean includeVoided, Date asOfDate);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves a Cohort to the database
+&nbsp;	 * 
+&nbsp;	 * @param cohort Cohort to save
+&nbsp;	 * @return the saved Cohort
+&nbsp;	 */
+&nbsp;	Cohort saveCohort(Cohort cohort) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds all Cohorts with matching names
+&nbsp;	 * 
+&nbsp;	 * @param nameFragment
+&nbsp;	 * @return List&amp;lt;Cohort&amp;gt; object of matching Cohorts
+&nbsp;	 */
+&nbsp;	List&lt;Cohort&gt; getCohorts(String nameFragment) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a cohort from the database
+&nbsp;	 * 
+&nbsp;	 * @param cohort
+&nbsp;	 * @return the deleted Cohort
+&nbsp;	 */
+&nbsp;	Cohort deleteCohort(Cohort cohort) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return cohort or null
+&nbsp;	 */
+&nbsp;	Cohort getCohortByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return cohort membership or null
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	CohortMembership getCohortMembershipByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patientId
+&nbsp;	 * @param activeOnDate optional
+&nbsp;	 * @param includeVoided
+&nbsp;	 * @return cohort memberships for the given patient (optionally active on a given date)
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	List&lt;CohortMembership&gt; getCohortMemberships(Integer patientId, Date activeOnDate, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cohortMembership
+&nbsp;	 * @return the cohortMembership (now persisted or updated)
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	CohortMembership saveCohortMembership(CohortMembership cohortMembership);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

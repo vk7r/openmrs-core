@@ -1,0 +1,226 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MediaHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.obs.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: MediaHandler (org.openmrs.obs.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MediaHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,4%
+  </span>
+  <span class="absValue">
+    (27/32)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.obs.handler;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileInputStream;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.obs.ComplexData;
+&nbsp;import org.openmrs.obs.ComplexObsHandler;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Handler for storing audio and video for complex obs to the file system. The mime type used is
+&nbsp; * probed from the file if possible. Media are stored in the location specified by the global
+&nbsp; * property: &quot;obs.complex_obs_dir&quot;
+&nbsp; *
+&nbsp; * @see org.openmrs.util.OpenmrsConstants#GLOBAL_PROPERTY_COMPLEX_OBS_DIR
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;public class MediaHandler extends AbstractHandler implements ComplexObsHandler {
+&nbsp;	
+&nbsp;	/** Views supported by this handler */
+<b class="fc">&nbsp;	private static final String[] supportedViews = { ComplexObsHandler.RAW_VIEW, };</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MediaHandler.class);</b>
+&nbsp;	
+&nbsp;	public MediaHandler() {
+<b class="fc">&nbsp;		super();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Currently supports all views and puts the media file data into the ComplexData object
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.obs.ComplexObsHandler#getObs(org.openmrs.Obs, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs getObs(Obs obs, String view) {
+<b class="fc">&nbsp;		File file = getComplexDataFile(obs);</b>
+&nbsp;		
+&nbsp;		// Raw media
+<b class="fc">&nbsp;		if (ComplexObsHandler.RAW_VIEW.equals(view)) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				String[] names = obs.getValueComplex().split(&quot;\\|&quot;);</b>
+<b class="fc">&nbsp;				String originalFilename = names[0];</b>
+<b class="fc">&nbsp;				originalFilename = originalFilename.replace(&quot;,&quot;, &quot;&quot;).replace(&quot; &quot;, &quot;&quot;);</b>
+&nbsp;				
+<b class="fc">&nbsp;				FileInputStream mediaStream = new FileInputStream(file);</b>
+<b class="fc">&nbsp;				ComplexData complexData = new ComplexData(originalFilename, mediaStream);</b>
+&nbsp;				
+&nbsp;				// Get the Mime Type and set it
+<b class="fc">&nbsp;				String mimeType = OpenmrsUtil.getFileMimeType(file);</b>
+<b class="fc">&nbsp;				complexData.setMimeType(mimeType);</b>
+&nbsp;				
+<b class="fc">&nbsp;				complexData.setLength(file.length());</b>
+&nbsp;				
+<b class="fc">&nbsp;				obs.setComplexData(complexData);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (FileNotFoundException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Trying to create media file stream from &quot; + file.getAbsolutePath(), e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		// No other view supported
+&nbsp;		// NOTE: if adding support for another view, don&#39;t forget to update supportedViews list above
+&nbsp;		else {
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.obs.ComplexObsHandler#getSupportedViews()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String[] getSupportedViews() {
+<b class="fc">&nbsp;		return supportedViews;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.obs.ComplexObsHandler#saveObs(org.openmrs.Obs)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs saveObs(Obs obs) throws APIException {
+&nbsp;		
+&nbsp;		try {
+&nbsp;			// Write the File to the File System
+<b class="fc">&nbsp;			String fileName = obs.getComplexData().getTitle();</b>
+<b class="fc">&nbsp;			File outfile = getOutputFileToWrite(obs);</b>
+<b class="fc">&nbsp;			OutputStream out = new FileOutputStream(outfile, false);</b>
+<b class="fc">&nbsp;			FileInputStream mediaStream = (FileInputStream) obs.getComplexData().getData();</b>
+<b class="fc">&nbsp;			OpenmrsUtil.copyFile(mediaStream, out);</b>
+&nbsp;			
+&nbsp;			// Store the filename in the Obs
+<b class="fc">&nbsp;			obs.setComplexData(null);</b>
+<b class="fc">&nbsp;			obs.setValueComplex(fileName + &quot;|&quot; + outfile.getName());</b>
+&nbsp;			
+&nbsp;			// close the stream
+<b class="fc">&nbsp;			out.close();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException ioe) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Obs.error.trying.write.complex&quot;, null, ioe);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,223 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MoveDeletedHL7sChangeSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: MoveDeletedHL7sChangeSet (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MoveDeletedHL7sChangeSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    8,6%
+  </span>
+  <span class="absValue">
+    (3/35)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;
+&nbsp;import org.openmrs.hl7.HL7Constants;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomChange;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * This change set moves &quot;deleted&quot; HL7s from the archive table to the queue table
+&nbsp; */
+<b class="fc">&nbsp;public class MoveDeletedHL7sChangeSet implements CustomTaskChange {</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see CustomTaskChange#execute(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="nc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		
+<b class="nc">&nbsp;		StringBuilder getDeletedHL7sSql = new StringBuilder();</b>
+<b class="nc">&nbsp;		getDeletedHL7sSql.append(&quot;SELECT hl7_source, hl7_source_key, hl7_data, date_created, uuid, hl7_in_archive_id&quot;);</b>
+<b class="nc">&nbsp;		getDeletedHL7sSql.append(&quot; FROM hl7_in_archive WHERE message_state=&quot;);</b>
+<b class="nc">&nbsp;		getDeletedHL7sSql.append(HL7Constants.HL7_STATUS_DELETED);</b>
+&nbsp;		
+<b class="nc">&nbsp;		StringBuilder insertHL7Sql = new StringBuilder();</b>
+<b class="nc">&nbsp;		insertHL7Sql.append(&quot;INSERT INTO hl7_in_queue&quot;);</b>
+<b class="nc">&nbsp;		insertHL7Sql.append(&quot; (hl7_source, hl7_source_key, hl7_data, date_created, uuid, message_state)&quot;);</b>
+<b class="nc">&nbsp;		insertHL7Sql.append(&quot; VALUES (?, ?, ?, ?, ?, &quot;);</b>
+<b class="nc">&nbsp;		insertHL7Sql.append(HL7Constants.HL7_STATUS_DELETED);</b>
+<b class="nc">&nbsp;		insertHL7Sql.append(&quot;)&quot;);</b>
+&nbsp;		
+&nbsp;		PreparedStatement insertStatement;
+&nbsp;		PreparedStatement deleteStatement;
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			insertStatement = connection.prepareStatement(insertHL7Sql.toString());</b>
+<b class="nc">&nbsp;			deleteStatement = connection.prepareStatement(&quot;DELETE FROM hl7_in_archive WHERE hl7_in_archive_id=?&quot;);</b>
+&nbsp;			
+&nbsp;			// iterate over deleted HL7s
+<b class="nc">&nbsp;			ResultSet archives = connection.createStatement().executeQuery(getDeletedHL7sSql.toString());</b>
+<b class="nc">&nbsp;			while (archives.next()) {</b>
+&nbsp;				
+&nbsp;				// add to the queue
+<b class="nc">&nbsp;				insertStatement.setString(1, archives.getString(1)); // set hl7_source</b>
+<b class="nc">&nbsp;				insertStatement.setString(2, archives.getString(2)); // set hl7_source_key</b>
+<b class="nc">&nbsp;				insertStatement.setString(3, archives.getString(3)); // set hl7_data</b>
+<b class="nc">&nbsp;				insertStatement.setDate(4, archives.getDate(4)); // set date_created</b>
+<b class="nc">&nbsp;				insertStatement.setString(5, archives.getString(5)); // set uuid</b>
+<b class="nc">&nbsp;				insertStatement.executeUpdate();</b>
+&nbsp;				
+&nbsp;				// remove from the archives
+<b class="nc">&nbsp;				deleteStatement.setInt(1, archives.getInt(6));</b>
+<b class="nc">&nbsp;				deleteStatement.executeUpdate();</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// cleanup
+<b class="nc">&nbsp;			if (insertStatement != null) {</b>
+<b class="nc">&nbsp;				insertStatement.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (deleteStatement != null) {</b>
+<b class="nc">&nbsp;				deleteStatement.close();</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SQLException | DatabaseException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Unable to move deleted HL7s from archive table to queue table&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Finished moving deleted changesets&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor fo) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CustomChange#validate(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database db) {
+<b class="nc">&nbsp;		return new ValidationErrors();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

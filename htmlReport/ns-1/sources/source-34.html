@@ -1,0 +1,312 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DrugReferenceMap</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: DrugReferenceMap (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DrugReferenceMap</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (18/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (20/22)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DrugReferenceMap$HibernateProxy$4GOMDQ7y</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (18/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (20/22)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.ContainedIn;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;import org.hibernate.search.annotations.IndexedEmbedded;
+&nbsp;
+&nbsp;/**
+&nbsp; * The DrugReferenceMap map object represents a mapping between a drug and alternative drug
+&nbsp; * terminologies.
+&nbsp; * 
+&nbsp; * @since 1.10
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class DrugReferenceMap extends BaseOpenmrsObject implements Auditable, Serializable {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	@DocumentId
+&nbsp;	private Integer drugReferenceMapId;
+&nbsp;	
+&nbsp;	@ContainedIn
+&nbsp;	private Drug drug;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private ConceptReferenceTerm conceptReferenceTerm;
+&nbsp;	
+&nbsp;	private ConceptMapType conceptMapType;
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public DrugReferenceMap() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param term
+&nbsp;	 * @param conceptMapType
+&nbsp;	 */
+<b class="fc">&nbsp;	public DrugReferenceMap(ConceptReferenceTerm term, ConceptMapType conceptMapType) {</b>
+<b class="fc">&nbsp;		this.conceptReferenceTerm = term;</b>
+<b class="fc">&nbsp;		this.conceptMapType = conceptMapType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the drugReferenceMapId.
+&nbsp;	 */
+&nbsp;	public Integer getDrugReferenceMapId() {
+<b class="fc">&nbsp;		return drugReferenceMapId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param drugReferenceMapId The drugReferenceMapId to set.
+&nbsp;	 */
+&nbsp;	public void setDrugReferenceMapId(Integer drugReferenceMapId) {
+<b class="fc">&nbsp;		this.drugReferenceMapId = drugReferenceMapId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the drug.
+&nbsp;	 */
+&nbsp;	public Drug getDrug() {
+<b class="fc">&nbsp;		return drug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param drug The drug to set.
+&nbsp;	 */
+&nbsp;	public void setDrug(Drug drug) {
+<b class="fc">&nbsp;		this.drug = drug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptReferenceTerm.
+&nbsp;	 */
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTerm() {
+<b class="fc">&nbsp;		return conceptReferenceTerm;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptReferenceTerm The conceptReferenceTerm to set.
+&nbsp;	 */
+&nbsp;	public void setConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) {
+<b class="fc">&nbsp;		this.conceptReferenceTerm = conceptReferenceTerm;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptMapType.
+&nbsp;	 */
+&nbsp;	public ConceptMapType getConceptMapType() {
+<b class="fc">&nbsp;		return conceptMapType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptMapType The conceptMapType to set.
+&nbsp;	 */
+&nbsp;	public void setConceptMapType(ConceptMapType conceptMapType) {
+<b class="fc">&nbsp;		this.conceptMapType = conceptMapType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return id - The unique Identifier for the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getDrugReferenceMapId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param id - The unique Identifier for the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setDrugReferenceMapId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return User - the user who created the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return this.creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator - the user who created the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Date - the date the object was created
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated - the date the object was created
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return User - the user who last changed the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return this.changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param changedBy - the user who last changed the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Date - the date the object was last changed
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return this.dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged - the date the object was last changed
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

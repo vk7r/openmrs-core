@@ -1,0 +1,208 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CareSetting</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: CareSetting (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CareSetting</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    54,5%
+  </span>
+  <span class="absValue">
+    (6/11)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CareSetting$CareSettingType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">CareSetting$HibernateProxy$3dsK8bPE</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (8/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    64,3%
+  </span>
+  <span class="absValue">
+    (9/14)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * Care Setting defines the scope of care for any piece of data within the medical record. Clinical
+&nbsp; * data (treatments, notes, etc.) apply within their associated care setting. Implementations
+&nbsp; * working within a single context (e.g., within a single clinic, a set of coordinated clinics, or a
+&nbsp; * single hospital) may use a single Care Setting for all of their data. Implementations providing
+&nbsp; * care across different care settings (e.g., within clinics and within hospital) may need to define
+&nbsp; * multiple care settings in order to, for example, keep orders within one care setting from
+&nbsp; * affecting orders in the other care setting. Active order lists are scoped to a single care
+&nbsp; * setting. In the simplest example, an implementation would define a care setting for each basic
+&nbsp; * type of setting (INPATIENT, OUTPATIENT, EMERGENCY) they use. If an implementation provides care
+&nbsp; * in two separate hospitals that function independently, then they would use two separate care
+&nbsp; * settings like &quot;Hospital A&quot; and &quot;Hospital B&quot;.
+&nbsp; * 
+&nbsp; * @since 1.10
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class CareSetting extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+<b class="fc">&nbsp;	public enum CareSettingType {</b>
+<b class="fc">&nbsp;		OUTPATIENT,</b>
+<b class="fc">&nbsp;		INPATIENT</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Integer careSettingId;
+&nbsp;	
+&nbsp;	private CareSettingType careSettingType;
+&nbsp;	
+<b class="fc">&nbsp;	public CareSetting() {</b>
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	public CareSetting(String name, String description, CareSettingType careSettingType) {</b>
+<b class="nc">&nbsp;		setName(name);</b>
+<b class="nc">&nbsp;		setDescription(description);</b>
+<b class="nc">&nbsp;		setCareSettingType(careSettingType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getCareSettingId() {
+<b class="fc">&nbsp;		return careSettingId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setCareSettingId(Integer careSettingId) {
+<b class="fc">&nbsp;		this.careSettingId = careSettingId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public CareSettingType getCareSettingType() {
+<b class="fc">&nbsp;		return careSettingType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setCareSettingType(CareSettingType careSettingType) {
+<b class="fc">&nbsp;		this.careSettingType = careSettingType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getCareSettingId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setCareSettingId(id);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

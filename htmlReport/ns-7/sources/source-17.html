@@ -1,0 +1,280 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ContextDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: ContextDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ContextDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.concurrent.Future;
+&nbsp;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.ContextAuthenticationException;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines the functions that the Context needs to access the database
+&nbsp; */
+&nbsp;public interface ContextDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Authenticate user with the given username and password.
+&nbsp;	 * 
+&nbsp;	 * @param username user&#39;s username or systemId
+&nbsp;	 * @param password user&#39;s password
+&nbsp;	 * @return a valid user if authentication succeeds
+&nbsp;	 * @throws ContextAuthenticationException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; authenticate given username and password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; authenticate given systemId and password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; authenticate given systemId without hyphen and password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given username and incorrect password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given systemId and incorrect password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given incorrect username
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given incorrect systemId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given null login
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given empty login
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given null password when password in database is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate given non null password when password in database is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not authenticate when password in database is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give identical error messages between username and password mismatch
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; lockout user after eight failed attempts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; authenticateWithCorrectHashedPassword
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; authenticateWithIncorrectHashedPassword
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set uuid on user property when authentication fails with valid user
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass regression test for 1580
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw a ContextAuthenticationException if username is an empty string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw a ContextAuthenticationException if username is white space
+&nbsp;	 */
+&nbsp;	public User authenticate(String username, String password) throws ContextAuthenticationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a user given the uuid. Privilege checks are not done here because this is used by the
+&nbsp;	 * {@link Context#getAuthenticatedUser()} method.
+&nbsp;	 * 
+&nbsp;	 * @param uuid uuid of user to fetch
+&nbsp;	 * @return the User from the database
+&nbsp;	 * @throws ContextAuthenticationException
+&nbsp;	 */
+&nbsp;	public User getUserByUuid(String uuid) throws ContextAuthenticationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a user given the username. Privilege checks are not done here because this is used by the
+&nbsp;	 * {@link Context#getAuthenticatedUser()} or {@link Context#authenticate(org.openmrs.api.context.Credentials)} methods.
+&nbsp;	 * 
+&nbsp;	 * @param username The username of the user to fetch
+&nbsp;	 * @return The matched user, null otherwise.
+&nbsp;	 * 
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public User getUserByUsername(String username);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a new user.
+&nbsp;	 * When the users are managed by a third-party authentication provider, it will happen that a successfully authenticated user still needs to be created in OpenMRS.
+&nbsp;	 * This method is made available to authentication schemes to create new users on the fly.
+&nbsp;	 * 
+&nbsp;	 * @param user A new user to be created.
+&nbsp;	 * @param password The password for the new user.
+&nbsp;	 * @param roleNames A list of role names to add to the user.
+&nbsp;	 * @return The newly created user
+&nbsp;	 * @throws Exception 
+&nbsp;	 * 
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public User createUser(User user, String password, List&lt;String&gt; roleNames) throws Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Open session.
+&nbsp;	 */
+&nbsp;	public void openSession();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Close session.
+&nbsp;	 */
+&nbsp;	public void closeSession();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.context.Context#clearSession()
+&nbsp;	 */
+&nbsp;	public void clearSession();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.context.Context#flushSession()
+&nbsp;	 */
+&nbsp;	public void flushSession();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used to clear a cached object out of a session in the middle of a unit of work. Future
+&nbsp;	 * updates to this object will not be saved. Future gets of this object will not fetch this
+&nbsp;	 * cached copy
+&nbsp;	 * 
+&nbsp;	 * @param obj The object to evict/remove from the session
+&nbsp;	 * @see org.openmrs.api.context.Context#evictFromSession(Object)
+&nbsp;	 */
+&nbsp;	public void evictFromSession(Object obj);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Evicts the entity data for a particular entity instance.
+&nbsp;	 *
+&nbsp;	 * @param object entity instance to evict from the DB cache
+&nbsp;	 * @see org.openmrs.api.context.Context#evictEntity(OpenmrsObject)   
+&nbsp;	 */
+&nbsp;	public void evictEntity(OpenmrsObject object);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Evicts all entity data of a particular class from the given region.
+&nbsp;	
+&nbsp;	 * @param entityClass entity class to evict from the DB cache
+&nbsp;	 * @see org.openmrs.api.context.Context#evictAllEntities(Class)
+&nbsp;	 */
+&nbsp;	public void evictAllEntities(Class&lt;?&gt; entityClass);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Evicts data from all cache regions.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.api.context.Context#clearEntireCache()
+&nbsp;	 */
+&nbsp;	public void clearEntireCache();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Used to re-read the state of the given instance from the underlying database.
+&nbsp;	 * @since 2.0
+&nbsp;	 *
+&nbsp;	 * @param obj The object to refresh from the database in the session
+&nbsp;	 * @see org.openmrs.api.context.Context#refreshEntity(Object)
+&nbsp;	 */
+&nbsp;	public void refreshEntity(Object obj);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Starts the OpenMRS System
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Should be called prior to any kind of activity
+&nbsp;	 * 
+&nbsp;	 * @param props Properties
+&nbsp;	 */
+&nbsp;	public void startup(Properties props);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Stops the OpenMRS System Should be called after all activity has ended and application is
+&nbsp;	 * closing
+&nbsp;	 */
+&nbsp;	public void shutdown();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Merge in the default properties defined for this database connection
+&nbsp;	 * 
+&nbsp;	 * @param runtimeProperties The current user specific runtime properties
+&nbsp;	 */
+&nbsp;	public void mergeDefaultRuntimeProperties(Properties runtimeProperties);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Updates the search index if necessary.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The update is triggered if {@link OpenmrsConstants#GP_SEARCH_INDEX_VERSION} is blank
+&nbsp;	 * or the value does not match {@link OpenmrsConstants#SEARCH_INDEX_VERSION}.
+&nbsp;	 */
+&nbsp;	public void setupSearchIndex();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see Context#updateSearchIndex()
+&nbsp;	 */
+&nbsp;	public void updateSearchIndex();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see Context#updateSearchIndexAsync()
+&nbsp;	 */
+&nbsp;	public Future&lt;?&gt; updateSearchIndexAsync();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see Context#updateSearchIndexForObject(Object)
+&nbsp;	 */
+&nbsp;	public void updateSearchIndexForObject(Object object);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see Context#updateSearchIndexForType(Class)
+&nbsp;	 */
+&nbsp;	public void updateSearchIndexForType(Class&lt;?&gt; type);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return a Connection from the OpenMRS database connection pool
+&nbsp;	 * @since 2.5.7
+&nbsp;	 */
+&nbsp;	public Connection getDatabaseConnection();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

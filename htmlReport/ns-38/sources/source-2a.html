@@ -1,0 +1,269 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonNameValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonNameValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonNameValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,7%
+  </span>
+  <span class="absValue">
+    (26/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class validates a PersonName object.
+&nbsp; *
+&nbsp; * @since 1.7
+&nbsp; */
+&nbsp;@Handler(supports = { PersonName.class }, order = 50)
+<b class="fc">&nbsp;public class PersonNameValidator implements Validator {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PersonNameValidator.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return PersonName.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether person name has all required values, and whether values are proper length
+&nbsp;	 *
+&nbsp;	 * @param object
+&nbsp;	 * @param errors
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName object is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if name is invalid but voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object object, Errors errors) {
+<b class="fc">&nbsp;		log.debug(&quot;{}.validate...&quot;, this.getClass().getName());</b>
+<b class="fc">&nbsp;		PersonName personName = (PersonName) object;</b>
+&nbsp;		try {
+&nbsp;			// Validate that the person name object is not null
+<b class="fc">&nbsp;			if (personName == null) {</b>
+<b class="fc">&nbsp;				errors.reject(&quot;error.name&quot;);</b>
+<b class="fc">&nbsp;			} else if (!personName.getVoided()) {</b>
+&nbsp;				// TODO - the following method should be made private in a major release
+<b class="fc">&nbsp;				validatePersonName(personName, errors, false, true);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			errors.reject(e.getMessage());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks that the given {@link PersonName} is valid
+&nbsp;	 *
+&nbsp;	 * @param personName the {@link PersonName} to validate
+&nbsp;	 * @param errors
+&nbsp;	 * @param arrayInd indicates whether or not a names[0] array needs to be prepended to field
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName object is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.givenName is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.givenName is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.givenName is just spaces
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.givenName is spaces surrounded by quotation marks
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.givenName is not blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is just spaces
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyName is spaces surrounded by quotation marks
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is not blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.prefix is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.prefix is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.prefix is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.givenName is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.givenName is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.givenName is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.middleName is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.middleName is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.middleName is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyNamePrefix is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyNamePrefix is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyNamePrefix is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyName is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyName2 is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName2 is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName2 is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyNameSuffix is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyNameSuffix is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyNameSuffix is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.degree is too long
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.degree is exactly max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.degree is less than maximum field length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.givenName is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.givenName is valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.middleName is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.middleName is valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyName is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName is valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PersonName.familyName2 is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PersonName.familyName2 is valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if regex string is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if regex string is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate against regex for blank names
+&nbsp;	 * @deprecated as of 2.2.0, use {@link #validate(Object, Errors)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public void validatePersonName(PersonName personName, Errors errors, boolean arrayInd, boolean testInd) {
+&nbsp;		
+<b class="fc">&nbsp;		if (personName == null) {</b>
+<b class="nc">&nbsp;			errors.reject(&quot;error.name&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		// Make sure they assign a name
+<b class="fc">&nbsp;		if (StringUtils.isBlank(personName.getGivenName())</b>
+<b class="fc">&nbsp;		        || StringUtils.isBlank(personName.getGivenName().replaceAll(&quot;\&quot;&quot;, &quot;&quot;))) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(getFieldKey(&quot;givenName&quot;, arrayInd, testInd), &quot;Patient.names.required.given.family&quot;);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Make sure the entered name value is sensible 
+<b class="fc">&nbsp;		String namePattern = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_NAME_REGEX);
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(namePattern)) {</b>
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(personName.getGivenName()) &amp;&amp; !personName.getGivenName().matches(namePattern)) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(getFieldKey(&quot;givenName&quot;, arrayInd, testInd), &quot;GivenName.invalid&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(personName.getMiddleName()) &amp;&amp; !personName.getMiddleName().matches(namePattern)) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(getFieldKey(&quot;middleName&quot;, arrayInd, testInd), &quot;MiddleName.invalid&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(personName.getFamilyName()) &amp;&amp; !personName.getFamilyName().matches(namePattern)) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(getFieldKey(&quot;familyName&quot;, arrayInd, testInd), &quot;FamilyName.invalid&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(personName.getFamilyName2()) &amp;&amp; !personName.getFamilyName2().matches(namePattern)) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(getFieldKey(&quot;familyName2&quot;, arrayInd, testInd), &quot;FamilyName2.invalid&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, personName.getClass(), &quot;prefix&quot;, &quot;givenName&quot;, &quot;middleName&quot;,</b>
+&nbsp;		    &quot;familyNamePrefix&quot;, &quot;familyName&quot;, &quot;familyName2&quot;, &quot;familyNameSuffix&quot;, &quot;degree&quot;, &quot;voidReason&quot;);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/***********************************************************************************************************
+&nbsp;	 * @param field the field name
+&nbsp;	 * @param arrayInd indicates whether or not a names[0] array needs to be prepended to field
+&nbsp;	 * @return formated
+&nbsp;	 */
+&nbsp;	private String getFieldKey(String field, boolean arrayInd, boolean testInd) {
+<b class="fc">&nbsp;		return testInd ? field : arrayInd ? &quot;names[0].&quot; + field : &quot;name.&quot; + field;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

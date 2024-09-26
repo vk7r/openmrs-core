@@ -1,0 +1,420 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Drug</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Drug (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Drug</td>
+<td class="coverageStat">
+  <span class="percent">
+    82,1%
+  </span>
+  <span class="absValue">
+    (23/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,1%
+  </span>
+  <span class="absValue">
+    (31/43)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Drug$HibernateProxy$bXAS7wey</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    82,1%
+  </span>
+  <span class="absValue">
+    (23/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,1%
+  </span>
+  <span class="absValue">
+    (31/43)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.envers.NotAudited;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;import org.hibernate.search.annotations.Indexed;
+&nbsp;import org.hibernate.search.annotations.IndexedEmbedded;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * Drug
+&nbsp; */
+&nbsp;@Indexed
+&nbsp;@Audited
+&nbsp;public class Drug extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 285L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@DocumentId
+&nbsp;	private Integer drugId;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean combination = false;</b>
+&nbsp;	
+&nbsp;	private Concept dosageForm;
+&nbsp;	
+&nbsp;	private Double maximumDailyDose;
+&nbsp;	
+&nbsp;	private Double minimumDailyDose;
+&nbsp;	
+&nbsp;	private String strength;
+&nbsp;	
+&nbsp;	private Concept doseLimitUnits;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private Set&lt;DrugReferenceMap&gt; drugReferenceMaps;
+&nbsp;	
+&nbsp;	private Collection&lt;DrugIngredient&gt; ingredients;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Drug() {</b>
+<b class="fc">&nbsp;		ingredients = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="nc">&nbsp;	public Drug(Integer drugId) {</b>
+<b class="nc">&nbsp;		this.drugId = drugId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the internal identification number for this drug
+&nbsp;	 *
+&nbsp;	 * @return Integer
+&nbsp;	 */
+&nbsp;	public Integer getDrugId() {
+<b class="fc">&nbsp;		return this.drugId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the internal identification number for this drug
+&nbsp;	 *
+&nbsp;	 * @param drugId
+&nbsp;	 */
+&nbsp;	public void setDrugId(Integer drugId) {
+<b class="fc">&nbsp;		this.drugId = drugId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the entries concept drug name in the form of CONCEPTNAME (Drug: DRUGNAME)
+&nbsp;	 * 
+&nbsp;	 * @param locale
+&nbsp;	 * @return full drug name (with concept name appended)
+&nbsp;	 */
+&nbsp;	public String getFullName(Locale locale) {
+<b class="nc">&nbsp;		if (concept == null) {</b>
+<b class="nc">&nbsp;			return getName();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return getName() + &quot; (&quot; + concept.getName(locale).getName() + &quot;)&quot;;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets whether or not this is a combination drug
+&nbsp;	 *
+&nbsp;	 * @return Boolean
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getCombination()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isCombination() {
+<b class="nc">&nbsp;		return getCombination();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getCombination() {
+<b class="fc">&nbsp;		return combination;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets whether or not this is a combination drug
+&nbsp;	 *
+&nbsp;	 * @param combination
+&nbsp;	 */
+&nbsp;	public void setCombination(Boolean combination) {
+<b class="fc">&nbsp;		this.combination = combination;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the strength
+&nbsp;	 *
+&nbsp;	 * @return String
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public String getStrength() {
+<b class="fc">&nbsp;		return strength;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the strength
+&nbsp;	 *
+&nbsp;	 * @param strength
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setStrength(String strength) {
+<b class="fc">&nbsp;		this.strength = strength;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept this drug is tied to
+&nbsp;	 *
+&nbsp;	 * @return Concept
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return this.concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the concept this drug is tied to
+&nbsp;	 *
+&nbsp;	 * @param concept
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getDosageForm() {
+<b class="fc">&nbsp;		return dosageForm;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDosageForm(Concept dosageForm) {
+<b class="fc">&nbsp;		this.dosageForm = dosageForm;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getMaximumDailyDose() {
+<b class="fc">&nbsp;		return maximumDailyDose;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setMaximumDailyDose(Double maximumDailyDose) {
+<b class="fc">&nbsp;		this.maximumDailyDose = maximumDailyDose;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getMinimumDailyDose() {
+<b class="fc">&nbsp;		return minimumDailyDose;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setMinimumDailyDose(Double minimumDailyDose) {
+<b class="fc">&nbsp;		this.minimumDailyDose = minimumDailyDose;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the ingredients
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Collection&lt;DrugIngredient&gt; getIngredients() {
+<b class="fc">&nbsp;		return ingredients;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param ingredients
+&nbsp;	 *            The ingredients to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setIngredients(Collection&lt;DrugIngredient&gt; ingredients) {
+<b class="fc">&nbsp;		this.ingredients = ingredients;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getDrugId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setDrugId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that returns a display name for the drug, defaults to drug.name
+&nbsp;	 *
+&nbsp;	 * @return the display name
+&nbsp;	 * @since 1.8.5, 1.9.4, 1.10
+&nbsp;	 */
+&nbsp;	public String getDisplayName() {
+<b class="nc">&nbsp;		if (StringUtils.isNotBlank(getName())) {</b>
+<b class="nc">&nbsp;			return getName();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (getConcept() != null) {</b>
+<b class="nc">&nbsp;			return getConcept().getName().getName();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the drugReferenceMaps.
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Set&lt;DrugReferenceMap&gt; getDrugReferenceMaps() {
+<b class="fc">&nbsp;		if (drugReferenceMaps == null) {</b>
+<b class="fc">&nbsp;			drugReferenceMaps = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return drugReferenceMaps;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param drugReferenceMaps The drugReferenceMaps to set.
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDrugReferenceMaps(Set&lt;DrugReferenceMap&gt; drugReferenceMaps) {
+<b class="fc">&nbsp;		this.drugReferenceMaps = drugReferenceMaps;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given DrugReferenceMap object to this drug&#39;s list of drug reference mappings. If there is
+&nbsp;	 * already a corresponding DrugReferenceMap object for this concept, this one will not be added.
+&nbsp;	 *
+&nbsp;	 * @param drugReferenceMap
+&nbsp;	 * @since 1.10
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set drug as the drug to which a mapping is being added
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should not add duplicate drug reference maps
+&nbsp;	 */
+&nbsp;	public void addDrugReferenceMap(DrugReferenceMap drugReferenceMap) {
+<b class="fc">&nbsp;		if (drugReferenceMap != null &amp;&amp; !getDrugReferenceMaps().contains(drugReferenceMap)) {</b>
+<b class="fc">&nbsp;			drugReferenceMap.setDrug(this);</b>
+<b class="fc">&nbsp;			if (drugReferenceMap.getConceptMapType() == null) {</b>
+<b class="fc">&nbsp;				drugReferenceMap.setConceptMapType(Context.getConceptService().getDefaultConceptMapType());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			getDrugReferenceMaps().add(drugReferenceMap);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the doseLimitUnits which represents the units of the existing maximumDailyDose and
+&nbsp;	 * minimumDailyDose
+&nbsp;	 * 
+&nbsp;	 * @return the doseLimitUnits.
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public Concept getDoseLimitUnits() {
+<b class="fc">&nbsp;		return doseLimitUnits;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the doseLimitUnits which represents the units of the existing maximumDailyDose and
+&nbsp;	 * minimumDailyDose
+&nbsp;	 * 
+&nbsp;	 * @param doseLimitUnits The doseLimitUnits to set.
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public void setDoseLimitUnits(Concept doseLimitUnits) {
+<b class="fc">&nbsp;		this.doseLimitUnits = doseLimitUnits;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

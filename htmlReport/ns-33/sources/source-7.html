@@ -1,0 +1,166 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProcessHL7InQueueTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: ProcessHL7InQueueTask (org.openmrs.scheduler.tasks)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProcessHL7InQueueTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler.tasks;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.hl7.HL7InQueueProcessor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import ca.uhn.hl7v2.HL7Exception;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation of a task that process all form entry queues. NOTE: This class does not need to be
+&nbsp; * StatefulTask as we create the context in the constructor.
+&nbsp; * 
+&nbsp; * @version 1.1 1.1 - made processor static to ensure only one HL7 processor runs
+&nbsp; */
+&nbsp;public class ProcessHL7InQueueTask extends AbstractTask {
+&nbsp;	
+&nbsp;	// Logger
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ProcessHL7InQueueTask.class);</b>
+&nbsp;	
+&nbsp;	// Instance of hl7 processor
+<b class="nc">&nbsp;	private static HL7InQueueProcessor processor = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default Constructor (Uses SchedulerConstants.username and SchedulerConstants.password
+&nbsp;	 */
+<b class="nc">&nbsp;	public ProcessHL7InQueueTask() {</b>
+<b class="nc">&nbsp;		if (processor == null) {</b>
+<b class="nc">&nbsp;			processor = new HL7InQueueProcessor();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Process the next form entry in the database and then remove the form entry from the database.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute() {
+<b class="nc">&nbsp;		Context.openSession();</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			log.debug(&quot;Processing HL7 queue ... &quot;);</b>
+<b class="nc">&nbsp;			processor.processHL7InQueue();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (HL7Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error running hl7 in queue task&quot;, e);</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Hl7inQueue.error.running&quot;, null, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			Context.closeSession();</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

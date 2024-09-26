@@ -1,0 +1,491 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AdministrationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: AdministrationService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">AdministrationService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.SortedMap;
+&nbsp;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.ImplementationId;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.AdministrationDAO;
+&nbsp;import org.openmrs.util.HttpClient;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.openmrs.validator.ValidateUtil;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to doing some administrative tasks in OpenMRS
+&nbsp; * &lt;p&gt;
+&nbsp; * Use:&lt;br&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * 
+&nbsp; * List&amp;lt;GlobalProperty&amp;gt; globalProperties = Context.getAdministrationService().getGlobalProperties();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;public interface AdministrationService extends OpenmrsService {
+&nbsp;	
+&nbsp;	public static final String GP_SUFFIX_SERIALIZER_WHITELIST_TYPES = &quot;.serializer.whitelist.types&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_SERIALIZER_WHITELIST_HIERARCHY_TYPES_PREFIX = &quot;hierarchyOf:&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used by Spring to set the specific/chosen database access implementation
+&nbsp;	 * 
+&nbsp;	 * @param dao The dao implementation to use
+&nbsp;	 */
+&nbsp;	public void setAdministrationDAO(AdministrationDAO dao);
+&nbsp;										
+&nbsp;	/**
+&nbsp;	 * Get a global property by its uuid. There should be only one of these in the database (well,
+&nbsp;	 * in the world actually). If multiple are found, an error is thrown.
+&nbsp;	 * 
+&nbsp;	 * @return the global property matching the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public GlobalProperty getGlobalPropertyByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a listing or important variables used in openmrs
+&nbsp;	 * 
+&nbsp;	 * @return a map from variable name to variable value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all registered system variables
+&nbsp;	 */
+&nbsp;	
+&nbsp;	@Authorized(PrivilegeConstants.VIEW_ADMIN_FUNCTIONS)
+&nbsp;	public SortedMap&lt;String, String&gt; getSystemVariables();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a map of all the System Information. Java, user, time, runtime properties, etc
+&nbsp;	 * 
+&nbsp;	 * @return a map from variable name to a map of the information
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all system information
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.VIEW_ADMIN_FUNCTIONS)
+&nbsp;	public Map&lt;String, Map&lt;String, String&gt;&gt; getSystemInformation();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the global property that has the given &lt;code&gt;propertyName&lt;/code&gt;.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If &lt;code&gt;propertyName&lt;/code&gt; is not found in the list of Global Properties currently in the
+&nbsp;	 * database, a null value is returned. This method should not have any authorization check.
+&nbsp;	 * 
+&nbsp;	 * @param propertyName property key to look for
+&nbsp;	 * @return value of property returned or null if none
+&nbsp;	 * @see #getGlobalProperty(String, String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null propertyName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get property value given valid property name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get property in case insensitive way
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public String getGlobalProperty(String propertyName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the global property that has the given &lt;code&gt;propertyName&lt;/code&gt;
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If propertyName is not found in the list of Global Properties currently in the database, a
+&nbsp;	 * &lt;code&gt;defaultValue&lt;/code&gt; is returned
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This method should not have any authorization check
+&nbsp;	 * 
+&nbsp;	 * @param propertyName property key to look for
+&nbsp;	 * @param defaultValue value to return if propertyName is not found
+&nbsp;	 * @return value of propertyName property or defaultValue if none
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return default value if property name does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null default value
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public String getGlobalProperty(String propertyName, String defaultValue);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the global property that has the given &lt;code&gt;propertyName&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param propertyName property key to look for
+&nbsp;	 * @return the global property that matches the given &lt;code&gt;propertyName&lt;/code&gt;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no global property match given property name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public GlobalProperty getGlobalPropertyObject(String propertyName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all global properties that begin with &lt;code&gt;prefix&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param prefix The beginning of the property name to match.
+&nbsp;	 * @return a &lt;code&gt;List&lt;/code&gt; of &lt;code&gt;GlobalProperty&lt;/code&gt;s that match &lt;code&gt;prefix&lt;/code&gt;
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all relevant global properties in the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public List&lt;GlobalProperty&gt; getGlobalPropertiesByPrefix(String prefix);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all global properties that end with &lt;code&gt;suffix&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param suffix The end of the property name to match.
+&nbsp;	 * @return a &lt;code&gt;List&lt;/code&gt; of &lt;code&gt;GlobalProperty&lt;/code&gt;s that match &lt;code&gt;.*suffix&lt;/code&gt;
+&nbsp;	 * @since 1.6
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all relevant global properties in the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public List&lt;GlobalProperty&gt; getGlobalPropertiesBySuffix(String suffix);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a list of all global properties in the system
+&nbsp;	 * 
+&nbsp;	 * @return list of global properties
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all global properties in the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public List&lt;GlobalProperty&gt; getAllGlobalProperties();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given list of global properties to the database.
+&nbsp;	 * 
+&nbsp;	 * @param props list of GlobalProperty objects to save
+&nbsp;	 * @return the saved global properties
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save all global properties to the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with empty list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign uuid to all new properties
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save properties with case difference only
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES)
+&nbsp;	public List&lt;GlobalProperty&gt; saveGlobalProperties(List&lt;GlobalProperty&gt; props);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove the given global property from the database
+&nbsp;	 * 
+&nbsp;	 * @param globalProperty the global property to delete/remove from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete global property from database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_GLOBAL_PROPERTIES)
+&nbsp;	public void purgeGlobalProperty(GlobalProperty globalProperty);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove the given global properties from the database
+&nbsp;	 * 
+&nbsp;	 * @param globalProperties the global properties to delete/remove from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete global properties from database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_GLOBAL_PROPERTIES)
+&nbsp;	public void purgeGlobalProperties(List&lt;GlobalProperty&gt; globalProperties);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given global property to the database. If the global property already exists,
+&nbsp;	 * then it will be overwritten
+&nbsp;	 * 
+&nbsp;	 * @param propertyName the name of the global property to save
+&nbsp;	 * @param propertyValue the value of the global property to save
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create global property in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; overwrite global property if exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a global property whose typed value is handled by a custom datatype
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES)
+&nbsp;	public void setGlobalProperty(String propertyName, String propertyValue);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Overwrites the value of the global property if it already exists. If the global property does
+&nbsp;	 * not exist, an exception will be thrown
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param propertyName  the name of the global property to overwrite
+&nbsp;	 * @param propertyValue  the value of the global property to overwrite
+&nbsp;	 * @throws IllegalStateException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update global property in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if global property being updated does not already exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update a global property whose typed value is handled by a custom datatype
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES)
+&nbsp;	public void updateGlobalProperty(String propertyName, String propertyValue);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given global property to the database
+&nbsp;	 * 
+&nbsp;	 * @param gp global property to save
+&nbsp;	 * @return the saved global property
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create global property in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; overwrite global property if exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not allow different properties to have the same string with different case
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a global property whose typed value is handled by a custom datatype
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; evict all entries of search locale cache
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES)
+&nbsp;	public GlobalProperty saveGlobalProperty(GlobalProperty gp);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allows code to be notified when a global property is created/edited/deleted.
+&nbsp;	 * 
+&nbsp;	 * @see GlobalPropertyListener
+&nbsp;	 * @param listener The listener to register
+&nbsp;	 */
+&nbsp;	public void addGlobalPropertyListener(GlobalPropertyListener listener);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a GlobalPropertyListener previously registered by
+&nbsp;	 * {@link #addGlobalPropertyListener(GlobalPropertyListener)}
+&nbsp;	 * 
+&nbsp;	 * @param listener
+&nbsp;	 */
+&nbsp;	public void removeGlobalPropertyListener(GlobalPropertyListener listener);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Runs the &lt;code&gt;sql&lt;/code&gt; on the database. If &lt;code&gt;selectOnly&lt;/code&gt; is flagged then any
+&nbsp;	 * non-select sql statements will be rejected.
+&nbsp;	 * 
+&nbsp;	 * @param sql
+&nbsp;	 * @param selectOnly
+&nbsp;	 * @return ResultSet
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; execute sql containing group by
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.SQL_LEVEL_ACCESS)
+&nbsp;	public List&lt;List&lt;Object&gt;&gt; executeSQL(String sql, boolean selectOnly);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the implementation id stored for this server Returns null if no implementation id has
+&nbsp;	 * been successfully set yet
+&nbsp;	 * 
+&nbsp;	 * @return ImplementationId object that is this implementation&#39;s unique id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no implementation id is defined yet
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_IMPLEMENTATION_ID)
+&nbsp;	public ImplementationId getImplementationId();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the given &lt;code&gt;implementationId&lt;/code&gt; as this implementation&#39;s unique id
+&nbsp;	 * 
+&nbsp;	 * @param implementationId the ImplementationId to save
+&nbsp;	 * @throws APIException if implementationId is empty or is invalid according to central id
+&nbsp;	 *             server
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create implementation id in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; overwrite implementation id in database if exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if given implementationId is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if given empty implementationId object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if given a caret in the implementationId code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if given a pipe in the implementationId code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set uuid on implementation id global property
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_IMPLEMENTATION_ID)
+&nbsp;	public void setImplementationId(ImplementationId implementationId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the list of locales which the administrator has allowed for use on the system. This is
+&nbsp;	 * specified with a global property named
+&nbsp;	 * {@link OpenmrsConstants#GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST}.
+&nbsp;	 * 
+&nbsp;	 * @return list of allowed locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return at least one locale if no locales defined in database yet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if not global property for locales allowed defined yet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return duplicates even if the global property has them
+&nbsp;	 */
+&nbsp;	public List&lt;Locale&gt; getAllowedLocales();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the list of locales for which localized messages are available for the user interface
+&nbsp;	 * (presentation layer). This set includes all the available locales (as indicated by the
+&nbsp;	 * MessageSourceService) filtered by the allowed locales (as indicated by this
+&nbsp;	 * AdministrationService).
+&nbsp;	 * 
+&nbsp;	 * @return list of allowed presentation locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return at least one locale if no locales defined in database yet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return more locales than message source service locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only country locale if both country locale and language locale are specified in allowed list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all country locales if language locale and no country locales are specified in allowed list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return language locale if country locale is specified in allowed list but country locale message file is missing
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return language locale if it is specified in allowed list and there are no country locale message files available
+&nbsp;	 */
+&nbsp;	public Set&lt;Locale&gt; getPresentationLocales();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a global property according to the type specified
+&nbsp;	 * 
+&nbsp;	 * @param &lt;T&gt;
+&nbsp;	 * @param propertyName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get property value in the proper type specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return default value if property name does not exist
+&nbsp;	 * @return property value in the type of the default value
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+&nbsp;	public &lt;T&gt; T getGlobalPropertyValue(String propertyName, T defaultValue);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param aClass class of object getting length for
+&nbsp;	 * @param fieldName name of the field to get the length for
+&nbsp;	 * @return the max field length of a property
+&nbsp;	 */
+&nbsp;	public int getMaximumPropertyLength(Class&lt;? extends OpenmrsObject&gt; aClass, String fieldName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Performs validation in the manual flush mode to prevent any premature flushes.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Used by {@link ValidateUtil#validate(Object)}.
+&nbsp;	 * 
+&nbsp;	 * @since 1.9
+&nbsp;	 * @param object
+&nbsp;	 * @param errors
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass for a valid object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail for an invalid object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw throw APIException if the input is null
+&nbsp;	 */
+&nbsp;	public void validate(Object object, Errors errors);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a list of locales used by the user when searching.
+&nbsp;	 *
+&nbsp;	 * @param currentLocale currently selected locale
+&nbsp;	 * @param user authenticated user
+&nbsp;	 * @return
+&nbsp;	 * @throws APIException
+&nbsp;     */
+&nbsp;	public List&lt;Locale&gt; getSearchLocales(Locale currentLocale, User user);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a list of locales used by the user when searching.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The list is constructed from a currently selected locale and allowed user proficient locales.
+&nbsp;	 * 
+&nbsp;	 * @return locales
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8.4, 1.9.1, 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include currently selected full locale and language
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include users proficient locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; exclude not allowed locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cache results for a user
+&nbsp;	 */
+&nbsp;	public List&lt;Locale&gt; getSearchLocales();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used by Spring to set the http client for accessing the openmrs implementation service
+&nbsp;	 *
+&nbsp;	 * @param implementationHttpClient The implementation http client
+&nbsp;	 */
+&nbsp;	public void setImplementationIdHttpClient(HttpClient implementationHttpClient);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reads a GP which specifies if database string comparison is case sensitive.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is an optimisation parameter for MySQL, which can speed up searching if set to &lt;b&gt;false&lt;/b&gt;.
+&nbsp;	 * See http://dev.mysql.com/doc/refman/5.7/en/case-sensitivity.html
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is set to &lt;b&gt;true&lt;/b&gt; by default.
+&nbsp;	 * 
+&nbsp;	 * @return true if database string comparison is case sensitive
+&nbsp;	 * @since 1.9.9, 1.10.2, 1.11
+&nbsp;	 */
+&nbsp;	public boolean isDatabaseStringComparisonCaseSensitive();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;Unlike MySQL which uses identifier strategy, PostgreSQL follows sequence strategy&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;So as to bridge the gap between these two strategies, this method has been created.&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;It will perform task of updating the sequence values after insertions are done from core
+&nbsp;	 * data or concepts are inserted (present in Reference Metadata Module)&lt;/li&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * 
+&nbsp;	 * @since 2.4
+&nbsp;	 */
+&nbsp;	public void updatePostgresSequence();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of packages and/or individual classes including hierarchy of OpenmrsObject, OpenmmrsMetadata,
+&nbsp;	 * OpenmrsData and other common OpenMRS classes as well as any whitelists defined through GPs with the 
+&nbsp;	 * &#39;.serializer.whitelist.types&#39; suffix that are considered to be safe for deserializing.
+&nbsp;	 *
+&nbsp;	 * It is the responsibility of the serializer to block any unlisted classes from being deserialized and posing
+&nbsp;	 * security risk. It is especially important for serializers using XStream.
+&nbsp;	 *
+&nbsp;	 * @since 2.7.0, 2.6.2, 2.5.13 
+&nbsp;	 * @return a list of packages and/or classes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return packages and individual classes defined in GPs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return default common classes if no GPs defined
+&nbsp;	 */
+&nbsp;	List&lt;String&gt; getSerializerWhitelistTypes();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

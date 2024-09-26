@@ -1,0 +1,806 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientSearchCriteria</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientSearchCriteria (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientSearchCriteria</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,7%
+  </span>
+  <span class="absValue">
+    (15/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41,2%
+  </span>
+  <span class="absValue">
+    (94/228)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PatientSearchCriteria$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    59,3%
+  </span>
+  <span class="absValue">
+    (16/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41,5%
+  </span>
+  <span class="absValue">
+    (95/229)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.Join;
+&nbsp;import javax.persistence.criteria.JoinType;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.attribute.Attribute;
+&nbsp;import org.openmrs.attribute.AttributeType;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * The PatientSearchCriteria class. It has API to return a criteria from the Patient Name and
+&nbsp; * identifier.
+&nbsp; *
+&nbsp; * @deprecated since 2.1.0 (in favor of Hibernate Search)
+&nbsp; */
+&nbsp;@Deprecated
+&nbsp;public class PatientSearchCriteria {
+&nbsp;
+&nbsp;	private final SessionFactory sessionFactory;
+&nbsp;
+&nbsp;	private final PersonSearchCriteria personSearchCriteria;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+<b class="fc">&nbsp;	public PatientSearchCriteria(SessionFactory sessionFactory) {</b>
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+<b class="fc">&nbsp;		this.personSearchCriteria = new PersonSearchCriteria();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Prepare a {@link QueryResult} for searching patients by name and/or identifier. The visibility of
+&nbsp;	 * this method remains public in order not to break OpenMRS modules that use this method. Instead of
+&nbsp;	 * calling this method consider using {@link org.openmrs.api.PatientService} or
+&nbsp;	 * {@link org.openmrs.api.db.PatientDAO}.
+&nbsp;	 *
+&nbsp;	 * @param cb
+&nbsp;	 * @param patientJoin
+&nbsp;	 * @param name
+&nbsp;	 * @param identifier
+&nbsp;	 * @param identifierTypes
+&nbsp;	 * @param matchIdentifierExactly
+&nbsp;	 * @param searchOnNamesOrIdentifiers specifies if the logic should find patients that match the name
+&nbsp;	 *            or identifier otherwise find patients that match both the name and identifier
+&nbsp;	 * @return {@link QueryResult}
+&nbsp;	 */
+&nbsp;	public QueryResult prepareCriteria(CriteriaBuilder cb, Join&lt;Encounter, Patient&gt; patientJoin, String name,
+&nbsp;	        String identifier, List&lt;PatientIdentifierType&gt; identifierTypes, boolean matchIdentifierExactly,
+&nbsp;	        boolean orderByNames, boolean searchOnNamesOrIdentifiers) {
+&nbsp;		
+<b class="fc">&nbsp;		QueryResult queryResult = new QueryResult();</b>
+<b class="fc">&nbsp;		PatientSearchMode patientSearchMode = getSearchMode(name, identifier, identifierTypes, searchOnNamesOrIdentifiers);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;		Join&lt;Patient, PersonName&gt; nameJoin;
+<b class="fc">&nbsp;		switch (patientSearchMode) {</b>
+&nbsp;			case PATIENT_SEARCH_BY_NAME:
+<b class="nc">&nbsp;				nameJoin = addAliasForName(cb, patientJoin, orderByNames, queryResult);</b>
+<b class="nc">&nbsp;				predicates.add(preparePredicateForName(cb, nameJoin, name));</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case PATIENT_SEARCH_BY_IDENTIFIER:
+<b class="nc">&nbsp;				Join&lt;Patient, PatientIdentifier&gt; identifierJoin = addAliasForIdentifiers(patientJoin);</b>
+<b class="nc">&nbsp;				predicates.add(preparePredicateForIdentifier(cb, identifierJoin, identifier, identifierTypes, matchIdentifierExactly));</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case PATIENT_SEARCH_BY_NAME_OR_IDENTIFIER:
+&nbsp;
+&nbsp;				// If only name *or* identifier is provided as a search parameter,
+&nbsp;				// the respective value is copied to the empty search parameter.
+&nbsp;				//
+&nbsp;				// As a consequence, the *single* parameter is used to search for both names and identifiers.
+&nbsp;				//
+<b class="fc">&nbsp;				name = copySearchParameter(identifier, name);</b>
+<b class="fc">&nbsp;				identifier = copySearchParameter(name, identifier);</b>
+&nbsp;
+<b class="fc">&nbsp;				nameJoin = addAliasForName(cb, patientJoin, orderByNames, queryResult);</b>
+<b class="fc">&nbsp;				Join&lt;Patient, PatientIdentifier&gt; idsJoin = addAliasForIdentifiers(patientJoin);</b>
+<b class="fc">&nbsp;				predicates.add((cb.or(</b>
+<b class="fc">&nbsp;					preparePredicateForName(cb, nameJoin, name), </b>
+<b class="fc">&nbsp;					preparePredicateForIdentifier(cb, idsJoin, identifier, identifierTypes, matchIdentifierExactly))</b>
+&nbsp;				));
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case PATIENT_SEARCH_BY_NAME_AND_IDENTIFIER:
+<b class="nc">&nbsp;				nameJoin = addAliasForName(cb, patientJoin, orderByNames, queryResult);</b>
+<b class="nc">&nbsp;				Join&lt;Patient, PatientIdentifier&gt; idJoin = addAliasForIdentifiers(patientJoin);</b>
+<b class="nc">&nbsp;				predicates.add((cb.and(</b>
+<b class="nc">&nbsp;					preparePredicateForName(cb, nameJoin, name),</b>
+<b class="nc">&nbsp;					preparePredicateForIdentifier(cb, idJoin, identifier, identifierTypes, matchIdentifierExactly))</b>
+&nbsp;				));
+<b class="nc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			default:
+&nbsp;				break;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		predicates.add(cb.isFalse(patientJoin.get(&quot;voided&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		queryResult.addPredicates(predicates);</b>
+&nbsp;
+<b class="fc">&nbsp;		return queryResult;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Provides a {@link QueryResult} object for searching patients by name, identifier or searchable attribute.
+&nbsp;	 * 
+&nbsp;	 * The visibility of this method is &quot;default&quot; as this method should NOT be called directly by classes other
+&nbsp;	 * than org.openmrs.api.db.hibernate.HibernatePatientDAO.
+&nbsp;	 * 
+&nbsp;	 * Instead of calling this method consider using {@link org.openmrs.api.PatientService} or
+&nbsp;	 * {@link org.openmrs.api.db.PatientDAO}.
+&nbsp;	 *
+&nbsp;	 * @param cb            the CriteriaBuilder to build the criteria
+&nbsp;	 * @param patientJoin   the join from Encounter to Patient
+&nbsp;	 * @param query         defines search parameters
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 * @return QueryResult for searching by name OR identifier OR searchable attributes
+&nbsp;	 */
+&nbsp;	QueryResult prepareCriteria(CriteriaBuilder cb, Join&lt;Encounter, Patient&gt; patientJoin, String query, boolean includeVoided) {
+<b class="nc">&nbsp;		QueryResult queryResult = new QueryResult();</b>
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		Join&lt;Patient, PersonName&gt; nameJoin = addAliasForName(cb, patientJoin, true, queryResult);</b>
+<b class="nc">&nbsp;		Join&lt;Patient, Attribute&gt; attributeJoin = personSearchCriteria.addAliasForAttribute(patientJoin);</b>
+<b class="nc">&nbsp;		Join&lt;Attribute, AttributeType&gt; attributeTypeJoin = personSearchCriteria.addAliasForAttributeType(attributeJoin);</b>
+<b class="nc">&nbsp;		Join&lt;Patient, PatientIdentifier&gt; idsJoin = addAliasForIdentifiers(patientJoin);</b>
+<b class="nc">&nbsp;		predicates.add(cb.or(</b>
+<b class="nc">&nbsp;			preparePredicateForName(cb, nameJoin, query, includeVoided),</b>
+<b class="nc">&nbsp;			prepareCriterionForAttribute(cb, attributeJoin, attributeTypeJoin, query, includeVoided),</b>
+<b class="nc">&nbsp;			preparePredicateForIdentifier(cb, idsJoin, query, new ArrayList&lt;&gt;(), false, includeVoided)));</b>
+<b class="nc">&nbsp;		if (!includeVoided) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.isFalse(patientJoin.get(&quot;voided&quot;)));</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		queryResult.addPredicates(predicates);</b>
+<b class="nc">&nbsp;		return queryResult;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Provides a {@link QueryResult} object for searching patients by name, identifier or searchable attribute.
+&nbsp;	 *
+&nbsp;	 * The visibility of this method is &quot;default&quot; as this method should NOT be called directly by classes other
+&nbsp;	 * than org.openmrs.api.db.hibernate.HibernatePatientDAO.
+&nbsp;	 *
+&nbsp;	 * Instead of calling this method consider using {@link org.openmrs.api.PatientService} or
+&nbsp;	 * {@link org.openmrs.api.db.PatientDAO}.
+&nbsp;	 *
+&nbsp;	 * @param cb            the CriteriaBuilder to build the criteria
+&nbsp;	 * @param patientJoin   the join from Encounter to Patient
+&nbsp;	 * @param query defines search parameters
+&nbsp;	 * @return QueryResult for searching by name OR identifier OR searchable attributes
+&nbsp;	 */
+&nbsp;	QueryResult prepareCriteria(CriteriaBuilder cb, Join&lt;Encounter, Patient&gt; patientJoin, String query) {
+<b class="nc">&nbsp;		return prepareCriteria(cb, patientJoin, query, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param query         defines search parameters
+&nbsp;	 *
+&nbsp;	 * @param cb            the CriteriaBuilder to build the criteria
+&nbsp;	 * @param patientJoin   the join from Encounter to Patient   
+&nbsp;	 * @param matchExactly  true/false whether to perform an exact match on names
+&nbsp;	 * @param orderByNames  true/false whether to order by names
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 * @return QueryResult for searching by name OR identifier OR searchable attributes
+&nbsp;	 */
+&nbsp;	QueryResult prepareCriteria(CriteriaBuilder cb, Join&lt;Encounter, Patient&gt; patientJoin, String query, Boolean matchExactly, boolean orderByNames, boolean includeVoided) {
+<b class="nc">&nbsp;		QueryResult queryResult = new QueryResult();</b>
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		Join&lt;Patient, PersonName&gt; nameJoin = addAliasForName(cb, patientJoin, orderByNames, queryResult);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (matchExactly == null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.and(</b>
+<b class="nc">&nbsp;				preparePredicateForName(cb, nameJoin, query, null, includeVoided),</b>
+<b class="nc">&nbsp;				preparePredicateForName(cb, nameJoin, query, true, includeVoided),</b>
+<b class="nc">&nbsp;				cb.not(preparePredicateForName(cb, nameJoin, query, false, includeVoided))));</b>
+<b class="nc">&nbsp;		} else if (!matchExactly) {</b>
+<b class="nc">&nbsp;			predicates.add(preparePredicateForName(cb, nameJoin, query, false, includeVoided));</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			Join&lt;Patient, Attribute&gt; attributeJoin = personSearchCriteria.addAliasForAttribute(patientJoin);</b>
+<b class="nc">&nbsp;			Join&lt;Attribute, AttributeType&gt; attributeTypeJoin = personSearchCriteria.addAliasForAttributeType(attributeJoin);</b>
+<b class="nc">&nbsp;			Join&lt;Patient, PatientIdentifier&gt; idsJoin = addAliasForIdentifiers(patientJoin);</b>
+&nbsp;
+<b class="nc">&nbsp;			predicates.add(cb.or(</b>
+<b class="nc">&nbsp;				preparePredicateForName(cb, nameJoin, query, true, includeVoided),</b>
+<b class="nc">&nbsp;				prepareCriterionForAttribute(cb, attributeJoin, attributeTypeJoin, query, includeVoided),</b>
+<b class="nc">&nbsp;				preparePredicateForIdentifier(cb, idsJoin, query, new ArrayList&lt;&gt;(), false, includeVoided))</b>
+&nbsp;			);
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!includeVoided) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.isFalse(patientJoin.get(&quot;voided&quot;)));</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		queryResult.addPredicates(predicates);</b>
+<b class="nc">&nbsp;		return queryResult;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return source value when target is blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return target value when target is non-blank
+&nbsp;	 */
+&nbsp;	String copySearchParameter(String source, String target) {
+<b class="fc">&nbsp;		if (!StringUtils.isBlank(source) &amp;&amp; StringUtils.isBlank(target)) {</b>
+<b class="fc">&nbsp;			return source;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; identify search by name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; identify search by identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; identify search by identifier type list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; identify search by identifier and identifier type list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; identify search by name or identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; identify search by name and identifier
+&nbsp;	 */
+&nbsp;	PatientSearchMode getSearchMode(String name, String identifier, List&lt;PatientIdentifierType&gt; identifierTypes,
+&nbsp;	        boolean searchOnNamesOrIdentifiers) {
+<b class="fc">&nbsp;		if (searchOnNamesOrIdentifiers) {</b>
+<b class="fc">&nbsp;			return PatientSearchMode.PATIENT_SEARCH_BY_NAME_OR_IDENTIFIER;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!StringUtils.isBlank(name) &amp;&amp; StringUtils.isBlank(identifier) &amp;&amp; CollectionUtils.isEmpty(identifierTypes)) {</b>
+<b class="fc">&nbsp;			return PatientSearchMode.PATIENT_SEARCH_BY_NAME;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// de Morgan&#39;s law coming to fruition: (!A||!B) &lt;=&gt; !(A&amp;&amp;B)
+&nbsp;		//
+<b class="fc">&nbsp;		if (StringUtils.isBlank(name) &amp;&amp; !(StringUtils.isBlank(identifier) &amp;&amp; CollectionUtils.isEmpty(identifierTypes))) {</b>
+<b class="fc">&nbsp;			return PatientSearchMode.PATIENT_SEARCH_BY_IDENTIFIER;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return PatientSearchMode.PATIENT_SEARCH_BY_NAME_AND_IDENTIFIER;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Join&lt;Patient, PersonName&gt; addAliasForName(CriteriaBuilder cb, Join&lt;Encounter, Patient&gt; patientJoin, boolean orderByNames, QueryResult queryResult) {
+<b class="fc">&nbsp;		Join&lt;Patient, PersonName&gt; nameJoin = patientJoin.join(&quot;names&quot;);</b>
+<b class="fc">&nbsp;		if (orderByNames) {</b>
+<b class="fc">&nbsp;			queryResult.addOrder(cb.asc(nameJoin.get(&quot;givenName&quot;)));</b>
+<b class="fc">&nbsp;			queryResult.addOrder(cb.asc(nameJoin.get(&quot;middleName&quot;)));</b>
+<b class="fc">&nbsp;			queryResult.addOrder(cb.asc(nameJoin.get(&quot;familyName&quot;)));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return nameJoin;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Join&lt;Patient, PatientIdentifier&gt; addAliasForIdentifiers(Join&lt;Encounter, Patient&gt; patientJoin) {
+<b class="fc">&nbsp;		return patientJoin.join(&quot;identifiers&quot;, JoinType.LEFT);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to add identifier expression to an existing criteria
+&nbsp;	 *
+&nbsp;	 * @param cb        the CriteriaBuilder to build the criteria
+&nbsp;	 * @param idsJoin   the join from Patient to PatientIdentifier
+&nbsp;	 * @param identifier
+&nbsp;	 * @param identifierTypes
+&nbsp;	 * @param matchIdentifierExactly
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 */
+&nbsp;	private Predicate preparePredicateForIdentifier(CriteriaBuilder cb, Join&lt;Patient, PatientIdentifier&gt; idsJoin,
+&nbsp;	        String identifier, List&lt;PatientIdentifierType&gt; identifierTypes, boolean matchIdentifierExactly,
+&nbsp;	        boolean includeVoided) {
+&nbsp;		
+<b class="fc">&nbsp;		identifier = HibernateUtil.escapeSqlWildcards(identifier, sessionFactory);</b>
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeVoided) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(idsJoin.get(&quot;voided&quot;)));</b>
+&nbsp;		}
+&nbsp;		// do the identifier restriction
+<b class="fc">&nbsp;		if (identifier != null) {</b>
+&nbsp;			// if the user wants an exact search, match on that.
+<b class="fc">&nbsp;			if (matchIdentifierExactly) {</b>
+<b class="fc">&nbsp;				if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {</b>
+<b class="fc">&nbsp;					predicates.add(cb.equal(cb.lower(idsJoin.get(&quot;identifier&quot;)), identifier.toLowerCase()));</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					predicates.add(cb.equal(idsJoin.get(&quot;identifier&quot;), identifier));</b>
+&nbsp;				}
+&nbsp;			} else {
+<b class="nc">&nbsp;				AdministrationService adminService = Context.getAdministrationService();</b>
+<b class="nc">&nbsp;				String regex = adminService.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_IDENTIFIER_REGEX, &quot;&quot;);</b>
+<b class="nc">&nbsp;				String patternSearch = adminService.getGlobalProperty(</b>
+&nbsp;				OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SEARCH_PATTERN, &quot;&quot;);
+&nbsp;
+&nbsp;				// remove padding from identifier search string
+<b class="nc">&nbsp;				if (Pattern.matches(&quot;^\\^.{1}\\*.*$&quot;, regex)) {</b>
+<b class="nc">&nbsp;					identifier = removePadding(identifier, regex);</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				if (org.springframework.util.StringUtils.hasLength(patternSearch)) {</b>
+<b class="nc">&nbsp;					predicates.add(splitAndGetSearchPattern(cb, idsJoin, identifier, patternSearch));</b>
+&nbsp;				}
+&nbsp;				// if the regex is empty, default to a simple &quot;like&quot; search or if
+&nbsp;				// we&#39;re in hsql world, also only do the simple like search (because
+&nbsp;				// hsql doesn&#39;t know how to deal with &#39;regexp&#39;
+<b class="nc">&nbsp;				else if (&quot;&quot;.equals(regex) || HibernateUtil.isHSQLDialect(sessionFactory)) {</b>
+<b class="nc">&nbsp;					predicates.add(getPredicateForSimpleSearch(cb, idsJoin, identifier, adminService));</b>
+&nbsp;				}
+&nbsp;				// if the regex is present, search on that
+&nbsp;				else {
+<b class="nc">&nbsp;					regex = replaceSearchString(regex, identifier);</b>
+<b class="nc">&nbsp;					predicates.add(cb.isTrue(cb.function(&quot;regexp&quot;, Boolean.class, idsJoin.get(&quot;identifier&quot;),</b>
+<b class="nc">&nbsp;						cb.literal(regex))));</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// do the type restriction
+<b class="fc">&nbsp;		if (!CollectionUtils.isEmpty(identifierTypes)) {</b>
+<b class="nc">&nbsp;			predicates.add(idsJoin.get(&quot;identifierType&quot;).in(identifierTypes));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return cb.and(predicates.toArray(predicates.toArray(new Predicate[]{})));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to add identifier expression to an existing criteria
+&nbsp;	 *
+&nbsp;	 * @param cb        the CriteriaBuilder to build the criteria
+&nbsp;	 * @param idsJoin   the join from Patient to PatientIdentifier
+&nbsp;	 * @param identifier
+&nbsp;	 * @param identifierTypes
+&nbsp;	 * @param matchIdentifierExactly
+&nbsp;	 */
+&nbsp;	private Predicate preparePredicateForIdentifier(CriteriaBuilder cb, Join&lt;Patient, PatientIdentifier&gt; idsJoin,
+&nbsp;	        String identifier, List&lt;PatientIdentifierType&gt; identifierTypes, boolean matchIdentifierExactly) {
+<b class="fc">&nbsp;		return preparePredicateForIdentifier(cb, idsJoin, identifier, identifierTypes, matchIdentifierExactly, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to add prefix and suffix like expression
+&nbsp;	 *
+&nbsp;	 * @param cb        the CriteriaBuilder to build the criteria
+&nbsp;	 * @param idsJoin   the join from Patient to PatientIdentifier
+&nbsp;	 * @param identifier
+&nbsp;	 * @param adminService
+&nbsp;	 */
+&nbsp;	private Predicate getPredicateForSimpleSearch(CriteriaBuilder cb, Join&lt;Patient, PatientIdentifier&gt; idsJoin,
+&nbsp;	        String identifier, AdministrationService adminService) {
+<b class="nc">&nbsp;		String prefix = adminService.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_IDENTIFIER_PREFIX, &quot;&quot;);</b>
+<b class="nc">&nbsp;		String suffix = adminService.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SUFFIX, &quot;&quot;);</b>
+<b class="nc">&nbsp;		String matchPattern = (prefix + identifier + suffix).toLowerCase();</b>
+<b class="nc">&nbsp;		return cb.like(cb.lower(idsJoin.get(&quot;identifier&quot;)), matchPattern);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to add search pattern expression to identifier.
+&nbsp;	 *
+&nbsp;	 * @param cb
+&nbsp;	 * @param idsJoin
+&nbsp;	 * @param identifier
+&nbsp;	 * @param patternSearch
+&nbsp;	 */
+&nbsp;	private Predicate splitAndGetSearchPattern(CriteriaBuilder cb, Join&lt;Patient, PatientIdentifier&gt; idsJoin,
+&nbsp;											   String identifier, String patternSearch) {
+<b class="nc">&nbsp;		CriteriaBuilder.In&lt;String&gt; inClause = cb.in(idsJoin.get(&quot;identifier&quot;));</b>
+&nbsp;		// replace the @SEARCH@, etc in all elements
+<b class="nc">&nbsp;		for (String pattern : patternSearch.split(&quot;,&quot;)) {</b>
+<b class="nc">&nbsp;			inClause.value(replaceSearchString(pattern, identifier));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return inClause;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to remove padding from the identifier.
+&nbsp;	 *
+&nbsp;	 * @param identifier
+&nbsp;	 * @param regex
+&nbsp;	 * @return identifier without the padding.
+&nbsp;	 */
+&nbsp;	private String removePadding(String identifier, String regex) {
+<b class="nc">&nbsp;		String padding = regex.substring(regex.indexOf(&quot;^&quot;) + 1, regex.indexOf(&quot;*&quot;));</b>
+<b class="nc">&nbsp;		Pattern pattern = Pattern.compile(&quot;^&quot; + padding + &quot;+&quot;);</b>
+<b class="nc">&nbsp;		identifier = pattern.matcher(identifier).replaceFirst(&quot;&quot;);</b>
+<b class="nc">&nbsp;		return identifier;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to add name expressions to criteria.
+&nbsp;	 *
+&nbsp;	 * @param cb
+&nbsp;	 * @param nameJoin
+&nbsp;	 * @param name
+&nbsp;	 * @param matchExactly
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 */
+&nbsp;	private Predicate preparePredicateForName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name,
+&nbsp;	        Boolean matchExactly, boolean includeVoided) {
+<b class="fc">&nbsp;		name = HibernateUtil.escapeSqlWildcards(name, sessionFactory);</b>
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		String[] nameParts = getQueryParts(name);</b>
+<b class="fc">&nbsp;		if (nameParts.length &gt; 0) {</b>
+<b class="fc">&nbsp;			StringBuilder multiName = new StringBuilder(nameParts[0]);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int i = 0; i &lt; nameParts.length; i++) {</b>
+<b class="fc">&nbsp;				String singleName = nameParts[i];</b>
+&nbsp;
+<b class="fc">&nbsp;				if (singleName != null &amp;&amp; !singleName.isEmpty()) {</b>
+<b class="fc">&nbsp;					Predicate singleNamePredicate = getPredicateForName(cb, nameJoin, singleName, matchExactly, includeVoided);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (i &gt; 0) {</b>
+<b class="fc">&nbsp;						multiName.append(&quot; &quot;);</b>
+<b class="fc">&nbsp;						multiName.append(singleName);</b>
+<b class="fc">&nbsp;						Predicate multiNamePredicate = getPredicateForName(cb, nameJoin, multiName.toString(), matchExactly, includeVoided);</b>
+<b class="fc">&nbsp;						singleNamePredicate = cb.or(singleNamePredicate, multiNamePredicate);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					predicates.add(singleNamePredicate);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return cb.and(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to add name expressions to criteria.
+&nbsp;	 *
+&nbsp;	 * @param cb        the CriteriaBuilder to build the criteria
+&nbsp;	 * @param nameJoin  the join from Patient to PersonName
+&nbsp;	 * @param name
+&nbsp;	 */
+&nbsp;	private Predicate preparePredicateForName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name) {
+<b class="fc">&nbsp;		return preparePredicateForName(cb, nameJoin, name, null, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;
+&nbsp;	private Predicate preparePredicateForName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name, boolean includeVoided) {
+<b class="nc">&nbsp;		return preparePredicateForName(cb, nameJoin, name, null, includeVoided);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; process simple space as separator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; process comma as separator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; process mixed separators
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return empty name parts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject null as name
+&nbsp;	 **/
+&nbsp;	String[] getQueryParts(String query) {
+<b class="fc">&nbsp;		if (query == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;query must not be null&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		query = query.replace(&quot;,&quot;, &quot; &quot;);</b>
+<b class="fc">&nbsp;		String[] queryPartArray = query.split(&quot; &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;String&gt; queryPartList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (String queryPart : queryPartArray) {</b>
+<b class="fc">&nbsp;			if (queryPart.trim().length() &gt; 0) {</b>
+<b class="fc">&nbsp;				queryPartList.add(queryPart);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return queryPartList.toArray(new String[0]);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a criteria object comparing the given string to each part of the name. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This criteria is essentially:
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 *
+&nbsp;	 * &lt;pre&gt;
+&nbsp;	 * ... where voided = false &amp;amp;&amp;amp; name in (familyName2, familyName, middleName, givenName)
+&nbsp;	 * &lt;/pre&gt;
+&nbsp;	 *
+&nbsp;	 * Except when the name provided is less than min characters (usually 3) then we will look for
+&nbsp;	 * an EXACT match by default
+&nbsp;	 *
+&nbsp;	 * @param cb        the CriteriaBuilder to build the criteria
+&nbsp;	 * @param nameJoin  the join from Patient to PersonName
+&nbsp;	 * @param name
+&nbsp;	 * @param matchExactly
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 * @return {@link Predicate}
+&nbsp;	 */
+&nbsp;	private Predicate getPredicateForName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name, Boolean matchExactly, boolean includeVoided) {
+<b class="fc">&nbsp;		if (isShortName(name)) {</b>
+<b class="nc">&nbsp;			return getPredicateForShortName(cb, nameJoin, name, includeVoided);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (matchExactly != null) {</b>
+<b class="nc">&nbsp;				if (matchExactly) {</b>
+<b class="nc">&nbsp;					return getPredicateForShortName(cb, nameJoin, name, includeVoided);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				return getPredicateForNoExactName(cb, nameJoin, name, includeVoided);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return getPredicateForLongName(cb, nameJoin, name, includeVoided);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; recognise short name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; recognise long name
+&nbsp;	 */
+&nbsp;	Boolean isShortName(String name) {
+<b class="fc">&nbsp;		Integer minChars = Context.getAdministrationService().getGlobalPropertyValue(</b>
+&nbsp;		OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS,
+<b class="fc">&nbsp;		OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (name != null &amp;&amp; name.length() &lt; minChars) {</b>
+<b class="fc">&nbsp;			return Boolean.TRUE;</b>
+&nbsp;
+&nbsp;		} else {
+<b class="fc">&nbsp;			return Boolean.FALSE;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private Predicate getPredicateForShortName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name, boolean includeVoided) {
+<b class="nc">&nbsp;		Predicate givenNamePredicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;givenName&quot;)),</b>
+<b class="nc">&nbsp;			cb.equal(cb.lower(nameJoin.get(&quot;givenName&quot;)), name.toLowerCase())</b>
+&nbsp;		);
+&nbsp;
+<b class="nc">&nbsp;		Predicate middleNamePredicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;middleName&quot;)),</b>
+<b class="nc">&nbsp;			cb.equal(cb.lower(nameJoin.get(&quot;middleName&quot;)), name.toLowerCase())</b>
+&nbsp;		);
+&nbsp;
+<b class="nc">&nbsp;		Predicate familyNamePredicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;familyName&quot;)),</b>
+<b class="nc">&nbsp;			cb.equal(cb.lower(nameJoin.get(&quot;familyName&quot;)), name.toLowerCase())</b>
+&nbsp;		);
+&nbsp;
+<b class="nc">&nbsp;		Predicate familyName2Predicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;familyName2&quot;)),</b>
+<b class="nc">&nbsp;			cb.equal(cb.lower(nameJoin.get(&quot;familyName2&quot;)), name.toLowerCase())</b>
+&nbsp;		);
+&nbsp;
+<b class="nc">&nbsp;		Predicate namePredicate = cb.or(givenNamePredicate, middleNamePredicate, familyNamePredicate, familyName2Predicate);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!includeVoided) {</b>
+<b class="nc">&nbsp;			Predicate nonVoidedPredicate = cb.isFalse(nameJoin.get(&quot;voided&quot;));</b>
+<b class="nc">&nbsp;			namePredicate = cb.and(namePredicate, nonVoidedPredicate);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return namePredicate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Predicate getPredicateForLongName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name, boolean includeVoided) {
+<b class="fc">&nbsp;		String pattern = getMatchMode().toCaseSensitivePattern(name);</b>
+&nbsp;
+<b class="fc">&nbsp;		Predicate givenNamePredicate = cb.like(nameJoin.get(&quot;givenName&quot;), pattern);</b>
+<b class="fc">&nbsp;		Predicate middleNamePredicate = cb.like(nameJoin.get(&quot;middleName&quot;), pattern);</b>
+<b class="fc">&nbsp;		Predicate familyNamePredicate = cb.like(nameJoin.get(&quot;familyName&quot;), pattern);</b>
+<b class="fc">&nbsp;		Predicate familyName2Predicate = cb.like(nameJoin.get(&quot;familyName2&quot;), pattern);</b>
+&nbsp;
+<b class="fc">&nbsp;		Predicate namePredicate = cb.or(givenNamePredicate, middleNamePredicate, familyNamePredicate, familyName2Predicate);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeVoided) {</b>
+<b class="fc">&nbsp;			Predicate nonVoidedPredicate = cb.isFalse(nameJoin.get(&quot;voided&quot;));</b>
+<b class="fc">&nbsp;			namePredicate = cb.and(namePredicate, nonVoidedPredicate);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return namePredicate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Predicate getPredicateForNoExactName(CriteriaBuilder cb, Join&lt;Patient, PersonName&gt; nameJoin, String name, boolean includeVoided) {
+<b class="nc">&nbsp;		String pattern = getMatchMode().toCaseSensitivePattern(name);</b>
+<b class="nc">&nbsp;		Predicate givenNamePredicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;givenName&quot;)),</b>
+<b class="nc">&nbsp;			cb.like(nameJoin.get(&quot;givenName&quot;), pattern)</b>
+&nbsp;		);
+<b class="nc">&nbsp;		Predicate middleNamePredicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;middleName&quot;)),</b>
+<b class="nc">&nbsp;			cb.like(nameJoin.get(&quot;middleName&quot;), pattern)</b>
+&nbsp;		);
+<b class="nc">&nbsp;		Predicate familyNamePredicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;familyName&quot;)),</b>
+<b class="nc">&nbsp;			cb.like(nameJoin.get(&quot;familyName&quot;), pattern)</b>
+&nbsp;		);
+<b class="nc">&nbsp;		Predicate familyName2Predicate = cb.and(</b>
+<b class="nc">&nbsp;			cb.isNotNull(nameJoin.get(&quot;familyName2&quot;)),</b>
+<b class="nc">&nbsp;			cb.like(nameJoin.get(&quot;familyName2&quot;), pattern)</b>
+&nbsp;		);
+&nbsp;
+<b class="nc">&nbsp;		Predicate namePredicates = cb.or(givenNamePredicate, middleNamePredicate, familyNamePredicate, familyName2Predicate);</b>
+&nbsp;
+<b class="nc">&nbsp;		Predicate notGivenName = cb.or(cb.isNull(nameJoin.get(&quot;givenName&quot;)), cb.notEqual(nameJoin.get(&quot;givenName&quot;), name));</b>
+<b class="nc">&nbsp;		Predicate notMiddleName = cb.or(cb.isNull(nameJoin.get(&quot;middleName&quot;)), cb.notEqual(nameJoin.get(&quot;middleName&quot;), name));</b>
+<b class="nc">&nbsp;		Predicate notFamilyName = cb.or(cb.isNull(nameJoin.get(&quot;familyName&quot;)), cb.notEqual(nameJoin.get(&quot;familyName&quot;), name));</b>
+<b class="nc">&nbsp;		Predicate notFamilyName2 = cb.or(cb.isNull(nameJoin.get(&quot;familyName2&quot;)), cb.notEqual(nameJoin.get(&quot;familyName2&quot;), name));</b>
+&nbsp;
+<b class="nc">&nbsp;		Predicate combinedPredicate = cb.and(namePredicates, notGivenName, notMiddleName, notFamilyName, notFamilyName2);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!includeVoided) {</b>
+<b class="nc">&nbsp;			combinedPredicate = cb.and(combinedPredicate, cb.isFalse(nameJoin.get(&quot;voided&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return combinedPredicate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return start as default match mode
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return start as configured match mode
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return anywhere as configured match mode
+&nbsp;	 */
+&nbsp;	MatchMode getMatchMode() {
+<b class="fc">&nbsp;		String matchMode = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_MODE,
+&nbsp;		OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_START);
+&nbsp;
+<b class="fc">&nbsp;		if (matchMode.equalsIgnoreCase(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_ANYWHERE)) {</b>
+<b class="fc">&nbsp;			return MatchMode.ANYWHERE;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return MatchMode.START;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Puts @SEARCH@, @SEARCH-1@, and @CHECKDIGIT@ into the search string
+&nbsp;	 *
+&nbsp;	 * @param regex the admin-defined search string containing the @..@&#39;s to be replaced
+&nbsp;	 * @param identifierSearched the user entered search string
+&nbsp;	 * @return substituted search strings.
+&nbsp;	 */
+&nbsp;	private String replaceSearchString(String regex, String identifierSearched) {
+<b class="nc">&nbsp;		String returnString = regex.replaceAll(&quot;@SEARCH@&quot;, identifierSearched);</b>
+<b class="nc">&nbsp;		if (identifierSearched.length() &gt; 1) {</b>
+&nbsp;			// for 2 or more character searches, we allow regex to use last character as check digit
+<b class="nc">&nbsp;			returnString = returnString.replaceAll(&quot;@SEARCH-1@&quot;,</b>
+<b class="nc">&nbsp;			    identifierSearched.substring(0, identifierSearched.length() - 1));</b>
+<b class="nc">&nbsp;			returnString = returnString.replaceAll(&quot;@CHECKDIGIT@&quot;,</b>
+<b class="nc">&nbsp;			    identifierSearched.substring(identifierSearched.length() - 1));</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			returnString = returnString.replaceAll(&quot;@SEARCH-1@&quot;, &quot;&quot;);</b>
+<b class="nc">&nbsp;			returnString = returnString.replaceAll(&quot;@CHECKDIGIT@&quot;, &quot;&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return returnString;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Predicate prepareCriterionForAttribute(CriteriaBuilder cb, Join&lt;Patient, Attribute&gt; attributeJoin, Join&lt;Attribute, AttributeType&gt; attributeTypeJoin, String query, boolean includeVoided) {
+<b class="nc">&nbsp;		query = HibernateUtil.escapeSqlWildcards(query, sessionFactory);</b>
+&nbsp;
+<b class="nc">&nbsp;		MatchMode matchMode = personSearchCriteria.getAttributeMatchMode();</b>
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		String[] queryParts = getQueryParts(query);</b>
+<b class="nc">&nbsp;		for (String queryPart : queryParts) {</b>
+<b class="nc">&nbsp;			predicates.add(personSearchCriteria.preparePredicateForAttribute(cb, attributeJoin, attributeTypeJoin, queryPart, includeVoided, matchMode));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return cb.and(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

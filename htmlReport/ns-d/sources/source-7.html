@@ -1,0 +1,363 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DiagnosisServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: DiagnosisServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DiagnosisServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,5%
+  </span>
+  <span class="absValue">
+    (21/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,2%
+  </span>
+  <span class="absValue">
+    (25/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import org.openmrs.CodedOrFreeText;
+&nbsp;import org.openmrs.Diagnosis;
+&nbsp;import org.openmrs.DiagnosisAttribute;
+&nbsp;import org.openmrs.DiagnosisAttributeType;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.DiagnosisService;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.DiagnosisDAO;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.HashSet;
+&nbsp;
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class DiagnosisServiceImpl extends BaseOpenmrsService implements DiagnosisService {</b>
+&nbsp;	
+&nbsp;	private DiagnosisDAO diagnosisDAO;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves a diagnosis
+&nbsp;	 *
+&nbsp;	 * @param diagnosis - the diagnosis to be saved
+&nbsp;	 * @return the diagnosis
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis save(Diagnosis diagnosis) {
+<b class="fc">&nbsp;		diagnosisDAO.saveDiagnosis(diagnosis);</b>
+<b class="fc">&nbsp;		return diagnosis;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Voids a diagnosis
+&nbsp;	 *
+&nbsp;	 * @param diagnosis  - the diagnosis to be voided
+&nbsp;	 * @param voidReason - the reason for voiding the diagnosis
+&nbsp;	 * @return the diagnosis that was voided
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis voidDiagnosis(Diagnosis diagnosis, String voidReason) {
+<b class="fc">&nbsp;		return Context.getDiagnosisService().save(diagnosis);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a diagnosis based on the uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid - uuid of the diagnosis to be returned
+&nbsp;	 * @return diagnosis matching the given uuid
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis getDiagnosisByUuid(String uuid) {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosisByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets diagnoses since date, sorted in reverse chronological order
+&nbsp;	 *
+&nbsp;	 * @param patient  the patient whose diagnosis we are to get
+&nbsp;	 * @param fromDate the date used to filter diagnosis which happened from this date and later
+&nbsp;	 * @return the list of diagnoses for the given patient and starting from the given date
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Diagnosis&gt; getDiagnoses(Patient patient, Date fromDate) {
+<b class="fc">&nbsp;		return diagnosisDAO.getActiveDiagnoses(patient, fromDate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosesByEncounter(Encounter, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Diagnosis&gt; getDiagnosesByEncounter(Encounter encounter, boolean primaryOnly, boolean confirmedOnly) {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosesByEncounter(encounter, primaryOnly, confirmedOnly);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosesByVisit(Visit, boolean, boolean) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Diagnosis&gt; getDiagnosesByVisit(Visit visit, boolean primaryOnly, boolean confirmedOnly) {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosesByVisit(visit, primaryOnly, confirmedOnly);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds the primary diagnoses for a given encounter
+&nbsp;	 * The diagnosis order is identified using the integer rank value. The diagnosis rank is thus:
+&nbsp;	 * 1 - PRIMARY (Primary diagnosis)
+&nbsp;	 * 2 - SECONDARY (Secondary diagnosis)
+&nbsp;	 *
+&nbsp;	 * @param encounter the encounter whose diagnoses we are to get
+&nbsp;	 * @return the list of diagnoses in the given encounter whose rank is 1 (Primary diagnosis)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Diagnosis&gt; getPrimaryDiagnoses(Encounter encounter) {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosesByEncounter(encounter, true, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets unique diagnoses since date, sorted in reverse chronological order
+&nbsp;	 *
+&nbsp;	 * @param patient  the patient whose diagnosis we are to get
+&nbsp;	 * @param fromDate the date used to filter diagnosis which happened from this date and later
+&nbsp;	 * @return the list of diagnoses
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Diagnosis&gt; getUniqueDiagnoses(Patient patient, Date fromDate) {
+<b class="fc">&nbsp;		List&lt;Diagnosis&gt; diagnoses = getDiagnoses(patient, fromDate);</b>
+<b class="fc">&nbsp;		Set&lt;CodedOrFreeText&gt; answers = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		diagnoses.removeIf(diagnosis -&gt; !answers.add(diagnosis.getDiagnosis()));</b>
+<b class="fc">&nbsp;		return diagnoses;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a diagnosis by id.
+&nbsp;	 *
+&nbsp;	 * @param diagnosisId - id of the diagnosis to be returned
+&nbsp;	 * @return diagnosis matching the given id
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Diagnosis getDiagnosis(Integer diagnosisId) {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosisById(diagnosisId);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Revive a diagnosis (pull a Lazarus)
+&nbsp;	 *
+&nbsp;	 * @param diagnosis diagnosis to unvoid
+&nbsp;	 * @return the unvoided diagnosis
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unset voided bit on given diagnosis
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis unvoidDiagnosis(Diagnosis diagnosis) {
+<b class="fc">&nbsp;		return Context.getDiagnosisService().save(diagnosis);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely remove a diagnosis from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidDiagnosis(Diagnosis) for that one) If other things link to
+&nbsp;	 * this diagnosis, an error will be thrown.
+&nbsp;	 *
+&nbsp;	 * @param diagnosis diagnosis to remove from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given diagnosis from th e database
+&nbsp;	 * @see #purgeDiagnosis(Diagnosis)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeDiagnosis(Diagnosis diagnosis) {
+<b class="fc">&nbsp;		diagnosisDAO.deleteDiagnosis(diagnosis);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the diagnosis data access object
+&nbsp;	 * 
+&nbsp;	 * @return the diagnosis data access object
+&nbsp;	 */
+&nbsp;	public DiagnosisDAO getDiagnosisDAO() {
+<b class="nc">&nbsp;		return diagnosisDAO;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the diagnosis data access object
+&nbsp;	 * 
+&nbsp;	 * @param diagnosisDAO
+&nbsp;	 */
+&nbsp;	public void setDiagnosisDAO(DiagnosisDAO diagnosisDAO) {
+<b class="fc">&nbsp;		this.diagnosisDAO = diagnosisDAO;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getAllDiagnosisAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;DiagnosisAttributeType&gt; getAllDiagnosisAttributeTypes() throws APIException {
+<b class="fc">&nbsp;		return diagnosisDAO.getAllDiagnosisAttributeTypes();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosisAttributeTypeById(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DiagnosisAttributeType getDiagnosisAttributeTypeById(Integer id) throws APIException {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosisAttributeTypeById(id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosisAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DiagnosisAttributeType getDiagnosisAttributeTypeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosisAttributeTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#saveDiagnosisAttributeType(DiagnosisAttributeType) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DiagnosisAttributeType saveDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws APIException {
+<b class="fc">&nbsp;		return diagnosisDAO.saveDiagnosisAttributeType(diagnosisAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#retireDiagnosisAttributeType(DiagnosisAttributeType, String) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DiagnosisAttributeType retireDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType, String reason) throws APIException {
+<b class="fc">&nbsp;		return Context.getDiagnosisService().saveDiagnosisAttributeType(diagnosisAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#unretireDiagnosisAttributeType(DiagnosisAttributeType) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DiagnosisAttributeType unretireDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws APIException {
+<b class="fc">&nbsp;		return Context.getDiagnosisService().saveDiagnosisAttributeType(diagnosisAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#purgeDiagnosisAttributeType(DiagnosisAttributeType) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws APIException {
+<b class="fc">&nbsp;		diagnosisDAO.deleteDiagnosisAttributeType(diagnosisAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosisAttributeByUuid(String) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DiagnosisAttribute getDiagnosisAttributeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return diagnosisDAO.getDiagnosisAttributeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

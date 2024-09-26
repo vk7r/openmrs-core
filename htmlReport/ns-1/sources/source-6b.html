@@ -1,0 +1,295 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > RelationshipType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: RelationshipType (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RelationshipType</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RelationshipType$HibernateProxy$kx70fxhh</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    93,8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines a type of relationship between two people in the database. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * A relationship is two-way. There is a name for the relationship in both directions. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * For example: &lt;br&gt;
+&nbsp; * a) physician Joe&lt;br&gt;
+&nbsp; * b) patient Bob&lt;br&gt;
+&nbsp; * Joe is the &quot;physician of&quot; Bob &lt;u&gt;and&lt;/u&gt; Bob is the patient of Joe. Once you can establish one of
+&nbsp; * the two relationships, you automatically know the other. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * ALL relationships are two-way and can be defined as such. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * RelationshipTypes should be defined as &lt;b&gt;gender non-specific&lt;/b&gt; For example: A mother and her
+&nbsp; * son. Instead of having a RelationshipType defined as mother-son, it should be defined as
+&nbsp; * Parent-child. (This avoids the duplicative types that would come out like father-son,
+&nbsp; * father-daughter, mother-daughter) &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * In English, we run into a tricky RelationshipType with aunts and uncles. We have chosen to define
+&nbsp; * them as aunt/uncle-niece/nephew.
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class RelationshipType extends BaseChangeableOpenmrsMetadata{
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 4223L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private Integer relationshipTypeId;
+&nbsp;	
+&nbsp;	private String aIsToB;
+&nbsp;	
+&nbsp;	private String bIsToA;
+&nbsp;	
+<b class="fc">&nbsp;	private Integer weight = 0;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean preferred = false;</b>
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public RelationshipType() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public RelationshipType(Integer relationshipTypeId) {</b>
+<b class="fc">&nbsp;		this.relationshipTypeId = relationshipTypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the relationshipTypeId.
+&nbsp;	 */
+&nbsp;	public Integer getRelationshipTypeId() {
+<b class="fc">&nbsp;		return relationshipTypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param relationshipTypeId The relationshipTypeId to set.
+&nbsp;	 */
+&nbsp;	public void setRelationshipTypeId(Integer relationshipTypeId) {
+<b class="fc">&nbsp;		this.relationshipTypeId = relationshipTypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the weight
+&nbsp;	 */
+&nbsp;	public Integer getWeight() {
+<b class="fc">&nbsp;		return weight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param weight the weight to set
+&nbsp;	 */
+&nbsp;	public void setWeight(Integer weight) {
+<b class="fc">&nbsp;		this.weight = weight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The java bean specifications says that if an attribute has the second letter capitalized (as
+&nbsp;	 * the &quot;I&quot; is), the initial &quot;a&quot; is not to be capitalized. Both Spring and Hibernate use this
+&nbsp;	 * &quot;getter&quot; definition
+&nbsp;	 * 
+&nbsp;	 * @return the aIsToB
+&nbsp;	 */
+&nbsp;	public String getaIsToB() {
+<b class="fc">&nbsp;		return aIsToB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param aisToB the aIsToB to set
+&nbsp;	 */
+&nbsp;	public void setaIsToB(String aisToB) {
+<b class="fc">&nbsp;		aIsToB = aisToB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the bIsToA
+&nbsp;	 */
+&nbsp;	public String getbIsToA() {
+<b class="fc">&nbsp;		return bIsToA;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &quot;Preferred&quot; relationship types are those that should be shown as default types when
+&nbsp;	 * adding/editing a person&#39;s relationships
+&nbsp;	 * 
+&nbsp;	 * @return the preferred status
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getPreferred()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isPreferred() {
+<b class="fc">&nbsp;		return getPreferred();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getPreferred() {
+<b class="fc">&nbsp;		return preferred;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &quot;Preferred&quot; relationship types are those that should be shown as default types when
+&nbsp;	 * adding/editing a person&#39;s relationships
+&nbsp;	 * 
+&nbsp;	 * @param preferred sets the preferred status of this relationship type
+&nbsp;	 */
+&nbsp;	public void setPreferred(Boolean preferred) {
+<b class="fc">&nbsp;		this.preferred = preferred;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param bisToA the bIsToA to set
+&nbsp;	 */
+&nbsp;	public void setbIsToA(String bisToA) {
+<b class="fc">&nbsp;		bIsToA = bisToA;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return getaIsToB() + &quot;/&quot; + getbIsToA();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getRelationshipTypeId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setRelationshipTypeId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

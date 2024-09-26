@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientIdentifierTypeDefaultComparator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.comparator</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientIdentifierTypeDefaultComparator (org.openmrs.comparator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientIdentifierTypeDefaultComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.comparator;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Comparator;
+&nbsp;
+&nbsp;import org.apache.commons.collections.comparators.ComparatorChain;
+&nbsp;import org.apache.commons.collections.comparators.NullComparator;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;
+&nbsp;/**
+&nbsp; * Orders {@link PatientIdentifierType} by retired (true last), required (true first), name and
+&nbsp; * id.
+&nbsp; * 
+&nbsp; * @since 1.9.2, 1.8.5
+&nbsp; */
+&nbsp;public class PatientIdentifierTypeDefaultComparator implements Comparator&lt;PatientIdentifierType&gt;, Serializable {
+&nbsp;
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	private final ComparatorChain comparatorChain;
+&nbsp;	
+<b class="fc">&nbsp;	public PatientIdentifierTypeDefaultComparator() {</b>
+<b class="fc">&nbsp;		comparatorChain = new ComparatorChain();</b>
+&nbsp;		
+<b class="fc">&nbsp;		final NullComparator nullHigherComparator = new NullComparator();</b>
+<b class="fc">&nbsp;		final NullComparator nullLowerComparator = new NullComparator(false);</b>
+&nbsp;		
+&nbsp;		//Retired higher
+<b class="fc">&nbsp;		comparatorChain.addComparator(</b>
+<b class="fc">&nbsp;				(Comparator&lt;PatientIdentifierType&gt;) (o1, o2) -&gt; nullLowerComparator.compare(o1.getRetired(), o2.getRetired()));</b>
+&nbsp;		
+&nbsp;		//Required lower
+<b class="fc">&nbsp;		comparatorChain.addComparator(</b>
+<b class="fc">&nbsp;				(Comparator&lt;PatientIdentifierType&gt;) (o1, o2) -&gt; nullLowerComparator.compare(o1.getRequired(), o2.getRequired()), true);</b>
+&nbsp;		
+&nbsp;		//By name
+<b class="fc">&nbsp;		comparatorChain.addComparator((Comparator&lt;PatientIdentifierType&gt;) (o1, o2) -&gt; {</b>
+<b class="fc">&nbsp;			String o1Name = (o1.getName() != null) ? o1.getName().toLowerCase() : null;</b>
+<b class="fc">&nbsp;			String o2Name = (o2.getName() != null) ? o2.getName().toLowerCase() : null;</b>
+&nbsp;
+<b class="fc">&nbsp;			return nullHigherComparator.compare(o1Name, o2Name);</b>
+&nbsp;		});
+&nbsp;		
+&nbsp;		//By id
+<b class="fc">&nbsp;		comparatorChain.addComparator((Comparator&lt;PatientIdentifierType&gt;) (o1, o2) -&gt; nullHigherComparator.compare(o1.getPatientIdentifierTypeId(), o2.getPatientIdentifierTypeId()));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Orders by retired (true last), required (true first), name and id.
+&nbsp;	 * 
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order properly
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int compare(PatientIdentifierType pit1, PatientIdentifierType pit2) {
+<b class="fc">&nbsp;		return comparatorChain.compare(pit1, pit2);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

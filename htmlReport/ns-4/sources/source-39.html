@@ -1,0 +1,2054 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ConceptService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptAnswer;
+&nbsp;import org.openmrs.ConceptAttribute;
+&nbsp;import org.openmrs.ConceptAttributeType;
+&nbsp;import org.openmrs.ConceptClass;
+&nbsp;import org.openmrs.ConceptComplex;
+&nbsp;import org.openmrs.ConceptDatatype;
+&nbsp;import org.openmrs.ConceptDescription;
+&nbsp;import org.openmrs.ConceptMap;
+&nbsp;import org.openmrs.ConceptMapType;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.ConceptNameTag;
+&nbsp;import org.openmrs.ConceptNumeric;
+&nbsp;import org.openmrs.ConceptProposal;
+&nbsp;import org.openmrs.ConceptReferenceTerm;
+&nbsp;import org.openmrs.ConceptReferenceTermMap;
+&nbsp;import org.openmrs.ConceptSearchResult;
+&nbsp;import org.openmrs.ConceptSet;
+&nbsp;import org.openmrs.ConceptSource;
+&nbsp;import org.openmrs.ConceptStopWord;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.DrugIngredient;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.ConceptDAO;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to creating/updating/deleting/retiring Concepts, Drugs, Concept
+&nbsp; * Proposals, and all other things &#39;Concept&#39;.
+&nbsp; * &lt;p&gt;
+&nbsp; * To get a list of concepts: &lt;pre&gt;
+&nbsp; * 
+&nbsp; *
+&nbsp; *
+&nbsp; *
+&nbsp; * List&amp;lt;Concept&amp;gt; concepts = Context.getConceptService().getAllConcepts();
+&nbsp; * &lt;/pre&gt; To get a single concept: &lt;pre&gt;
+&nbsp; * 
+&nbsp; *
+&nbsp; * 
+&nbsp; * 
+&nbsp; * // if there is a concept row in the database with concept_id = 3845
+&nbsp; * Concept concept = Context.getConceptService().getConcept(3845);
+&nbsp; * 
+&nbsp; * String name = concept.getPreferredName(Context.getLocale()).getName();
+&nbsp; * &lt;/pre&gt; To save a concept to the database &lt;pre&gt;
+&nbsp; *   Concept concept = new Concept();
+&nbsp; *   concept.setConceptClass(Context.getConceptService().getConceptClass(3));
+&nbsp; *   concept.setDatatype(Context.getConceptService().getConceptDatatype(17));
+&nbsp; *   concept.setName...
+&nbsp; *   ... // and other required values on the concept
+&nbsp; *   Context.getConceptService().saveConcept(concept);
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;public interface ConceptService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the data access object for Concepts. The dao is used for saving and getting concepts
+&nbsp;	 * to/from the database
+&nbsp;	 * 
+&nbsp;	 * @param dao The data access object to use
+&nbsp;	 */
+&nbsp;	public void setConceptDAO(ConceptDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Concept by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConceptByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save or update the given &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt; in the database
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If this is a new concept, the returned concept will have a new {@link Concept#getConceptId()}
+&nbsp;	 * inserted into it that was generated by the database
+&nbsp;	 * 
+&nbsp;	 * @param concept The &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt; to save or update
+&nbsp;	 * @return the &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt; that was saved or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * @throws ConceptsLockedException
+&nbsp;	 * @throws ConceptInUseException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; put generated concept id onto returned concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new concept in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update concept already existing in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; generate id for new concept if none is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; keep id for new concept if one is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save non ConceptNumeric object as conceptNumeric
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save non ConceptComplex object as conceptComplex
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save changes between concept numeric and complex
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a ConceptNumeric as a concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a new ConceptNumeric
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void the conceptName if the text of the name has changed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a new conceptName when the old name is changed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set a preferred name for each locale if none is marked
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when a duplicate name is edited to a unique value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a reference term for a concept mapping on the fly when editing a concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a reference term for a concept mapping on the fly when creating a concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add new concept name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set audit info if the concept is not edited
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set audit info if an item is removed from any of its child collections
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set audit info if any item in the child collections is edited
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set audit info if an item is added to any of its child collections
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass when saving a concept after removing a name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a conceptNumeric with allowDecimal value
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.MANAGE_CONCEPTS })
+&nbsp;	public Concept saveConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save or update the given &lt;code&gt;Drug&lt;/code&gt; in the database. If this is a new drug, the
+&nbsp;	 * returned drug object will have a new {@link Drug#getDrugId()} inserted into it that was
+&nbsp;	 * generated by the database
+&nbsp;	 * 
+&nbsp;	 * @param drug The Drug to save or update
+&nbsp;	 * @return the Drug that was saved or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; put generated drug id onto returned drug
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new drug in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update drug already existing in database
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.MANAGE_CONCEPTS })
+&nbsp;	public Drug saveDrug(Drug drug) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely purge a &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt; from the database.
+&nbsp;	 * This should not typically be used unless desperately needed. Most should just be retired. See
+&nbsp;	 * {@link #retireConcept(Concept, String)}
+&nbsp;	 * 
+&nbsp;	 * @param conceptOrConceptNumeric The &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt; to
+&nbsp;	 *            remove from the system
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; purge the concept if not being used by an obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if any of the conceptNames of the concept is being used by an obs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPTS)
+&nbsp;	public void purgeConcept(Concept conceptOrConceptNumeric) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retiring a concept essentially removes it from circulation
+&nbsp;	 * 
+&nbsp;	 * @param conceptOrConceptNumeric The &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt; to
+&nbsp;	 *            retire
+&nbsp;	 * @param reason The retire reason
+&nbsp;	 * @return the retired &lt;code&gt;Concept&lt;/code&gt; or &lt;code&gt;ConceptNumeric&lt;/code&gt;
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if no reason is given
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire the given concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+&nbsp;	public Concept retireConcept(Concept conceptOrConceptNumeric, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retiring a Drug essentially removes it from circulation
+&nbsp;	 * 
+&nbsp;	 * @param drug The Drug to retire
+&nbsp;	 * @param reason The retire reason
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return the retired Drug
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire the given Drug
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+&nbsp;	public Drug retireDrug(Drug drug, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Marks a drug that is currently retired as not retired.
+&nbsp;	 * 
+&nbsp;	 * @param drug that is current set as retired
+&nbsp;	 * @return the given drug, marked as not retired now, and saved to the db
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark drug as not retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not change attributes of drug that is already not retired
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+&nbsp;	public Drug unretireDrug(Drug drug) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely purge a Drug from the database. This should not typically be used unless
+&nbsp;	 * desperately needed. Most Drugs should just be retired.
+&nbsp;	 * 
+&nbsp;	 * @param drug The Drug to remove from the system
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; purge the given drug
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPTS)
+&nbsp;	public void purgeDrug(Drug drug) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept with the given id
+&nbsp;	 * 
+&nbsp;	 * @param conceptId
+&nbsp;	 * @return the matching Concept object
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConcept(Integer conceptId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept-name with the given id
+&nbsp;	 * 
+&nbsp;	 * @param conceptNameId
+&nbsp;	 * @return the matching Concept object
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptName getConceptName(Integer conceptNameId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the ConceptAnswer with the given id
+&nbsp;	 * 
+&nbsp;	 * @param conceptAnswerId
+&nbsp;	 * @return the matching ConceptAnswer object
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptAnswer getConceptAnswer(Integer conceptAnswerId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the Drug with the given id
+&nbsp;	 * 
+&nbsp;	 * @param drugId
+&nbsp;	 * @return the matching Drug object
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Drug getDrug(Integer drugId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the ConceptNumeric with the given id
+&nbsp;	 * 
+&nbsp;	 * @param conceptId The ConceptNumeric id
+&nbsp;	 * @return the matching ConceptNumeric object
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptNumeric getConceptNumeric(Integer conceptId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a Concept class matching the given identifier
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * @param conceptClassId the concept class identifier
+&nbsp;	 * @return the matching ConceptClass
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptClass getConceptClass(Integer conceptClassId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of unretired concepts sorted by concept id ascending and
+&nbsp;	 * 
+&nbsp;	 * @return a List&amp;lt;Concept&amp;gt; object containing all of the sorted concepts
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getAllConcepts() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of concepts sorted on sortBy in dir direction (asc/desc)
+&nbsp;	 * 
+&nbsp;	 * @param sortBy The property name to sort by; if null or invalid, concept_id is used.
+&nbsp;	 * @param asc true = sort ascending; false = sort descending
+&nbsp;	 * @param includeRetired If &lt;code&gt;true&lt;/code&gt;, retired concepts will also be returned
+&nbsp;	 * @return a List&amp;lt;Concept&amp;gt; object containing all of the sorted concepts
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order by concept id and include retired when given no parameters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order by concept id descending when set asc parameter to false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; exclude retired concepts when set includeRetired to false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order by a concept name field
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order by a concept field
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getAllConcepts(String sortBy, boolean asc, boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of concepts matching any part of a concept name, this method is case
+&nbsp;	 * insensitive to the concept name string
+&nbsp;	 * 
+&nbsp;	 * @param name The search string
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return a List&amp;lt;Concept&amp;gt; object containing all of the matching concepts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass irrespective of the case of the passed parameter
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a Concept that matches the name exactly
+&nbsp;	 * 
+&nbsp;	 * @param name The search string
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return the found Concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept by name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null given null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find concepts with names in more specific locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find concepts with names in more generic locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find concepts with names in same specific locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null given blank string
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConceptByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Concept by id or name convenience method
+&nbsp;	 * 
+&nbsp;	 * @param conceptIdOrName
+&nbsp;	 * @return the found Concept
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null given null parameter
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConcept(String conceptIdOrName) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get the concept by conceptRef where the conceptRef can either be: 1) an integer id like 5090
+&nbsp;	 * 2) a mapping type id like &quot;XYZ:HT&quot; 3) a uuid like &quot;a3e12268-74bf-11df-9768-17cfc9833272&quot; 4) a
+&nbsp;	 * name like &quot;PLATELETS&quot; 5) the fully qualified name of a Java constant which contains one of the above
+&nbsp;	 * @param conceptRef the concept string identifier
+&nbsp;	 * @since 2.6.0
+&nbsp;	 * @return the concept if it exists otherwise null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConceptByReference(String conceptRef);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Drug by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return drug of null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Drug getDrugByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Drug Ingredient by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid the uuid for the drug ingredient to get
+&nbsp;	 * @return the drug ingredient if found, else null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public DrugIngredient getDrugIngredientByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the drug object corresponding to the given name or drugId
+&nbsp;	 * 
+&nbsp;	 * @param drugNameOrId String name or drugId to match exactly on
+&nbsp;	 * @return matching Drug object
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the matching drug object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no matching drug is found
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Drug getDrug(String drugNameOrId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of drugs currently in the database that are not retired
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return a List&amp;lt;Drug&amp;gt; object containing all drugs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of all drugs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getAllDrugs() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of drugs associated with the given concept
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * @param concept
+&nbsp;	 * @return a List&amp;lt;Drug&amp;gt; object containing all matching drugs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getDrugsByConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get drugs by concept. This method is the utility method that should be used to generically
+&nbsp;	 * retrieve all Drugs in the system.
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired If &lt;code&gt;true&lt;/code&gt; then the search will include voided Drugs
+&nbsp;	 * @return A List&amp;lt;Drug&amp;gt; object containing all matching Drugs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all drugs including retired ones if given true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all drugs excluding retired ones if given false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getAllDrugs(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find drugs in the system. The string search can match either drug.name or drug.concept.name,
+&nbsp;	 * drug.drugId or drug.concept.conceptId
+&nbsp;	 * 
+&nbsp;	 * @param phrase Search phrase
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return A List&amp;lt;Drug&amp;gt; object containing all Drug matches
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return drugs that are retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return drugs by drug id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return drugs by drug concept id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if there is no drug by given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getDrugs(String phrase) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cc ConceptClass
+&nbsp;	 * @return Returns all concepts in a given class
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail due to no name in search
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByClass(ConceptClass cc) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a Concept class matching the given name
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return ConceptClass matching the given name
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_CLASSES)
+&nbsp;	public ConceptClass getConceptClassByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of concept classes currently in the database
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return List&amp;lt;ConceptClass&amp;gt; object with all ConceptClass objects
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of all concept classes
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_CLASSES)
+&nbsp;	public List&lt;ConceptClass&gt; getAllConceptClasses() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of concept classes currently in the database
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired include retired concept classes in the search results?
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return List&amp;lt;ConceptClass&amp;gt; object with all ConceptClass objects
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept classes including retired ones when given true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept classes excluding retired ones when given false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_CLASSES)
+&nbsp;	public List&lt;ConceptClass&gt; getAllConceptClasses(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptClass by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept class or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_CLASSES)
+&nbsp;	public ConceptClass getConceptClassByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptAnswer by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept answer or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptAnswer getConceptAnswerByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptName by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept name or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptName getConceptNameByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptSet by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept set or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptSet getConceptSetByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptSource by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept source or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource getConceptSourceByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates a concept class
+&nbsp;	 * 
+&nbsp;	 * @param cc ConceptClass to create or update
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save the the given ConceptClass
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_CLASSES)
+&nbsp;	public ConceptClass saveConceptClass(ConceptClass cc) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge a ConceptClass
+&nbsp;	 * 
+&nbsp;	 * @param cc ConceptClass to delete
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given ConceptClass
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_CLASSES)
+&nbsp;	public void purgeConceptClass(ConceptClass cc) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge a ConceptNameTag
+&nbsp;	 * 
+&nbsp;	 * @param cnt ConceptNameTag to delete
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the specified conceptNameTag from the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_NAME_TAGS)
+&nbsp;	public void purgeConceptNameTag(ConceptNameTag cnt) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of all concept datatypes currently in the database
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return List of ConceptDatatypes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give a list of all concept datatypes
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_DATATYPES)
+&nbsp;	public List&lt;ConceptDatatype&gt; getAllConceptDatatypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of concept datatypes currently in the database
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include the retired datatypes?
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return List of ConceptDatatypes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept datatypes including retired ones when given true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept datatypes excluding retired ones when given false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_DATATYPES)
+&nbsp;	public List&lt;ConceptDatatype&gt; getAllConceptDatatypes(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a ConceptDatatype matching the given identifier
+&nbsp;	 * 
+&nbsp;	 * @param i Integer for the requested ConceptDatatype
+&nbsp;	 * @return ConceptDatatype matching the given identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_DATATYPES)
+&nbsp;	public ConceptDatatype getConceptDatatype(Integer i) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptDatatype by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept data type or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_DATATYPES)
+&nbsp;	public ConceptDatatype getConceptDatatypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a Concept datatype matching the given name
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return ConceptDatatype matching the given name
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return an exact match on name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return a fuzzy match on name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_DATATYPES)
+&nbsp;	public ConceptDatatype getConceptDatatypeByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of the concept sets with concept_set matching concept
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * For example to find all concepts for ARVs, you would do
+&nbsp;	 * getConceptSets(getConcept(&quot;ANTIRETROVIRAL MEDICATIONS&quot;)) and then take the conceptIds from
+&nbsp;	 * the resulting list.
+&nbsp;	 * 
+&nbsp;	 * @param concept The concept representing the concept set
+&nbsp;	 * @return A List&amp;lt;ConceptSet&amp;gt; object containing all matching ConceptSets
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptSet&gt; getConceptSetsByConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a List of all concepts within a concept set
+&nbsp;	 * 
+&nbsp;	 * @param concept The concept representing the concept set
+&nbsp;	 * @return A List&amp;lt;Concept&amp;gt; object containing all objects within the ConceptSet
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByConceptSet(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all sets that the given concept is a member of
+&nbsp;	 * 
+&nbsp;	 * @param concept
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return A List&amp;lt;ConceptSet&amp;gt; object with all parent concept sets
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give a list of ConceptSet containing the given Concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give an empty list if no matching ConceptSet is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give an empty list if concept id is null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptSet&gt; getSetsContainingConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a List of all concept proposals
+&nbsp;	 * 
+&nbsp;	 * @param includeCompleted boolean - include completed proposals as well?
+&nbsp;	 * @return a List&amp;lt;ConceptProposal&amp;gt; object of all found ConceptProposals
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept proposals including retired ones when given true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept proposals excluding retired ones when given false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_PROPOSALS)
+&nbsp;	public List&lt;ConceptProposal&gt; getAllConceptProposals(boolean includeCompleted) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptNumeric by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept numeric or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptNumeric getConceptNumericByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a ConceptProposal by conceptProposalId
+&nbsp;	 * 
+&nbsp;	 * @param conceptProposalId the Integer concept proposal Id
+&nbsp;	 * @return the found ConceptProposal
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_PROPOSALS)
+&nbsp;	public ConceptProposal getConceptProposal(Integer conceptProposalId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find matching concept proposals
+&nbsp;	 * 
+&nbsp;	 * @param text
+&nbsp;	 * @return a List&amp;lt;ConceptProposal&amp;gt; object containing matching concept proposals
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_PROPOSALS)
+&nbsp;	public List&lt;ConceptProposal&gt; getConceptProposals(String text) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find matching proposed concepts
+&nbsp;	 * 
+&nbsp;	 * @param text
+&nbsp;	 * @return a List&amp;lt;Concept&amp;gt; object containing matching proposed concepts
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_PROPOSALS)
+&nbsp;	public List&lt;Concept&gt; getProposedConcepts(String text) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves/updates/proposes a concept proposal
+&nbsp;	 * 
+&nbsp;	 * @param conceptProposal The ConceptProposal to save
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return the saved/updated ConceptProposal object
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.ADD_CONCEPT_PROPOSALS, PrivilegeConstants.EDIT_CONCEPT_PROPOSALS })
+&nbsp;	public ConceptProposal saveConceptProposal(ConceptProposal conceptProposal) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a concept proposal from the database entirely.
+&nbsp;	 * 
+&nbsp;	 * @param cp
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; purge the given concept proposal
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_PROPOSALS)
+&nbsp;	public void purgeConceptProposal(ConceptProposal cp) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Maps a concept proposal to a concept
+&nbsp;	 * 
+&nbsp;	 * @param cp
+&nbsp;	 * @param mappedConcept
+&nbsp;	 * @return the mappedConcept
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not require mapped concept on reject action
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; allow rejecting proposals
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException when mapping to null concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+&nbsp;	public Concept mapConceptProposalToConcept(ConceptProposal cp, Concept mappedConcept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Maps a concept proposal to a concept
+&nbsp;	 * 
+&nbsp;	 * @param cp
+&nbsp;	 * @param mappedConcept
+&nbsp;	 * @param locale of concept proposal
+&nbsp;	 * @return the mappedConcept
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not require mapped concept on reject action
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; allow rejecting proposals
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException when mapping to null concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set value coded name when add synonym is selected
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set value coded name when add concept is selected
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when adding a duplicate synonym
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+&nbsp;	public Concept mapConceptProposalToConcept(ConceptProposal cp, Concept mappedConcept, Locale locale) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all possible Concepts to which this concept is a value-coded answer. To navigate in
+&nbsp;	 * the other direction, i.e., from Concept to its answers use Concept.getAnswers()
+&nbsp;	 * 
+&nbsp;	 * @param concept
+&nbsp;	 * @return A List&amp;lt;Concept&amp;gt; containing all possible questions to which this concept is a
+&nbsp;	 *         valued_Coded answer
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return an empty list if concept id is null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByAnswer(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the previous concept in the dictionary that has the next lowest concept id
+&nbsp;	 * 
+&nbsp;	 * @param concept the offset Concept
+&nbsp;	 * @return the foundConcept
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept previous to the given concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getPrevConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the next concept in the dictionary that has the next largest concept id
+&nbsp;	 * 
+&nbsp;	 * @param concept the offset Concept
+&nbsp;	 * @return the foundConcept
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept next to the given concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getNextConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if the concepts are locked and if so, throw exception during manipulation of concept
+&nbsp;	 * 
+&nbsp;	 * @throws ConceptsLockedException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public void checkIfLocked() throws ConceptsLockedException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptProposal by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept proposal or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_PROPOSALS)
+&nbsp;	public ConceptProposal getConceptProposalByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for finding concepts associated with drugs in formulary.
+&nbsp;	 * 
+&nbsp;	 * @return A List&amp;lt;Concept&amp;gt; object of all concepts that occur as a Drug.concept.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give a list of all matching concepts
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsWithDrugsInFormulary() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptNameTag by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the conceptNameTag with a matching uuid
+&nbsp;	 * @see Concept#setPreferredName(ConceptName)
+&nbsp;	 * @see Concept#setFullySpecifiedName(ConceptName)
+&nbsp;	 * @see Concept#setShortName(ConceptName)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptNameTag getConceptNameTagByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a ComplexConcept with the given conceptId
+&nbsp;	 * 
+&nbsp;	 * @param conceptId of the ComplexConcept
+&nbsp;	 * @return a ConceptComplex object
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a concept complex object
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptComplex getConceptComplex(Integer conceptId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Search for a ConceptNameTag by name
+&nbsp;	 * 
+&nbsp;	 * @param tag String name of ConceptNameTag
+&nbsp;	 * @return ConceptNameTag matching the given String tag
+&nbsp;	 * @see Concept#getPreferredName(Locale)
+&nbsp;	 * @see Concept#getFullySpecifiedName(Locale)
+&nbsp;	 * @see Concept#getShortNameInLocale(Locale)
+&nbsp;	 * @see Concept#getShortestName(Locale, Boolean)
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONCEPTS })
+&nbsp;	public ConceptNameTag getConceptNameTagByName(String tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the set of unique Locales used by existing concept names.
+&nbsp;	 * 
+&nbsp;	 * @return set of used Locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of matching locales
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Set&lt;Locale&gt; getLocalesOfConceptNames();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of concept sources currently in the database Whether or not to return retired
+&nbsp;	 * concept sources is decided by the boolean includeRetired param
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to include retired sources
+&nbsp;	 * @return List of Concept source objects
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept sources including retired ones when given true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept sources excluding retired ones when given false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+&nbsp;	public List&lt;ConceptSource&gt; getAllConceptSources(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a Concept source matching the given concept source id
+&nbsp;	 * 
+&nbsp;	 * @param i Integer conceptSourceId
+&nbsp;	 * @return ConceptSource
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource getConceptSource(Integer i) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a new ConceptSource
+&nbsp;	 * 
+&nbsp;	 * @param conceptSource ConceptSource to create
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set creator if one is supplied already
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set date created if one is supplied already
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a ConceptSource with a null hl7Code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not save a ConceptSource if voided is null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource saveConceptSource(ConceptSource conceptSource) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete ConceptSource
+&nbsp;	 * 
+&nbsp;	 * @param cs ConceptSource object delete
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; purge the given concept source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource purgeConceptSource(ConceptSource cs) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This effectively removes a concept source from the database. The source can still be
+&nbsp;	 * referenced by old data, but no new data should use this source.
+&nbsp;	 * 
+&nbsp;	 * @param cs the concept source to retire
+&nbsp;	 * @param reason why the concept source is to be retired, must not be empty of null
+&nbsp;	 * @return the retired concept source
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire concept source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource retireConceptSource(ConceptSource cs, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a new Concept name tag if none exists. If a tag exists with the same name then that
+&nbsp;	 * existing tag is returned.
+&nbsp;	 * 
+&nbsp;	 * @param nameTag the concept name tag to be saved
+&nbsp;	 * @return the newly created or existing concept name tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a concept name tag if tag does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not save a concept name tag if tag exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not save a concept name tag if tag is null, empty or whitespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a concept name tag if tag is supplied
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save an edited concept name tag
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_NAME_TAGS)
+&nbsp;	public ConceptNameTag saveConceptNameTag(ConceptNameTag nameTag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the highest concept-id used by a concept.
+&nbsp;	 * 
+&nbsp;	 * @return highest concept-id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give the maximum concept-id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Integer getMaxConceptId();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns an iterator for all concepts, including retired and expired.
+&nbsp;	 * 
+&nbsp;	 * @return the Iterator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; start with the smallest concept id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; iterate over all concepts
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Iterator&lt;Concept&gt; conceptIterator();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Looks up a concept via {@link ConceptMap} This will return the {@link Concept} which contains
+&nbsp;	 * a {@link ConceptMap} entry whose &lt;code&gt;sourceCode&lt;/code&gt; is equal to the passed
+&nbsp;	 * &lt;code&gt;conceptCode&lt;/code&gt; and whose {@link ConceptSource} has either a &lt;code&gt;name&lt;/code&gt; or
+&nbsp;	 * &lt;code&gt;hl7Code&lt;/code&gt; that is equal to the passed &lt;code&gt;mappingCode&lt;/code&gt;. Delegates to
+&nbsp;	 * getConceptByMapping(code,sourceName,includeRetired) with includeRetired=true
+&nbsp;	 * 
+&nbsp;	 * @param code the code associated with a concept within a given {@link ConceptSource}
+&nbsp;	 * @param sourceName the name or hl7Code of the {@link ConceptSource} to check
+&nbsp;	 * @return the {@link Concept} that has the given mapping, or null if no {@link Concept} found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept with given code and and source hl7 code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept with given code and source name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if source code does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if mapping does not exist
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConceptByMapping(String code, String sourceName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Looks up a concept via {@link ConceptMap} This will return the {@link Concept} which contains
+&nbsp;	 * a {@link ConceptMap} entry whose &lt;code&gt;sourceCode&lt;/code&gt; is equal to the passed
+&nbsp;	 * &lt;code&gt;conceptCode&lt;/code&gt; and whose {@link ConceptSource} has either a &lt;code&gt;name&lt;/code&gt; or
+&nbsp;	 * &lt;code&gt;hl7Code&lt;/code&gt; that is equal to the passed &lt;code&gt;mappingCode&lt;/code&gt; . Operates under
+&nbsp;	 * the assumption that each mappingCode in a {@link ConceptSource} references one and only one
+&nbsp;	 * non-retired {@link Concept}: if the underlying dao method returns more than one non-retired
+&nbsp;	 * concept, this method will throw an exception; if the underlying dao method returns more than
+&nbsp;	 * one concept, but only one non-retired concept, this method will return the non-retired
+&nbsp;	 * concept; if the dao only returns retired concepts, this method will simply return the first
+&nbsp;	 * concept in the list returns by the dao method; retired concepts can be excluded by setting
+&nbsp;	 * the includeRetired parameter to false, but the above logic still applies
+&nbsp;	 *
+&nbsp;	 * @param code the code associated with a concept within a given {@link ConceptSource}
+&nbsp;	 * @param sourceName the name or hl7Code of the {@link ConceptSource} to check
+&nbsp;	 * @param includeRetired whether or not to include retired concepts
+&nbsp;	 * @return the {@link Concept} that has the given mapping, or null if no {@link Concept} found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept with given code and and source hl7 code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept with given code and source name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if source code does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if mapping does not exist
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getConceptByMapping(String code, String sourceName, Boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Looks up a concept via {@link ConceptMap} This will return the list of concepts
+&nbsp;	 * {@link Concept}s which contain a {@link ConceptMap} entry whose &lt;code&gt;sourceCode&lt;/code&gt; is
+&nbsp;	 * equal to the passed &lt;code&gt;conceptCode&lt;/code&gt; and whose {@link ConceptSource} has either a
+&nbsp;	 * &lt;code&gt;name&lt;/code&gt; or &lt;code&gt;hl7Code&lt;/code&gt; that is equal to the passed
+&nbsp;	 * &lt;code&gt;mappingCode&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param code the code associated with a concept within a given {@link ConceptSource}
+&nbsp;	 * @param sourceName the name or hl7Code of the {@link ConceptSource} to check
+&nbsp;	 * @return the list of non-voided {@link Concept}s that has the given mapping, or null if no
+&nbsp;	 *         {@link Concept} found
+&nbsp;	 * @throws APIException if the specified source+code maps to more than one concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concepts with given code and and source hl7 code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concepts with given code and source name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if source code does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if mapping does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include retired concepts
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByMapping(String code, String sourceName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Looks up a concept via {@link ConceptMap} This will return the list of {@link Concept}s which
+&nbsp;	 * contain a {@link ConceptMap} entry whose &lt;code&gt;sourceCode&lt;/code&gt; is equal to the passed
+&nbsp;	 * &lt;code&gt;conceptCode&lt;/code&gt; and whose {@link ConceptSource} has either a &lt;code&gt;name&lt;/code&gt; or
+&nbsp;	 * &lt;code&gt;hl7Code&lt;/code&gt; that is equal to the passed &lt;code&gt;mappingCode&lt;/code&gt;. Delegates to
+&nbsp;	 * getConceptsByMapping(code,sourceName,includeRetired) with includeRetired=true
+&nbsp;	 * 
+&nbsp;	 * @param code the code associated with a concept within a given {@link ConceptSource}
+&nbsp;	 * @param sourceName the name or hl7Code of the {@link ConceptSource} to check
+&nbsp;	 * @param includeRetired whether or not to include retired concepts
+&nbsp;	 * @return the list of non-voided {@link Concept}s that has the given mapping, or null if no
+&nbsp;	 *         {@link Concept} found
+&nbsp;	 * @throws APIException if the specified source+code maps to more than one concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concepts with given code and and source hl7 code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concepts with given code and source name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if source code does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if mapping does not exist
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByMapping(String code, String sourceName, boolean includeRetired) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Looks up concepts via {@link ConceptMap} This will return the list of ids for all
+&nbsp;	 * {@link Concept}s which contain a {@link ConceptMap} entry whose &lt;code&gt;sourceCode&lt;/code&gt; is
+&nbsp;	 * equal to the passed &lt;code&gt;conceptCode&lt;/code&gt; and whose {@link ConceptSource} has either a
+&nbsp;	 * &lt;code&gt;name&lt;/code&gt; or &lt;code&gt;hl7Code&lt;/code&gt; that is equal to the passed
+&nbsp;	 * &lt;code&gt;mappingCode&lt;/code&gt;
+&nbsp;	 *
+&nbsp;	 * @param code the code associated with a concept within a given {@link ConceptSource}
+&nbsp;	 * @param sourceName the name or hl7Code of the {@link ConceptSource} to check
+&nbsp;	 * @param includeRetired whether or not to include retired concepts
+&nbsp;	 * @return the list ids for all non-voided {@link Concept}s that have the given mapping, or an empty List if none found
+&nbsp;	 * @throws APIException if the specified source+code maps to more than one concept
+&nbsp;	 * @should get concepts with given code and and source hl7 code
+&nbsp;	 * @should get concepts with given code and source name
+&nbsp;	 * @should return empty list if source code does not exist
+&nbsp;	 * @should return empty list if mapping does not exist
+&nbsp;	 * @should include retired concepts
+&nbsp;	 * @since 2.3
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Integer&gt; getConceptIdsByMapping(String code, String sourceName, boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all the concept name tags defined in the database, included voided ones
+&nbsp;	 * 
+&nbsp;	 * @since 1.5
+&nbsp;	 * @return a list of the concept name tags stored in the dataset
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of all concept name tags
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptNameTag&gt; getAllConceptNameTags();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the {@link ConceptNameTag} with the given database primary key
+&nbsp;	 * 
+&nbsp;	 * @param id the concept name tag id to find
+&nbsp;	 * @return the matching {@link ConceptNameTag} or null if none found
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public ConceptNameTag getConceptNameTag(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ConceptDescription by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept description or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONCEPTS })
+&nbsp;	public ConceptDescription getConceptDescriptionByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Lookup a ConceptSource by its name property
+&nbsp;	 * 
+&nbsp;	 * @param conceptSourceName
+&nbsp;	 * @return ConceptSource
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get ConceptSource with the given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no ConceptSource with that name is found
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource getConceptSourceByName(String conceptSourceName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a ConceptSource by its unique id.
+&nbsp;	 *
+&nbsp;	 * @param uniqueId the unique id
+&nbsp;	 * @return the concept source matching given unique id
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept source with the given unique id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept source with given unique id is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if given an empty string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if given null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource getConceptSourceByUniqueId(String uniqueId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a ConceptSource by its hl7Code.
+&nbsp;	 *
+&nbsp;	 * @param hl7Code the hl7Code
+&nbsp;	 * @return the concept source matching given hl7Code
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get concept source with the given hl7Code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept source with given hl7Code is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if given an empty string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if given null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+&nbsp;	public ConceptSource getConceptSourceByHL7Code(String hl7Code) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if there are any observations (including voided observations) for a concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept which used or not used by an observation
+&nbsp;	 * @return boolean true if the concept is used by an observation
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public boolean hasAnyObservation(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the TRUE concept
+&nbsp;	 * 
+&nbsp;	 * @return true concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the true concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getTrueConcept();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the FALSE concept
+&nbsp;	 * 
+&nbsp;	 * @return false concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the false concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getFalseConcept();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the UNKNOWN concept
+&nbsp;	 *
+&nbsp;	 * @return unknown concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the unknown concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Concept getUnknownConcept();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Changes the datatype of a concept from boolean to coded when it has observations it is
+&nbsp;	 * associated to.
+&nbsp;	 * 
+&nbsp;	 * @param conceptToChange the concept which to change
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; convert the datatype of a boolean concept to coded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the datatype of the concept is not boolean
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; explicitly add true concept as a value_Coded answer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; explicitly add false concept as a value_Coded answer
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.MANAGE_CONCEPTS })
+&nbsp;	public void convertBooleanConceptToCoded(Concept conceptToChange) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if there are any observations (including voided observations) using a conceptName.
+&nbsp;	 * 
+&nbsp;	 * @param conceptName which is used or not used by an observation
+&nbsp;	 * @return boolean true if the conceptName is used by an observation otherwise false
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since Version 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public boolean hasAnyObservation(ConceptName conceptName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Searches for concepts by the given parameters.
+&nbsp;	 * 
+&nbsp;	 * @param phrase matched to the start of any word in any of the names of a concept (if
+&nbsp;	 *            blank/null, matches all concepts)
+&nbsp;	 * @param locales List&amp;lt;Locale&amp;gt; to restrict to
+&nbsp;	 * @param includeRetired boolean if false, will exclude retired concepts
+&nbsp;	 * @param requireClasses List&amp;lt;ConceptClass&amp;gt; to restrict to
+&nbsp;	 * @param excludeClasses List&amp;lt;ConceptClass&amp;gt; to leave out of results
+&nbsp;	 * @param requireDatatypes List&amp;lt;ConceptDatatype&amp;gt; to restrict to
+&nbsp;	 * @param excludeDatatypes List&amp;lt;ConceptDatatype&amp;gt; to leave out of results
+&nbsp;	 * @param answersToConcept all results will be a possible answer to this concept
+&nbsp;	 * @param start all results less than this number will be removed
+&nbsp;	 * @param size if non zero, all results after &lt;code&gt;start&lt;/code&gt; + &lt;code&gt;size&lt;/code&gt; will be
+&nbsp;	 *            removed
+&nbsp;	 * @return a list of conceptSearchResults
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept search results that match unique concepts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a search result whose concept name contains all word tokens as first
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a search result for phrase with stop words
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return concepts with matching names that are voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return preferred names higher
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find concept by full code
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptSearchResult&gt; getConcepts(String phrase, List&lt;Locale&gt; locales, boolean includeRetired,
+&nbsp;	        List&lt;ConceptClass&gt; requireClasses, List&lt;ConceptClass&gt; excludeClasses, List&lt;ConceptDatatype&gt; requireDatatypes,
+&nbsp;	        List&lt;ConceptDatatype&gt; excludeDatatypes, Concept answersToConcept, Integer start, Integer size)
+&nbsp;	                throws APIException;
+&nbsp;					
+&nbsp;	/**
+&nbsp;	 * Finds concepts that are possible value coded answers to concept parameter
+&nbsp;	 * 
+&nbsp;	 * @param phrase
+&nbsp;	 * @param locale
+&nbsp;	 * @param concept the answers to match on
+&nbsp;	 * @return a list of conceptSearchResults
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of all matching concept search results
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptSearchResult&gt; findConceptAnswers(String phrase, Locale locale, Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Iterates over the words in names and synonyms (for each locale) and updates the concept
+&nbsp;	 * index, note that this only updates the index of the specified concept. Use
+&nbsp;	 * {@link ConceptService#updateConceptIndexes()} if you wish to update the entire concept index.
+&nbsp;	 * 
+&nbsp;	 * @param concept the concept whose index is to be updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.MANAGE_CONCEPTS })
+&nbsp;	public void updateConceptIndex(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Iterates over all concepts and calls updateConceptIndexes(Concept concept)
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.MANAGE_CONCEPTS })
+&nbsp;	public void updateConceptIndexes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Searches for concepts with the given parameters
+&nbsp;	 * 
+&nbsp;	 * @param phrase the string to search against (if blank/null, matches all concepts)
+&nbsp;	 * @param locale the locale in which to search for the concepts
+&nbsp;	 * @param includeRetired Specifies whether to include retired concepts
+&nbsp;	 * @return a list ConceptSearchResults
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give a list of ConceptSearchResult for the matching Concepts
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptSearchResult&gt; getConcepts(String phrase, Locale locale, boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the number of concepts matching a search phrase and the specified arguments
+&nbsp;	 * 
+&nbsp;	 * @param phrase matched to the start of any word in any of the names of a concept
+&nbsp;	 * @param locales List&amp;lt;Locale&amp;gt; to restrict to
+&nbsp;	 * @param includeRetired Specifies whether to include retired concepts
+&nbsp;	 * @param requireClasses List&amp;lt;ConceptClass&amp;gt; to restrict to
+&nbsp;	 * @param excludeClasses List&amp;lt;ConceptClass&amp;gt; to leave out of results
+&nbsp;	 * @param requireDatatypes List&amp;lt;ConceptDatatype&amp;gt; to restrict to
+&nbsp;	 * @param excludeDatatypes List&amp;lt;ConceptDatatype&amp;gt; to leave out of results
+&nbsp;	 * @param answersToConcept all results will be a possible answer to this concept
+&nbsp;	 * @return the number of concepts matching the given search phrase
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a count of unique concepts
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Integer getCountOfConcepts(String phrase, List&lt;Locale&gt; locales, boolean includeRetired,
+&nbsp;	        List&lt;ConceptClass&gt; requireClasses, List&lt;ConceptClass&gt; excludeClasses, List&lt;ConceptDatatype&gt; requireDatatypes,
+&nbsp;	        List&lt;ConceptDatatype&gt; excludeDatatypes, Concept answersToConcept);
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Return the number of drugs with matching names or concept drug names
+&nbsp;	 * 
+&nbsp;	 * @param drugName the name of the drug
+&nbsp;	 * @param concept the drug concept
+&nbsp;	 * @param searchOnPhrase Specifies if the search should match names starting with or contain the
+&nbsp;	 *            text
+&nbsp;	 * @param searchDrugConceptNames Specifies whether a search on concept names for the drug&#39;s
+&nbsp;	 *            concept should be done or not
+&nbsp;	 * @param includeRetired specifies whether to include retired drugs
+&nbsp;	 * @return the number of matching drugs
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the total number of matching drugs
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Integer getCountOfDrugs(String drugName, Concept concept, boolean searchOnPhrase, boolean searchDrugConceptNames,
+&nbsp;	        boolean includeRetired) throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Returns a list of drugs with matching names or concept drug names and returns a specific
+&nbsp;	 * number of them from the specified starting position. If start and length are not specified,
+&nbsp;	 * then all matches are returned
+&nbsp;	 * 
+&nbsp;	 * @param drugName the name of the drug
+&nbsp;	 * @param concept the drug concept
+&nbsp;	 * @param searchKeywords (since 1.11) Specifies whether the search should match keywords or just
+&nbsp;	 *            phrase
+&nbsp;	 * @param searchDrugConceptNames Specifies whether a search on concept names for the drug&#39;s
+&nbsp;	 *            concept should be done or not
+&nbsp;	 * @param includeRetired specifies whether to include retired drugs
+&nbsp;	 * @param start beginning index for the batch
+&nbsp;	 * @param length number of drugs to return in the batch
+&nbsp;	 * @return a list of matching drugs
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of matching drugs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getDrugs(String drugName, Concept concept, boolean searchKeywords, boolean searchDrugConceptNames,
+&nbsp;	        boolean includeRetired, Integer start, Integer length) throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Gets the list of &lt;code&gt;ConceptStopWord&lt;/code&gt; for given locale
+&nbsp;	 * 
+&nbsp;	 * @param locale The locale in which to search for the &lt;code&gt;ConceptStopWord&lt;/code&gt;
+&nbsp;	 * @return list of concept stop words for given locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return list of concept stop words for given locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if no stop words are found for the given locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return default Locale &lt;code&gt;ConceptStopWord&lt;/code&gt; if Locale is null
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;String&gt; getConceptStopWords(Locale locale);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given &lt;code&gt;ConceptStopWord&lt;/code&gt; in the database
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If this is a new concept stop word, the returned concept stop word will have a new
+&nbsp;	 * {@link org.openmrs.ConceptStopWord#getConceptStopWordId()} inserted into it that was
+&nbsp;	 * generated by the database
+&nbsp;	 * &lt;/p&gt;
+&nbsp;	 * 
+&nbsp;	 * @param conceptStopWord The &lt;code&gt;ConceptStopWord&lt;/code&gt; to save or update
+&nbsp;	 * @return the &lt;code&gt;ConceptStopWord&lt;/code&gt; that was saved or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; generated concept stop word id onto returned concept stop word
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save concept stop word into database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign default Locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save concept stop word in uppercase
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a duplicate conceptStopWord in a locale is added
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_STOP_WORDS)
+&nbsp;	public ConceptStopWord saveConceptStopWord(ConceptStopWord conceptStopWord) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete the given &lt;code&gt;ConceptStopWord&lt;/code&gt; in the database
+&nbsp;	 * 
+&nbsp;	 * @param conceptStopWordId The &lt;code&gt;ConceptStopWord&lt;/code&gt; to delete
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given concept stop word from the database
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_STOP_WORDS)
+&nbsp;	public void deleteConceptStopWord(Integer conceptStopWordId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all the concept stop words
+&nbsp;	 * 
+&nbsp;	 * @return List of &lt;code&gt;ConceptStopWord&lt;/code&gt;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all the concept stop words
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if nothing found
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptStopWord&gt; getAllConceptStopWords();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets drugs by the given ingredient, which can be either the drug itself or any ingredient.
+&nbsp;	 * 
+&nbsp;	 * @return the list of drugs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return drugs matched by intermediate concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return drugs matched by drug concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if nothing found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; raise exception if no concept is given
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getDrugsByIngredient(Concept ingredient);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of concept map types currently in the database excluding hidden ones
+&nbsp;	 * 
+&nbsp;	 * @return List of concept map type objects
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all the concept map types excluding hidden ones
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_MAP_TYPES)
+&nbsp;	public List&lt;ConceptMapType&gt; getActiveConceptMapTypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of concept map types currently in the database including or excluding retired
+&nbsp;	 * and hidden ones as specified by the includeRetired and includeHidden arguments
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired specifies if retired concept map types should be included
+&nbsp;	 * @return List of concept map type objects
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all the concept map types if includeRetired and hidden are set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only un retired concept map types if includeRetired is set to false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include hidden concept map types if includeHidden is set to false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_MAP_TYPES)
+&nbsp;	public List&lt;ConceptMapType&gt; getConceptMapTypes(boolean includeRetired, boolean includeHidden) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a concept map type matching the given concept map type id
+&nbsp;	 * 
+&nbsp;	 * @param conceptMapTypeId Integer concept map type id
+&nbsp;	 * @return ConceptMapType
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType getConceptMapType(Integer conceptMapTypeId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a concept map type matching the given uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the uuid to search against
+&nbsp;	 * @return ConceptMapType
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a conceptMapType matching the specified uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType getConceptMapTypeByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a concept map type matching the given name
+&nbsp;	 * 
+&nbsp;	 * @param name the name to search against
+&nbsp;	 * @return ConceptMapType
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a conceptMapType matching the specified name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be case insensitive
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType getConceptMapTypeByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves or updates the specified concept map type in the database
+&nbsp;	 * 
+&nbsp;	 * @param conceptMapType the concept map type to save
+&nbsp;	 * @return the saved conceptMapType
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the specified concept map type to the database and assign to it an id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing concept map type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType saveConceptMapType(ConceptMapType conceptMapType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retiring a concept map type essentially removes it from circulation
+&nbsp;	 * 
+&nbsp;	 * @param conceptMapType the concept map type to retire
+&nbsp;	 * @param retireReason the reason why the concept map type is being retired
+&nbsp;	 * @return the retired concept map type
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire the specified conceptMapType with the given retire reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should set the default retire reason if none is given
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType retireConceptMapType(ConceptMapType conceptMapType, String retireReason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Marks a concept map type that is currently retired as not retired.
+&nbsp;	 * 
+&nbsp;	 * @param conceptMapType the concept map type to unretire
+&nbsp;	 * @return the unretired concept map type
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire the specified concept map type and drop all retire related fields
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType unretireConceptMapType(ConceptMapType conceptMapType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely purges a concept map type from the database
+&nbsp;	 * 
+&nbsp;	 * @param conceptMapType the concept map type to purge from the database
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the specified conceptMapType from the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_MAP_TYPES)
+&nbsp;	public void purgeConceptMapType(ConceptMapType conceptMapType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of mappings from concepts to terms in the given reference terminology
+&nbsp;	 * 
+&nbsp;	 * @param conceptSource
+&nbsp;	 * @return a List&amp;lt;ConceptMap&amp;gt; object
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a List of ConceptMaps from the given source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptMap&gt; getConceptMappingsToSource(ConceptSource conceptSource) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a list of all concept reference terms saved in the database
+&nbsp;	 * 
+&nbsp;	 * @return a list of concept reference terms
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept reference terms in the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getAllConceptReferenceTerms() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a list of concept reference terms saved in the database
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired specifies if retired concept reference terms should be included
+&nbsp;	 * @return a list of concept reference terms
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all the concept reference terms if includeRetired is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only un retired concept reference terms if includeRetired is set to false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getConceptReferenceTerms(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept reference term with the specified concept reference term id
+&nbsp;	 * 
+&nbsp;	 * @param conceptReferenceTermId the concept reference term id to search against
+&nbsp;	 * @return the concept reference term object with the given concept reference term id
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTerm(Integer conceptReferenceTermId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept reference term with the specified uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the uuid to search against
+&nbsp;	 * @return the concept reference term object with the given uuid
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept reference term that matches the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTermByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a concept reference term with the specified name from the specified concept source
+&nbsp;	 * ignoring all retired ones
+&nbsp;	 * 
+&nbsp;	 * @param name the name to match against
+&nbsp;	 * @param conceptSource the concept source to match against
+&nbsp;	 * @return concept reference term object
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a concept reference term that matches the given name from the given source
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be case insensitive
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept reference term is found
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTermByName(String name, ConceptSource conceptSource) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a concept reference term with the specified code from the specified concept source
+&nbsp;	 * 
+&nbsp;	 * @param code the code to match against
+&nbsp;	 * @param conceptSource the concept source to match against
+&nbsp;	 * @return concept reference term object
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a concept reference term that matches the given code from the given source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTermByCode(String code, ConceptSource conceptSource) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a list of concept reference terms with the specified code from the specified concept source
+&nbsp;	 *
+&nbsp;	 * @param code the code to match against
+&nbsp;	 * @param conceptSource the concept source to match against
+&nbsp;	 * @param includeRetired specifies if retired concept reference terms should be included
+&nbsp;	 * @return concept reference term object
+&nbsp;	 * @since 2.7
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of concept reference terms that matches the given code from the given source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getConceptReferenceTermByCode(String code, ConceptSource conceptSource, boolean includeRetired) throws APIException;
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Stores the specified concept reference term to the database
+&nbsp;	 * 
+&nbsp;	 * @param conceptReferenceTerm the concept reference term object to save
+&nbsp;	 * @return the saved concept reference term object
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add a concept reference term to the database and assign an id to it
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update changes to the concept reference term in the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm saveConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retiring a concept reference term essentially removes it from circulation
+&nbsp;	 * 
+&nbsp;	 * @param conceptReferenceTerm the concept reference term object to retire
+&nbsp;	 * @param retireReason the reason why the concept reference term is being retired
+&nbsp;	 * @return the retired concept reference term object
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire the specified concept reference term with the given retire reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should set the default retire reason if none is given
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm retireConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm, String retireReason)
+&nbsp;	        throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Marks a concept reference term that is currently retired as not retired.
+&nbsp;	 * 
+&nbsp;	 * @param conceptReferenceTerm the concept reference term to unretire
+&nbsp;	 * @return the unretired concept reference term
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire the specified concept reference term and drop all retire related fields
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public ConceptReferenceTerm unretireConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purges the specified concept reference term from the database
+&nbsp;	 * 
+&nbsp;	 * @param conceptReferenceTerm the concept reference term object to purge
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; purge the given concept reference term
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if given concept reference term is in use
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public void purgeConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the concept reference term in the database that have a code or name that contains the
+&nbsp;	 * specified search phrase.
+&nbsp;	 * 
+&nbsp;	 * @param query the string to match against the reference term names or codes
+&nbsp;	 * @param conceptSource the concept source from which the terms should be looked up
+&nbsp;	 * @param start beginning index for the batch
+&nbsp;	 * @param length number of terms to return in the batch
+&nbsp;	 * @param includeRetired specifies if the retired terms should be included
+&nbsp;	 * @return a list if {@link ConceptReferenceTerm}s
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unique terms with a code or name containing the search phrase
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only the concept reference terms from the given concept source
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS })
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getConceptReferenceTerms(String query, ConceptSource conceptSource, Integer start,
+&nbsp;	        Integer length, boolean includeRetired) throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Returns the count of concept reference terms that match the specified arguments
+&nbsp;	 * 
+&nbsp;	 * @param query the string to match against the reference term names
+&nbsp;	 * @param conceptSource the concept source from which the terms should be looked up
+&nbsp;	 * @param includeRetired specifies if retired concept reference terms should be included
+&nbsp;	 * @return the count of matching concept reference terms
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include retired terms if includeRetired is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include retired terms if includeRetired is set to false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public Integer getCountOfConceptReferenceTerms(String query, ConceptSource conceptSource, boolean includeRetired)
+&nbsp;	        throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Fetches all the {@link ConceptReferenceTermMap} where the specified reference term is the
+&nbsp;	 * termB i.e mappings added to other terms pointing to it
+&nbsp;	 * 
+&nbsp;	 * @param term the term to match against
+&nbsp;	 * @return a list of {@link ConceptReferenceTermMap}s
+&nbsp;	 * @since 1.9
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept reference term maps where the specified term is the termB
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS)
+&nbsp;	public List&lt;ConceptReferenceTermMap&gt; getReferenceTermMappingsTo(ConceptReferenceTerm term) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of concepts with the same name in the given locale.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This method is case insensitive. It searches for exactly matching names and close matching
+&nbsp;	 * locales (if exactLocale = false). It considers only non-voided names and all concepts.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @param locale &lt;code&gt;null&lt;/code&gt; = all locales
+&nbsp;	 * @param exactLocale &lt;code&gt;false&lt;/code&gt; if search for both global and country specific,
+&nbsp;	 *            &lt;code&gt;true&lt;/code&gt; if &lt;code&gt;null&lt;/code&gt;
+&nbsp;	 * @return the list of concepts
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.9, 1.8.4
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concepts for all countries and global language given language only locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concepts for specific country and global language given language and country
+&nbsp;	 *         locale
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Concept&gt; getConceptsByName(String name, Locale locale, Boolean exactLocale) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept map type to be used as the default. It is specified by the
+&nbsp;	 * &lt;code&gt;concept.defaultConceptMapType&lt;/code&gt; global property.
+&nbsp;	 * 
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return the {@link ConceptMapType}
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return same as by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return type as set in gp
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_MAP_TYPES)
+&nbsp;	public ConceptMapType getDefaultConceptMapType() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determines if the given concept name is a duplicate.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Concept name is considered duplicate if it is a default non-retired name for a non-voided
+&nbsp;	 * concept and there is another name, which is:
+&nbsp;	 * &lt;ol&gt;
+&nbsp;	 * &lt;li&gt;equal ignoring case&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;non voided&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;in same locale or in same general language&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;non-retired and different concept&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;default name for concept&lt;/li&gt;
+&nbsp;	 * &lt;/ol&gt;
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return true if it is a duplicate name
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public boolean isConceptNameDuplicate(ConceptName name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches un retired drugs that match the specified search phrase. The logic matches on drug
+&nbsp;	 * names, concept names of the associated concepts or the concept reference term codes of the
+&nbsp;	 * drug reference term mappings
+&nbsp;	 * 
+&nbsp;	 * @param searchPhrase The string to match against
+&nbsp;	 * @param locale The locale to match against when searching in drug concept names
+&nbsp;	 * @param exactLocale If false then concepts with names in a broader locale will be matched e.g
+&nbsp;	 *            in case en_GB is passed in then en will be matched
+&nbsp;	 * @param includeRetired Specifies if retired drugs that match should be included or not
+&nbsp;	 * @return A list of matching drugs
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get drugs with names matching the search phrase
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include retired drugs if includeRetired is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get drugs linked to concepts with names that match the phrase
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get drugs linked to concepts with names that match the phrase and locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get drugs linked to concepts with names that match the phrase and related locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get drugs that have mappings with reference term codes that match the phrase
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unique drugs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all drugs with a matching term code or drug name or concept name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a null search phrase
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getDrugs(String searchPhrase, Locale locale, boolean exactLocale, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches all drugs with reference mappings to the specified concept source that match the
+&nbsp;	 * specified code and concept map types
+&nbsp;	 * 
+&nbsp;	 * @param code the code the reference term code to match on
+&nbsp;	 * @param conceptSource the concept source on which to match on
+&nbsp;	 * @param withAnyOfTheseTypes the ConceptMapTypes to match on
+&nbsp;	 * @param includeRetired specifies if retired drugs should be included or not
+&nbsp;	 * @since 1.10
+&nbsp;	 * @return the list of {@link Drug}
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get a list of all drugs that match on all the parameter values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return retired and non-retired drugs if includeRetired is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if no matches are found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on the code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on the concept source
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on the map types
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if no code and concept source and withAnyOfTheseTypes are provided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; exclude duplicate matches
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if source is null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;Drug&gt; getDrugsByMapping(String code, ConceptSource conceptSource,
+&nbsp;	        Collection&lt;ConceptMapType&gt; withAnyOfTheseTypes, boolean includeRetired) throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * Gets the &quot;best&quot; matching drug, i.e. matching the earliest ConceptMapType passed in e.g.
+&nbsp;	 * getDrugByMapping(&quot;12345&quot;, rxNorm, Arrays.asList(sameAs, narrowerThan)) If there are multiple
+&nbsp;	 * matches for the highest-priority ConceptMapType, throw an exception
+&nbsp;	 * 
+&nbsp;	 * @param code the code the reference term code to match on
+&nbsp;	 * @param conceptSource the concept source to match on
+&nbsp;	 * @param withAnyOfTheseTypesOrOrderOfPreference the ConceptMapTypes to match on
+&nbsp;	 * @since 1.10
+&nbsp;	 * @return the {@link Drug}
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a drug that matches the code and source
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a drug that matches the code and source and the best map type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if multiple drugs are found matching the best map type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no match found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if no code and concept source and withAnyOfTheseTypes are provided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if source is null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public Drug getDrugByMapping(String code, ConceptSource conceptSource,
+&nbsp;	        Collection&lt;ConceptMapType&gt; withAnyOfTheseTypesOrOrderOfPreference) throws APIException;
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * An Orderable concept is one where its conceptClass has a mapping in the order_type_class_map
+&nbsp;	 * table. This method searches for orderable concepts which match the specified arguments
+&nbsp;	 * 
+&nbsp;	 * @param phrase the phrase to match on
+&nbsp;	 * @param locales list of locales to match on
+&nbsp;	 * @param includeRetired include retired concepts or not
+&nbsp;	 * @param start start index of search results
+&nbsp;	 * @param length number of concept results to be returned
+&nbsp;	 * @return List of ConceptSearchResults
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get orderable concepts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return an empty list if no concept search result is found
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	public List&lt;ConceptSearchResult&gt; getOrderableConcepts(String phrase, List&lt;Locale&gt; locales, boolean includeRetired,
+&nbsp;	        Integer start, Integer length);
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * @return all {@link ConceptAttributeType}s
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept attribute types including retired ones
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	public List&lt;ConceptAttributeType&gt; getAllConceptAttributeTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given concept attribute type in the database
+&nbsp;	 *
+&nbsp;	 * @param conceptAttributeType
+&nbsp;	 * @return the ConceptAttributeType created/saved
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a new concept attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; edit an existing concept attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	public ConceptAttributeType saveConceptAttributeType(ConceptAttributeType conceptAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param id
+&nbsp;	 * @return the {@link ConceptAttributeType} with the given internal id
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept attribute type with the given id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept attribute type exists with the given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	public ConceptAttributeType getConceptAttributeType(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the {@link ConceptAttributeType} with the given uuid
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept attribute type with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept attribute type exists with the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	public ConceptAttributeType getConceptAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a concept attribute type from the database
+&nbsp;	 *
+&nbsp;	 * @param conceptAttributeType
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; completely remove a concept attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	void purgeConceptAttributeType(ConceptAttributeType conceptAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find concept attribute types matching the given parameters. Retired types are included in the
+&nbsp;	 * results
+&nbsp;	 *
+&nbsp;	 * @param name (optional) The name of type
+&nbsp;	 * @return list of ConceptAttributeTypes that matches &lt;em&gt;name&lt;/em&gt; partially or completely
+&nbsp;	 * @since 2.0
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept attribute types performing fuzzy match on given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no concept attribute types match given name
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONCEPT_ATTRIBUTE_TYPES })
+&nbsp;	public List&lt;ConceptAttributeType&gt; getConceptAttributeTypes(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a ConceptAttributeType object based on the name provided
+&nbsp;	 *
+&nbsp;	 * @param exactName
+&nbsp;	 * @return the {@link ConceptAttributeType} with the specified name
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept attribute type with the exact specified name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept attribute type exists with the exact specified name
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONCEPT_ATTRIBUTE_TYPES })
+&nbsp;	public ConceptAttributeType getConceptAttributeTypeByName(String exactName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retire a concept attribute type
+&nbsp;	 *
+&nbsp;	 * @param conceptAttributeType the concept attribute type to be retired
+&nbsp;	 * @param reason for retiring the concept attribute type
+&nbsp;	 * @return the retired concept attribute type
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire concept type attribute
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	public ConceptAttributeType retireConceptAttributeType(ConceptAttributeType conceptAttributeType, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Un-Retire a concept attribute type
+&nbsp;	 *
+&nbsp;	 * @param conceptAttributeType the concept type attribute to unretire
+&nbsp;	 * @return the unretire concept attribute type
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire a concept attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_ATTRIBUTE_TYPES)
+&nbsp;	public ConceptAttributeType unretireConceptAttributeType(ConceptAttributeType conceptAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the {@link ConceptAttribute} with the given uuid
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the concept attribute with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no concept attribute has the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	ConceptAttribute getConceptAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptAttributeType
+&nbsp;	 * @since 2.0 Checks if there are any concept attributes (including voided attributes) for a
+&nbsp;	 *        concept attribute type.
+&nbsp;	 * @return boolean true if the concept attribute type is used by a concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+&nbsp;	boolean hasAnyConceptAttribute(ConceptAttributeType conceptAttributeType);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,264 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Allergen</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Allergen (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Allergen</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (22/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Embeddable;
+&nbsp;import javax.persistence.EnumType;
+&nbsp;import javax.persistence.Enumerated;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represent allergen
+&nbsp; */
+&nbsp;@Embeddable
+&nbsp;public class Allergen {
+&nbsp;	
+&nbsp;	@Enumerated(EnumType.STRING)
+&nbsp;	@Column(name = &quot;allergen_type&quot;)
+&nbsp;	private AllergenType allergenType;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;coded_allergen&quot;)
+&nbsp;	private Concept codedAllergen;
+&nbsp;	
+&nbsp;	@Column(name = &quot;non_coded_allergen&quot;)
+&nbsp;	private String nonCodedAllergen;
+&nbsp;	
+&nbsp;	private static String OTHER_NON_CODED_CONCEPT_UUID;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public Allergen(){</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param allergenType the allergenType to set
+&nbsp;	 * @param codedAllergen the codedAllergen to set
+&nbsp;	 * @param nonCodedAllergen the nonCodedAllergen to set
+&nbsp;	 */
+<b class="fc">&nbsp;	public Allergen(AllergenType allergenType, Concept codedAllergen, String nonCodedAllergen) {</b>
+<b class="fc">&nbsp;		this.allergenType = allergenType;</b>
+<b class="fc">&nbsp;		this.codedAllergen = codedAllergen;</b>
+<b class="fc">&nbsp;		this.nonCodedAllergen = nonCodedAllergen;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the allergenType
+&nbsp;	 */
+&nbsp;	public AllergenType getAllergenType() {
+<b class="fc">&nbsp;		return allergenType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param allergenType the allergenType to set
+&nbsp;	 */
+&nbsp;	public void setAllergenType(AllergenType allergenType) {
+<b class="nc">&nbsp;		this.allergenType = allergenType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;    /**
+&nbsp;     * @return the codedAllergen
+&nbsp;     */
+&nbsp;    public Concept getCodedAllergen() {
+<b class="fc">&nbsp;    	return codedAllergen;</b>
+&nbsp;    }
+&nbsp;	
+&nbsp;    
+&nbsp;	/**
+&nbsp;	 * Sets other non coded concept uuid constant.
+&nbsp;	 * 
+&nbsp;	 * @param otherNonCodedConceptUuid
+&nbsp;	 * @since 2.0
+&nbsp;	 */
+&nbsp;    public static void setOtherNonCodedConceptUuid(String otherNonCodedConceptUuid) {
+<b class="fc">&nbsp;		OTHER_NON_CODED_CONCEPT_UUID = otherNonCodedConceptUuid;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;	/**
+&nbsp;	 * Returns other non coded concept uuid constant.
+&nbsp;	 * 
+&nbsp;	 * @return other non coded concept uuid constant
+&nbsp;	 * @since 2.0
+&nbsp;	 */
+&nbsp;	public static String getOtherNonCodedConceptUuid() {
+<b class="fc">&nbsp;		return OTHER_NON_CODED_CONCEPT_UUID;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    /**
+&nbsp;     * @param codedAllergen the codedAllergen to set
+&nbsp;     */
+&nbsp;    public void setCodedAllergen(Concept codedAllergen) {
+<b class="fc">&nbsp;		this.codedAllergen = codedAllergen;</b>
+<b class="fc">&nbsp;		if (codedAllergen != null &amp;&amp; !codedAllergen.getUuid().equals(getOtherNonCodedConceptUuid())) {</b>
+<b class="fc">&nbsp;			nonCodedAllergen = null;</b>
+&nbsp;		}
+&nbsp;    }
+&nbsp;	
+&nbsp;    /**
+&nbsp;     * @return the nonCodedAllergen
+&nbsp;     */
+&nbsp;    public String getNonCodedAllergen() {
+<b class="fc">&nbsp;    	return nonCodedAllergen;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * @param nonCodedAllergen the nonCodedAllergen to set
+&nbsp;     */
+&nbsp;    public void setNonCodedAllergen(String nonCodedAllergen) {
+<b class="fc">&nbsp;		this.nonCodedAllergen = nonCodedAllergen;</b>
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(nonCodedAllergen) &amp;&amp; codedAllergen != null</b>
+<b class="fc">&nbsp;				&amp;&amp; !codedAllergen.getUuid().equals(getOtherNonCodedConceptUuid())) {</b>
+<b class="fc">&nbsp;			codedAllergen = null;	</b>
+&nbsp;		}
+&nbsp;    }
+&nbsp;
+&nbsp;	public boolean isCoded(){
+<b class="fc">&nbsp;		return codedAllergen != null &amp;&amp; !codedAllergen.getUuid().equals(getOtherNonCodedConceptUuid());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;	    if (StringUtils.isNotBlank(nonCodedAllergen)) {</b>
+<b class="nc">&nbsp;	    	return nonCodedAllergen;</b>
+&nbsp;	    }
+<b class="nc">&nbsp;	    return codedAllergen.getName().getName();</b>
+&nbsp;    }
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if this allergen is the same as the given one
+&nbsp;	 * 
+&nbsp;	 * @param allergen the given allergen to test with
+&nbsp;	 * 
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true for same coded allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for different coded allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true for same non coded allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for different non coded allergen
+&nbsp;	 * 
+&nbsp;	 * @return true if the same, else false
+&nbsp;	 */
+&nbsp;	public boolean isSameAllergen(Allergen allergen) {
+<b class="fc">&nbsp;		if (isCoded()) {</b>
+<b class="fc">&nbsp;			return allergen.getCodedAllergen() != null &amp;&amp; codedAllergen.equals(allergen.getCodedAllergen());</b>
+&nbsp;		}  else {
+<b class="fc">&nbsp;			return nonCodedAllergen != null &amp;&amp; allergen.getNonCodedAllergen() != null &amp;&amp; nonCodedAllergen</b>
+<b class="fc">&nbsp;					.equalsIgnoreCase(allergen.getNonCodedAllergen());</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

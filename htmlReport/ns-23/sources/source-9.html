@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ModuleConstants</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: ModuleConstants (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ModuleConstants</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Constants used by the module system in openmrs
+&nbsp; */
+&nbsp;public class ModuleConstants {
+&nbsp;
+&nbsp;	private ModuleConstants() {
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A map from &quot;moduleid&quot; to &quot;required version&quot; for all core modules that are required by
+&nbsp;	 * openmrs. A module with at least the given version is required to start before openmrs will
+&nbsp;	 * fully start.
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final Map&lt;String, String&gt; CORE_MODULES = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used to determine if the {@link #CORE_MODULES} list should be used or not. For unit testing
+&nbsp;	 * this is set to true to allow for faster runs with less dependencies.
+&nbsp;	 */
+&nbsp;	public static final String IGNORE_CORE_MODULES_PROPERTY = &quot;module.ignore_core_status&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Name of the file in the module repository to ping to question for updates to a module
+&nbsp;	 */
+&nbsp;	public static final String UPDATE_FILE_NAME = &quot;update.rdf&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Name of the global property that will tell the system where to look for modules to load. Can
+&nbsp;	 * be either relative or absolute
+&nbsp;	 */
+&nbsp;	public static final String REPOSITORY_FOLDER_PROPERTY = &quot;module_repository_folder&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default name of the folder that holds the currently loaded modules for the system
+&nbsp;	 * 
+&nbsp;	 * @see #REPOSITORY_FOLDER_PROPERTY
+&nbsp;	 */
+&nbsp;	public static final String REPOSITORY_FOLDER_PROPERTY_DEFAULT = &quot;modules&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Setting either of these properties to false will block web administration of modules
+&nbsp;	 * 
+&nbsp;	 * @see #RUNTIMEPROPERTY_ALLOW_ADMIN
+&nbsp;	 */
+&nbsp;	public static final String RUNTIMEPROPERTY_ALLOW_UPLOAD = &quot;module.allow_upload&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Setting either of these properties to &quot;false&quot; will block web administration of modules
+&nbsp;	 * 
+&nbsp;	 * @see #RUNTIMEPROPERTY_ALLOW_UPLOAD
+&nbsp;	 */
+&nbsp;	public static final String RUNTIMEPROPERTY_ALLOW_ADMIN = &quot;module.allow_web_admin&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Intended to be used by the testing framework in order to set a list of specific files that
+&nbsp;	 * need to be loaded by the Context. Should be space separated. Should be either absolute file
+&nbsp;	 * paths or classpath loadable file paths.
+&nbsp;	 */
+&nbsp;	public static final String RUNTIMEPROPERTY_MODULE_LIST_TO_LOAD = &quot;module.list_to_load&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Name of the runtime property that will tell the system where to look for modules to load. Can
+&nbsp;	 * be either relative or absolute
+&nbsp;	 */
+&nbsp;	public static final String REPOSITORY_FOLDER_RUNTIME_PROPERTY = &quot;module.repository_folder&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A module message.properties file containing this key mapped to &quot;true&quot; will be allowed to define messages outside of the module&#39;s namespace.
+&nbsp;	 *
+&nbsp;	 * @since 1.9.3
+&nbsp;	 */
+&nbsp;	public static final String MESSAGE_PROPERTY_ALLOW_KEYS_OUTSIDE_OF_MODULE_NAMESPACE = &quot;openmrs.property.MESSAGE_PROPERTY_ALLOW_KEYS_OUTSIDE_OF_MODULE_NAMESPACE&quot;;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

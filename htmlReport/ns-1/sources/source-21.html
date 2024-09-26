@@ -1,0 +1,413 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptNameTag</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptNameTag (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptNameTag</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (26/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,5%
+  </span>
+  <span class="absValue">
+    (29/31)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptNameTag$HibernateProxy$v4TsRWHE</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (26/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,5%
+  </span>
+  <span class="absValue">
+    (29/31)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * ConceptNameTag is a textual tag which can be applied to a ConceptName.
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptNameTag extends BaseOpenmrsObject implements Auditable, Voidable, java.io.Serializable {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 33226787L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	private Integer conceptNameTagId;
+&nbsp;	
+&nbsp;	private String tag;
+&nbsp;	
+&nbsp;	private String description;
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean voided = false;</b>
+&nbsp;	
+&nbsp;	private User voidedBy;
+&nbsp;	
+&nbsp;	private Date dateVoided;
+&nbsp;	
+&nbsp;	private String voidReason;
+&nbsp;	
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor.
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptNameTag() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Public constructor. Use factory methods to obtain copies of the desired tags.
+&nbsp;	 * 
+&nbsp;	 * @param tag
+&nbsp;	 * @param description
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptNameTag(String tag, String description) {</b>
+<b class="fc">&nbsp;		setTag(tag);</b>
+<b class="fc">&nbsp;		setDescription(description);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the textual representation of this ConceptNameTag.
+&nbsp;	 * 
+&nbsp;	 * @return the textual representation of this ConceptNameTag.
+&nbsp;	 */
+&nbsp;	public String getTag() {
+<b class="fc">&nbsp;		return tag;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the textual representation of this ConceptNametag.
+&nbsp;	 * 
+&nbsp;	 * @param tag the textual representation
+&nbsp;	 */
+&nbsp;	public void setTag(String tag) {
+<b class="fc">&nbsp;		this.tag = tag;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the description of this tag.
+&nbsp;	 * 
+&nbsp;	 * @return the description of this tag
+&nbsp;	 */
+&nbsp;	public String getDescription() {
+<b class="fc">&nbsp;		return description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the description of this tag.
+&nbsp;	 * 
+&nbsp;	 * @param description
+&nbsp;	 */
+&nbsp;	public void setDescription(String description) {
+<b class="fc">&nbsp;		this.description = description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns whether the ConceptName has been voided.
+&nbsp;	 * 
+&nbsp;	 * @return true if the ConceptName has been voided, false otherwise.
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getVoided()}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isVoided() {
+<b class="nc">&nbsp;		return getVoided();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns whether the ConceptName has been voided.
+&nbsp;	 * 
+&nbsp;	 * @return true if the ConceptName has been voided, false otherwise.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Boolean getVoided() {
+<b class="fc">&nbsp;		return voided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the voided status of the ConceptName.
+&nbsp;	 * 
+&nbsp;	 * @param voided the voided status to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoided(Boolean voided) {
+<b class="fc">&nbsp;		this.voided = voided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the User who voided this ConceptName.
+&nbsp;	 * 
+&nbsp;	 * @return the User who voided this ConceptName, or null if not set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getVoidedBy() {
+<b class="fc">&nbsp;		return voidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the User who voided this ConceptName.
+&nbsp;	 * 
+&nbsp;	 * @param voidedBy the user who voided this ConceptName.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoidedBy(User voidedBy) {
+<b class="fc">&nbsp;		this.voidedBy = voidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the Date this ConceptName was voided.
+&nbsp;	 * 
+&nbsp;	 * @return the Date this ConceptName was voided.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateVoided() {
+<b class="fc">&nbsp;		return dateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the Data this ConceptName was voided.
+&nbsp;	 * 
+&nbsp;	 * @param dateVoided the date the ConceptName was voided.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateVoided(Date dateVoided) {
+<b class="fc">&nbsp;		this.dateVoided = dateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the reason this ConceptName was voided.
+&nbsp;	 * 
+&nbsp;	 * @return the reason this ConceptName was voided
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getVoidReason() {
+<b class="fc">&nbsp;		return voidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the reason this ConceptName was voided.
+&nbsp;	 * 
+&nbsp;	 * @param voidReason the reason this ConceptName was voided
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoidReason(String voidReason) {
+<b class="fc">&nbsp;		this.voidReason = voidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return this.tag;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptNameTagId
+&nbsp;	 */
+&nbsp;	public Integer getConceptNameTagId() {
+<b class="fc">&nbsp;		return conceptNameTagId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptNameTagId the conceptNameTagId to set
+&nbsp;	 */
+&nbsp;	public void setConceptNameTagId(Integer conceptNameTagId) {
+<b class="fc">&nbsp;		this.conceptNameTagId = conceptNameTagId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptNameTagId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptNameTagId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the changedBy.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param changedBy The user that changed this object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the date this object was changed
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged The date this object was changed
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

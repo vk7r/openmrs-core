@@ -1,0 +1,254 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CustomDatatype</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.customdatatype</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomDatatype (org.openmrs.customdatatype)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+  <tr>
+    <td class="name">CustomDatatype$Summary</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.customdatatype;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a custom datatype, which an administrator may use for global properties, attribute types, etc.
+&nbsp; * Handles conversion between a typed Java object and a reference string which can be persisted in a database
+&nbsp; * varchar column. 
+&nbsp; * @param &lt;T&gt; the Java class used for typed values
+&nbsp; * @since 1.9 
+&nbsp; */
+&nbsp;public interface CustomDatatype&lt;T&gt; {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A {@link CustomValueDescriptor} defines both a datatype and its configuration (e.g. a regex for a RegexValidatedString datatype).
+&nbsp;	 * The framework will instantiate datatypes and call this method to set that configuration. Subclasses should define the format
+&nbsp;	 * of this configuration.
+&nbsp;	 * 
+&nbsp;	 * @param config
+&nbsp;	 */
+&nbsp;	void setConfiguration(String config);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The OpenMRS service layer calls this method when a custom value of this datatype is saved (created or edited). Implementations
+&nbsp;	 * should persist the typed value, and return a valueReference that can be used to access that value in the future.
+&nbsp;	 * (Simple datatype implementations that don&#39;t require external storage may just serialize their typedValue to a String and
+&nbsp;	 * return that.)
+&nbsp;	 * 
+&nbsp;	 * Implementations may safely assume that validate was called on typedValue before this method is called.
+&nbsp;	 * 
+&nbsp;	 * @param typedValue
+&nbsp;	 * @param existingValueReference If null, the custom value is being saved for the first time. If not null, this custom value has
+&nbsp;	 * been saved before with the given reference. Implementations may choose to return the same value reference if they are overwriting
+&nbsp;	 * the old value on remote storage. 
+&nbsp;	 * @return a valueReference that may be used in the future to retrieve typedValue
+&nbsp;	 * @throws InvalidCustomValueException
+&nbsp;	 */
+&nbsp;	String save(T typedValue, String existingValueReference) throws InvalidCustomValueException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the reference string that would be persisted for the given typed value. (This allows efficient searching for exact attribute
+&nbsp;	 * values.)
+&nbsp;	 * 
+&nbsp;	 * @param typedValue
+&nbsp;	 * @return reference string
+&nbsp;	 * @throws UnsupportedOperationException  if it is not feasible to calculate this efficiently (e.g. you&#39;d need to go to remote storage)
+&nbsp;	 */
+&nbsp;	String getReferenceStringForValue(T typedValue) throws UnsupportedOperationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts a reference string to its typed value. This may be expensive, especially if the datatype needs
+&nbsp;	 * to go to remote storage.
+&nbsp;	 * 
+&nbsp;	 * @param referenceString
+&nbsp;	 * @return the actual typed value for the given referenceString
+&nbsp;	 * @throws InvalidCustomValueException if the persisted value is illegal (perhaps because datatype configuration
+&nbsp;	 * was changed since this value was persisted)
+&nbsp;	 */
+&nbsp;	T fromReferenceString(String referenceString) throws InvalidCustomValueException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts a reference string to a short (generally &amp;lt; 100 characters) plain-text representation of its value. The return
+&nbsp;	 * value also indicates whether this representation is a complete view of the value, or if there is more to display. 
+&nbsp;	 * Implementations of this method must be high-performance, e.g. if the method is called thousands of times for a table
+&nbsp;	 * of objects with custom values.
+&nbsp;	 * 
+&nbsp;	 * @param referenceString
+&nbsp;	 * @return a summary representation of the given value
+&nbsp;	 */
+&nbsp;	Summary getTextSummary(String referenceString);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates the given value to see if it is a legal value for the given handler. (For example the RegexValidatedText
+&nbsp;	 * type checks against a regular expression.)
+&nbsp;	 * @param typedValue
+&nbsp;	 */
+&nbsp;	void validate(T typedValue) throws InvalidCustomValueException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A short representation of a custom value, along with an indication of whether this is the complete value,
+&nbsp;	 * or just a summary.
+&nbsp;	 */
+&nbsp;	public class Summary {
+&nbsp;		
+&nbsp;		private String summary;
+&nbsp;		
+&nbsp;		private boolean complete;
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * @param summary
+&nbsp;		 * @param complete
+&nbsp;		 */
+<b class="fc">&nbsp;		public Summary(String summary, boolean complete) {</b>
+<b class="fc">&nbsp;			this.summary = summary;</b>
+<b class="fc">&nbsp;			this.complete = complete;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * @return the short representation of a custom value
+&nbsp;		 */
+&nbsp;		public String getSummary() {
+<b class="fc">&nbsp;			return summary;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * @param summary the summary to set
+&nbsp;		 */
+&nbsp;		public void setSummary(String summary) {
+<b class="nc">&nbsp;			this.summary = summary;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * @return if true, then getSummary() returns a complete view of the custom value; otherwise the value is
+&nbsp;		 * in fact a summary 
+&nbsp;		 */
+&nbsp;		public boolean isComplete() {
+<b class="fc">&nbsp;			return complete;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * @param complete the complete to set
+&nbsp;		 */
+&nbsp;		public void setComplete(boolean complete) {
+<b class="nc">&nbsp;			this.complete = complete;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * @see java.lang.Object#toString()
+&nbsp;		 */
+&nbsp;		@Override
+&nbsp;		public String toString() {
+<b class="nc">&nbsp;			return summary;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

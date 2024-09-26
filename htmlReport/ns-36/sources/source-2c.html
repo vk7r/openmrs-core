@@ -1,0 +1,662 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PrivilegeConstants</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: PrivilegeConstants (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">PrivilegeConstants</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import org.openmrs.annotation.AddOnStartup;
+&nbsp;import org.openmrs.annotation.HasAddOnStartupPrivileges;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains all privilege names and their descriptions. Some of privilege names may be marked with
+&nbsp; * AddOnStartup annotation.
+&nbsp; * 
+&nbsp; * @see org.openmrs.annotation.AddOnStartup
+&nbsp; * @since 1.8
+&nbsp; */
+&nbsp;@HasAddOnStartupPrivileges
+&nbsp;public class PrivilegeConstants {
+&nbsp;
+&nbsp;	private PrivilegeConstants() {
+&nbsp;	}
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept entries&quot;)
+&nbsp;	public static final String GET_CONCEPTS = &quot;Get Concepts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept proposals to the system&quot;)
+&nbsp;	public static final String GET_CONCEPT_PROPOSALS = &quot;Get Concept Proposals&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get users in OpenMRS&quot;)
+&nbsp;	public static final String GET_USERS = &quot;Get Users&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient encounters&quot;)
+&nbsp;	public static final String GET_ENCOUNTERS = &quot;Get Encounters&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get encounter types&quot;)
+&nbsp;	public static final String GET_ENCOUNTER_TYPES = &quot;Get Encounter Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get locations&quot;)
+&nbsp;	public static final String GET_LOCATIONS = &quot;Get Locations&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient observations&quot;)
+&nbsp;	public static final String GET_OBS = &quot;Get Observations&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient notes&quot;)
+&nbsp;	public static final String GET_NOTE = &quot;Get Notes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patients&quot;)
+&nbsp;	public static final String GET_PATIENTS = &quot;Get Patients&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient identifiers&quot;)
+&nbsp;	public static final String GET_PATIENT_IDENTIFIERS = &quot;Get Patient Identifiers&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient cohorts&quot;)
+&nbsp;	public static final String GET_PATIENT_COHORTS = &quot;Get Patient Cohorts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get orders&quot;)
+&nbsp;	public static final String GET_ORDERS = &quot;Get Orders&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get forms&quot;)
+&nbsp;	public static final String GET_FORMS = &quot;Get Forms&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient identifier types&quot;)
+&nbsp;	public static final String GET_IDENTIFIER_TYPES = &quot;Get Identifier Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept classes&quot;)
+&nbsp;	public static final String GET_CONCEPT_CLASSES = &quot;Get Concept Classes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept datatypes&quot;)
+&nbsp;	public static final String GET_CONCEPT_DATATYPES = &quot;Get Concept Datatypes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get user privileges&quot;)
+&nbsp;	public static final String GET_PRIVILEGES = &quot;Get Privileges&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get user roles&quot;)
+&nbsp;	public static final String GET_ROLES = &quot;Get Roles&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get field types&quot;)
+&nbsp;	public static final String GET_FIELD_TYPES = &quot;Get Field Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get order types&quot;)
+&nbsp;	public static final String GET_ORDER_TYPES = &quot;Get Order Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get relationship types&quot;)
+&nbsp;	public static final String GET_RELATIONSHIP_TYPES = &quot;Get Relationship Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept sources&quot;)
+&nbsp;	public static final String GET_CONCEPT_SOURCES = &quot;Get Concept Sources&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept map types&quot;)
+&nbsp;	public static final String GET_CONCEPT_MAP_TYPES = &quot;Get Concept Map Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept reference terms&quot;)
+&nbsp;	public static final String GET_CONCEPT_REFERENCE_TERMS = &quot;Get Concept Reference Terms&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get patient programs&quot;)
+&nbsp;	public static final String GET_PROGRAMS = &quot;Get Programs&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get which programs that patients are in&quot;)
+&nbsp;	public static final String GET_PATIENT_PROGRAMS = &quot;Get Patient Programs&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get global properties on the administration screen&quot;)
+&nbsp;	public static final String GET_GLOBAL_PROPERTIES = &quot;Get Global Properties&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get person attribute types&quot;)
+&nbsp;	public static final String GET_PERSON_ATTRIBUTE_TYPES = &quot;Get Person Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get provider attribute types&quot;)
+&nbsp;	public static final String GET_PROVIDER_ATTRIBUTE_TYPES = &quot;Get Provider Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get person objects&quot;)
+&nbsp;	public static final String GET_PERSONS = &quot;Get People&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get relationships&quot;)
+&nbsp;	public static final String GET_RELATIONSHIPS = &quot;Get Relationships&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get database changes from the admin screen&quot;)
+&nbsp;	public static final String GET_DATABASE_CHANGES = &quot;Get Database Changes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get problems&quot;)
+&nbsp;	public static final String GET_PROBLEMS = &quot;Get Problems&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get allergies&quot;)
+&nbsp;	public static final String GET_ALLERGIES = &quot;Get Allergies&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete HL7 messages&quot;)
+&nbsp;	public static final String MANAGE_HL7_MESSAGES = &quot;Manage HL7 Messages&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_HL7_MESSAGES = &quot;Purge HL7 Messages&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get an HL7 Source&quot;)
+&nbsp;	public static final String GET_HL7_SOURCE = &quot;Get HL7 Source&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get an HL7 Queue item&quot;)
+&nbsp;	public static final String GET_HL7_IN_QUEUE = &quot;Get HL7 Inbound Queue&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get an HL7 archive item&quot;)
+&nbsp;	public static final String GET_HL7_IN_ARCHIVE = &quot;Get HL7 Inbound Archive&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get an HL7 error item&quot;)
+&nbsp;	public static final String GET_HL7_IN_EXCEPTION = &quot;Get HL7 Inbound Exception&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get visit types&quot;)
+&nbsp;	public static final String GET_VISIT_TYPES = &quot;Get Visit Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get visits&quot;)
+&nbsp;	public static final String GET_VISITS = &quot;Get Visits&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get visit attribute types&quot;)
+&nbsp;	public static final String GET_VISIT_ATTRIBUTE_TYPES = &quot;Get Visit Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get location attribute types&quot;)
+&nbsp;	public static final String GET_LOCATION_ATTRIBUTE_TYPES = &quot;Get Location Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get Provider&quot;)
+&nbsp;	public static final String GET_PROVIDERS = &quot;Get Providers&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get encounter roles&quot;)
+&nbsp;	public static final String GET_ENCOUNTER_ROLES = &quot;Get Encounter Roles&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete concept entries&quot;)
+&nbsp;	public static final String MANAGE_CONCEPTS = &quot;Manage Concepts&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPTS = &quot;Purge Concepts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete concept name tags&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_NAME_TAGS = &quot;Manage Concept Name tags&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add concept proposals to the system&quot;)
+&nbsp;	public static final String ADD_CONCEPT_PROPOSALS = &quot;Add Concept Proposals&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit concept proposals in the system&quot;)
+&nbsp;	public static final String EDIT_CONCEPT_PROPOSALS = &quot;Edit Concept Proposals&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete concept proposals from the system&quot;)
+&nbsp;	public static final String DELETE_CONCEPT_PROPOSALS = &quot;Delete Concept Proposals&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPT_PROPOSALS = &quot;Purge Concept Proposals&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add users to OpenMRS&quot;)
+&nbsp;	public static final String ADD_USERS = &quot;Add Users&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit users in OpenMRS&quot;)
+&nbsp;	public static final String EDIT_USERS = &quot;Edit Users&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete users in OpenMRS&quot;)
+&nbsp;	public static final String DELETE_USERS = &quot;Delete Users&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_USERS = &quot;Purge Users&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to change the passwords of users in OpenMRS&quot;)
+&nbsp;	public static final String EDIT_USER_PASSWORDS = &quot;Edit User Passwords&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add patient encounters&quot;)
+&nbsp;	public static final String ADD_ENCOUNTERS = &quot;Add Encounters&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit patient encounters&quot;)
+&nbsp;	public static final String EDIT_ENCOUNTERS = &quot;Edit Encounters&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete patient encounters&quot;)
+&nbsp;	public static final String DELETE_ENCOUNTERS = &quot;Delete Encounters&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ENCOUNTERS = &quot;Purge Encounters&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire encounter types&quot;)
+&nbsp;	public static final String MANAGE_ENCOUNTER_TYPES = &quot;Manage Encounter Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ENCOUNTER_TYPES = &quot;Purge Encounter Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to choose encounter visit handler and enable/disable encounter visits&quot;)
+&nbsp;	public static final String CONFIGURE_VISITS = &quot;Configure Visits&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete locations&quot;)
+&nbsp;	public static final String MANAGE_LOCATIONS = &quot;Manage Locations&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_LOCATIONS = &quot;Purge Locations&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete location tags&quot;)
+&nbsp;	public static final String MANAGE_LOCATION_TAGS = &quot;Manage Location Tags&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete address templates&quot;)
+&nbsp;	public static final String MANAGE_ADDRESS_TEMPLATES = &quot;Manage Address Templates&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_LOCATION_TAGS = &quot;Purge Location Tags&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add patient observations&quot;)
+&nbsp;	public static final String ADD_OBS = &quot;Add Observations&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit patient observations&quot;)
+&nbsp;	public static final String EDIT_OBS = &quot;Edit Observations&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete patient observations&quot;)
+&nbsp;	public static final String DELETE_OBS = &quot;Delete Observations&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_OBS = &quot;Purge Observations&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit patient notes&quot;)
+&nbsp;	public static final String EDIT_NOTE = &quot;Edit Notes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete patient notes&quot;)
+&nbsp;	public static final String DELETE_NOTE = &quot;Delete Notes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add patients&quot;)
+&nbsp;	public static final String ADD_PATIENTS = &quot;Add Patients&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit patients&quot;)
+&nbsp;	public static final String EDIT_PATIENTS = &quot;Edit Patients&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete patients&quot;)
+&nbsp;	public static final String DELETE_PATIENTS = &quot;Delete Patients&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PATIENTS = &quot;Purge Patients&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add patient identifiers&quot;)
+&nbsp;	public static final String ADD_PATIENT_IDENTIFIERS = &quot;Add Patient Identifiers&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit patient identifiers&quot;)
+&nbsp;	public static final String EDIT_PATIENT_IDENTIFIERS = &quot;Edit Patient Identifiers&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete patient identifiers&quot;)
+&nbsp;	public static final String DELETE_PATIENT_IDENTIFIERS = &quot;Delete Patient Identifiers&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PATIENT_IDENTIFIERS = &quot;Purge Patient Identifiers&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add a cohort to the system&quot;)
+&nbsp;	public static final String ADD_COHORTS = &quot;Add Cohorts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add a cohort to the system&quot;)
+&nbsp;	public static final String EDIT_COHORTS = &quot;Edit Cohorts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add a cohort to the system&quot;)
+&nbsp;	public static final String DELETE_COHORTS = &quot;Delete Cohorts&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_COHORTS = &quot;Purge Cohorts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add orders&quot;)
+&nbsp;	public static final String ADD_ORDERS = &quot;Add Orders&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit orders&quot;)
+&nbsp;	public static final String EDIT_ORDERS = &quot;Edit Orders&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete orders&quot;)
+&nbsp;	public static final String DELETE_ORDERS = &quot;Delete Orders&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ORDERS = &quot;Purge Orders&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete forms&quot;)
+&nbsp;	public static final String MANAGE_FORMS = &quot;Manage Forms&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_FORMS = &quot;Purge Forms&quot;;
+&nbsp;	
+&nbsp;	// This name is historic, since that&#39;s what it was originally called in the
+&nbsp;	// infopath formentry module
+&nbsp;	@AddOnStartup(description = &quot;Able to fill out forms&quot;)
+&nbsp;	public static final String FORM_ENTRY = &quot;Form Entry&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire patient identifier types&quot;)
+&nbsp;	public static final String MANAGE_IDENTIFIER_TYPES = &quot;Manage Identifier Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_IDENTIFIER_TYPES = &quot;Purge Identifier Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire concept classes&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_CLASSES = &quot;Manage Concept Classes&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPT_CLASSES = &quot;Purge Concept Classes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire concept datatypes&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_DATATYPES = &quot;Manage Concept Datatypes&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPT_DATATYPES = &quot;Purge Concept Datatypes&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete privileges&quot;)
+&nbsp;	public static final String MANAGE_PRIVILEGES = &quot;Manage Privileges&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PRIVILEGES = &quot;Purge Privileges&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete user roles&quot;)
+&nbsp;	public static final String MANAGE_ROLES = &quot;Manage Roles&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ROLES = &quot;Purge Roles&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire field types&quot;)
+&nbsp;	public static final String MANAGE_FIELD_TYPES = &quot;Manage Field Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_FIELD_TYPES = &quot;Purge Field Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire order types&quot;)
+&nbsp;	public static final String MANAGE_ORDER_TYPES = &quot;Manage Order Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ORDER_TYPES = &quot;Purge Order Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire relationship types&quot;)
+&nbsp;	public static final String MANAGE_RELATIONSHIP_TYPES = &quot;Manage Relationship Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_RELATIONSHIP_TYPES = &quot;Purge Relationship Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete user alerts&quot;)
+&nbsp;	public static final String MANAGE_ALERTS = &quot;Manage Alerts&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete concept sources&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_SOURCES = &quot;Manage Concept Sources&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire concept map types&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_MAP_TYPES = &quot;Manage Concept Map Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPT_MAP_TYPES = &quot;Purge Concept Map Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire reference terms&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_REFERENCE_TERMS = &quot;Manage Concept Reference Terms&quot;;
+&nbsp;	
+&nbsp;	public static final String CREATE_REFERENCE_TERMS_WHILE_EDITING_CONCEPTS = &quot;Create Reference Terms While Editing Concepts&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPT_REFERENCE_TERMS = &quot;Purge Concept Reference Terms&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_CONCEPT_SOURCES = &quot;Purge Concept Sources&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to view the navigation menu (Home, View Patients, Dictionary, Administration, My Profile&quot;)
+&nbsp;	public static final String VIEW_NAVIGATION_MENU = &quot;View Navigation Menu&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to view the &#39;Administration&#39; link in the navigation bar&quot;)
+&nbsp;	public static final String VIEW_ADMIN_FUNCTIONS = &quot;View Administration Functions&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to view and fill out unpublished forms&quot;)
+&nbsp;	public static final String VIEW_UNPUBLISHED_FORMS = &quot;View Unpublished Forms&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/view/delete patient programs&quot;)
+&nbsp;	public static final String MANAGE_PROGRAMS = &quot;Manage Programs&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add patients to programs&quot;)
+&nbsp;	public static final String ADD_PATIENT_PROGRAMS = &quot;Add Patient Programs&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit patients in programs&quot;)
+&nbsp;	public static final String EDIT_PATIENT_PROGRAMS = &quot;Edit Patient Programs&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete patients from programs&quot;)
+&nbsp;	public static final String DELETE_PATIENT_PROGRAMS = &quot;Delete Patient Programs&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PATIENT_PROGRAMS = &quot;Purge Patient Programs&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit global properties&quot;)
+&nbsp;	public static final String MANAGE_GLOBAL_PROPERTIES = &quot;Manage Global Properties&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_GLOBAL_PROPERTIES = &quot;Purge Global Properties&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/remove modules to the system&quot;)
+&nbsp;	public static final String MANAGE_MODULES = &quot;Manage Modules&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/remove scheduled tasks&quot;)
+&nbsp;	public static final String MANAGE_SCHEDULER = &quot;Manage Scheduler&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire person attribute types&quot;)
+&nbsp;	public static final String MANAGE_PERSON_ATTRIBUTE_TYPES = &quot;Manage Person Attribute Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PERSON_ATTRIBUTE_TYPES = &quot;Purge Person Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add person objects&quot;)
+&nbsp;	public static final String ADD_PERSONS = &quot;Add People&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add person objects&quot;)
+&nbsp;	public static final String EDIT_PERSONS = &quot;Edit People&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete objects&quot;)
+&nbsp;	public static final String DELETE_PERSONS = &quot;Delete People&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PERSONS = &quot;Purge People&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add relationships&quot;)
+&nbsp;	public static final String ADD_RELATIONSHIPS = &quot;Add Relationships&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit relationships&quot;)
+&nbsp;	public static final String EDIT_RELATIONSHIPS = &quot;Edit Relationships&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete relationships&quot;)
+&nbsp;	public static final String DELETE_RELATIONSHIPS = &quot;Delete Relationships&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_RELATIONSHIPS = &quot;Purge Relationships&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to view/add/edit the implementation id for the system&quot;)
+&nbsp;	public static final String MANAGE_IMPLEMENTATION_ID = &quot;Manage Implementation Id&quot;;
+&nbsp;	
+&nbsp;	public static final String SQL_LEVEL_ACCESS = &quot;SQL Level Access&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Add problems&quot;)
+&nbsp;	public static final String ADD_PROBLEMS = &quot;Add Problems&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit problems&quot;)
+&nbsp;	public static final String EDIT_PROBLEMS = &quot;Edit Problems&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Remove problems&quot;)
+&nbsp;	public static final String DELETE_PROBLEMS = &quot;Remove Problems&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Add allergies&quot;)
+&nbsp;	public static final String ADD_ALLERGIES = &quot;Add Allergies&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit allergies&quot;)
+&nbsp;	public static final String EDIT_ALLERGIES = &quot;Edit Allergies&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Remove allergies&quot;)
+&nbsp;	public static final String DELETE_ALLERGIES = &quot;Remove Allergies&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to view/add/remove the concept stop words&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_STOP_WORDS = &quot;Manage Concept Stop Words&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add an HL7 Source&quot;)
+&nbsp;	public static final String PRIV_ADD_HL7_SOURCE = &quot;Add HL7 Source&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to update an HL7 Source&quot;)
+&nbsp;	public static final String PRIV_UPDATE_HL7_SOURCE = &quot;Update HL7 Source&quot;;
+&nbsp;	
+&nbsp;	public static final String PRIV_PURGE_HL7_SOURCE = &quot;Purge HL7 Source&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add an HL7 Queue item&quot;)
+&nbsp;	public static final String PRIV_ADD_HL7_IN_QUEUE = &quot;Add HL7 Inbound Queue&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to update an HL7 Queue item&quot;)
+&nbsp;	public static final String PRIV_UPDATE_HL7_IN_QUEUE = &quot;Update HL7 Inbound Queue&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete an HL7 Queue item&quot;)
+&nbsp;	public static final String PRIV_DELETE_HL7_IN_QUEUE = &quot;Delete HL7 Inbound Queue&quot;;
+&nbsp;	
+&nbsp;	public static final String PRIV_PURGE_HL7_IN_QUEUE = &quot;Purge HL7 Inbound Queue&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add an HL7 archive item&quot;)
+&nbsp;	public static final String PRIV_ADD_HL7_IN_ARCHIVE = &quot;Add HL7 Inbound Archive&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to update an HL7 archive item&quot;)
+&nbsp;	public static final String PRIV_UPDATE_HL7_IN_ARCHIVE = &quot;Update HL7 Inbound Archive&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete/retire an HL7 archive item&quot;)
+&nbsp;	public static final String PRIV_DELETE_HL7_IN_ARCHIVE = &quot;Delete HL7 Inbound Archive&quot;;
+&nbsp;	
+&nbsp;	public static final String PRIV_PURGE_HL7_IN_ARCHIVE = &quot;Purge HL7 Inbound Archive&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add an HL7 error item&quot;)
+&nbsp;	public static final String PRIV_ADD_HL7_IN_EXCEPTION = &quot;Add HL7 Inbound Exception&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to update an HL7 archive item&quot;)
+&nbsp;	public static final String PRIV_UPDATE_HL7_IN_EXCEPTION = &quot;Update HL7 Inbound Exception&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete an HL7 archive item&quot;)
+&nbsp;	public static final String PRIV_DELETE_HL7_IN_EXCEPTION = &quot;Delete HL7 Inbound Exception&quot;;
+&nbsp;	
+&nbsp;	public static final String PRIV_PURGE_HL7_IN_EXCEPTION = &quot;Purge HL7 Inbound Exception&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/delete visit types&quot;)
+&nbsp;	public static final String MANAGE_VISIT_TYPES = &quot;Manage Visit Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add visits&quot;)
+&nbsp;	public static final String ADD_VISITS = &quot;Add Visits&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit visits&quot;)
+&nbsp;	public static final String EDIT_VISITS = &quot;Edit Visits&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to delete visits&quot;)
+&nbsp;	public static final String DELETE_VISITS = &quot;Delete Visits&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_VISITS = &quot;Purge Visits&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire visit attribute types&quot;)
+&nbsp;	public static final String MANAGE_VISIT_ATTRIBUTE_TYPES = &quot;Manage Visit Attribute Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_VISIT_ATTRIBUTE_TYPES = &quot;Purge Visit Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire location attribute types&quot;)
+&nbsp;	public static final String MANAGE_LOCATION_ATTRIBUTE_TYPES = &quot;Manage Location Attribute Types&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_LOCATION_ATTRIBUTE_TYPES = &quot;Purge Location Attribute Types&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit Provider&quot;)
+&nbsp;	public static final String MANAGE_PROVIDERS = &quot;Manage Providers&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_PROVIDERS = &quot;Purge Providers&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ENCOUNTER_ROLES = &quot;Purge Encounter Roles&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire encounter roles&quot;)
+&nbsp;	public static final String MANAGE_ENCOUNTER_ROLES = &quot;Manage Encounter Roles&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to assign System Developer role&quot;)
+&nbsp;	public static final String ASSIGN_SYSTEM_DEVELOPER_ROLE = &quot;Assign System Developer Role&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get Order Frequencies&quot;)
+&nbsp;	public static final String GET_ORDER_FREQUENCIES = &quot;Get Order Frequencies&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire Order Frequencies&quot;)
+&nbsp;	public static final String MANAGE_ORDER_FREQUENCIES = &quot;Manage Order Frequencies&quot;;
+&nbsp;	
+&nbsp;	public static final String PURGE_ORDER_FREQUENCIES = &quot;Purge Order Frequencies&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to get Care Settings&quot;)
+&nbsp;	public static final String GET_CARE_SETTINGS = &quot;Get Care Settings&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to manage the search index&quot;)
+&nbsp;	public static final String MANAGE_SEARCH_INDEX = &quot;Manage Search Index&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to add, edit, delete allergies&quot;)
+&nbsp;	public static final String MODIFY_ALLERGIES = &quot;Task: Modify Allergies&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get order sets&quot;)
+&nbsp;	public static final String GET_ORDER_SETS = &quot;Get Order Sets&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to manage order sets&quot;)
+&nbsp;	public static final String MANAGE_ORDER_SETS = &quot;Manage Order Sets&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get concept attribute types&quot;)
+&nbsp;	public static final String GET_CONCEPT_ATTRIBUTE_TYPES = &quot;Get Concept Attribute Types&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire concept attribute types&quot;)
+&nbsp;	public static final String MANAGE_CONCEPT_ATTRIBUTE_TYPES = &quot;Manage Concept Attribute Types&quot;;
+&nbsp;
+&nbsp;	public static final String PURGE_CONCEPT_ATTRIBUTE_TYPES = &quot;Purge Concept Attribute Types&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to edit conditions&quot;)
+&nbsp;	public static final String EDIT_CONDITIONS = &quot;Edit Conditions&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get conditions&quot;)
+&nbsp;	public static final String GET_CONDITIONS = &quot;Get Conditions&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to delete conditions&quot;)
+&nbsp;	public static final String DELETE_CONDITIONS = &quot;Delete Conditions&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to edit diagnoses&quot;)
+&nbsp;	public static final String EDIT_DIAGNOSES = &quot;Edit Diagnoses&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get diagnoses&quot;)
+&nbsp;	public static final String GET_DIAGNOSES = &quot;Get Diagnoses&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to delete diagnoses&quot;)
+&nbsp;	public static final String DELETE_DIAGNOSES = &quot;Delete Diagnoses&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get diagnoses attribute types&quot;)
+&nbsp;	public static final String GET_DIAGNOSES_ATTRIBUTE_TYPES = &quot;Get Diagnoses Attribute Types&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get order set attribute types&quot;)
+&nbsp;	public static final String GET_ORDER_SET_ATTRIBUTE_TYPES = &quot;Get Order Set Attribute Types&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to add/edit/retire order set attribute types&quot;)
+&nbsp;	public static final String MANAGE_ORDER_SET_ATTRIBUTE_TYPES = &quot;Manage Order Set Attribute Types&quot;;
+&nbsp;
+&nbsp;	public static final String PURGE_ORDER_SET_ATTRIBUTE_TYPES = &quot;Purge Order Set Attribute Types&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to get Medication Dispenses&quot;)
+&nbsp;	public static final String GET_MEDICATION_DISPENSE = &quot;Get Medication Dispense&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Able to edit Medication Dispenses&quot;)
+&nbsp;	public static final String EDIT_MEDICATION_DISPENSE = &quot;Edit Medication Dispense&quot;;
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Able to delete Medication Dispenses&quot;)
+&nbsp;	public static final String DELETE_MEDICATION_DISPENSE = &quot;Delete Medication Dispense&quot;;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,286 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConditionServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ConditionServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConditionServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,7%
+  </span>
+  <span class="absValue">
+    (11/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,1%
+  </span>
+  <span class="absValue">
+    (32/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; * 
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.BooleanUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.Condition;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.ConditionService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.ConditionDAO;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class implements the {@link ConditionService} interface
+&nbsp; * It defines the methods to handle the condition domain object
+&nbsp; *
+&nbsp; * @since 2.2
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class ConditionServiceImpl extends BaseOpenmrsService implements ConditionService {</b>
+&nbsp;
+&nbsp;	private ConditionDAO conditionDAO;
+&nbsp;
+&nbsp;	public void setConditionDAO(ConditionDAO conditionDAO) {
+<b class="fc">&nbsp;		this.conditionDAO = conditionDAO;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public ConditionDAO getConditionDAO() {
+<b class="nc">&nbsp;		return conditionDAO;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a condition based on the uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid - uuid of the condition to be returned
+&nbsp;	 * @return the condition that is gotten by the given uuid
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Condition getConditionByUuid(String uuid) {
+<b class="fc">&nbsp;		return conditionDAO.getConditionByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a condition by id
+&nbsp;	 *
+&nbsp;	 * @param conditionId - the id of the Condition to retrieve
+&nbsp;	 * @return the condition that is gotten by the given id
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Condition getCondition(Integer conditionId) {
+<b class="fc">&nbsp;		return conditionDAO.getCondition(conditionId);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a patient&#39;s active conditions
+&nbsp;	 *
+&nbsp;	 * @param patient - the patient to retrieve conditions for
+&nbsp;	 * @return a list of the patient&#39;s active conditions
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Condition&gt; getActiveConditions(Patient patient) {
+<b class="fc">&nbsp;		return conditionDAO.getActiveConditions(patient);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see ConditionService#getAllConditions(Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Condition&gt; getAllConditions(Patient patient) {
+<b class="fc">&nbsp;		return conditionDAO.getAllConditions(patient);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see ConditionService#getConditionsByEncounter(Encounter)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Condition&gt; getConditionsByEncounter(Encounter encounter) throws APIException {
+<b class="fc">&nbsp;		return conditionDAO.getConditionsByEncounter(encounter);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves a condition
+&nbsp;	 *
+&nbsp;	 * @param condition - the condition to be saved
+&nbsp;	 * @return the saved condition
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Condition saveCondition(Condition condition) throws APIException {
+&nbsp;		
+&nbsp;		// If there is no existing condition, then we are creating a condition
+<b class="fc">&nbsp;		Integer existingConditionId = condition.getConditionId();</b>
+<b class="fc">&nbsp;		if (existingConditionId == null) {</b>
+<b class="fc">&nbsp;			return conditionDAO.saveCondition(condition);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// If there is an existing condition, create a new condition from it and reset the existing instance state
+<b class="fc">&nbsp;		Condition newCondition = Condition.newInstance(condition);</b>
+<b class="fc">&nbsp;		Context.refreshEntity(condition);</b>
+&nbsp;		
+&nbsp;		// Determine how the existing state and new state have changed
+<b class="fc">&nbsp;		boolean conditionHasChanged = !newCondition.matches(condition);</b>
+<b class="fc">&nbsp;		boolean existingVoided = BooleanUtils.isTrue(condition.getVoided());</b>
+<b class="fc">&nbsp;		boolean newVoided = BooleanUtils.isTrue(newCondition.getVoided());</b>
+<b class="fc">&nbsp;		boolean voidOriginal = !existingVoided &amp;&amp; conditionHasChanged;</b>
+<b class="fc">&nbsp;		boolean saveNew = !newVoided &amp;&amp; conditionHasChanged;</b>
+&nbsp;		
+&nbsp;		// If the intention is to void or change the original Condition, then void the existing and save the new
+<b class="fc">&nbsp;		if (voidOriginal) {</b>
+<b class="fc">&nbsp;			User currentUser = Context.getAuthenticatedUser();</b>
+<b class="fc">&nbsp;			String reason = saveNew ? &quot;Condition replaced by &quot; + newCondition.getUuid() : &quot;Condition removed&quot;;</b>
+<b class="fc">&nbsp;			condition.setVoided(true);</b>
+<b class="fc">&nbsp;			condition.setVoidedBy(newCondition.getVoidedBy() == null ? currentUser : newCondition.getVoidedBy());</b>
+<b class="fc">&nbsp;			condition.setVoidReason(newCondition.getVoidReason() == null ? reason : newCondition.getVoidReason());</b>
+<b class="fc">&nbsp;			condition = conditionDAO.saveCondition(condition);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (saveNew) {</b>
+<b class="fc">&nbsp;			newCondition.setPreviousVersion(condition);</b>
+<b class="fc">&nbsp;			return conditionDAO.saveCondition(newCondition);</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			return condition;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Voids a condition
+&nbsp;	 *
+&nbsp;	 * @param condition  - the condition to be voided
+&nbsp;	 * @param voidReason - the reason for voiding the condition
+&nbsp;	 * @return the voided condition
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Condition voidCondition(Condition condition, String voidReason) {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(voidReason)) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;voidReason cannot be null or empty&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return conditionDAO.saveCondition(condition);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Revive a condition
+&nbsp;	 *
+&nbsp;	 * @param condition Condition to unvoid
+&nbsp;	 * @return the unvoided condition
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Condition unvoidCondition(Condition condition) {
+<b class="fc">&nbsp;		return conditionDAO.saveCondition(condition);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely remove a condition from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidCondition(Condition) for that one) If other things link to
+&nbsp;	 * this condition, an error will be thrown.
+&nbsp;	 *
+&nbsp;	 * @param condition the condition to purge from the database
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeCondition(Condition condition) {
+<b class="fc">&nbsp;		conditionDAO.deleteCondition(condition);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

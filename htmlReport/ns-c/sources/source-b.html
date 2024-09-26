@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ExistingVisitAssignmentHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: ExistingVisitAssignmentHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ExistingVisitAssignmentHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    82,4%
+  </span>
+  <span class="absValue">
+    (14/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * This handler assigns an encounter to an existing visit, where appropriate, but will never create
+&nbsp; * a new visit.
+&nbsp; *
+&nbsp; * @see EncounterVisitHandler
+&nbsp; */
+&nbsp;@Handler
+<b class="fc">&nbsp;public class ExistingVisitAssignmentHandler extends BaseEncounterVisitHandler {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.handler.EncounterVisitHandler#getDisplayName(java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDisplayName(Locale locale) {
+<b class="nc">&nbsp;		return Context.getMessageSourceService().getMessage(&quot;visit.assignmentHandler.assignToExistingVisitOnly&quot;, null,</b>
+&nbsp;		    locale);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.handler.EncounterVisitHandler#beforeCreateEncounter(org.openmrs.Encounter)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign existing visit if match found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not assign visit if no match found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not assign visit which stopped before encounter date
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void beforeCreateEncounter(Encounter encounter) {
+&nbsp;		
+&nbsp;		//Do nothing if the encounter already belongs to a visit.
+<b class="fc">&nbsp;		if (encounter.getVisit() != null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Patient&gt; patients = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		patients.add(encounter.getPatient());</b>
+&nbsp;		
+&nbsp;		//Fetch visits for this patient that haven&#39;t ended by the encounter date.
+<b class="fc">&nbsp;		List&lt;Visit&gt; visits = Context.getVisitService().getVisits(null, patients, null, null, null,</b>
+<b class="fc">&nbsp;		    encounter.getEncounterDatetime(), null, null, null, true, false);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (visits == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Date encounterDate = encounter.getEncounterDatetime();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Visit visit : visits) {</b>
+&nbsp;			//skip visits which are started after the encounter date.
+<b class="fc">&nbsp;			if (visit.getStartDatetime().after(encounterDate)) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//skip visits which ended before the encounter date
+<b class="fc">&nbsp;			if (visit.getStopDatetime() != null &amp;&amp; visit.getStopDatetime().before(encounterDate)) {</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (visit.getLocation() == null || Location.isInHierarchy(encounter.getLocation(), visit.getLocation())) {</b>
+<b class="fc">&nbsp;				encounter.setVisit(visit);</b>
+&nbsp;				return;
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

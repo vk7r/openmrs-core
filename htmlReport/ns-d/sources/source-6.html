@@ -1,0 +1,340 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DatatypeServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: DatatypeServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DatatypeServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (63/70)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.lang.reflect.ParameterizedType;
+&nbsp;import java.lang.reflect.Type;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.api.DatatypeService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.ClobDatatypeStorage;
+&nbsp;import org.openmrs.api.db.DatatypeDAO;
+&nbsp;import org.openmrs.customdatatype.CustomDatatype;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeException;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeHandler;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Standard implementation of {@link DatatypeService}
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class DatatypeServiceImpl extends BaseOpenmrsService implements DatatypeService {</b>
+&nbsp;	
+&nbsp;	private List&lt;Class&lt;? extends CustomDatatype&gt;&gt; datatypeClasses;
+&nbsp;	
+&nbsp;	private List&lt;Class&lt;? extends CustomDatatypeHandler&gt;&gt; handlerClasses;
+&nbsp;	
+&nbsp;	private transient Map&lt;Class&lt;? extends CustomDatatype&gt;, Class&lt;? extends CustomDatatypeHandler&gt;&gt; prioritizedHandlerClasses;
+&nbsp;	
+&nbsp;	private DatatypeDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the dao
+&nbsp;	 *
+&nbsp;	 * @param dao the dao to set
+&nbsp;	 */
+&nbsp;	public void setDao(DatatypeDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getAllDatatypeClasses()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public synchronized Set&lt;Class&lt;? extends CustomDatatype&lt;?&gt;&gt;&gt; getAllDatatypeClasses() {
+<b class="fc">&nbsp;		if (datatypeClasses == null) {</b>
+<b class="fc">&nbsp;			populateBeanListsFromContext();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return new LinkedHashSet(datatypeClasses);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getAllHandlerClasses()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public synchronized Set&lt;Class&lt;? extends CustomDatatypeHandler&lt;?, ?&gt;&gt;&gt; getAllHandlerClasses() {
+<b class="fc">&nbsp;		if (handlerClasses == null) {</b>
+<b class="nc">&nbsp;			populateBeanListsFromContext();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return new LinkedHashSet(handlerClasses);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private synchronized void populateBeanListsFromContext() {
+<b class="fc">&nbsp;		if (datatypeClasses == null) {</b>
+<b class="fc">&nbsp;			List&lt;CustomDatatype&gt; datatypeBeans = Context.getRegisteredComponents(CustomDatatype.class);</b>
+<b class="fc">&nbsp;			datatypeClasses = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (CustomDatatype&lt;?&gt; dt : datatypeBeans) {</b>
+<b class="fc">&nbsp;				datatypeClasses.add(dt.getClass());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;		}
+<b class="fc">&nbsp;		if (handlerClasses == null) {</b>
+<b class="fc">&nbsp;			List&lt;CustomDatatypeHandler&gt; handlerBeans = Context.getRegisteredComponents(CustomDatatypeHandler.class);</b>
+<b class="fc">&nbsp;			handlerClasses = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (CustomDatatypeHandler&lt;?, ?&gt; h : handlerBeans) {</b>
+<b class="fc">&nbsp;				handlerClasses.add(h.getClass());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getDatatype(java.lang.Class, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public &lt;T extends CustomDatatype&lt;?&gt;&gt; T getDatatype(Class&lt;T&gt; clazz, String config) {
+&nbsp;		try {
+<b class="fc">&nbsp;			T dt = clazz.newInstance();</b>
+<b class="fc">&nbsp;			dt.setConfiguration(config);</b>
+<b class="fc">&nbsp;			return dt;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception ex) {</b>
+<b class="fc">&nbsp;			throw new CustomDatatypeException(&quot;Failed to instantiate &quot; + clazz + &quot; with config &quot; + config, ex);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getHandlerClasses(Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Class&lt;? extends CustomDatatypeHandler&gt;&gt; getHandlerClasses(Class&lt;? extends CustomDatatype&lt;?&gt;&gt; datatype) {
+<b class="fc">&nbsp;		List&lt;Class&lt;? extends CustomDatatypeHandler&gt;&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (Class&lt;? extends CustomDatatypeHandler&lt;?, ?&gt;&gt; candidate : getAllHandlerClasses()) {</b>
+<b class="fc">&nbsp;			if (datatypeClassHandled(candidate).equals(datatype)) {</b>
+<b class="fc">&nbsp;				ret.add(candidate);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param t
+&nbsp;	 * @return the generic type of t or an interface it implements that is a CustomDatatype
+&nbsp;	 */
+&nbsp;	private Class datatypeClassHandled(Type t) {
+<b class="fc">&nbsp;		if (t instanceof ParameterizedType) {</b>
+<b class="fc">&nbsp;			ParameterizedType pt = (ParameterizedType) t;</b>
+<b class="fc">&nbsp;			Type first = pt.getActualTypeArguments()[0];</b>
+<b class="fc">&nbsp;			if (first instanceof Class &amp;&amp; CustomDatatype.class.isAssignableFrom((Class) first)) {</b>
+<b class="fc">&nbsp;				return (Class) first;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				return datatypeClassHandled(pt.getRawType());</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;		} else if (t instanceof Class) {</b>
+<b class="fc">&nbsp;			Type genericSuperclass = ((Class) t).getGenericSuperclass();</b>
+<b class="fc">&nbsp;			if (genericSuperclass != null) {</b>
+<b class="fc">&nbsp;				Class ret = datatypeClassHandled(genericSuperclass);</b>
+<b class="fc">&nbsp;				if (ret != null) {</b>
+<b class="fc">&nbsp;					return ret;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;			for (Type candidate : ((Class) t).getGenericInterfaces()) {</b>
+<b class="fc">&nbsp;				Class ret = datatypeClassHandled(candidate);</b>
+<b class="fc">&nbsp;				if (ret != null) {</b>
+<b class="fc">&nbsp;					return ret;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getHandler(org.openmrs.customdatatype.CustomDatatype, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public synchronized CustomDatatypeHandler&lt;?, ?&gt; getHandler(CustomDatatype&lt;?&gt; datatype, String handlerConfig) {
+<b class="fc">&nbsp;		if (prioritizedHandlerClasses == null) {</b>
+<b class="fc">&nbsp;			prioritizeHandlers();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Class&lt;? extends CustomDatatypeHandler&gt; clazz = prioritizedHandlerClasses.get(datatype.getClass());</b>
+<b class="fc">&nbsp;		if (clazz == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		try {
+<b class="fc">&nbsp;			CustomDatatypeHandler&lt;?, ?&gt; ret = clazz.newInstance();</b>
+<b class="fc">&nbsp;			ret.setHandlerConfiguration(handlerConfig);</b>
+<b class="fc">&nbsp;			return ret;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			throw new CustomDatatypeException(&quot;Failed to instantiate handler for &quot; + datatype + &quot; with config &quot;</b>
+&nbsp;			        + handlerConfig, ex);
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * private method that prioritizes all registered handlers so we can quickly determine which to use for
+&nbsp;	 * each datatype
+&nbsp;	 */
+&nbsp;	private synchronized void prioritizeHandlers() {
+<b class="fc">&nbsp;		if (prioritizedHandlerClasses == null) {</b>
+<b class="fc">&nbsp;			prioritizedHandlerClasses = new LinkedHashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (Class dt : getAllDatatypeClasses()) {</b>
+<b class="fc">&nbsp;				List&lt;Class&lt;? extends CustomDatatypeHandler&gt;&gt; handlerClasses = getHandlerClasses(dt);</b>
+<b class="fc">&nbsp;				if (handlerClasses == null || handlerClasses.isEmpty()) {</b>
+<b class="fc">&nbsp;					prioritizedHandlerClasses.put(dt, null);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					prioritizedHandlerClasses.put(dt, handlerClasses.get(0));</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getClobDatatypeStorage(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ClobDatatypeStorage getClobDatatypeStorage(Integer id) {
+<b class="nc">&nbsp;		return dao.getClobDatatypeStorage(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#getClobDatatypeStorageByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ClobDatatypeStorage getClobDatatypeStorageByUuid(String uuid) {
+<b class="nc">&nbsp;		return dao.getClobDatatypeStorageByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#saveClobDatatypeStorage(org.openmrs.api.db.ClobDatatypeStorage)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ClobDatatypeStorage saveClobDatatypeStorage(ClobDatatypeStorage storage) {
+<b class="fc">&nbsp;		return dao.saveClobDatatypeStorage(storage);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DatatypeService#deleteClobDatatypeStorage(org.openmrs.api.db.ClobDatatypeStorage)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteClobDatatypeStorage(ClobDatatypeStorage storage) {
+<b class="nc">&nbsp;		dao.deleteClobDatatypeStorage(storage);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

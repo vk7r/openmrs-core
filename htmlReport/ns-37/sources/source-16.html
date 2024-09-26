@@ -1,0 +1,220 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UpdateCohortMemberIdsChangeset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: UpdateCohortMemberIdsChangeset (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UpdateCohortMemberIdsChangeset</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * This change set is run to update cohort member ids
+&nbsp; */
+<b class="nc">&nbsp;public class UpdateCohortMemberIdsChangeset implements CustomTaskChange {</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(UpdateCohortMemberIdsChangeset.class);</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see CustomTaskChange#execute(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="nc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+<b class="nc">&nbsp;		Statement stmt = null;</b>
+<b class="nc">&nbsp;		PreparedStatement pStmt = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			stmt = connection.createStatement();</b>
+<b class="nc">&nbsp;			ResultSet rs = stmt.executeQuery(&quot;SELECT * FROM cohort_member&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			pStmt = connection</b>
+<b class="nc">&nbsp;					.prepareStatement(&quot;UPDATE cohort_member SET cohort_member_id = ?&quot;</b>
+&nbsp;							+ &quot; WHERE cohort_id = ? AND patient_id = ?&quot;);
+<b class="nc">&nbsp;			int i = 0;</b>
+<b class="nc">&nbsp;			while (rs.next()) {</b>
+<b class="nc">&nbsp;				int cohortId = rs.getInt(&quot;cohort_id&quot;);</b>
+<b class="nc">&nbsp;				int patientId = rs.getInt(&quot;patient_id&quot;);</b>
+<b class="nc">&nbsp;				pStmt.setInt(1, ++i);</b>
+<b class="nc">&nbsp;				pStmt.setInt(2, cohortId);</b>
+<b class="nc">&nbsp;				pStmt.setInt(3, patientId);</b>
+<b class="nc">&nbsp;				pStmt.addBatch();</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			pStmt.executeBatch();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (stmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					stmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			if (pStmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					pStmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the prepared statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Finished updating cohort member ids&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor resourceAccessor) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

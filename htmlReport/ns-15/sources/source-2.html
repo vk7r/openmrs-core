@@ -1,0 +1,1383 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ORUR01Handler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: ORUR01Handler (org.openmrs.hl7.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ORUR01Handler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (37/37)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,8%
+  </span>
+  <span class="absValue">
+    (407/523)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7.handler;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptAnswer;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.ConceptProposal;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.EncounterRole;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonAttributeType;
+&nbsp;import org.openmrs.Provider;
+&nbsp;import org.openmrs.Relationship;
+&nbsp;import org.openmrs.RelationshipType;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.hl7.HL7Constants;
+&nbsp;import org.openmrs.hl7.HL7InQueueProcessor;
+&nbsp;import org.openmrs.obs.ComplexData;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;import ca.uhn.hl7v2.HL7Exception;
+&nbsp;import ca.uhn.hl7v2.app.Application;
+&nbsp;import ca.uhn.hl7v2.app.ApplicationException;
+&nbsp;import ca.uhn.hl7v2.model.DataTypeException;
+&nbsp;import ca.uhn.hl7v2.model.Message;
+&nbsp;import ca.uhn.hl7v2.model.Type;
+&nbsp;import ca.uhn.hl7v2.model.Varies;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.CE;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.CWE;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.CX;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.DLD;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.DT;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.DTM;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.ED;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.EI;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.FT;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.ID;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.IS;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.NM;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.PL;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.ST;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.TM;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.TS;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.XCN;
+&nbsp;import ca.uhn.hl7v2.model.v25.group.ORU_R01_OBSERVATION;
+&nbsp;import ca.uhn.hl7v2.model.v25.group.ORU_R01_ORDER_OBSERVATION;
+&nbsp;import ca.uhn.hl7v2.model.v25.group.ORU_R01_PATIENT_RESULT;
+&nbsp;import ca.uhn.hl7v2.model.v25.message.ORU_R01;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.MSH;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.NK1;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.OBR;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.OBX;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.ORC;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.PID;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.PV1;
+&nbsp;import ca.uhn.hl7v2.parser.EncodingCharacters;
+&nbsp;import ca.uhn.hl7v2.parser.PipeParser;
+&nbsp;
+&nbsp;/**
+&nbsp; * Parses ORUR01 messages into openmrs Encounter objects Usage: GenericParser parser = new
+&nbsp; * GenericParser(); MessageTypeRouter router = new MessageTypeRouter();
+&nbsp; * router.registerApplication(&quot;ORU&quot;, &quot;R01&quot;, new ORUR01Handler()); Message hl7message =
+&nbsp; * parser.parse(somehl7string);
+&nbsp; *
+&nbsp; * @see HL7InQueueProcessor
+&nbsp; */
+<b class="fc">&nbsp;public class ORUR01Handler implements Application {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ORUR01Handler.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static EncounterRole unknownRole = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Always returns true, assuming that the router calling this handler will only call this
+&nbsp;	 * handler with ORU_R01 messages.
+&nbsp;	 *
+&nbsp;	 * @return true
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean canProcess(Message message) {
+<b class="fc">&nbsp;		return message != null &amp;&amp; &quot;ORU_R01&quot;.equals(message.getName());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Processes an ORU R01 event message
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create encounter and obs from hl7 message
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create basic concept proposal
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create concept proposal and with obs alongside
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not create problem list observation with concept proposals
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; append to an existing encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create obs group for OBRs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create obs valueCodedName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on empty concept proposals
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on empty concept answers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set value_Coded matching a boolean concept for obs if the answer is 0 or 1 and
+&nbsp;	 *         Question datatype is coded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set value as boolean for obs if the answer is 0 or 1 and Question datatype is Boolean
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set value_Numeric for obs if Question datatype is Numeric and the answer is either 0
+&nbsp;	 *         or 1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set value_Numeric for obs if Question datatype is Numeric
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if question datatype is coded and a boolean is not a valid answer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if question datatype is neither Boolean nor numeric nor coded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create an encounter and find the provider by identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create an encounter and find the provider by personId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create an encounter and find the provider by uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create an encounter and find the provider by providerId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the provider name type code is not specified and is not a personId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; understand form uuid if present
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; prefer form uuid over id if both are present
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; prefer form id if uuid is not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set complex data for obs with complex concepts
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message processMessage(Message message) throws ApplicationException {
+&nbsp;		
+<b class="fc">&nbsp;		if (!(message instanceof ORU_R01)) {</b>
+<b class="nc">&nbsp;			throw new ApplicationException(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.invalidMessage&quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Processing ORU_R01 message&quot;);</b>
+&nbsp;		
+&nbsp;		Message response;
+&nbsp;		try {
+<b class="fc">&nbsp;			ORU_R01 oru = (ORU_R01) message;</b>
+<b class="fc">&nbsp;			response = processORU_R01(oru);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassCastException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error casting &quot; + message.getClass().getName() + &quot; to ORU_R01&quot;, e);</b>
+<b class="nc">&nbsp;			throw new ApplicationException(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.invalidMessageType &quot;,</b>
+<b class="nc">&nbsp;			    new Object[] { message.getClass().getName() }, null), e);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (HL7Exception e) {</b>
+<b class="fc">&nbsp;			log.warn(&quot;Error while processing ORU_R01 message&quot;, e);</b>
+<b class="fc">&nbsp;			throw new ApplicationException(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.WhileProcessing&quot;), e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Finished processing ORU_R01 message&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return response;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Bulk of the processing done here. Called by the main processMessage method
+&nbsp;	 *
+&nbsp;	 * @param oru the message to process
+&nbsp;	 * @return the processed message
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; process multiple NK1 segments
+&nbsp;	 */
+&nbsp;	private Message processORU_R01(ORU_R01 oru) throws HL7Exception {
+&nbsp;		
+&nbsp;		// TODO: ideally, we would branch or alter our behavior based on the
+&nbsp;		// sending application.
+&nbsp;		
+&nbsp;		// validate message
+<b class="fc">&nbsp;		validate(oru);</b>
+&nbsp;		
+&nbsp;		// extract segments for convenient use below
+<b class="fc">&nbsp;		MSH msh = getMSH(oru);</b>
+<b class="fc">&nbsp;		PID pid = getPID(oru);</b>
+<b class="fc">&nbsp;		List&lt;NK1&gt; nk1List = getNK1List(oru);</b>
+<b class="fc">&nbsp;		PV1 pv1 = getPV1(oru);</b>
+<b class="fc">&nbsp;		ORC orc = getORC(oru); // we&#39;re using the ORC assoc with first OBR to</b>
+&nbsp;		// hold data enterer and date entered for now
+&nbsp;		
+&nbsp;		// Obtain message control id (unique ID for message from sending
+&nbsp;		// application)
+<b class="fc">&nbsp;		String messageControlId = msh.getMessageControlID().getValue();</b>
+<b class="fc">&nbsp;		log.debug(&quot;Found HL7 message in inbound queue with control id = {}&quot;, messageControlId);</b>
+&nbsp;		// create the encounter
+<b class="fc">&nbsp;		Patient patient = getPatient(pid);</b>
+<b class="fc">&nbsp;		log.debug(&quot;Processing HL7 message for patient {}&quot;, patient.getPatientId());</b>
+<b class="fc">&nbsp;		Encounter encounter = createEncounter(msh, patient, pv1, orc);</b>
+&nbsp;		
+&nbsp;		// do the discharge to location logic
+&nbsp;		try {
+<b class="fc">&nbsp;			updateHealthCenter(patient, pv1);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error while processing Discharge To Location (&quot; + messageControlId + &quot;)&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// process NK1 (relationship) segments
+<b class="fc">&nbsp;		for (NK1 nk1 : nk1List) {</b>
+<b class="fc">&nbsp;			processNK1(patient, nk1);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// list of concepts proposed in the obs of this encounter.
+&nbsp;		// these proposals need to be created after the encounter
+&nbsp;		// has been created
+<b class="fc">&nbsp;		List&lt;ConceptProposal&gt; conceptProposals = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+&nbsp;		// create observations
+<b class="fc">&nbsp;		log.debug(&quot;Creating observations for message {}...&quot;, messageControlId);</b>
+&nbsp;		// we ignore all MEDICAL_RECORD_OBSERVATIONS that are OBRs.  We do not
+&nbsp;		// create obs_groups for them
+<b class="fc">&nbsp;		List&lt;Integer&gt; ignoredConceptIds = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		String obrConceptId = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_MEDICAL_RECORD_OBSERVATIONS, &quot;1238&quot;);
+<b class="fc">&nbsp;		if (StringUtils.hasLength(obrConceptId)) {</b>
+<b class="fc">&nbsp;			ignoredConceptIds.add(Integer.valueOf(obrConceptId));</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// we also ignore all PROBLEM_LIST that are OBRs
+<b class="fc">&nbsp;		String obrProblemListConceptId = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_PROBLEM_LIST, &quot;1284&quot;);
+<b class="fc">&nbsp;		if (StringUtils.hasLength(obrProblemListConceptId)) {</b>
+<b class="fc">&nbsp;			ignoredConceptIds.add(Integer.valueOf(obrProblemListConceptId));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ORU_R01_PATIENT_RESULT patientResult = oru.getPATIENT_RESULT();</b>
+<b class="fc">&nbsp;		int numObr = patientResult.getORDER_OBSERVATIONReps();</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; numObr; i++) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Processing OBR ({} of {})&quot;, i, numObr);</b>
+<b class="fc">&nbsp;			ORU_R01_ORDER_OBSERVATION orderObs = patientResult.getORDER_OBSERVATION(i);</b>
+&nbsp;			
+&nbsp;			// the parent obr
+<b class="fc">&nbsp;			OBR obr = orderObs.getOBR();</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!StringUtils.hasText(obr.getUniversalServiceIdentifier().getIdentifier().getValue())) {</b>
+<b class="nc">&nbsp;				throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.errorInvalidOBR &quot;,</b>
+&nbsp;				    new Object[] { messageControlId }, null));
+&nbsp;			}
+&nbsp;			
+&nbsp;			// if we&#39;re not ignoring this obs group, create an
+&nbsp;			// Obs grouper object that the underlying obs objects will use
+<b class="fc">&nbsp;			Obs obsGrouper = null;</b>
+<b class="fc">&nbsp;			Concept obrConcept = getConcept(obr.getUniversalServiceIdentifier(), messageControlId);</b>
+<b class="fc">&nbsp;			if (obrConcept != null &amp;&amp; !ignoredConceptIds.contains(obrConcept.getId())) {</b>
+&nbsp;				// maybe check for a parent obs group from OBR-29 Parent ?
+&nbsp;				
+&nbsp;				// create an obs for this obs group too
+<b class="fc">&nbsp;				obsGrouper = new Obs();</b>
+<b class="fc">&nbsp;				obsGrouper.setConcept(obrConcept);</b>
+<b class="fc">&nbsp;				obsGrouper.setPerson(encounter.getPatient());</b>
+<b class="fc">&nbsp;				obsGrouper.setEncounter(encounter);</b>
+<b class="fc">&nbsp;				Date datetime = getDatetime(obr);</b>
+<b class="fc">&nbsp;				if (datetime == null) {</b>
+<b class="fc">&nbsp;					datetime = encounter.getEncounterDatetime();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				obsGrouper.setObsDatetime(datetime);</b>
+<b class="fc">&nbsp;				obsGrouper.setLocation(encounter.getLocation());</b>
+<b class="fc">&nbsp;				obsGrouper.setCreator(encounter.getCreator());</b>
+&nbsp;				
+&nbsp;				// set comments if there are any
+<b class="fc">&nbsp;				StringBuilder comments = new StringBuilder();</b>
+<b class="fc">&nbsp;				ORU_R01_ORDER_OBSERVATION parent = (ORU_R01_ORDER_OBSERVATION) obr.getParent();</b>
+<b class="fc">&nbsp;				int totalNTEs = parent.getNTEReps();</b>
+<b class="fc">&nbsp;				for (int iNTE = 0; iNTE &lt; totalNTEs; iNTE++) {</b>
+<b class="fc">&nbsp;					for (FT obxComment : parent.getNTE(iNTE).getComment()) {</b>
+<b class="fc">&nbsp;						if (comments.length() &gt; 0) {</b>
+<b class="nc">&nbsp;							comments.append(&quot; &quot;);</b>
+&nbsp;						}
+<b class="fc">&nbsp;						comments.append(obxComment.getValue());</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				// only set comments if there are any
+<b class="fc">&nbsp;				if (StringUtils.hasText(comments.toString())) {</b>
+<b class="fc">&nbsp;					obsGrouper.setComment(comments.toString());</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				// add this obs as another row in the obs table
+<b class="fc">&nbsp;				encounter.addObs(obsGrouper);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// loop over the obs and create each object, adding it to the encounter
+<b class="fc">&nbsp;			int numObs = orderObs.getOBSERVATIONReps();</b>
+<b class="fc">&nbsp;			HL7Exception errorInHL7Queue = null;</b>
+<b class="fc">&nbsp;			for (int j = 0; j &lt; numObs; j++) {</b>
+<b class="fc">&nbsp;				if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;Processing OBS ({} of {})&quot;, j, numObs);</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				OBX obx = orderObs.getOBSERVATION(j).getOBX();</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					log.debug(&quot;Parsing observation&quot;);</b>
+<b class="fc">&nbsp;					Obs obs = parseObs(encounter, obx, obr, messageControlId);</b>
+<b class="fc">&nbsp;					if (obs != null) {</b>
+&nbsp;						
+&nbsp;						// if we&#39;re backfilling an encounter, don&#39;t use
+&nbsp;						// the creator/dateCreated from the encounter
+<b class="fc">&nbsp;						if (encounter.getEncounterId() != null) {</b>
+<b class="fc">&nbsp;							obs.setCreator(getEnterer(orc));</b>
+<b class="fc">&nbsp;							obs.setDateCreated(new Date());</b>
+&nbsp;						}
+&nbsp;						
+&nbsp;						// set the obsGroup on this obs
+<b class="fc">&nbsp;						if (obsGrouper != null) {</b>
+&nbsp;							// set the obs to the group.  This assumes the group is already
+&nbsp;							// on the encounter and that when the encounter is saved it will
+&nbsp;							// propagate to the children obs
+<b class="fc">&nbsp;							obsGrouper.addGroupMember(obs);</b>
+&nbsp;						} else {
+&nbsp;							// set this obs on the encounter object that we
+&nbsp;							// will be saving later
+<b class="fc">&nbsp;							log.debug(&quot;Obs is not null. Adding to encounter object&quot;);</b>
+<b class="fc">&nbsp;							encounter.addObs(obs);</b>
+<b class="fc">&nbsp;							log.debug(&quot;Done with this obs&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;				catch (ProposingConceptException proposingException) {</b>
+<b class="fc">&nbsp;					Concept questionConcept = proposingException.getConcept();</b>
+<b class="fc">&nbsp;					String value = proposingException.getValueName();</b>
+&nbsp;					//if the sender never specified any text for the proposed concept
+<b class="fc">&nbsp;					if (!StringUtils.isEmpty(value)) {</b>
+<b class="fc">&nbsp;						conceptProposals.add(createConceptProposal(encounter, questionConcept, value));</b>
+&nbsp;					} else {
+<b class="fc">&nbsp;						errorInHL7Queue = new HL7Exception(Context.getMessageSourceService().getMessage(</b>
+&nbsp;						    &quot;Hl7.proposed.concept.name.empty&quot;), proposingException);
+&nbsp;						break;//stop any further processing of current message
+&nbsp;					}
+&nbsp;					
+&nbsp;				}
+<b class="fc">&nbsp;				catch (HL7Exception e) {</b>
+<b class="fc">&nbsp;					errorInHL7Queue = e;</b>
+&nbsp;				}
+&nbsp;				finally {
+&nbsp;					// Handle obs-level exceptions
+<b class="fc">&nbsp;					if (errorInHL7Queue != null) {</b>
+<b class="fc">&nbsp;						throw new HL7Exception(Context.getMessageSourceService().getMessage(</b>
+&nbsp;						    &quot;ORUR01.error.improperlyFormattedOBX&quot;,
+<b class="fc">&nbsp;						    new Object[] { PipeParser.encode(obx, new EncodingCharacters(&#39;|&#39;, &quot;^~\\&amp;&quot;)) }, null),</b>
+&nbsp;						        HL7Exception.DATA_TYPE_ERROR, errorInHL7Queue);
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Finished creating observations&quot;);</b>
+<b class="nc">&nbsp;			log.debug(&quot;Current thread: {}&quot;, Thread.currentThread());</b>
+<b class="nc">&nbsp;			log.debug(&quot;Creating the encounter object&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Context.getEncounterService().saveEncounter(encounter);</b>
+&nbsp;		
+&nbsp;		// loop over the proposed concepts and save each to the database
+&nbsp;		// now that the encounter is saved
+<b class="fc">&nbsp;		for (ConceptProposal proposal : conceptProposals) {</b>
+<b class="fc">&nbsp;			Context.getConceptService().saveConceptProposal(proposal);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return oru;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * process an NK1 segment and add relationships if needed
+&nbsp;	 *
+&nbsp;	 * @param patient
+&nbsp;	 * @param nk1
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a relationship from a NK1 segment
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not create a relationship if one exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a person if the relative is not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the coding system is not 99REL
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the relationship identifier is formatted improperly
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the relationship type is not found
+&nbsp;	 */
+&nbsp;	protected void processNK1(Patient patient, NK1 nk1) throws HL7Exception {
+&nbsp;		// guarantee we are working with our custom coding system
+<b class="fc">&nbsp;		String relCodingSystem = nk1.getRelationship().getNameOfCodingSystem().getValue();</b>
+<b class="fc">&nbsp;		if (!relCodingSystem.equals(HL7Constants.HL7_LOCAL_RELATIONSHIP)) {</b>
+<b class="fc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.relationshipCoding&quot;,</b>
+&nbsp;			    new Object[] { relCodingSystem }, null));
+&nbsp;		}
+&nbsp;		
+&nbsp;		// get the relationship type identifier
+<b class="fc">&nbsp;		String relIdentifier = nk1.getRelationship().getIdentifier().getValue();</b>
+&nbsp;		
+&nbsp;		// validate the format of the relationship identifier
+<b class="fc">&nbsp;		if (!Pattern.matches(&quot;[0-9]+[AB]&quot;, relIdentifier)) {</b>
+<b class="fc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.relationshipType&quot;,</b>
+&nbsp;			    new Object[] { relIdentifier }, null));
+&nbsp;		}
+&nbsp;		
+&nbsp;		// get the type ID
+&nbsp;		Integer relTypeId;
+&nbsp;		try {
+<b class="fc">&nbsp;			relTypeId = Integer.parseInt(relIdentifier.substring(0, relIdentifier.length() - 1));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.relationshipType&quot;,</b>
+&nbsp;			    new Object[] { relIdentifier }, null));
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// find the relationship type
+<b class="fc">&nbsp;		RelationshipType relType = Context.getPersonService().getRelationshipType(relTypeId);</b>
+<b class="fc">&nbsp;		if (relType == null) {</b>
+<b class="fc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.relationshipTypeNotFound&quot;,</b>
+&nbsp;			    new Object[] { relTypeId }, null));
+&nbsp;		}
+&nbsp;		
+&nbsp;		// find the relative
+<b class="fc">&nbsp;		Person relative = getRelative(nk1);</b>
+&nbsp;		
+&nbsp;		// determine if the patient is person A or B; the relIdentifier indicates
+&nbsp;		// the relative&#39;s side of the relationship, so the patient is the inverse
+<b class="fc">&nbsp;		boolean patientIsPersonA = relIdentifier.endsWith(&quot;B&quot;);</b>
+<b class="fc">&nbsp;		boolean patientCanBeEitherPerson = relType.getbIsToA().equals(relType.getaIsToB());</b>
+&nbsp;		
+&nbsp;		// look at existing relationships to determine if a new one is needed
+<b class="fc">&nbsp;		Set&lt;Relationship&gt; rels = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (relative != null) {</b>
+<b class="fc">&nbsp;			if (patientCanBeEitherPerson || patientIsPersonA) {</b>
+<b class="fc">&nbsp;				rels.addAll(Context.getPersonService().getRelationships(patient, relative, relType));</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (patientCanBeEitherPerson || !patientIsPersonA) {</b>
+<b class="fc">&nbsp;				rels.addAll(Context.getPersonService().getRelationships(relative, patient, relType));</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// create a relationship if none is found
+<b class="fc">&nbsp;		if (rels.isEmpty()) {</b>
+&nbsp;			
+&nbsp;			// check the relative&#39;s existence
+<b class="fc">&nbsp;			if (relative == null) {</b>
+&nbsp;				// create one based on NK1 information
+<b class="fc">&nbsp;				relative = Context.getHL7Service().createPersonFromNK1(nk1);</b>
+<b class="fc">&nbsp;				if (relative == null) {</b>
+<b class="nc">&nbsp;					throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.relativeNotCreated&quot;));</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+&nbsp;			// create the relationship
+<b class="fc">&nbsp;			Relationship relation = new Relationship();</b>
+<b class="fc">&nbsp;			if (patientCanBeEitherPerson || patientIsPersonA) {</b>
+<b class="fc">&nbsp;				relation.setPersonA(patient);</b>
+<b class="fc">&nbsp;				relation.setPersonB(relative);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				relation.setPersonA(relative);</b>
+<b class="fc">&nbsp;				relation.setPersonB(patient);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			relation.setRelationshipType(relType);</b>
+<b class="fc">&nbsp;			Context.getPersonService().saveRelationship(relation);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not used
+&nbsp;	 *
+&nbsp;	 * @param message
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private void validate(Message message) throws HL7Exception {
+&nbsp;		// TODO: check version, etc.
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	private MSH getMSH(ORU_R01 oru) {
+<b class="fc">&nbsp;		return oru.getMSH();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private PID getPID(ORU_R01 oru) {
+<b class="fc">&nbsp;		return oru.getPATIENT_RESULT().getPATIENT().getPID();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * finds NK1 segments in an ORU_R01 message. all HAPI-rendered Messages have at least one NK1
+&nbsp;	 * segment but if the original message truly does not contain an NK1, the setID will be null on
+&nbsp;	 * the generated NK1
+&nbsp;	 *
+&nbsp;	 * @param oru ORU_R01 message to be parsed for NK1 segments
+&nbsp;	 * @return list of not-null NK1 segments
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	public List&lt;NK1&gt; getNK1List(ORU_R01 oru) throws HL7Exception {
+<b class="fc">&nbsp;		List&lt;NK1&gt; res = new ArrayList&lt;&gt;();</b>
+&nbsp;		// there will always be at least one NK1, even if the original message does not contain one
+<b class="fc">&nbsp;		for (int i = 0; i &lt; oru.getPATIENT_RESULT().getPATIENT().getNK1Reps(); i++) {</b>
+&nbsp;			// if the setIDNK1 value is null, this NK1 is blank
+<b class="fc">&nbsp;			if (oru.getPATIENT_RESULT().getPATIENT().getNK1(i).getSetIDNK1().getValue() != null) {</b>
+<b class="fc">&nbsp;				res.add(oru.getPATIENT_RESULT().getPATIENT().getNK1(i));</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private PV1 getPV1(ORU_R01 oru) {
+<b class="fc">&nbsp;		return oru.getPATIENT_RESULT().getPATIENT().getVISIT().getPV1();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private ORC getORC(ORU_R01 oru) {
+<b class="fc">&nbsp;		return oru.getPATIENT_RESULT().getORDER_OBSERVATION().getORC();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method does not call the database to create the encounter row. The encounter is only
+&nbsp;	 * created after all obs have been attached to it Creates an encounter pojo to be attached
+&nbsp;	 * later. This method does not create an encounterId
+&nbsp;	 *
+&nbsp;	 * @param msh
+&nbsp;	 * @param patient
+&nbsp;	 * @param pv1
+&nbsp;	 * @param orc
+&nbsp;	 * @return
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private Encounter createEncounter(MSH msh, Patient patient, PV1 pv1, ORC orc) throws HL7Exception {
+&nbsp;		
+&nbsp;		// the encounter we will return
+&nbsp;		Encounter encounter;
+&nbsp;		
+&nbsp;		// look for the encounter id in PV1-19
+<b class="fc">&nbsp;		CX visitNumber = pv1.getVisitNumber();</b>
+<b class="fc">&nbsp;		Integer encounterId = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			encounterId = Integer.valueOf(visitNumber.getIDNumber().getValue());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (NumberFormatException e) {</b>
+&nbsp;			// pass
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// if an encounterId was passed in, assume that these obs are
+&nbsp;		// going to be appended to it.  Fetch the old encounter from
+&nbsp;		// the database
+<b class="fc">&nbsp;		if (encounterId != null) {</b>
+<b class="fc">&nbsp;			encounter = Context.getEncounterService().getEncounter(encounterId);</b>
+&nbsp;		} else {
+&nbsp;			// if no encounter_id was passed in, this is a new
+&nbsp;			// encounter, create the object
+<b class="fc">&nbsp;			encounter = new Encounter();</b>
+&nbsp;			
+<b class="fc">&nbsp;			Date encounterDate = getEncounterDate(pv1);</b>
+<b class="fc">&nbsp;			Provider provider = getProvider(pv1);</b>
+<b class="fc">&nbsp;			Location location = getLocation(pv1);</b>
+<b class="fc">&nbsp;			Form form = getForm(msh);</b>
+<b class="fc">&nbsp;			EncounterType encounterType = getEncounterType(msh, form);</b>
+<b class="fc">&nbsp;			User enterer = getEnterer(orc);</b>
+&nbsp;			//			Date dateEntered = getDateEntered(orc); // ignore this since we have no place in the data model to store it
+&nbsp;			
+<b class="fc">&nbsp;			encounter.setEncounterDatetime(encounterDate);</b>
+<b class="fc">&nbsp;			if (unknownRole == null) {</b>
+<b class="fc">&nbsp;				unknownRole = Context.getEncounterService()</b>
+<b class="fc">&nbsp;				        .getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			encounter.setProvider(unknownRole, provider);</b>
+<b class="fc">&nbsp;			encounter.setPatient(patient);</b>
+<b class="fc">&nbsp;			encounter.setLocation(location);</b>
+<b class="fc">&nbsp;			encounter.setForm(form);</b>
+<b class="fc">&nbsp;			encounter.setEncounterType(encounterType);</b>
+<b class="fc">&nbsp;			encounter.setCreator(enterer);</b>
+<b class="fc">&nbsp;			encounter.setDateCreated(new Date());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates the Obs pojo from the OBX message
+&nbsp;	 *
+&nbsp;	 * @param encounter The Encounter object this Obs is a member of
+&nbsp;	 * @param obx The hl7 obx message
+&nbsp;	 * @param obr The parent hl7 or message
+&nbsp;	 * @param uid unique string for this message for any error reporting purposes
+&nbsp;	 * @return Obs pojo with all values filled in
+&nbsp;	 * @throws HL7Exception if there is a parsing exception
+&nbsp;	 * @throws ProposingConceptException if the answer to this obs is a proposed concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add comments to an observation from NTE segments
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add multiple comments for an observation as one comment
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add comments to an observation group
+&nbsp;	 */
+&nbsp;	private Obs parseObs(Encounter encounter, OBX obx, OBR obr, String uid) throws HL7Exception, ProposingConceptException {
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;parsing observation: &quot; + obx);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Varies[] values = obx.getObservationValue();</b>
+&nbsp;		
+&nbsp;		// bail out if no values were found
+<b class="fc">&nbsp;		if (values == null || values.length &lt; 1) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		String hl7Datatype = values[0].getName();</b>
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;  datatype = &quot; + hl7Datatype);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Concept concept = getConcept(obx.getObservationIdentifier(), uid);</b>
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;  concept = &quot; + concept.getConceptId());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		ConceptName conceptName = getConceptName(obx.getObservationIdentifier());</b>
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;  concept-name = &quot; + conceptName);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Date datetime = getDatetime(obx);</b>
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;  timestamp = &quot; + datetime);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (datetime == null) {</b>
+<b class="nc">&nbsp;			datetime = encounter.getEncounterDatetime();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Obs obs = new Obs();</b>
+<b class="fc">&nbsp;		obs.setPerson(encounter.getPatient());</b>
+<b class="fc">&nbsp;		obs.setConcept(concept);</b>
+<b class="fc">&nbsp;		obs.setEncounter(encounter);</b>
+<b class="fc">&nbsp;		obs.setObsDatetime(datetime);</b>
+<b class="fc">&nbsp;		obs.setLocation(encounter.getLocation());</b>
+<b class="fc">&nbsp;		obs.setCreator(encounter.getCreator());</b>
+<b class="fc">&nbsp;		obs.setDateCreated(encounter.getDateCreated());</b>
+&nbsp;		
+&nbsp;		// set comments if there are any
+<b class="fc">&nbsp;		StringBuilder comments = new StringBuilder();</b>
+<b class="fc">&nbsp;		ORU_R01_OBSERVATION parent = (ORU_R01_OBSERVATION) obx.getParent();</b>
+&nbsp;		// iterate over all OBX NTEs
+<b class="fc">&nbsp;		for (int i = 0; i &lt; parent.getNTEReps(); i++) {</b>
+<b class="fc">&nbsp;			for (FT obxComment : parent.getNTE(i).getComment()) {</b>
+<b class="fc">&nbsp;				if (comments.length() &gt; 0) {</b>
+<b class="fc">&nbsp;					comments.append(&quot; &quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				comments = comments.append(obxComment.getValue());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		// only set comments if there are any
+<b class="fc">&nbsp;		if (StringUtils.hasText(comments.toString())) {</b>
+<b class="fc">&nbsp;			obs.setComment(comments.toString());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Type obx5 = values[0].getData();</b>
+<b class="fc">&nbsp;		if (&quot;NM&quot;.equals(hl7Datatype)) {</b>
+<b class="fc">&nbsp;			String value = ((NM) obx5).getValue();</b>
+<b class="fc">&nbsp;			if (value == null || value.length() == 0) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Not creating null valued obs for concept &quot; + concept);</b>
+<b class="nc">&nbsp;				return null;</b>
+<b class="fc">&nbsp;			} else if (&quot;0&quot;.equals(value) || &quot;1&quot;.equals(value)) {</b>
+<b class="fc">&nbsp;				concept = concept.hydrate(concept.getConceptId().toString());</b>
+<b class="fc">&nbsp;				obs.setConcept(concept);</b>
+<b class="fc">&nbsp;				if (concept.getDatatype().isBoolean()) {</b>
+<b class="fc">&nbsp;					obs.setValueBoolean(&quot;1&quot;.equals(value));</b>
+<b class="fc">&nbsp;				} else if (concept.getDatatype().isNumeric()) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						obs.setValueNumeric(Double.valueOf(value));</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;						throw new HL7Exception(Context.getMessageSourceService().getMessage(</b>
+&nbsp;						    &quot;ORUR01.error.notnumericConcept&quot;,
+<b class="nc">&nbsp;						    new Object[] { value, concept.getConceptId(), conceptName.getName(), uid }, null), e);</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				} else if (concept.getDatatype().isCoded()) {</b>
+<b class="fc">&nbsp;					Concept answer = &quot;1&quot;.equals(value) ? Context.getConceptService().getTrueConcept() : Context</b>
+<b class="nc">&nbsp;					        .getConceptService().getFalseConcept();</b>
+<b class="fc">&nbsp;					boolean isValidAnswer = false;</b>
+<b class="fc">&nbsp;					Collection&lt;ConceptAnswer&gt; conceptAnswers = concept.getAnswers();</b>
+<b class="fc">&nbsp;					if (conceptAnswers != null &amp;&amp; !conceptAnswers.isEmpty()) {</b>
+<b class="fc">&nbsp;						for (ConceptAnswer conceptAnswer : conceptAnswers) {</b>
+<b class="fc">&nbsp;							if (conceptAnswer.getAnswerConcept().getId().equals(answer.getId())) {</b>
+<b class="fc">&nbsp;								obs.setValueCoded(answer);</b>
+<b class="fc">&nbsp;								isValidAnswer = true;</b>
+<b class="fc">&nbsp;								break;</b>
+&nbsp;							}
+<b class="fc">&nbsp;						}</b>
+&nbsp;					}
+&nbsp;					//answer the boolean answer concept was&#39;t found
+<b class="fc">&nbsp;					if (!isValidAnswer) {</b>
+<b class="fc">&nbsp;						throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.invalidAnswer&quot;,</b>
+<b class="fc">&nbsp;						    new Object[] { answer.toString(), uid }, null));</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+&nbsp;					//throw this exception to make sure that the handler doesn&#39;t silently ignore bad hl7 message
+<b class="fc">&nbsp;					throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.CannotSetBoolean&quot;,</b>
+<b class="fc">&nbsp;					    new Object[] { obs.getConcept().getConceptId() }, null));</b>
+&nbsp;				}
+&nbsp;			} else {
+&nbsp;				try {
+<b class="fc">&nbsp;					obs.setValueNumeric(Double.valueOf(value));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;					throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.notnumericConcept&quot;,</b>
+<b class="nc">&nbsp;					    new Object[] { value, concept.getConceptId(), conceptName.getName(), uid }, null), e);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (&quot;CWE&quot;.equals(hl7Datatype)) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;  CWE observation&quot;);</b>
+<b class="fc">&nbsp;			CWE value = (CWE) obx5;</b>
+<b class="fc">&nbsp;			String valueIdentifier = value.getIdentifier().getValue();</b>
+<b class="fc">&nbsp;			log.debug(&quot;    value id = &quot; + valueIdentifier);</b>
+<b class="fc">&nbsp;			String valueName = value.getText().getValue();</b>
+<b class="fc">&nbsp;			log.debug(&quot;    value name = &quot; + valueName);</b>
+<b class="fc">&nbsp;			if (isConceptProposal(valueIdentifier)) {</b>
+<b class="fc">&nbsp;				if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;Proposing concept&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				throw new ProposingConceptException(concept, valueName);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				log.debug(&quot;    not proposal&quot;);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					Concept valueConcept = getConcept(value, uid);</b>
+<b class="fc">&nbsp;					obs.setValueCoded(valueConcept);</b>
+<b class="fc">&nbsp;					if (HL7Constants.HL7_LOCAL_DRUG.equals(value.getNameOfAlternateCodingSystem().getValue())) {</b>
+<b class="nc">&nbsp;						Drug valueDrug = new Drug();</b>
+<b class="nc">&nbsp;						valueDrug.setDrugId(Integer.valueOf(value.getAlternateIdentifier().getValue()));</b>
+<b class="nc">&nbsp;						obs.setValueDrug(valueDrug);</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						ConceptName valueConceptName = getConceptName(value);</b>
+<b class="fc">&nbsp;						if (valueConceptName != null) {</b>
+<b class="fc">&nbsp;							if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;								log.debug(&quot;    value concept-name-id = &quot; + valueConceptName.getConceptNameId());</b>
+<b class="nc">&nbsp;								log.debug(&quot;    value concept-name = &quot; + valueConceptName.getName());</b>
+&nbsp;							}
+<b class="fc">&nbsp;							obs.setValueCodedName(valueConceptName);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;					throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.InvalidConceptId&quot;,</b>
+&nbsp;					    new Object[] { valueIdentifier, valueName }, null));
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;  Done with CWE&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (&quot;CE&quot;.equals(hl7Datatype)) {</b>
+<b class="nc">&nbsp;			CE value = (CE) obx5;</b>
+<b class="nc">&nbsp;			String valueIdentifier = value.getIdentifier().getValue();</b>
+<b class="nc">&nbsp;			String valueName = value.getText().getValue();</b>
+<b class="nc">&nbsp;			if (isConceptProposal(valueIdentifier)) {</b>
+<b class="nc">&nbsp;				throw new ProposingConceptException(concept, valueName);</b>
+&nbsp;			} else {
+&nbsp;				try {
+<b class="nc">&nbsp;					obs.setValueCoded(getConcept(value, uid));</b>
+<b class="nc">&nbsp;					obs.setValueCodedName(getConceptName(value));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;					throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.InvalidConceptId&quot;,</b>
+&nbsp;					    new Object[] { valueIdentifier, valueName }, null));
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else if (&quot;DT&quot;.equals(hl7Datatype)) {</b>
+<b class="fc">&nbsp;			DT value = (DT) obx5;</b>
+<b class="fc">&nbsp;			if (value != null) {</b>
+<b class="fc">&nbsp;				Date valueDate = getDate(value.getYear(), value.getMonth(), value.getDay(), 0, 0, 0);</b>
+<b class="fc">&nbsp;				obs.setValueDatetime(valueDate);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Not creating null valued obs for concept &quot; + concept);</b>
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (&quot;TS&quot;.equals(hl7Datatype)) {</b>
+<b class="nc">&nbsp;			DTM value = ((TS) obx5).getTime();</b>
+<b class="nc">&nbsp;			if (value != null) {</b>
+<b class="nc">&nbsp;				Date valueDate = getDate(value.getYear(), value.getMonth(), value.getDay(), value.getHour(), value</b>
+<b class="nc">&nbsp;				        .getMinute(), value.getSecond());</b>
+&nbsp;				
+<b class="nc">&nbsp;				obs.setValueDatetime(valueDate);</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Not creating null valued obs for concept &quot; + concept);</b>
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else if (&quot;TM&quot;.equals(hl7Datatype)) {</b>
+<b class="nc">&nbsp;			TM value = (TM) obx5;</b>
+<b class="nc">&nbsp;			if (value != null) {</b>
+<b class="nc">&nbsp;				Date valueTime = getDate(0, 0, 0, value.getHour(), value.getMinute(), value.getSecond());</b>
+<b class="nc">&nbsp;				obs.setValueDatetime(valueTime);</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Not creating null valued obs for concept &quot; + concept);</b>
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else if (&quot;ST&quot;.equals(hl7Datatype)) {</b>
+<b class="nc">&nbsp;			ST value = (ST) obx5;</b>
+<b class="nc">&nbsp;			if (value == null || value.getValue() == null || value.getValue().trim().length() == 0) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Not creating null valued obs for concept &quot; + concept);</b>
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			obs.setValueText(value.getValue());</b>
+<b class="nc">&nbsp;		} else if (&quot;ED&quot;.equals(hl7Datatype)) {</b>
+<b class="fc">&nbsp;			ED value = (ED) obx5;</b>
+<b class="fc">&nbsp;			if (value == null || value.getData() == null || !StringUtils.hasText(value.getData().getValue())) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Not creating null valued obs for concept &quot; + concept);</b>
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+&nbsp;			//we need to hydrate the concept so that the EncounterSaveHandler
+&nbsp;			//doesn&#39;t fail since it needs to check if it is a concept numeric
+<b class="fc">&nbsp;			Concept c = Context.getConceptService().getConcept(obs.getConcept().getConceptId());</b>
+<b class="fc">&nbsp;			obs.setConcept(c);</b>
+<b class="fc">&nbsp;			String title = null;</b>
+<b class="fc">&nbsp;			if (obs.getValueCodedName() != null) {</b>
+<b class="nc">&nbsp;				title = obs.getValueCodedName().getName();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!StringUtils.hasText(title)) {</b>
+<b class="fc">&nbsp;				title = c.getName().getName();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			obs.setComplexData(new ComplexData(title, value.getData().getValue()));</b>
+<b class="fc">&nbsp;		} else {</b>
+&nbsp;			// unsupported data type
+&nbsp;			// TODO: support RP (report), SN (structured numeric)
+&nbsp;			// do we need to support BIT just in case it slips thru?
+<b class="nc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.UpsupportedObsType&quot;,</b>
+&nbsp;			    new Object[] { hl7Datatype }, null));
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Derive a concept name from the CWE component of an hl7 message.
+&nbsp;	 *
+&nbsp;	 * @param cwe
+&nbsp;	 * @return
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private ConceptName getConceptName(CWE cwe) throws HL7Exception {
+<b class="fc">&nbsp;		ST altIdentifier = cwe.getAlternateIdentifier();</b>
+<b class="fc">&nbsp;		ID altCodingSystem = cwe.getNameOfAlternateCodingSystem();</b>
+<b class="fc">&nbsp;		return getConceptName(altIdentifier, altCodingSystem);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Derive a concept name from the CE component of an hl7 message.
+&nbsp;	 *
+&nbsp;	 * @param ce
+&nbsp;	 * @return
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private ConceptName getConceptName(CE ce) throws HL7Exception {
+<b class="fc">&nbsp;		ST altIdentifier = ce.getAlternateIdentifier();</b>
+<b class="fc">&nbsp;		ID altCodingSystem = ce.getNameOfAlternateCodingSystem();</b>
+<b class="fc">&nbsp;		return getConceptName(altIdentifier, altCodingSystem);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Derive a concept name from the CWE component of an hl7 message.
+&nbsp;	 *
+&nbsp;	 * @param altIdentifier
+&nbsp;	 * @param altCodingSystem
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private ConceptName getConceptName(ST altIdentifier, ID altCodingSystem) throws HL7Exception {
+<b class="fc">&nbsp;		if (altIdentifier != null &amp;&amp; HL7Constants.HL7_LOCAL_CONCEPT_NAME.equals(altCodingSystem.getValue())) {</b>
+<b class="fc">&nbsp;			String hl7ConceptNameId = altIdentifier.getValue();</b>
+<b class="fc">&nbsp;			return getConceptName(hl7ConceptNameId);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method to retrieve the openmrs ConceptName specified in an hl7 message observation
+&nbsp;	 * segment. This method assumes that the check for 99NAM has been done already and is being
+&nbsp;	 * given an openmrs conceptNameId
+&nbsp;	 *
+&nbsp;	 * @param hl7ConceptNameId internal ConceptNameId to look up
+&nbsp;	 * @return ConceptName from the database
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private ConceptName getConceptName(String hl7ConceptNameId) throws HL7Exception {
+<b class="fc">&nbsp;		ConceptName specifiedConceptName = null;</b>
+<b class="fc">&nbsp;		if (hl7ConceptNameId != null) {</b>
+&nbsp;			// get the exact concept name specified by the id
+&nbsp;			try {
+<b class="fc">&nbsp;				Integer conceptNameId = Integer.valueOf(hl7ConceptNameId);</b>
+<b class="fc">&nbsp;				specifiedConceptName = new ConceptName();</b>
+<b class="fc">&nbsp;				specifiedConceptName.setConceptNameId(conceptNameId);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (NumberFormatException e) {</b>
+&nbsp;				// if it is not a valid number, more than likely it is a bad hl7 message
+<b class="nc">&nbsp;				log.debug(&quot;Invalid concept name ID &#39;&quot; + hl7ConceptNameId + &quot;&#39;&quot;, e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return specifiedConceptName;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean isConceptProposal(String identifier) {
+<b class="fc">&nbsp;		return OpenmrsUtil.nullSafeEquals(identifier, OpenmrsConstants.PROPOSED_CONCEPT_IDENTIFIER);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Date getDate(int year, int month, int day, int hour, int minute, int second) {
+<b class="fc">&nbsp;		Calendar cal = Calendar.getInstance();</b>
+&nbsp;		// Calendar.set(MONTH, int) is zero-based, Hl7 is not
+<b class="fc">&nbsp;		cal.set(year, month - 1, day, hour, minute, second);</b>
+<b class="fc">&nbsp;		return cal.getTime();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get an openmrs Concept object out of the given hl7 coded element
+&nbsp;	 *
+&nbsp;	 * @param codedElement ce to pull from
+&nbsp;	 * @param uid unique string for this message for any error reporting purposes
+&nbsp;	 * @return new Concept object
+&nbsp;	 * @throws HL7Exception if parsing errors occur
+&nbsp;	 */
+&nbsp;	private Concept getConcept(CE codedElement, String uid) throws HL7Exception {
+<b class="fc">&nbsp;		String hl7ConceptId = codedElement.getIdentifier().getValue();</b>
+&nbsp;		
+<b class="fc">&nbsp;		String codingSystem = codedElement.getNameOfCodingSystem().getValue();</b>
+<b class="fc">&nbsp;		return getConcept(hl7ConceptId, codingSystem, uid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get an openmrs Concept object out of the given hl7 coded with exceptions element
+&nbsp;	 *
+&nbsp;	 * @param codedElement cwe to pull from
+&nbsp;	 * @param uid unique string for this message for any error reporting purposes
+&nbsp;	 * @return new Concept object
+&nbsp;	 * @throws HL7Exception if parsing errors occur
+&nbsp;	 */
+&nbsp;	private Concept getConcept(CWE codedElement, String uid) throws HL7Exception {
+<b class="fc">&nbsp;		String hl7ConceptId = codedElement.getIdentifier().getValue();</b>
+&nbsp;		
+<b class="fc">&nbsp;		String codingSystem = codedElement.getNameOfCodingSystem().getValue();</b>
+<b class="fc">&nbsp;		return getConcept(hl7ConceptId, codingSystem, uid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a concept object representing this conceptId and coding system.&lt;br&gt;
+&nbsp;	 * If codingSystem is 99DCT, then a new Concept with the given conceptId is returned.&lt;br&gt;
+&nbsp;	 * Otherwise, the coding system is looked up in the ConceptMap for an openmrs concept mapped to
+&nbsp;	 * that code.
+&nbsp;	 *
+&nbsp;	 * @param hl7ConceptId the given hl7 conceptId
+&nbsp;	 * @param codingSystem the coding system for this conceptid (e.g. 99DCT)
+&nbsp;	 * @param uid unique string for this message for any error reporting purposes
+&nbsp;	 * @return a Concept object or null if no conceptId with given coding system found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if codingSystem not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a Concept if given local coding system
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a mapped Concept if given a valid mapping
+&nbsp;	 */
+&nbsp;	protected Concept getConcept(String hl7ConceptId, String codingSystem, String uid) throws HL7Exception {
+<b class="fc">&nbsp;		if (codingSystem == null || HL7Constants.HL7_LOCAL_CONCEPT.equals(codingSystem)) {</b>
+&nbsp;			// the concept is local
+&nbsp;			try {
+<b class="fc">&nbsp;				Integer conceptId = Integer.valueOf(hl7ConceptId);</b>
+<b class="fc">&nbsp;				return Context.getConceptService().getConcept(conceptId);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (NumberFormatException e) {</b>
+<b class="fc">&nbsp;				throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.hl7ConceptId&quot;,</b>
+&nbsp;				    new Object[] { hl7ConceptId, uid }, null));
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			// the concept is not local, look it up in our mapping
+<b class="fc">&nbsp;			return Context.getConceptService().getConceptByMapping(hl7ConceptId, codingSystem);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Pull the timestamp for this obx out. if an invalid date is found, null is returned
+&nbsp;	 *
+&nbsp;	 * @param obx the obs to parse and get the timestamp from
+&nbsp;	 * @return an obx timestamp or null
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * @see #getDatetime(TS)
+&nbsp;	 */
+&nbsp;	private Date getDatetime(OBX obx) throws HL7Exception {
+<b class="fc">&nbsp;		TS ts = obx.getDateTimeOfTheObservation();</b>
+<b class="fc">&nbsp;		return getDatetime(ts);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Pull the timestamp for this obr out. if an invalid date is found, null is returned
+&nbsp;	 *
+&nbsp;	 * @param obr
+&nbsp;	 * @return
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private Date getDatetime(OBR obr) throws HL7Exception {
+<b class="fc">&nbsp;		TS ts = obr.getObservationDateTime();</b>
+<b class="fc">&nbsp;		return getDatetime(ts);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a java date object for the given TS
+&nbsp;	 *
+&nbsp;	 * @param ts TS to parse
+&nbsp;	 * @return date object or null
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private Date getDatetime(TS ts) throws HL7Exception {
+<b class="fc">&nbsp;		Date datetime = null;</b>
+<b class="fc">&nbsp;		DTM value = ts.getTime();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (value.getYear() == 0 || value.getValue() == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			datetime = getDate(value.getYear(), value.getMonth(), value.getDay(), value.getHour(), value.getMinute(), value</b>
+<b class="fc">&nbsp;			        .getSecond());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DataTypeException e) {</b>
+&nbsp;
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return datetime;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Date getEncounterDate(PV1 pv1) throws HL7Exception {
+<b class="fc">&nbsp;		return tsToDate(pv1.getAdmitDateTime());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Provider getProvider(PV1 pv1) throws HL7Exception {
+<b class="fc">&nbsp;		XCN hl7Provider = pv1.getAttendingDoctor(0);</b>
+<b class="fc">&nbsp;		Provider provider = null;</b>
+<b class="fc">&nbsp;		String id = hl7Provider.getIDNumber().getValue();</b>
+<b class="fc">&nbsp;		String assignAuth = hl7Provider.getAssigningAuthority().getUniversalID().getValue();</b>
+<b class="fc">&nbsp;		String type = hl7Provider.getAssigningAuthority().getUniversalIDType().getValue();</b>
+&nbsp;		String errorMessage;
+<b class="fc">&nbsp;		if (StringUtils.hasText(id)) {</b>
+<b class="fc">&nbsp;			String specificErrorMsg = &quot;&quot;;</b>
+<b class="fc">&nbsp;			if (OpenmrsUtil.nullSafeEquals(&quot;L&quot;, type)) {</b>
+<b class="fc">&nbsp;				if (HL7Constants.PROVIDER_ASSIGNING_AUTH_PROV_ID.equalsIgnoreCase(assignAuth)) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						provider = Context.getProviderService().getProvider(Integer.valueOf(id));</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (NumberFormatException e) {</b>
+&nbsp;						// ignore
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;					specificErrorMsg = &quot;with provider Id&quot;;</b>
+<b class="fc">&nbsp;				} else if (HL7Constants.PROVIDER_ASSIGNING_AUTH_IDENTIFIER.equalsIgnoreCase(assignAuth)) {</b>
+<b class="fc">&nbsp;					provider = Context.getProviderService().getProviderByIdentifier(id);</b>
+<b class="fc">&nbsp;					specificErrorMsg = &quot;with provider identifier&quot;;</b>
+<b class="fc">&nbsp;				} else if (HL7Constants.PROVIDER_ASSIGNING_AUTH_PROV_UUID.equalsIgnoreCase(assignAuth)) {</b>
+<b class="fc">&nbsp;					provider = Context.getProviderService().getProviderByUuid(id);</b>
+<b class="fc">&nbsp;					specificErrorMsg = &quot;with provider uuid&quot;;</b>
+&nbsp;				}
+&nbsp;			} else {
+&nbsp;				try {
+<b class="fc">&nbsp;					Person person = Context.getPersonService().getPerson(Integer.valueOf(id));</b>
+<b class="fc">&nbsp;					Collection&lt;Provider&gt; providers = Context.getProviderService().getProvidersByPerson(person);</b>
+<b class="fc">&nbsp;					if (!providers.isEmpty()) {</b>
+<b class="fc">&nbsp;						provider = providers.iterator().next();</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;				catch (NumberFormatException e) {</b>
+&nbsp;					// ignore
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;				specificErrorMsg = &quot;associated to a person with person id&quot;;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			errorMessage = &quot;Could not resolve provider &quot; + specificErrorMsg + &quot;:&quot; + id;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			errorMessage = &quot;No unique identifier was found for the provider&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (provider == null) {</b>
+<b class="fc">&nbsp;			throw new HL7Exception(errorMessage);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return provider;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Patient getPatient(PID pid) throws HL7Exception {
+<b class="fc">&nbsp;		Integer patientId = Context.getHL7Service().resolvePatientId(pid);</b>
+<b class="fc">&nbsp;		if (patientId == null) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.UnresolvedPatient&quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPatientService().getPatient(patientId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * gets a relative based on an NK1 segment
+&nbsp;	 *
+&nbsp;	 * @param nk1 an NK1 segment from the HL7 request
+&nbsp;	 * @return a matching Person or null if not found
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	private Person getRelative(NK1 nk1) throws HL7Exception {
+&nbsp;		// if there are no associated party identifiers, the person will not exist
+<b class="fc">&nbsp;		if (nk1.getNextOfKinAssociatedPartySIdentifiers().length &lt; 1) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		// find the related person via given IDs
+<b class="fc">&nbsp;		return Context.getHL7Service().resolvePersonFromIdentifiers(nk1.getNextOfKinAssociatedPartySIdentifiers());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Location getLocation(PV1 pv1) throws HL7Exception {
+<b class="fc">&nbsp;		PL hl7Location = pv1.getAssignedPatientLocation();</b>
+<b class="fc">&nbsp;		Integer locationId = Context.getHL7Service().resolveLocationId(hl7Location);</b>
+<b class="fc">&nbsp;		if (locationId == null) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.UnresolvedLocation&quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getLocationService().getLocation(locationId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * needs to find a Form based on information in MSH-21. example: 16^AMRS.ELD.FORMID
+&nbsp;	 *
+&nbsp;	 * @param msh
+&nbsp;	 * @return
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if return value is null when uuid and id is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if return value is not null when uuid or id is not null
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	public Form getForm(MSH msh) throws HL7Exception {
+<b class="fc">&nbsp;		String uuid = null;</b>
+<b class="fc">&nbsp;		String id = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (EI identifier : msh.getMessageProfileIdentifier()) {</b>
+<b class="fc">&nbsp;			if (identifier != null &amp;&amp; identifier.getNamespaceID() != null) {</b>
+<b class="fc">&nbsp;				String identifierType = identifier.getNamespaceID().getValue();</b>
+<b class="fc">&nbsp;				if (OpenmrsUtil.nullSafeEquals(identifierType, HL7Constants.HL7_FORM_UUID)) {</b>
+<b class="fc">&nbsp;					uuid = identifier.getEntityIdentifier().getValue();</b>
+<b class="fc">&nbsp;				} else if (OpenmrsUtil.nullSafeEquals(identifierType, HL7Constants.HL7_FORM_ID)) {</b>
+<b class="fc">&nbsp;					id = identifier.getEntityIdentifier().getValue();</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					log.warn(&quot;Form identifier type of &quot; + identifierType + &quot; unknown to ORU R01 processor.&quot;);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Form form = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (uuid == null &amp;&amp; id == null) {</b>
+<b class="fc">&nbsp;			return form;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// prefer uuid over id
+<b class="fc">&nbsp;		if (uuid != null) {</b>
+<b class="fc">&nbsp;			form = Context.getFormService().getFormByUuid(uuid);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// if uuid did not work ...
+<b class="fc">&nbsp;		if (id != null) {</b>
+&nbsp;
+&nbsp;			try {
+<b class="fc">&nbsp;				Integer formId = Integer.parseInt(id);</b>
+<b class="fc">&nbsp;				form = Context.getFormService().getForm(formId);</b>
+<b class="nc">&nbsp;			} catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;				throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.parseFormId&quot;), e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return form;</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	private EncounterType getEncounterType(MSH msh, Form form) {
+<b class="fc">&nbsp;		if (form != null) {</b>
+<b class="fc">&nbsp;			return form.getEncounterType();</b>
+&nbsp;		}
+&nbsp;		// TODO: resolve encounter type from MSH data - do we need PV1 too?
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private User getEnterer(ORC orc) throws HL7Exception {
+<b class="fc">&nbsp;		XCN hl7Enterer = orc.getEnteredBy(0);</b>
+<b class="fc">&nbsp;		Integer entererId = Context.getHL7Service().resolveUserId(hl7Enterer);</b>
+<b class="fc">&nbsp;		if (entererId == null) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(Context.getMessageSourceService().getMessage(&quot;ORUR01.error.UnresolvedEnterer&quot;));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		User enterer = new User();</b>
+<b class="fc">&nbsp;		enterer.setUserId(entererId);</b>
+<b class="fc">&nbsp;		return enterer;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	//TODO: Debug (and use) methods in HL7Util instead
+&nbsp;	private Date tsToDate(TS ts) throws HL7Exception {
+&nbsp;		// need to handle timezone
+<b class="fc">&nbsp;		String dtm = ts.getTime().getValue();</b>
+<b class="fc">&nbsp;		int year = Integer.parseInt(dtm.substring(0, 4));</b>
+<b class="fc">&nbsp;		int month = (dtm.length() &gt;= 6 ? Integer.parseInt(dtm.substring(4, 6)) - 1 : 0);</b>
+<b class="fc">&nbsp;		int day = (dtm.length() &gt;= 8 ? Integer.parseInt(dtm.substring(6, 8)) : 1);</b>
+<b class="fc">&nbsp;		int hour = (dtm.length() &gt;= 10 ? Integer.parseInt(dtm.substring(8, 10)) : 0);</b>
+<b class="fc">&nbsp;		int min = (dtm.length() &gt;= 12 ? Integer.parseInt(dtm.substring(10, 12)) : 0);</b>
+<b class="fc">&nbsp;		int sec = (dtm.length() &gt;= 14 ? Integer.parseInt(dtm.substring(12, 14)) : 0);</b>
+<b class="fc">&nbsp;		Calendar cal = Calendar.getInstance();</b>
+<b class="fc">&nbsp;		cal.set(year, month, day, hour, min, sec);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return cal.getTime();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a ConceptProposal object that will need to be saved to the database at a later point.
+&nbsp;	 *
+&nbsp;	 * @param encounter
+&nbsp;	 * @param concept
+&nbsp;	 * @param originalText
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private ConceptProposal createConceptProposal(Encounter encounter, Concept concept, String originalText) {
+&nbsp;		// value is a proposed concept, create a ConceptProposal
+&nbsp;		// instead of an Obs for this observation
+&nbsp;		// TODO: at this point if componentSeparator (^) is in text,
+&nbsp;		// we&#39;ll only use the text before that delimiter!
+<b class="fc">&nbsp;		ConceptProposal conceptProposal = new ConceptProposal();</b>
+<b class="fc">&nbsp;		conceptProposal.setOriginalText(originalText);</b>
+<b class="fc">&nbsp;		conceptProposal.setState(OpenmrsConstants.CONCEPT_PROPOSAL_UNMAPPED);</b>
+<b class="fc">&nbsp;		conceptProposal.setEncounter(encounter);</b>
+<b class="fc">&nbsp;		conceptProposal.setObsConcept(concept);</b>
+<b class="fc">&nbsp;		return conceptProposal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void updateHealthCenter(Patient patient, PV1 pv1) {
+&nbsp;		// Update patient&#39;s location if it has changed
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Checking for discharge to location&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		DLD dld = pv1.getDischargedToLocation();</b>
+<b class="fc">&nbsp;		log.debug(&quot;DLD = &quot; + dld);</b>
+<b class="fc">&nbsp;		if (dld == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		IS hl7DischargeToLocation = dld.getDischargeLocation();</b>
+<b class="fc">&nbsp;		log.debug(&quot;is = &quot; + hl7DischargeToLocation);</b>
+<b class="fc">&nbsp;		if (hl7DischargeToLocation == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		String dischargeToLocation = hl7DischargeToLocation.getValue();</b>
+<b class="fc">&nbsp;		log.debug(&quot;dischargeToLocation = &quot; + dischargeToLocation);</b>
+<b class="fc">&nbsp;		if (dischargeToLocation != null &amp;&amp; dischargeToLocation.length() &gt; 0) {</b>
+<b class="nc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;Patient discharged to &quot; + dischargeToLocation);</b>
+&nbsp;			}
+&nbsp;			// Ignore anything past the first subcomponent (or component)
+&nbsp;			// delimiter
+<b class="nc">&nbsp;			for (int i = 0; i &lt; dischargeToLocation.length(); i++) {</b>
+<b class="nc">&nbsp;				char ch = dischargeToLocation.charAt(i);</b>
+<b class="nc">&nbsp;				if (ch == &#39;&amp;&#39; || ch == &#39;^&#39;) {</b>
+<b class="nc">&nbsp;					dischargeToLocation = dischargeToLocation.substring(0, i);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			Integer newLocationId = Integer.parseInt(dischargeToLocation);</b>
+&nbsp;			// Hydrate a full patient object from patient object containing only
+&nbsp;			// identifier
+<b class="nc">&nbsp;			patient = Context.getPatientService().getPatient(patient.getPatientId());</b>
+&nbsp;			
+<b class="nc">&nbsp;			PersonAttributeType healthCenterAttrType = Context.getPersonService().getPersonAttributeTypeByName(</b>
+&nbsp;			    &quot;Health Center&quot;);
+&nbsp;			
+<b class="nc">&nbsp;			if (healthCenterAttrType == null) {</b>
+<b class="nc">&nbsp;				log.error(&quot;A person attribute type with name &#39;Health Center&#39; is not defined but patient &quot;</b>
+<b class="nc">&nbsp;				        + patient.getPatientId() + &quot; is trying to change their health center to &quot; + newLocationId);</b>
+&nbsp;				return;
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			PersonAttribute currentHealthCenter = patient.getAttribute(&quot;Health Center&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (currentHealthCenter == null || !newLocationId.toString().equals(currentHealthCenter.getValue())) {</b>
+<b class="nc">&nbsp;				PersonAttribute newHealthCenter = new PersonAttribute(healthCenterAttrType, newLocationId.toString());</b>
+&nbsp;				
+<b class="nc">&nbsp;				log.debug(&quot;Updating patient&#39;s location from &quot; + currentHealthCenter + &quot; to &quot; + newLocationId);</b>
+&nbsp;				
+&nbsp;				// add attribute (and void old if there is one)
+<b class="nc">&nbsp;				patient.addAttribute(newHealthCenter);</b>
+&nbsp;				
+&nbsp;				// save the patient and their new attribute
+<b class="nc">&nbsp;				Context.getPatientService().savePatient(patient);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+<b class="fc">&nbsp;		log.debug(&quot;finished discharge to location method&quot;);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Voidable</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Voidable (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Voidable</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;
+&nbsp;/**
+&nbsp; * In OpenMRS, data are rarely fully deleted (purged) from the system; rather, they are either
+&nbsp; * voided or retired. When data can be removed (effectively deleted from the user&#39;s perspective),
+&nbsp; * then they are voidable. Voided data are no longer valid and references from other non-voided data
+&nbsp; * are not valid. For example, when duplicate patient records are merged, the record that is not
+&nbsp; * kept is voided (invalidated). Unlike {@link Retireable}, voiding data invalidates any data
+&nbsp; * referencing them. e.g., when a patient is voided, all observations for that patient must be
+&nbsp; * voided as well.
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; * @see OpenmrsData
+&nbsp; * @see Retireable
+&nbsp; */
+&nbsp;public interface Voidable extends OpenmrsObject {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Boolean - whether of not this object is voided
+&nbsp;	 *
+&nbsp;	 * @deprecated as of 2.0, use {@link #getVoided()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isVoided();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return true if this object is voided and otherwise false
+&nbsp;	 */
+&nbsp;	public Boolean getVoided();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param voided - whether of not this object is voided
+&nbsp;	 */
+&nbsp;	public void setVoided(Boolean voided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return User - the user who voided the object
+&nbsp;	 */
+&nbsp;	public User getVoidedBy();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param voidedBy - the user who voided the object
+&nbsp;	 */
+&nbsp;	public void setVoidedBy(User voidedBy);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Date - the date the object was voided
+&nbsp;	 */
+&nbsp;	public Date getDateVoided();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateVoided - the date the object was voided
+&nbsp;	 */
+&nbsp;	public void setDateVoided(Date dateVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return String - the reason the object was voided
+&nbsp;	 */
+&nbsp;	public String getVoidReason();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param voidReason - the reason the object was voided
+&nbsp;	 */
+&nbsp;	public void setVoidReason(String voidReason);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

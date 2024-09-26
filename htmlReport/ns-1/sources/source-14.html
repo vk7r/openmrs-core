@@ -1,0 +1,522 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Cohort</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Cohort (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Cohort</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,6%
+  </span>
+  <span class="absValue">
+    (31/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (76/95)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Cohort$HibernateProxy$mkf2EydW</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    81,6%
+  </span>
+  <span class="absValue">
+    (31/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (76/95)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class represents a list of patientIds.
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Cohort extends BaseChangeableOpenmrsData {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 0L;
+&nbsp;	
+&nbsp;	private Integer cohortId;
+&nbsp;	
+&nbsp;	private String name;
+&nbsp;	
+&nbsp;	private String description;
+&nbsp;	
+&nbsp;	private Collection&lt;CohortMembership&gt; memberships;
+&nbsp;	
+<b class="fc">&nbsp;	public Cohort() {</b>
+<b class="fc">&nbsp;		memberships = new TreeSet&lt;&gt;();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to create a Cohort object that has an primarykey/internal identifier
+&nbsp;	 * of &lt;code&gt;cohortId&lt;/code&gt;
+&nbsp;	 *
+&nbsp;	 * @param cohortId the internal identifier for this cohort
+&nbsp;	 */
+&nbsp;	public Cohort(Integer cohortId) {
+<b class="fc">&nbsp;		this();</b>
+<b class="fc">&nbsp;		this.cohortId = cohortId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor does not check whether the database contains patients with the given ids,
+&nbsp;	 * but {@link org.openmrs.api.CohortService#saveCohort(Cohort)} will.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @param description optional description
+&nbsp;	 * @param ids option array of Integer ids
+&nbsp;	 */
+&nbsp;	public Cohort(String name, String description, Integer[] ids) {
+<b class="fc">&nbsp;		this();</b>
+<b class="fc">&nbsp;		this.name = name;</b>
+<b class="fc">&nbsp;		this.description = description;</b>
+<b class="fc">&nbsp;		if (ids != null) {</b>
+<b class="fc">&nbsp;			Arrays.stream(ids).forEach(this::addMember);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor does not check whether the database contains patients with the given ids,
+&nbsp;	 * but {@link org.openmrs.api.CohortService#saveCohort(Cohort)} will.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @param description optional description
+&nbsp;	 * @param patients optional array of patients
+&nbsp;	 */
+&nbsp;	public Cohort(String name, String description, Patient[] patients) {
+<b class="nc">&nbsp;		this(name, description, (Integer[]) null);</b>
+<b class="nc">&nbsp;		if (patients != null) {</b>
+<b class="nc">&nbsp;			Arrays.stream(patients).forEach(p -&gt; addMembership(new CohortMembership(p.getPatientId())));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor does not check whether the database contains patients with the given ids,
+&nbsp;	 * but {@link org.openmrs.api.CohortService#saveCohort(Cohort)} will.
+&nbsp;	 * 
+&nbsp;	 * @param patientsOrIds optional collection which may contain Patients, or patientIds which may
+&nbsp;	 *            be Integers, Strings, or anything whose toString() can be parsed to an Integer.
+&nbsp;	 */
+&nbsp;	public Cohort(Collection&lt;?&gt; patientsOrIds) {
+<b class="nc">&nbsp;		this(null, null, patientsOrIds);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor does not check whether the database contains patients with the given ids,
+&nbsp;	 * but {@link org.openmrs.api.CohortService#saveCohort(Cohort)} will.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @param description optional description
+&nbsp;	 * @param patientsOrIds optional collection which may contain Patients, or patientIds which may
+&nbsp;	 *            be Integers, Strings, or anything whose toString() can be parsed to an Integer.
+&nbsp;	 */
+&nbsp;	public Cohort(String name, String description, Collection&lt;?&gt; patientsOrIds) {
+<b class="fc">&nbsp;		this(name, description, (Integer[]) null);</b>
+<b class="fc">&nbsp;		if (patientsOrIds != null) {</b>
+<b class="fc">&nbsp;			for (Object o : patientsOrIds) {</b>
+<b class="fc">&nbsp;				if (o instanceof Patient) {</b>
+<b class="fc">&nbsp;					addMembership(new CohortMembership(((Patient) o).getPatientId()));</b>
+<b class="nc">&nbsp;				} else if (o instanceof Integer) {</b>
+<b class="nc">&nbsp;					addMembership(new CohortMembership((Integer) o));</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor taking in a string that is a list of comma separated patient ids This
+&nbsp;	 * constructor does not check whether the database contains patients with the given ids, but
+&nbsp;	 * {@link org.openmrs.api.CohortService#saveCohort(Cohort)} will.
+&nbsp;	 * 
+&nbsp;	 * @param commaSeparatedIds
+&nbsp;	 */
+&nbsp;	public Cohort(String commaSeparatedIds) {
+<b class="fc">&nbsp;		this();</b>
+<b class="fc">&nbsp;		String[] ids = StringUtils.split(commaSeparatedIds, &#39;,&#39;);</b>
+<b class="fc">&nbsp;		Arrays.stream(ids).forEach(id -&gt; addMembership(new CohortMembership(Integer.valueOf(id.trim()))));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated since 2.1.0 cohorts are more complex than just a set of patient ids, so there is no one-line replacement
+&nbsp;	 * @return Returns a comma-separated list of patient ids in the cohort.
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public String getCommaSeparatedPatientIds() {
+<b class="fc">&nbsp;		return StringUtils.join(getMemberIds(), &#39;,&#39;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean contains(Integer patientId) {
+<b class="fc">&nbsp;		return getMemberships() != null</b>
+<b class="fc">&nbsp;		        &amp;&amp; getMemberships().stream().anyMatch(m -&gt; m.getPatientId().equals(patientId) &amp;&amp; !m.getVoided());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		StringBuilder sb = new StringBuilder(&quot;Cohort id=&quot; + getCohortId());</b>
+<b class="nc">&nbsp;		if (getName() != null) {</b>
+<b class="nc">&nbsp;			sb.append(&quot; name=&quot;).append(getName());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (getMemberships() != null) {</b>
+<b class="nc">&nbsp;			sb.append(&quot; size=&quot;).append(getMemberships().size());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return sb.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addMember(Integer memberId) {
+<b class="fc">&nbsp;		this.addMembership(new CohortMembership(memberId));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public boolean addMembership(CohortMembership cohortMembership) {
+<b class="fc">&nbsp;		if (cohortMembership != null) {</b>
+<b class="fc">&nbsp;			cohortMembership.setCohort(this);</b>
+<b class="fc">&nbsp;			return getMemberships().add(cohortMembership);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public boolean removeMembership(CohortMembership cohortMembership) {
+<b class="fc">&nbsp;		return getMemberships().remove(cohortMembership);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 * @param includeVoided boolean true/false to include/exclude voided memberships
+&nbsp;	 * @return Collection of cohort memberships
+&nbsp;	 */
+&nbsp;	public Collection&lt;CohortMembership&gt; getMemberships(boolean includeVoided) {
+<b class="fc">&nbsp;		if (includeVoided) {</b>
+<b class="fc">&nbsp;			return getMemberships();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return getMemberships().stream().filter(m -&gt; m.getVoided() == includeVoided).collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public Collection&lt;CohortMembership&gt; getMemberships() {
+<b class="fc">&nbsp;		if (memberships == null) {</b>
+<b class="nc">&nbsp;			memberships = new TreeSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return memberships;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 * @param asOfDate date used to return active memberships
+&nbsp;	 * @return Collection of cohort memberships
+&nbsp;	 */
+&nbsp;	public Collection&lt;CohortMembership&gt; getActiveMemberships(Date asOfDate) {
+<b class="fc">&nbsp;		return getMemberships().stream().filter(m -&gt; m.isActive(asOfDate)).collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Collection&lt;CohortMembership&gt; getActiveMemberships() {
+<b class="fc">&nbsp;		return getActiveMemberships(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public CohortMembership getActiveMembership(Patient patient) {
+<b class="nc">&nbsp;		return getMemberships().stream().filter(m -&gt; m.isActive() &amp;&amp; m.getPatientId().equals(patient.getPatientId())).findFirst().get();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public int size() {
+<b class="fc">&nbsp;		return getMemberships().stream().filter(m -&gt; !m.getVoided()).collect(Collectors.toList())</b>
+<b class="fc">&nbsp;		        .size();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated use {@link #size()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public int getSize() {
+<b class="nc">&nbsp;		return size();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isEmpty() {
+<b class="nc">&nbsp;		return size() == 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// static utility methods
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the union of two cohorts
+&nbsp;	 *
+&nbsp;	 * @param a The first Cohort
+&nbsp;	 * @param b The second Cohort
+&nbsp;	 * @return Cohort
+&nbsp;	 */
+&nbsp;	public static Cohort union(Cohort a, Cohort b) {
+<b class="fc">&nbsp;		Cohort ret = new Cohort();</b>
+<b class="fc">&nbsp;		if (a != null) {</b>
+<b class="fc">&nbsp;			ret.getMemberships().addAll(a.getMemberships());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (b != null) {</b>
+<b class="fc">&nbsp;			ret.getMemberships().addAll(b.getMemberships());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (a != null &amp;&amp; b != null) {</b>
+<b class="fc">&nbsp;			ret.setName(&quot;(&quot; + a.getName() + &quot; + &quot; + b.getName() + &quot;)&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the intersection of two cohorts, treating null as an empty cohort
+&nbsp;	 *
+&nbsp;	 * @param a The first Cohort
+&nbsp;	 * @param b The second Cohort
+&nbsp;	 * @return Cohort
+&nbsp;	 */
+&nbsp;	public static Cohort intersect(Cohort a, Cohort b) {
+<b class="fc">&nbsp;		Cohort ret = new Cohort();</b>
+<b class="fc">&nbsp;		ret.setName(&quot;(&quot; + (a == null ? &quot;NULL&quot; : a.getName()) + &quot; * &quot; + (b == null ? &quot;NULL&quot; : b.getName()) + &quot;)&quot;);</b>
+<b class="fc">&nbsp;		if (a != null &amp;&amp; b != null) {</b>
+<b class="fc">&nbsp;			ret.getMemberships().addAll(a.getMemberships());</b>
+<b class="fc">&nbsp;			ret.getMemberships().retainAll(b.getMemberships());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Subtracts a cohort from a cohort
+&nbsp;	 *
+&nbsp;	 * @param a the original Cohort
+&nbsp;	 * @param b the Cohort to subtract
+&nbsp;	 * @return Cohort
+&nbsp;	 */
+&nbsp;	public static Cohort subtract(Cohort a, Cohort b) {
+<b class="fc">&nbsp;		Cohort ret = new Cohort();</b>
+<b class="fc">&nbsp;		if (a != null) {</b>
+<b class="fc">&nbsp;			ret.getMemberships().addAll(a.getMemberships());</b>
+<b class="fc">&nbsp;			if (b != null) {</b>
+<b class="fc">&nbsp;				ret.getMemberships().removeAll(b.getMemberships());</b>
+<b class="fc">&nbsp;				ret.setName(&quot;(&quot; + a.getName() + &quot; - &quot; + b.getName() + &quot;)&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// getters and setters
+&nbsp;	
+&nbsp;	public Integer getCohortId() {
+<b class="fc">&nbsp;		return cohortId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setCohortId(Integer cohortId) {
+<b class="fc">&nbsp;		this.cohortId = cohortId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getDescription() {
+<b class="fc">&nbsp;		return description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDescription(String description) {
+<b class="fc">&nbsp;		this.description = description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setName(String name) {
+<b class="fc">&nbsp;		this.name = name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated since 2.1.0 cohorts are more complex than just a set of patient ids, so there is no one-line replacement
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public Set&lt;Integer&gt; getMemberIds() {
+<b class="fc">&nbsp;		Set&lt;Integer&gt; memberIds = new TreeSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (CohortMembership member : getMemberships()) {</b>
+<b class="fc">&nbsp;			memberIds.add(member.getPatientId());</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return memberIds;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated since 2.1.0 cohorts are more complex than just a set of patient ids, so there is no one-line replacement
+&nbsp;	 * @param memberIds
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public void setMemberIds(Set&lt;Integer&gt; memberIds) {
+<b class="fc">&nbsp;		if (getMemberships().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (Integer id : memberIds) {</b>
+<b class="fc">&nbsp;				addMembership(new CohortMembership(id));</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;since 2.1.0 cohorts are more complex than just a set of patient ids&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setMemberships(Collection&lt;CohortMembership&gt; members) {
+<b class="fc">&nbsp;		this.memberships = members;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getCohortId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setCohortId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.3
+&nbsp;	 * 
+&nbsp;	 * This function checks if there exists any active CohortMembership for a given patientId
+&nbsp;	 * 
+&nbsp;	 * @param patientId is the patientid that should be checked for activity in cohort
+&nbsp;	 * @return true if cohort has active membership for the requested patient             
+&nbsp;	 */
+&nbsp;	public boolean hasActiveMembership(int patientId) {
+<b class="fc">&nbsp;		return getMemberships().stream().anyMatch(m  -&gt; m.getPatientId() == patientId &amp;&amp; m.isActive());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * 
+&nbsp;	 * @since  2.3
+&nbsp;	 * This method returns the number of active members in the cohort
+&nbsp;	 * 
+&nbsp;	 * @return  number of active memberships in the cohort
+&nbsp;	 */
+&nbsp;	public int activeMembershipSize() {
+<b class="fc">&nbsp;		return getActiveMemberships().size();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @since  2.3
+&nbsp;	 * This method returns true if cohort has no active memberships
+&nbsp;	 *
+&nbsp;	 * @return true if no active cohort exists
+&nbsp;	 **/
+&nbsp;	public boolean hasNoActiveMemberships() {
+<b class="fc">&nbsp;		return getActiveMemberships().isEmpty();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

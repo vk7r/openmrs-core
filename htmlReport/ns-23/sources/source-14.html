@@ -1,0 +1,127 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ModuleActivator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: ModuleActivator (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ModuleActivator</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods that get called at different stages as the application is executing, you should
+&nbsp; * extend {@link BaseModuleActivator} instead of directly implementing this interface for forward
+&nbsp; * compatibility of subclasses.
+&nbsp; * 
+&nbsp; * @see BaseModuleActivator
+&nbsp; * @since 1.7
+&nbsp; */
+&nbsp;public interface ModuleActivator {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called just before spring&#39;s application context is refreshed, this method is called multiple
+&nbsp;	 * times i.e. whenever a new module gets started, at application startup or a developer chooses
+&nbsp;	 * to refresh the context.
+&nbsp;	 */
+&nbsp;	public void willRefreshContext();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called after spring&#39;s application context is refreshed , this method is called multiple times
+&nbsp;	 * i.e. whenever a new module gets started and at application startup.
+&nbsp;	 */
+&nbsp;	public void contextRefreshed();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called after a module has been loaded but before the application context is refreshed, at
+&nbsp;	 * this point the module&#39;s service methods aren&#39;t yet available so they can&#39;t be called. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This method will be authenticated as the Daemon user and have all privileges.
+&nbsp;	 */
+&nbsp;	public void willStart();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called after a module is started, the application context has been refreshed and the module&#39;s
+&nbsp;	 * service methods are ready to be called.
+&nbsp;	 */
+&nbsp;	public void started();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called just before a module is stopped
+&nbsp;	 */
+&nbsp;	public void willStop();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called after a module is stopped
+&nbsp;	 */
+&nbsp;	public void stopped();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MessageSourceService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.messagesource</a>
+</div>
+
+<h1>Coverage Summary for Class: MessageSourceService (org.openmrs.messagesource)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MessageSourceService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.messagesource;
+&nbsp;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * Interface for a service which expands on the basic capabilities of a message source.
+&nbsp; */
+&nbsp;public interface MessageSourceService extends MutableMessageSource {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the message with the given code from the current user&#39;s selected locale.
+&nbsp;	 * 
+&nbsp;	 * @see #getMessage(String arg0, Object[] arg1, java.util.Locale arg2)
+&nbsp;	 * @param s message code to retrieve
+&nbsp;	 * @return the translated message
+&nbsp;	 */
+&nbsp;	public String getMessage(String s);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the message source service which is currently providing services.
+&nbsp;	 * 
+&nbsp;	 * @return the activeMessageSource
+&nbsp;	 */
+&nbsp;	public MutableMessageSource getActiveMessageSource();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the message source service which will actually provide services.
+&nbsp;	 * 
+&nbsp;	 * @param activeMessageSource the &lt;code&gt;MutableMessageSource&lt;/code&gt; to set
+&nbsp;	 */
+&nbsp;	public void setActiveMessageSource(MutableMessageSource activeMessageSource);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the availableMessageSources
+&nbsp;	 */
+&nbsp;	public Set&lt;MutableMessageSource&gt; getMessageSources();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param availableMessageSources the availableMessageSources to set
+&nbsp;	 */
+&nbsp;	public void setMessageSources(Set&lt;MutableMessageSource&gt; availableMessageSources);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

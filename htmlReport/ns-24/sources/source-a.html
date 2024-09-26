@@ -1,0 +1,207 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AlertService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification</a>
+</div>
+
+<h1>Coverage Summary for Class: AlertService (org.openmrs.notification)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">AlertService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.notification.db.AlertDAO;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to creating/deleting/voiding Alerts in the system Use:&lt;br&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; *   Alert alert = new Alert();
+&nbsp; *   alert.set___(___);
+&nbsp; *   ...etc
+&nbsp; *   Context.getAlertService().saveAlert(alert);
+&nbsp; * &lt;/pre&gt;
+&nbsp; */
+&nbsp;public interface AlertService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used by Spring to set the specific/chosen database access implementation
+&nbsp;	 * 
+&nbsp;	 * @param dao The dao implementation to use
+&nbsp;	 */
+&nbsp;	public void setAlertDAO(AlertDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given &lt;code&gt;alert&lt;/code&gt; in the database
+&nbsp;	 * 
+&nbsp;	 * @param alert the Alert object to save
+&nbsp;	 * @return The saved alert object
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save simple alert with one user
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save alerts by role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign uuid to alert
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ALERTS)
+&nbsp;	public Alert saveAlert(Alert alert) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get alert by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param alertId internal alert identifier
+&nbsp;	 * @return alert with given internal identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public Alert getAlert(Integer alertId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely delete the given alert from the database
+&nbsp;	 * 
+&nbsp;	 * @param alert the Alert to purge/delete
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ALERTS)
+&nbsp;	public void purgeAlert(Alert alert) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all alerts for a user that have not expired
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @return alerts that are unread _or_ read that have not expired
+&nbsp;	 * @see #getAlerts(User, boolean, boolean)
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public List&lt;Alert&gt; getAllActiveAlerts(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find the alerts that are not read and have not expired for a user This will probably be the
+&nbsp;	 * most commonly called method If null is passed in for &lt;code&gt;user&lt;/code&gt;, find alerts for the
+&nbsp;	 * currently authenticated user. If no user is authenticated, search on &quot;new
+&nbsp;	 * User()&quot; (for &quot;Anonymous&quot; role alert possibilities)
+&nbsp;	 * 
+&nbsp;	 * @param user the user that is assigned to the returned alerts
+&nbsp;	 * @return alerts that are unread and not expired
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public List&lt;Alert&gt; getAlertsByUser(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds alerts for the given user with the given status
+&nbsp;	 * 
+&nbsp;	 * @param user to restrict to
+&nbsp;	 * @param includeRead
+&nbsp;	 * @param includeExpired
+&nbsp;	 * @return alerts for this user with these options
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public List&lt;Alert&gt; getAlerts(User user, boolean includeRead, boolean includeExpired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all unexpired alerts for all users
+&nbsp;	 * 
+&nbsp;	 * @return list of unexpired alerts
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public List&lt;Alert&gt; getAllAlerts() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get alerts for all users while obeying includeExpired
+&nbsp;	 * 
+&nbsp;	 * @param includeExpired
+&nbsp;	 * @return list of alerts
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public List&lt;Alert&gt; getAllAlerts(boolean includeExpired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sends an alert to all superusers
+&nbsp;	 * 
+&nbsp;	 * @param messageCode The alert message code from messages.properties
+&nbsp;	 * @param cause The exception that was thrown, method will work if cause is null
+&nbsp;	 * @param messageArguments The arguments for the coded message
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add an alert with message of length equals Text Max Length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add an alert with message text if cause is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add an alert to the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ALERTS)
+&nbsp;	public void notifySuperUsers(String messageCode, Exception cause, Object... messageArguments);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

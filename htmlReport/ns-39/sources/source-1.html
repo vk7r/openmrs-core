@@ -1,0 +1,264 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HL7DAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7.db</a>
+</div>
+
+<h1>Coverage Summary for Class: HL7DAO (org.openmrs.hl7.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">HL7DAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.hl7.HL7InArchive;
+&nbsp;import org.openmrs.hl7.HL7InError;
+&nbsp;import org.openmrs.hl7.HL7InQueue;
+&nbsp;import org.openmrs.hl7.HL7Service;
+&nbsp;import org.openmrs.hl7.HL7Source;
+&nbsp;
+&nbsp;/**
+&nbsp; * OpenMRS HL7 database related methods This class shouldn&#39;t be instantiated by itself. Use the
+&nbsp; * {@link org.openmrs.api.context.Context}
+&nbsp; * 
+&nbsp; * @see org.openmrs.hl7.HL7Service
+&nbsp; */
+&nbsp;public interface HL7DAO {
+&nbsp;	
+&nbsp;	/* HL7Source */
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#saveHL7Source(org.openmrs.hl7.HL7Source)
+&nbsp;	 */
+&nbsp;	public HL7Source saveHL7Source(HL7Source hl7Source) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7Source(Integer)
+&nbsp;	 */
+&nbsp;	public HL7Source getHL7Source(Integer hl7SourceId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7SourceByName(String)
+&nbsp;	 */
+&nbsp;	public HL7Source getHL7SourceByName(String name) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getAllHL7Sources()
+&nbsp;	 */
+&nbsp;	public List&lt;HL7Source&gt; getAllHL7Sources() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#purgeHL7Source(org.openmrs.hl7.HL7Source)
+&nbsp;	 */
+&nbsp;	public void deleteHL7Source(HL7Source hl7Source) throws DAOException;
+&nbsp;	
+&nbsp;	/* HL7InQueue */
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#saveHL7InQueue(org.openmrs.hl7.HL7InQueue)
+&nbsp;	 */
+&nbsp;	public HL7InQueue saveHL7InQueue(HL7InQueue hl7InQueue) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7InQueue(Integer)
+&nbsp;	 */
+&nbsp;	public HL7InQueue getHL7InQueue(Integer hl7InQueueId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see HL7Service#getHL7InQueueByUuid(String)
+&nbsp;	 */
+&nbsp;	public HL7InQueue getHL7InQueueByUuid(String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getAllHL7InQueues()
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InQueue&gt; getAllHL7InQueues() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getNextHL7InQueue()
+&nbsp;	 */
+&nbsp;	public HL7InQueue getNextHL7InQueue() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#purgeHL7InQueue(org.openmrs.hl7.HL7InQueue)
+&nbsp;	 */
+&nbsp;	public void deleteHL7InQueue(HL7InQueue hl7InQueue) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns hl7s based on batch settings and filtered by a query
+&nbsp;	 * 
+&nbsp;	 * @param &lt;T&gt;
+&nbsp;	 * @param clazz
+&nbsp;	 * @param start
+&nbsp;	 * @param length
+&nbsp;	 * @param query
+&nbsp;	 * @return list of hl7s
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;rawtypes&quot;)
+&nbsp;	public &lt;T&gt; List&lt;T&gt; getHL7Batch(Class clazz, int start, int length, Integer messageState, String query);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the amount of HL7 items in the database
+&nbsp;	 * 
+&nbsp;	 * @param clazz
+&nbsp;	 * @param messageState
+&nbsp;	 * @param query
+&nbsp;	 * @return count of HL7 items
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;rawtypes&quot;)
+&nbsp;	public Long countHL7s(Class clazz, Integer messageState, String query);
+&nbsp;	
+&nbsp;	/* HL7InArchive */
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#saveHL7InArchive(org.openmrs.hl7.HL7InArchive)
+&nbsp;	 */
+&nbsp;	public HL7InArchive saveHL7InArchive(HL7InArchive hl7InArchive) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7InArchive(Integer)
+&nbsp;	 */
+&nbsp;	public HL7InArchive getHL7InArchive(Integer hl7InArchiveId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7InArchiveByUuid(String)
+&nbsp;	 */
+&nbsp;	public HL7InArchive getHL7InArchiveByUuid(String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7InArchiveByState(Integer state)
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InArchive&gt; getHL7InArchiveByState(Integer state) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7InQueueByState(Integer stateId)
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InQueue&gt; getHL7InQueueByState(Integer stateId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getAllHL7InArchives()
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InArchive&gt; getAllHL7InArchives() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns hl7 in archives but with a limited resultset size to save memory
+&nbsp;	 * 
+&nbsp;	 * @param maxResults the maximum number of rows to be returned from the database
+&nbsp;	 * @return list of hl7 archives
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InArchive&gt; getAllHL7InArchives(Integer maxResults);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#purgeHL7InArchive(org.openmrs.hl7.HL7InArchive)
+&nbsp;	 */
+&nbsp;	public void deleteHL7InArchive(HL7InArchive hl7InArchive) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * provides a list of archives to be migrated
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InArchive&gt; getHL7InArchivesToMigrate();
+&nbsp;	
+&nbsp;	/* HL7InError */
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#saveHL7InError(org.openmrs.hl7.HL7InError)
+&nbsp;	 */
+&nbsp;	public HL7InError saveHL7InError(HL7InError hl7InError) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getHL7InError(Integer)
+&nbsp;	 */
+&nbsp;	public HL7InError getHL7InError(Integer hl7InErrorId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see HL7Service#getHL7InErrorByUuid(String)
+&nbsp;	 */
+&nbsp;	public HL7InError getHL7InErrorByUuid(String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#getAllHL7InErrors()
+&nbsp;	 */
+&nbsp;	public List&lt;HL7InError&gt; getAllHL7InErrors() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#purgeHL7InError(org.openmrs.hl7.HL7InError)
+&nbsp;	 */
+&nbsp;	public void deleteHL7InError(HL7InError hl7InError) throws DAOException;
+&nbsp;	
+&nbsp;	// miscellaneous
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.hl7.HL7Service#garbageCollect()
+&nbsp;	 */
+&nbsp;	public void garbageCollect();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

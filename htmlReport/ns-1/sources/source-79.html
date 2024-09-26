@@ -1,0 +1,144 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Retireable</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Retireable (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Retireable</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;
+&nbsp;/**
+&nbsp; * In OpenMRS, data are rarely fully deleted (purged) from the system; rather, they are either
+&nbsp; * voided or retired. When existing data remain valid but should no longer be used for new entries,
+&nbsp; * they are &lt;em&gt;retired&lt;/em&gt;. Typically this applies to metadata (see {@link OpenmrsMetadata}). For
+&nbsp; * example, an encounter form type or a patient attribute type may no longer be valid but cannot be
+&nbsp; * removed because there are (and may be in perpetuity) data previously collected using these
+&nbsp; * metadata. Making these metadata Retirable allows them to be retired, meaning that existing
+&nbsp; * references remain valid but future references are not allowed.
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; * @see OpenmrsMetadata
+&nbsp; * @see Voidable
+&nbsp; */
+&nbsp;public interface Retireable extends OpenmrsObject {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Boolean - whether of not this object is retired
+&nbsp;	 *
+&nbsp;	 * @deprecated as of 2.0, use {@link #getRetired()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isRetired();
+&nbsp;	
+&nbsp;	public Boolean getRetired();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param retired - whether of not this object is retired
+&nbsp;	 */
+&nbsp;	public void setRetired(Boolean retired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return User - the user who retired the object
+&nbsp;	 */
+&nbsp;	public User getRetiredBy();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param retiredBy - the user who retired the object
+&nbsp;	 */
+&nbsp;	public void setRetiredBy(User retiredBy);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Date - the date the object was retired
+&nbsp;	 */
+&nbsp;	public Date getDateRetired();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateRetired - the date the object was retired
+&nbsp;	 */
+&nbsp;	public void setDateRetired(Date dateRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return String - the reason the object was retired
+&nbsp;	 */
+&nbsp;	public String getRetireReason();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param retireReason - the reason the object was retired
+&nbsp;	 */
+&nbsp;	public void setRetireReason(String retireReason);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

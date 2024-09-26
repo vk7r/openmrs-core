@@ -1,0 +1,138 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SingleCustomValue</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.customdatatype</a>
+</div>
+
+<h1>Coverage Summary for Class: SingleCustomValue (org.openmrs.customdatatype)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SingleCustomValue</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.customdatatype;
+&nbsp;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.VisitAttribute;
+&nbsp;
+&nbsp;/**
+&nbsp; * Either a one-off custom value (e.g. a {@link GlobalProperty}) or a single custom value within a {@link Customizable}
+&nbsp; * object that may hold multiple (e.g. a {@link VisitAttribute} within a {@link Visit}).
+&nbsp; * The &quot;referenceString&quot; property is a String suitable for persistance in a database varchar column. It is typically a
+&nbsp; * reference to the real value (e.g. it is the UUID of a location or the URI of an image in a PACS).
+&nbsp; * The &quot;objectValue&quot; property accessors are convenience methods that use a {@link CustomDatatype} to convert
+&nbsp; * to/from the String serializedValue.
+&nbsp; * @param &lt;D&gt; the descriptor for this value, e.g. VisitAttribute implements SingleCustomValue&amp;lt;VisitAttributeType&amp;gt;
+&nbsp; * @see CustomDatatype
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;public interface SingleCustomValue&lt;D extends CustomValueDescriptor&gt; {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return metadata describing this custom value
+&nbsp;	 */
+&nbsp;	D getDescriptor();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the value persisted in a database in a varchar column. Not necessarily human-readable.
+&nbsp;	 * @throws NotYetPersistedException if valueReference hasn&#39;t been set by the CustomDatatype yet
+&nbsp;	 */
+&nbsp;	String getValueReference() throws NotYetPersistedException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Directly set the String value that OpenMRS should persist in the database
+&nbsp;	 * in a varchar column. Implementations should validate this value and throw an
+&nbsp;	 * {@link InvalidCustomValueException} if it&#39;s invalid, rather than setting it blindly. 
+&nbsp;	 * If you are coding against the OpenMRS API, you should use {@link #setValue(Object)}
+&nbsp;	 * instead.
+&nbsp;	 * @param valueToPersist
+&nbsp;	 */
+&nbsp;	void setValueReferenceInternal(String valueToPersist) throws InvalidCustomValueException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the typed version of the serializedValue. (This will result in a call
+&nbsp;	 * to a {@link CustomDatatype#fromReferenceString(String)}.)
+&nbsp;	 * @return typed value, converted from serializedValue by a CustomDatatype
+&nbsp;	 * @throws InvalidCustomValueException 
+&nbsp;	 */
+&nbsp;	Object getValue() throws InvalidCustomValueException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the typed value. (This will result in a call to {@link CustomDatatype#getReferenceStringForValue(Object)}
+&nbsp;	 * @param typedValue
+&nbsp;	 * @throws InvalidCustomValueException
+&nbsp;	 */
+&nbsp;	&lt;T&gt; void setValue(T typedValue) throws InvalidCustomValueException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return whether or not setValue has been called (thus {@link CustomDatatype#save(Object, String)} needs to be called
+&nbsp;	 */
+&nbsp;	boolean isDirty();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

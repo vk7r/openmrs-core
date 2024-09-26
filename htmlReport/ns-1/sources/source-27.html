@@ -1,0 +1,317 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptSet (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (15/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (20/26)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptSet$HibernateProxy$95SXlLBT</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (15/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (20/26)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * This represents a single concept within a concept set.
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptSet extends BaseOpenmrsObject implements Auditable, java.io.Serializable, Comparable&lt;ConceptSet&gt; {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 3787L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	private Integer conceptSetId;
+&nbsp;	
+&nbsp;	// concept in the set
+&nbsp;	private Concept concept; 
+&nbsp;	
+&nbsp;	// parent concept that uses this set
+&nbsp;	private Concept conceptSet; 
+&nbsp;	
+&nbsp;	private Double sortWeight;
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptSet() {</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public ConceptSet(Concept concept, Double weight) {</b>
+<b class="fc">&nbsp;		setConcept(concept);</b>
+<b class="fc">&nbsp;		setSortWeight(weight);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the concept set identifier.
+&nbsp;	 * 
+&nbsp;	 * @return the concept set identifier
+&nbsp;	 */
+&nbsp;	public Integer getConceptSetId() {
+<b class="fc">&nbsp;		return conceptSetId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the concept set identifier.
+&nbsp;	 * 
+&nbsp;	 * @param conceptSetId The concept set identifier.
+&nbsp;	 */
+&nbsp;	public void setConceptSetId(Integer conceptSetId) {
+<b class="fc">&nbsp;		this.conceptSetId = conceptSetId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getConceptSet() {
+<b class="fc">&nbsp;		return conceptSet;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConceptSet(Concept set) {
+<b class="fc">&nbsp;		this.conceptSet = set;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the sortWeight.
+&nbsp;	 */
+&nbsp;	public Double getSortWeight() {
+<b class="fc">&nbsp;		return sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param sortWeight The sortWeight to set.
+&nbsp;	 */
+&nbsp;	public void setSortWeight(Double sortWeight) {
+<b class="fc">&nbsp;		this.sortWeight = sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getConceptSetId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		this.setConceptSetId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used. Always returns null.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Auditable#getChangedBy()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getChangedBy() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used. Always returns null.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Auditable#getDateChanged()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateChanged() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Auditable#setChangedBy(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Auditable#setDateChanged(java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+&nbsp;	 * Note: this comparator imposes orderings that are inconsistent with equals.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;squid:S1210&quot;)
+&nbsp;	public int compareTo(ConceptSet cs) {
+<b class="fc">&nbsp;		int value = OpenmrsUtil.compareWithNullAsLowest(concept.getRetired(), cs.concept.getRetired());</b>
+<b class="fc">&nbsp;		if (value == 0) {</b>
+<b class="fc">&nbsp;			value = OpenmrsUtil.compareWithNullAsLowest(this.getSortWeight(), cs.getSortWeight());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return value;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

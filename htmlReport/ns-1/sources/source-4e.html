@@ -1,0 +1,421 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderGroup</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderGroup (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderGroup</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,5%
+  </span>
+  <span class="absValue">
+    (23/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,8%
+  </span>
+  <span class="absValue">
+    (44/49)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OrderGroup$HibernateProxy$PHcw6bN4</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    88,5%
+  </span>
+  <span class="absValue">
+    (23/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,8%
+  </span>
+  <span class="absValue">
+    (44/49)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains a group of {@link org.openmrs.Order}s that are ordered together within a single encounter,often driven by an {@link org.openmrs.OrderSet}. 
+&nbsp; * Not all orders in an encounter need to be grouped this way, only those that have a specific connection to each other 
+&nbsp; * (e.g. several orders that together make up a treatment protocol for some diagnosis could be grouped).
+&nbsp; * 
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;@Audited
+<b class="fc">&nbsp;public class OrderGroup extends BaseCustomizableData&lt;OrderGroupAttribute&gt; {</b>
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 72232L;
+&nbsp;	
+&nbsp;	private Integer orderGroupId;
+&nbsp;	
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	private Encounter encounter;
+&nbsp;	
+&nbsp;	private List&lt;Order&gt; orders;
+&nbsp;	
+&nbsp;	private OrderSet orderSet;
+&nbsp;	
+&nbsp;	private OrderGroup parentOrderGroup;
+&nbsp;
+&nbsp;	private Concept orderGroupReason;
+&nbsp;
+&nbsp;	private OrderGroup previousOrderGroup;
+&nbsp;	
+&nbsp;	private Set&lt;OrderGroup&gt; nestedOrderGroups;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the orderGroupId
+&nbsp;	 *
+&nbsp;	 * @return the orderGroupId
+&nbsp;	 */
+&nbsp;	public Integer getOrderGroupId() {
+<b class="fc">&nbsp;		return orderGroupId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the orderGroupId
+&nbsp;	 *
+&nbsp;	 * @param orderGroupId the orderGroupId to set
+&nbsp;	 */
+&nbsp;	public void setOrderGroupId(Integer orderGroupId) {
+<b class="fc">&nbsp;		this.orderGroupId = orderGroupId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the patient
+&nbsp;	 *
+&nbsp;	 * @return the patient
+&nbsp;	 */
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the patient
+&nbsp;	 *
+&nbsp;	 * @param patient the patient to set
+&nbsp;	 */
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the encounter
+&nbsp;	 *
+&nbsp;	 * @return the encounter
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the encounter
+&nbsp;	 *
+&nbsp;	 * @param encounter the encounter to set
+&nbsp;	 */
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the orders
+&nbsp;	 *
+&nbsp;	 * @return the orders
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getOrders() {
+<b class="fc">&nbsp;		if (orders == null) {</b>
+<b class="fc">&nbsp;			orders = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return orders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the orders
+&nbsp;	 *
+&nbsp;	 * @param orders the orders to set
+&nbsp;	 */
+&nbsp;	public void setOrders(List&lt;Order&gt; orders) {
+<b class="fc">&nbsp;		this.orders = orders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a new order to the existing list of orders
+&nbsp;	 * 
+&nbsp;	 * @param order the new order to be added
+&nbsp;	 */
+&nbsp;	public void addOrder(Order order) {
+<b class="fc">&nbsp;		this.addOrder(order, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds {@link Order}s to existing Order list
+&nbsp;	 * 
+&nbsp;	 * @param orders
+&nbsp;	 * @since 2.2
+&nbsp;	 */
+&nbsp;	public void addOrders(List&lt;Order&gt; orders) {
+<b class="nc">&nbsp;		for (Order order : orders) {</b>
+<b class="nc">&nbsp;			addOrder(order);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a new order to the existing list of orders.
+&nbsp;	 * The &lt;tt&gt;sortWeight&lt;/tt&gt; for the order is auto calculated based on the given position.
+&nbsp;	 * 
+&nbsp;	 * @param order the new order to be added
+&nbsp;	 * @param position the position where the order has to be added
+&nbsp;	 */
+&nbsp;	public void addOrder(Order order, Integer position) {
+<b class="fc">&nbsp;		if (order == null || getOrders().contains(order)) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;                
+<b class="fc">&nbsp;                order.setOrderGroup(this);  </b>
+&nbsp;                 
+<b class="fc">&nbsp;		Integer listIndex = findListIndexForGivenPosition(position);</b>
+<b class="fc">&nbsp;		getOrders().add(listIndex, order);</b>
+<b class="fc">&nbsp;		if (order.getSortWeight() == null) {</b>
+<b class="fc">&nbsp;			order.setSortWeight(findSortWeight(listIndex));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Integer findListIndexForGivenPosition(Integer position) {
+<b class="fc">&nbsp;		Integer size = getOrders().size();</b>
+<b class="fc">&nbsp;		if (position != null) {</b>
+<b class="fc">&nbsp;			if (position &lt; 0 &amp;&amp; position &gt;= (-1 - size)) {</b>
+<b class="fc">&nbsp;				position = position + size + 1;</b>
+<b class="fc">&nbsp;			} else if (position &gt; size) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;Cannot add a member which is out of range of the list&quot;);</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			position = size;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return position;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private double findSortWeight(int index) {
+<b class="fc">&nbsp;		int size = getOrders().size();</b>
+<b class="fc">&nbsp;		if (size == 1) {</b>
+<b class="fc">&nbsp;			return 10.0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (index == 0) {</b>
+<b class="fc">&nbsp;			return getOrders().get(1).getSortWeight() / 2;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (index == size - 1) {</b>
+<b class="fc">&nbsp;			return getOrders().get(index - 1).getSortWeight() + 10.0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return (getOrders().get(index - 1).getSortWeight() + getOrders().get(index + 1).getSortWeight()) / 2;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the orderSet
+&nbsp;	 *
+&nbsp;	 * @return the orderSet
+&nbsp;	 */
+&nbsp;	public OrderSet getOrderSet() {
+<b class="fc">&nbsp;		return orderSet;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the orderSet
+&nbsp;	 *
+&nbsp;	 * @param orderSet the orderSet to set
+&nbsp;	 */
+&nbsp;	public void setOrderSet(OrderSet orderSet) {
+<b class="fc">&nbsp;		this.orderSet = orderSet;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getOrderGroupId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setOrderGroupId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the parent order group to maintain linkages between groups and support group nesting
+&nbsp;	 * 
+&nbsp;	 * @return the parent order group
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public OrderGroup getParentOrderGroup() {
+<b class="fc">&nbsp;		return parentOrderGroup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the parent order group to maintain linkages between groups and support group nesting
+&nbsp;	 * 
+&nbsp;	 * @param parentOrderGroup the parent order group to set.
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public void setParentOrderGroup(OrderGroup parentOrderGroup) {
+<b class="fc">&nbsp;		this.parentOrderGroup = parentOrderGroup;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the order group reason which denotes the reason why the group was
+&nbsp;	 * ordered
+&nbsp;	 * 
+&nbsp;	 * @return the order group reason
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public Concept getOrderGroupReason() {
+<b class="fc">&nbsp;		return orderGroupReason;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the order group reason which denotes the reason why the group was
+&nbsp;	 * ordered
+&nbsp;	 * 
+&nbsp;	 * @param orderGroupReason, the order group reason to set
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public void setOrderGroupReason(Concept orderGroupReason) {
+<b class="fc">&nbsp;		this.orderGroupReason = orderGroupReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the previous order group to other order groups, to maintain linkages
+&nbsp;	 * between groups and support group nesting
+&nbsp;	 * 
+&nbsp;	 * @param returns the previous order group
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public OrderGroup getPreviousOrderGroup() {
+<b class="fc">&nbsp;		return previousOrderGroup;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the previous order group to other order groups, to maintain linkages
+&nbsp;	 * between groups and support group nesting
+&nbsp;	 * 
+&nbsp;	 * @param previousOrderGroup The previous order group to set
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public void setPreviousOrderGroup(OrderGroup previousOrderGroup) {
+<b class="fc">&nbsp;		this.previousOrderGroup = previousOrderGroup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the nested order groups to other order groups, to maintain linkages
+&nbsp;	 * between groups and support group nesting
+&nbsp;	 * 
+&nbsp;	 * @param returns the nested order groups
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public Set&lt;OrderGroup&gt; getNestedOrderGroups() {
+<b class="fc">&nbsp;		return this.nestedOrderGroups;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the nested order groups to other order groups, to maintain linkages
+&nbsp;	 * between groups and support group nesting.
+&nbsp;	 * 
+&nbsp;	 * @param nestedOrderGroup The nested order groups to set
+&nbsp;	 * @since 2.4.0
+&nbsp;	 */
+&nbsp;	public void setNestedOrderGroups(Set&lt;OrderGroup&gt; nestedOrderGroups) {
+<b class="nc">&nbsp;		this.nestedOrderGroups = nestedOrderGroups;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

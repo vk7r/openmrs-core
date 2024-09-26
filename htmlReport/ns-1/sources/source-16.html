@@ -1,0 +1,1798 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Concept</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Concept (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Concept</td>
+<td class="coverageStat">
+  <span class="percent">
+    91%
+  </span>
+  <span class="absValue">
+    (91/100)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83%
+  </span>
+  <span class="absValue">
+    (382/460)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Concept$HibernateProxy$YomYFnVT</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91%
+  </span>
+  <span class="absValue">
+    (91/100)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83%
+  </span>
+  <span class="absValue">
+    (382/460)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.ContainedIn;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;import org.hibernate.search.annotations.Field;
+&nbsp;import org.hibernate.search.annotations.FullTextFilterDef;
+&nbsp;import org.hibernate.search.annotations.FullTextFilterDefs;
+&nbsp;import org.hibernate.search.annotations.IndexedEmbedded;
+&nbsp;import org.openmrs.annotation.AllowDirectAccess;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.ConceptNameType;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.hibernate.search.TermsFilterFactory;
+&nbsp;import org.openmrs.customdatatype.CustomValueDescriptor;
+&nbsp;import org.openmrs.customdatatype.Customizable;
+&nbsp;import org.openmrs.util.LocaleUtility;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.ObjectUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * A Concept object can represent either a question or an answer to a data point. That data point is
+&nbsp; * usually an {@link Obs}. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * A Concept can have multiple names and multiple descriptions within one locale and across multiple
+&nbsp; * locales.&lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * To save a Concept to the database, first build up the Concept object in java, then pass that
+&nbsp; * object to the {@link ConceptService}.&lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * To get a Concept that is stored in the database, call a method in the {@link ConceptService} to
+&nbsp; * fetch an object. To get child objects off of that Concept, further calls to the
+&nbsp; * {@link ConceptService} or the database are not needed. e.g. To get the list of answers that are
+&nbsp; * stored to a concept, get the concept, then call {@link Concept#getAnswers()}
+&nbsp; * 
+&nbsp; * @see ConceptName
+&nbsp; * @see ConceptDescription
+&nbsp; * @see ConceptAnswer
+&nbsp; * @see ConceptSet
+&nbsp; * @see ConceptMap
+&nbsp; * @see ConceptService
+&nbsp; */
+&nbsp;@FullTextFilterDefs( { @FullTextFilterDef(name = &quot;termsFilterFactory&quot;, impl = TermsFilterFactory.class) })
+&nbsp;@Audited
+&nbsp;public class Concept extends BaseOpenmrsObject implements Auditable, Retireable, Serializable, Attributable&lt;Concept&gt;,Customizable&lt;ConceptAttribute&gt; {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 57332L;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Concept.class);</b>
+&nbsp;	private static final String CONCEPT_NAME_LOCALE_NULL = &quot;Concept.name.locale.null&quot;;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@DocumentId
+&nbsp;	private Integer conceptId;
+&nbsp;	
+<b class="fc">&nbsp;	@Field</b>
+<b class="fc">&nbsp;	private Boolean retired = false;</b>
+&nbsp;	
+&nbsp;	private User retiredBy;
+&nbsp;	
+&nbsp;	private Date dateRetired;
+&nbsp;	
+&nbsp;	private String retireReason;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private ConceptDatatype datatype;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private ConceptClass conceptClass;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean set = false;</b>
+&nbsp;	
+&nbsp;	private String version;
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;	
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	@AllowDirectAccess
+&nbsp;	@ContainedIn
+&nbsp;	private Collection&lt;ConceptName&gt; names;
+&nbsp;	
+&nbsp;	@AllowDirectAccess
+&nbsp;	private Collection&lt;ConceptAnswer&gt; answers;
+&nbsp;	
+&nbsp;	private Collection&lt;ConceptSet&gt; conceptSets;
+&nbsp;	
+&nbsp;	private Collection&lt;ConceptDescription&gt; descriptions;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private Collection&lt;ConceptMap&gt; conceptMappings;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A cache of locales to names which have compatible locales. Built on-the-fly by
+&nbsp;	 * getCompatibleNames().
+&nbsp;	 */
+&nbsp;	private Map&lt;Locale, List&lt;ConceptName&gt;&gt; compatibleCache;
+&nbsp;
+<b class="fc">&nbsp;	private Set&lt;ConceptAttribute&gt; attributes = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Concept() {</b>
+<b class="fc">&nbsp;		names = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		answers = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		conceptSets = new TreeSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		descriptions = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		conceptMappings = new HashSet&lt;&gt;();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor with conceptid to save to {@link #setConceptId(Integer)}. This
+&nbsp;	 * effectively creates a concept stub that can be used to make other calls. Because the
+&nbsp;	 * {@link #equals(Object)} and {@link #hashCode()} methods rely on conceptId, this allows a stub
+&nbsp;	 * to masquerade as a full concept as long as other objects like {@link #getAnswers()} and
+&nbsp;	 * {@link #getNames()} are not needed/called.
+&nbsp;	 * 
+&nbsp;	 * @param conceptId the concept id to set
+&nbsp;	 */
+&nbsp;	public Concept(Integer conceptId) {
+<b class="fc">&nbsp;		this();</b>
+<b class="fc">&nbsp;		this.conceptId = conceptId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns all answers (including retired answers).
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return retired and non-retired answers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null if answers is null or empty
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptAnswer&gt; getAnswers() {
+<b class="fc">&nbsp;		if (answers == null) {</b>
+<b class="fc">&nbsp;			answers = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return answers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If &lt;code&gt;includeRetired&lt;/code&gt; is true, then the returned object is the actual stored list of
+&nbsp;	 * {@link ConceptAnswer}s
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired true/false whether to also include the retired answers
+&nbsp;	 * @return Returns the answers for this Concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the same as getAnswers() if includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return retired answers if includeRetired is false
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptAnswer&gt; getAnswers(boolean includeRetired) {
+<b class="fc">&nbsp;		if (includeRetired) {</b>
+<b class="fc">&nbsp;			return getAnswers();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return getAnswers().stream()</b>
+<b class="fc">&nbsp;					.filter(a -&gt; !a.getAnswerConcept().getRetired())</b>
+<b class="fc">&nbsp;					.collect(Collectors.toSet());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set this Concept as having the given &lt;code&gt;answers&lt;/code&gt;; This method assumes that the
+&nbsp;	 * sort_weight has already been set.
+&nbsp;	 * 
+&nbsp;	 * @param answers The answers to set.
+&nbsp;	 */
+&nbsp;	public void setAnswers(Collection&lt;ConceptAnswer&gt; answers) {
+<b class="fc">&nbsp;		this.answers = answers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given ConceptAnswer to the list of answers for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param conceptAnswer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the ConceptAnswer to Concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if answers list is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if answers contains ConceptAnswer already
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the sort weight to the max plus one if not provided
+&nbsp;	 */
+&nbsp;	public void addAnswer(ConceptAnswer conceptAnswer) {
+<b class="fc">&nbsp;		if (conceptAnswer != null) {</b>
+<b class="fc">&nbsp;			if (!getAnswers().contains(conceptAnswer)) {</b>
+<b class="fc">&nbsp;				conceptAnswer.setConcept(this);</b>
+<b class="fc">&nbsp;				getAnswers().add(conceptAnswer);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if ((conceptAnswer.getSortWeight() == null) || (conceptAnswer.getSortWeight() &lt;= 0)) {</b>
+&nbsp;				//find largest sort weight
+<b class="fc">&nbsp;				ConceptAnswer a = Collections.max(answers);</b>
+&nbsp;				//a.sortWeight can be NULL
+<b class="fc">&nbsp;				Double sortWeight = (a == null) ? 1d : ((a.getSortWeight() == null) ? 1d : a.getSortWeight() + 1d);</b>
+<b class="fc">&nbsp;				conceptAnswer.setSortWeight(sortWeight);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given answer from the list of answers for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param conceptAnswer answer to remove
+&nbsp;	 * @return true if the entity was removed, false otherwise
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if answers is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if given answer does not exist in list
+&nbsp;	 */
+&nbsp;	public boolean removeAnswer(ConceptAnswer conceptAnswer) {
+<b class="fc">&nbsp;		return getAnswers().remove(conceptAnswer);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the changedBy.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param changedBy The changedBy to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptClass.
+&nbsp;	 */
+&nbsp;	public ConceptClass getConceptClass() {
+<b class="fc">&nbsp;		return conceptClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptClass The conceptClass to set.
+&nbsp;	 */
+&nbsp;	public void setConceptClass(ConceptClass conceptClass) {
+<b class="fc">&nbsp;		this.conceptClass = conceptClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * whether or not this concept is a set
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getSet()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isSet() {
+<b class="fc">&nbsp;		return getSet();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param set whether or not this concept is a set
+&nbsp;	 */
+&nbsp;	public void setSet(Boolean set) {
+<b class="fc">&nbsp;		this.set = set;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getSet() {
+<b class="fc">&nbsp;		return set;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptDatatype.
+&nbsp;	 */
+&nbsp;	public ConceptDatatype getDatatype() {
+<b class="fc">&nbsp;		return datatype;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptDatatype The conceptDatatype to set.
+&nbsp;	 */
+&nbsp;	public void setDatatype(ConceptDatatype conceptDatatype) {
+<b class="fc">&nbsp;		this.datatype = conceptDatatype;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptId.
+&nbsp;	 */
+&nbsp;	public Integer getConceptId() {
+<b class="fc">&nbsp;		return conceptId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptId The conceptId to set.
+&nbsp;	 */
+&nbsp;	public void setConceptId(Integer conceptId) {
+<b class="fc">&nbsp;		this.conceptId = conceptId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateChanged.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged The dateChanged to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the preferred name /in this locale/ to the specified conceptName and its Locale, if
+&nbsp;	 * there is an existing preferred name for this concept in the same locale, this one will
+&nbsp;	 * replace the old preferred name. Also, the name is added to the concept if it is not already
+&nbsp;	 * among the concept names.
+&nbsp;	 * 
+&nbsp;	 * @param preferredName The name to be marked as preferred in its locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only allow one preferred name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the name to the list of names if it not among them before
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the preferred name to set to is an index term
+&nbsp;	 */
+&nbsp;	public void setPreferredName(ConceptName preferredName) {
+&nbsp;		
+<b class="fc">&nbsp;		if (preferredName == null || preferredName.getVoided() || preferredName.isIndexTerm()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Concept.error.preferredName.null&quot;, (Object[]) null);</b>
+<b class="fc">&nbsp;		} else if (preferredName.getLocale() == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(CONCEPT_NAME_LOCALE_NULL, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//first revert the current preferred name(if any) from being preferred
+<b class="fc">&nbsp;		ConceptName oldPreferredName = getPreferredName(preferredName.getLocale());</b>
+<b class="fc">&nbsp;		if (oldPreferredName != null) {</b>
+<b class="fc">&nbsp;			oldPreferredName.setLocalePreferred(false);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		preferredName.setLocalePreferred(true);</b>
+&nbsp;		//add this name, if it is new or not among this concept&#39;s names
+<b class="fc">&nbsp;		if (preferredName.getConceptNameId() == null || !getNames().contains(preferredName)) {</b>
+<b class="fc">&nbsp;			addName(preferredName);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A convenience method to get the concept-name (if any) which has a particular tag. This does
+&nbsp;	 * not guarantee that the returned name is the only one with the tag.
+&nbsp;	 * 
+&nbsp;	 * @param conceptNameTag the tag for which to look
+&nbsp;	 * @return the tagged name, or null if no name has the tag
+&nbsp;	 */
+&nbsp;	public ConceptName findNameTaggedWith(ConceptNameTag conceptNameTag) {
+<b class="nc">&nbsp;		ConceptName taggedName = null;</b>
+<b class="nc">&nbsp;		for (ConceptName possibleName : getNames()) {</b>
+<b class="nc">&nbsp;			if (possibleName.hasTag(conceptNameTag)) {</b>
+<b class="nc">&nbsp;				taggedName = possibleName;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return taggedName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a name in the given locale. If a name isn&#39;t found with an exact match, a compatible
+&nbsp;	 * locale match is returned. If no name is found matching either of those, the first name
+&nbsp;	 * defined for this concept is returned.
+&nbsp;	 * 
+&nbsp;	 * @param locale the locale to fetch for
+&nbsp;	 * @return ConceptName attributed to the Concept in the given locale
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see Concept#getNames(Locale) to get all the names for a locale,
+&nbsp;	 * @see Concept#getPreferredName(Locale) for the preferred name (if any)
+&nbsp;	 */
+&nbsp;	public ConceptName getName(Locale locale) {
+<b class="fc">&nbsp;		return getName(locale, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns concept name, the look up for the appropriate name is done in the following order;
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;First name found in any locale that is explicitly marked as preferred while searching
+&nbsp;	 * available locales in order of preference (the locales are traversed in their order as they
+&nbsp;	 * are listed in the &#39;locale.allowed.list&#39; including english global property).&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;First &quot;Fully Specified&quot; name found while searching available locales in order of
+&nbsp;	 * preference.&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;The first fully specified name found while searching through all names for the concept&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;The first synonym found while searching through all names for the concept.&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;The first random name found(except index terms) while searching through all names.&lt;/li&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * 
+&nbsp;	 * @return {@link ConceptName} in the current locale or any locale if none found
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see Concept#getNames(Locale) to get all the names for a locale
+&nbsp;	 * @see Concept#getPreferredName(Locale) for the preferred name (if any)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the name explicitly marked as locale preferred if any is present
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the fully specified name in a locale if no preferred name is set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if the only added name is an index term
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return name in broader locale in case none is found in specific one
+&nbsp;	 */
+&nbsp;	public ConceptName getName() {
+<b class="fc">&nbsp;		if (getNames().isEmpty()) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;there are no names defined for: {}&quot;, conceptId);</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (Locale currentLocale : LocaleUtility.getLocalesInOrder()) {</b>
+<b class="fc">&nbsp;			ConceptName preferredName = getPreferredName(currentLocale);</b>
+<b class="fc">&nbsp;			if (preferredName != null) {</b>
+<b class="fc">&nbsp;				return preferredName;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			ConceptName fullySpecifiedName = getFullySpecifiedName(currentLocale);</b>
+<b class="fc">&nbsp;			if (fullySpecifiedName != null) {</b>
+<b class="nc">&nbsp;				return fullySpecifiedName;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//if the locale has an variants e.g en_GB, try names in the locale excluding the country code i.e en
+<b class="fc">&nbsp;			if (!StringUtils.isBlank(currentLocale.getCountry()) || !StringUtils.isBlank(currentLocale.getVariant())) {</b>
+<b class="fc">&nbsp;				Locale broaderLocale = new Locale(currentLocale.getLanguage());</b>
+<b class="fc">&nbsp;				ConceptName prefNameInBroaderLoc = getPreferredName(broaderLocale);</b>
+<b class="fc">&nbsp;				if (prefNameInBroaderLoc != null) {</b>
+<b class="fc">&nbsp;					return prefNameInBroaderLoc;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				ConceptName fullySpecNameInBroaderLoc = getFullySpecifiedName(broaderLocale);</b>
+<b class="fc">&nbsp;				if (fullySpecNameInBroaderLoc != null) {</b>
+<b class="nc">&nbsp;					return fullySpecNameInBroaderLoc;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (ConceptName cn : getNames()) {</b>
+<b class="fc">&nbsp;			if (cn.isFullySpecifiedName()) {</b>
+<b class="fc">&nbsp;				return cn;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!getSynonyms().isEmpty()) {</b>
+<b class="nc">&nbsp;			return getSynonyms().iterator().next();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// we don&#39;t expect to get here since every concept name must have at least
+&nbsp;		// one fully specified name, but just in case (probably inconsistent data)
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether this concept has the given string in any of the names in the given locale
+&nbsp;	 * already.
+&nbsp;	 * 
+&nbsp;	 * @param name the ConceptName.name to compare to
+&nbsp;	 * @param locale the locale to look in (null to check all locales)
+&nbsp;	 * @return true/false whether the name exists already
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if name is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if locale is null but name exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if locale is null but name does not exist
+&nbsp;	 */
+&nbsp;	public boolean hasName(String name, Locale locale) {
+<b class="fc">&nbsp;		if (name == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		Collection&lt;ConceptName&gt; currentNames;
+<b class="fc">&nbsp;		if (locale == null) {</b>
+<b class="fc">&nbsp;			currentNames = getNames();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			currentNames = getNames(locale);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (ConceptName currentName : currentNames) {</b>
+<b class="fc">&nbsp;			if (name.equalsIgnoreCase(currentName.getName())) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns concept name depending of locale, type (short, fully specified, etc) and tag.
+&nbsp;	 * Searches in the locale, and then the locale&#39;s parent if nothing is found.
+&nbsp;	 * 
+&nbsp;	 * @param ofType find a name of this type (optional)
+&nbsp;	 * @param havingTag find a name with this tag (optional)
+&nbsp;	 * @param locale find a name with this locale (required)
+&nbsp;	 * @return a name that matches the arguments, or null if none is found. If there are multiple
+&nbsp;	 *         matches and one is locale_preferred, that will be returned, otherwise a random one of
+&nbsp;	 *         the matches will be returned.
+&nbsp;	 * @since 1.9
+&nbsp;	 **/
+&nbsp;	public ConceptName getName(Locale locale, ConceptNameType ofType, ConceptNameTag havingTag) {
+<b class="nc">&nbsp;		Collection&lt;ConceptName&gt; namesInLocale = getNames(locale);</b>
+<b class="nc">&nbsp;		if (!namesInLocale.isEmpty()) {</b>
+&nbsp;			//Pass the possible candidates through a stream and save the ones that match requirements to the list
+<b class="nc">&nbsp;			List&lt;ConceptName&gt; matches = namesInLocale.stream().filter(</b>
+<b class="nc">&nbsp;				c-&gt;(ofType==null || ofType.equals(c.getConceptNameType())) &amp;&amp; (havingTag==null || c.hasTag(havingTag))</b>
+<b class="nc">&nbsp;			).collect(Collectors.toList());</b>
+&nbsp;			
+&nbsp;			// if we have any matches, we&#39;ll return one of them
+<b class="nc">&nbsp;			if (matches.size() == 1) {</b>
+<b class="nc">&nbsp;				return matches.get(0);</b>
+<b class="nc">&nbsp;			} else if (matches.size() &gt; 1) {</b>
+<b class="nc">&nbsp;				for (ConceptName match : matches) {</b>
+<b class="nc">&nbsp;					if (match.getLocalePreferred()) {</b>
+<b class="nc">&nbsp;						return match;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+&nbsp;				// none was explicitly marked as preferred
+<b class="nc">&nbsp;				return matches.get(0);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if we reach here, there were no matching names, so try to look in the parent locale
+<b class="nc">&nbsp;		Locale parent = new Locale(locale.getLanguage());</b>
+<b class="nc">&nbsp;		if (!parent.equals(locale)) {</b>
+<b class="nc">&nbsp;			return getName(parent, ofType, havingTag);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a name in the given locale. If a name isn&#39;t found with an exact match, a compatible
+&nbsp;	 * locale match is returned. If no name is found matching either of those, the first name
+&nbsp;	 * defined for this concept is returned.
+&nbsp;	 * 
+&nbsp;	 * @param locale the language and country in which the name is used
+&nbsp;	 * @param exact true/false to return only exact locale (no default locale)
+&nbsp;	 * @return the closest name in the given locale, or the first name
+&nbsp;	 * @see Concept#getNames(Locale) to get all the names for a locale,
+&nbsp;	 * @see Concept#getPreferredName(Locale) for the preferred name (if any)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return exact name locale match given exact equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return loose match given exact equals false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no names are found in locale given exact equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return any name if no locale match given exact equals false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return name in broader locale in case none is found in specific one
+&nbsp;	 */
+&nbsp;	public ConceptName getName(Locale locale, boolean exact) {
+&nbsp;		
+&nbsp;		// fail early if this concept has no names defined
+<b class="fc">&nbsp;		if (getNames().isEmpty()) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;there are no names defined for: {}&quot;, conceptId);</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Getting conceptName for locale: {}&quot;, locale);</b>
+&nbsp;		
+<b class="fc">&nbsp;		ConceptName exactName = getNameInLocale(locale);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (exactName != null) {</b>
+<b class="fc">&nbsp;			return exactName;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (!exact) {</b>
+<b class="fc">&nbsp;			Locale broaderLocale = new Locale(locale.getLanguage());</b>
+<b class="fc">&nbsp;			ConceptName name = getNameInLocale(broaderLocale);</b>
+<b class="fc">&nbsp;			return name != null ? name : getName();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the best name in the specified locale.
+&nbsp;	 * 
+&nbsp;	 * @param locale
+&nbsp;	 * @return null if name in given locale doesn&#39;t exist
+&nbsp;	 */
+&nbsp;	private ConceptName getNameInLocale(Locale locale) {
+<b class="fc">&nbsp;		ConceptName preferredName = getPreferredName(locale);</b>
+<b class="fc">&nbsp;		if (preferredName != null) {</b>
+<b class="fc">&nbsp;			return preferredName;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptName fullySpecifiedName = getFullySpecifiedName(locale);</b>
+<b class="fc">&nbsp;		if (fullySpecifiedName != null) {</b>
+<b class="nc">&nbsp;			return fullySpecifiedName;</b>
+<b class="fc">&nbsp;		} else if (!getSynonyms(locale).isEmpty()) {</b>
+<b class="fc">&nbsp;			return getSynonyms(locale).iterator().next();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the name which is explicitly marked as preferred for a given locale.
+&nbsp;	 * 
+&nbsp;	 * @param forLocale locale for which to return a preferred name
+&nbsp;	 * @return preferred name for the locale, or null if no preferred name is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept name explicitly marked as locale preferred
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the fully specified name if no name is explicitly marked as locale preferred
+&nbsp;	 */
+&nbsp;	public ConceptName getPreferredName(Locale forLocale) {
+&nbsp;		
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Getting preferred conceptName for locale: &quot; + forLocale);</b>
+&nbsp;		}
+&nbsp;		// fail early if this concept has no names defined
+<b class="fc">&nbsp;		if (getNames(forLocale).isEmpty()) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;there are no names defined for concept with id: {} in the locale: {}&quot;, conceptId, forLocale);</b>
+<b class="fc">&nbsp;			return null;</b>
+<b class="fc">&nbsp;		} else if (forLocale == null) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Locale cannot be null&quot;);</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (ConceptName nameInLocale : getNames(forLocale)) {</b>
+<b class="fc">&nbsp;			if (ObjectUtils.nullSafeEquals(nameInLocale.getLocalePreferred(), true)) {</b>
+<b class="fc">&nbsp;				return nameInLocale;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// look for partially locale match - any language matches takes precedence over country matches.
+<b class="fc">&nbsp;		ConceptName bestMatch = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (ConceptName nameInLocale : getPartiallyCompatibleNames(forLocale)) {</b>
+<b class="fc">&nbsp;			if (ObjectUtils.nullSafeEquals(nameInLocale.getLocalePreferred(), true)) {</b>
+<b class="fc">&nbsp;				Locale nameLocale = nameInLocale.getLocale();</b>
+<b class="fc">&nbsp;				if (forLocale.getLanguage().equals(nameLocale.getLanguage())) {</b>
+<b class="fc">&nbsp;					return nameInLocale;</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					bestMatch = nameInLocale;</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (bestMatch != null) {</b>
+<b class="nc">&nbsp;			return bestMatch;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return getFullySpecifiedName(forLocale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that returns the fully specified name in the locale
+&nbsp;	 * 
+&nbsp;	 * @param locale locale from which to look up the fully specified name
+&nbsp;	 * @return the name explicitly marked as fully specified for the locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the name marked as fully specified for the given locale
+&nbsp;	 */
+&nbsp;	public ConceptName getFullySpecifiedName(Locale locale) {
+<b class="fc">&nbsp;		if (locale != null &amp;&amp; !getNames(locale).isEmpty()) {</b>
+&nbsp;			//get the first fully specified name, since every concept must have a fully specified name,
+&nbsp;			//then, this loop will have to return a name
+<b class="fc">&nbsp;			for (ConceptName conceptName : getNames(locale)) {</b>
+<b class="fc">&nbsp;				if (ObjectUtils.nullSafeEquals(conceptName.isFullySpecifiedName(), true)) {</b>
+<b class="fc">&nbsp;					return conceptName;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// look for partially locale match - any language matches takes precedence over country matches.
+<b class="fc">&nbsp;			ConceptName bestMatch = null;</b>
+<b class="fc">&nbsp;			for (ConceptName conceptName : getPartiallyCompatibleNames(locale)) {</b>
+<b class="fc">&nbsp;				if (ObjectUtils.nullSafeEquals(conceptName.isFullySpecifiedName(), true)) {</b>
+<b class="fc">&nbsp;					Locale nameLocale = conceptName.getLocale();</b>
+<b class="fc">&nbsp;					if (locale.getLanguage().equals(nameLocale.getLanguage())) {</b>
+<b class="fc">&nbsp;						return conceptName;</b>
+&nbsp;					}
+<b class="nc">&nbsp;					bestMatch = conceptName;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			return bestMatch;</b>
+&nbsp;			
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all names available in a specific locale. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This is recommended when managing the concept dictionary.
+&nbsp;	 * 
+&nbsp;	 * @param locale locale for which names should be returned
+&nbsp;	 * @return Collection of ConceptNames with the given locale
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getNames(Locale locale) {
+<b class="fc">&nbsp;		return getNames().stream()</b>
+<b class="fc">&nbsp;				.filter(n -&gt; n.getLocale().equals(locale))</b>
+<b class="fc">&nbsp;				.collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all names available for locale language &quot;or&quot; country. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * 
+&nbsp;	 * @param locale locale for which names should be returned
+&nbsp;	 * @return Collection of ConceptNames with the given locale language or country
+&nbsp;	 */
+&nbsp;	private Collection&lt;ConceptName&gt; getPartiallyCompatibleNames(Locale locale) {
+<b class="fc">&nbsp;		String language = locale.getLanguage();</b>
+<b class="fc">&nbsp;		String country = locale.getCountry();</b>
+&nbsp;		
+<b class="fc">&nbsp;		return getNames().stream()</b>
+<b class="fc">&nbsp;				.filter(n -&gt; language.equals(n.getLocale().getLanguage()) || </b>
+<b class="fc">&nbsp;							StringUtils.isNotBlank(country) &amp;&amp; country.equals(n.getLocale().getCountry()))</b>
+<b class="fc">&nbsp;				.collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all names from compatible locales. A locale is considered compatible if it is exactly
+&nbsp;	 * the same locale, or if either locale has no country specified and the language matches. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This is recommended when presenting possible names to the use.
+&nbsp;	 * 
+&nbsp;	 * @param desiredLocale locale with which the names should be compatible
+&nbsp;	 * @return Collection of compatible names
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; exclude incompatible country locales
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; exclude incompatible language locales
+&nbsp;	 */
+&nbsp;	public List&lt;ConceptName&gt; getCompatibleNames(Locale desiredLocale) {
+&nbsp;		// lazy create the cache
+<b class="fc">&nbsp;		List&lt;ConceptName&gt; compatibleNames = null;</b>
+<b class="fc">&nbsp;		if (compatibleCache == null) {</b>
+<b class="fc">&nbsp;			compatibleCache = new HashMap&lt;&gt;();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			compatibleNames = compatibleCache.get(desiredLocale);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (compatibleNames == null) {</b>
+<b class="fc">&nbsp;			compatibleNames = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (ConceptName possibleName : getNames()) {</b>
+<b class="fc">&nbsp;				if (LocaleUtility.areCompatible(possibleName.getLocale(), desiredLocale)) {</b>
+<b class="fc">&nbsp;					compatibleNames.add(possibleName);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			compatibleCache.put(desiredLocale, compatibleNames);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return compatibleNames;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the specified name as the fully specified name for the locale and the current fully
+&nbsp;	 * specified (if any) ceases to be the fully specified name for the locale.
+&nbsp;	 * 
+&nbsp;	 * @param fullySpecifiedName the new fully specified name to set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the concept name type of the specified name to fully specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; convert the previous fully specified name if any to a synonym
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the name to the list of names if it not among them before
+&nbsp;	 */
+&nbsp;	public void setFullySpecifiedName(ConceptName fullySpecifiedName) {
+<b class="fc">&nbsp;		if (fullySpecifiedName == null || fullySpecifiedName.getLocale() == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(CONCEPT_NAME_LOCALE_NULL, (Object[]) null);</b>
+<b class="fc">&nbsp;		} else if (fullySpecifiedName.getVoided()) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Concept.error.fullySpecifiedName.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptName oldFullySpecifiedName = getFullySpecifiedName(fullySpecifiedName.getLocale());</b>
+<b class="fc">&nbsp;		if (oldFullySpecifiedName != null) {</b>
+<b class="fc">&nbsp;			oldFullySpecifiedName.setConceptNameType(null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		fullySpecifiedName.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);</b>
+&nbsp;		//add this name, if it is new or not among this concept&#39;s names
+<b class="fc">&nbsp;		if (fullySpecifiedName.getConceptNameId() == null || !getNames().contains(fullySpecifiedName)) {</b>
+<b class="fc">&nbsp;			addName(fullySpecifiedName);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the specified name as the short name for the locale and the current shortName(if any)
+&nbsp;	 * ceases to be the short name for the locale.
+&nbsp;	 * 
+&nbsp;	 * @param shortName the new shortName to set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the concept name type of the specified name to short
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; convert the previous shortName if any to a synonym
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the name to the list of names if it not among them before
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void old short name if new one is blank (do not save blanks!)
+&nbsp;	 */
+&nbsp;	public void setShortName(ConceptName shortName) {
+<b class="fc">&nbsp;		if (shortName != null) {</b>
+<b class="fc">&nbsp;			if (shortName.getLocale() == null) {</b>
+<b class="nc">&nbsp;				throw new APIException(CONCEPT_NAME_LOCALE_NULL, (Object[]) null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			ConceptName oldShortName = getShortNameInLocale(shortName.getLocale());</b>
+<b class="fc">&nbsp;			if (oldShortName != null) {</b>
+<b class="fc">&nbsp;				oldShortName.setConceptNameType(null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			shortName.setConceptNameType(ConceptNameType.SHORT);</b>
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(shortName.getName())</b>
+<b class="fc">&nbsp;			        &amp;&amp; (shortName.getConceptNameId() == null || !getNames().contains(shortName))) {</b>
+&nbsp;				//add this name, if it is new or not among this concept&#39;s names
+<b class="fc">&nbsp;				addName(shortName);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Concept.error.shortName.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the explicitly specified short name for a locale.
+&nbsp;	 * 
+&nbsp;	 * @param locale locale for which to find a short name
+&nbsp;	 * @return the short name, or null if none has been explicitly set
+&nbsp;	 */
+&nbsp;	public ConceptName getShortNameInLocale(Locale locale) {
+<b class="fc">&nbsp;		ConceptName bestMatch = null;</b>
+<b class="fc">&nbsp;		if (locale != null &amp;&amp; !getShortNames().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (ConceptName shortName : getShortNames()) {</b>
+<b class="fc">&nbsp;				Locale nameLocale = shortName.getLocale();</b>
+<b class="fc">&nbsp;				if (nameLocale.equals(locale)) {</b>
+<b class="fc">&nbsp;					return shortName;</b>
+&nbsp;				}
+&nbsp;				// test for partially locale match - any language matches takes precedence over country matches.
+<b class="fc">&nbsp;				if (OpenmrsUtil.nullSafeEquals(locale.getLanguage(), nameLocale.getLanguage())) {</b>
+<b class="fc">&nbsp;					bestMatch = shortName;</b>
+<b class="fc">&nbsp;				} else if (bestMatch == null &amp;&amp; StringUtils.isNotBlank(locale.getCountry())</b>
+<b class="fc">&nbsp;				        &amp;&amp; locale.getCountry().equals(nameLocale.getCountry())) {</b>
+<b class="nc">&nbsp;					bestMatch = shortName;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return bestMatch;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a collection of short names for this concept from all locales.
+&nbsp;	 * 
+&nbsp;	 * @return a collection of all short names for this concept
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getShortNames() {
+<b class="fc">&nbsp;		List&lt;ConceptName&gt; shortNames = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (getNames().isEmpty()) {</b>
+<b class="nc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;The Concept with id: &quot; + conceptId + &quot; has no names&quot;);</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			shortNames = getNames().stream()</b>
+<b class="fc">&nbsp;							.filter(ConceptName::isShort)</b>
+<b class="fc">&nbsp;							.collect(Collectors.toList());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return shortNames;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the short form name for a locale, or if none has been identified, the shortest name
+&nbsp;	 * available in the locale. If exact is false, the shortest name from any locale is returned
+&nbsp;	 * 
+&nbsp;	 * @param locale the language and country in which the short name is used
+&nbsp;	 * @param exact true/false to return only exact locale (no default locale)
+&nbsp;	 * @return the appropriate short name, or null if not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the name marked as the shortName for the locale if it is present
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the shortest name in a given locale for a concept if exact is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the shortest name for the concept from any locale if exact is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if there are no names in the specified locale and exact is true
+&nbsp;	 */
+&nbsp;	public ConceptName getShortestName(Locale locale, Boolean exact) {
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Getting shortest conceptName for locale: &quot; + locale);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptName shortNameInLocale = getShortNameInLocale(locale);</b>
+<b class="fc">&nbsp;		if (shortNameInLocale != null) {</b>
+<b class="fc">&nbsp;			return shortNameInLocale;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptName shortestNameForLocale = null;</b>
+<b class="fc">&nbsp;		ConceptName shortestNameForConcept = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (locale != null) {</b>
+<b class="fc">&nbsp;			for (ConceptName possibleName : getNames()) {</b>
+<b class="fc">&nbsp;				if (possibleName.getLocale().equals(locale)</b>
+<b class="fc">&nbsp;				        &amp;&amp; ((shortestNameForLocale == null) || (possibleName.getName().length() &lt; shortestNameForLocale</b>
+<b class="fc">&nbsp;				                .getName().length()))) {</b>
+<b class="fc">&nbsp;					shortestNameForLocale = possibleName;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if ((shortestNameForConcept == null)</b>
+<b class="fc">&nbsp;				        || (possibleName.getName().length() &lt; shortestNameForConcept.getName().length())) {</b>
+<b class="fc">&nbsp;					shortestNameForConcept = possibleName;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (exact) {</b>
+<b class="fc">&nbsp;			if (shortestNameForLocale == null) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;No short concept name found for concept id &quot; + conceptId + &quot; for locale &quot;</b>
+<b class="fc">&nbsp;				        + locale.getDisplayName());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return shortestNameForLocale;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return shortestNameForConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param name A name
+&nbsp;	 * @return whether this concept has the given name in any locale
+&nbsp;	 */
+&nbsp;	public boolean isNamed(String name) {
+<b class="fc">&nbsp;		return getNames().stream().anyMatch(cn -&gt; name.equals(cn.getName()));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the list of all non-retired concept names which are index terms for this concept
+&nbsp;	 * 
+&nbsp;	 * @return a collection of concept names which are index terms for this concept
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getIndexTerms() {
+<b class="nc">&nbsp;		return getNames().stream()</b>
+<b class="nc">&nbsp;				.filter(ConceptName::isIndexTerm)</b>
+<b class="nc">&nbsp;				.collect(Collectors.toSet());		</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the list of all non-retired concept names which are index terms in a given locale
+&nbsp;	 * 
+&nbsp;	 * @param locale the locale for the index terms to return
+&nbsp;	 * @return a collection of concept names which are index terms in the given locale
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getIndexTermsForLocale(Locale locale) {
+<b class="nc">&nbsp;		return getIndexTerms().stream()</b>
+<b class="nc">&nbsp;				.filter(n -&gt; n.getLocale().equals(locale))</b>
+<b class="nc">&nbsp;		        .collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the names.
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getNames() {
+<b class="fc">&nbsp;		return getNames(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the names.
+&nbsp;	 * @param includeVoided Include voided ConceptNames if true.
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getNames(boolean includeVoided) {
+<b class="fc">&nbsp;		if (names == null) {</b>
+<b class="nc">&nbsp;			names = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return names.stream()</b>
+<b class="fc">&nbsp;				.filter(n -&gt; includeVoided || !n.getVoided())</b>
+<b class="fc">&nbsp;				.collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param names The names to set.
+&nbsp;	 */
+&nbsp;	public void setNames(Collection&lt;ConceptName&gt; names) {
+<b class="fc">&nbsp;		this.names = names;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given ConceptName to the list of names for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param conceptName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; replace the old preferred name with a current one
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; replace the old fully specified name with a current one
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; replace the old short name with a current one
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark the first name added as fully specified
+&nbsp;	 */
+&nbsp;	public void addName(ConceptName conceptName) {
+<b class="fc">&nbsp;		if (conceptName != null) {</b>
+<b class="fc">&nbsp;			conceptName.setConcept(this);</b>
+<b class="fc">&nbsp;			if (names == null) {</b>
+<b class="nc">&nbsp;				names = new HashSet&lt;&gt;();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!names.contains(conceptName)) {</b>
+<b class="fc">&nbsp;				if (getNames().isEmpty()</b>
+<b class="fc">&nbsp;				        &amp;&amp; !ConceptNameType.FULLY_SPECIFIED.equals(conceptName.getConceptNameType())) {</b>
+<b class="fc">&nbsp;					conceptName.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					if (conceptName.isPreferred() &amp;&amp; !conceptName.isIndexTerm() &amp;&amp; conceptName.getLocale() != null) {</b>
+<b class="fc">&nbsp;						ConceptName prefName = getPreferredName(conceptName.getLocale());</b>
+<b class="fc">&nbsp;						if (prefName != null) {</b>
+<b class="fc">&nbsp;							prefName.setLocalePreferred(false);</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;					if (conceptName.isFullySpecifiedName() &amp;&amp; conceptName.getLocale() != null) {</b>
+<b class="fc">&nbsp;						ConceptName fullySpecName = getFullySpecifiedName(conceptName.getLocale());</b>
+<b class="fc">&nbsp;						if (fullySpecName != null) {</b>
+<b class="fc">&nbsp;							fullySpecName.setConceptNameType(null);</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else if (conceptName.isShort() &amp;&amp; conceptName.getLocale() != null) {</b>
+<b class="fc">&nbsp;						ConceptName shortName = getShortNameInLocale(conceptName.getLocale());</b>
+<b class="fc">&nbsp;						if (shortName != null) {</b>
+<b class="nc">&nbsp;							shortName.setConceptNameType(null);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;				names.add(conceptName);</b>
+<b class="fc">&nbsp;				if (compatibleCache != null) {</b>
+&nbsp;					// clear the locale cache, forcing it to be rebuilt
+<b class="nc">&nbsp;					compatibleCache.clear();</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given name from the list of names for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param conceptName
+&nbsp;	 * @return true if the entity was removed, false otherwise
+&nbsp;	 */
+&nbsp;	public boolean removeName(ConceptName conceptName) {
+<b class="fc">&nbsp;		if (names != null) {</b>
+<b class="fc">&nbsp;			return names.remove(conceptName);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the description of the concept using the current locale in Context.getLocale(). Returns
+&nbsp;	 * null if none found.
+&nbsp;	 * 
+&nbsp;	 * @return ConceptDescription attributed to the Concept in the given locale
+&nbsp;	 */
+&nbsp;	public ConceptDescription getDescription() {
+<b class="fc">&nbsp;		return getDescription(Context.getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the description of the concept in the given locale. Returns null if none found.
+&nbsp;	 * 
+&nbsp;	 * @param locale
+&nbsp;	 * @return ConceptDescription attributed to the Concept in the given locale
+&nbsp;	 */
+&nbsp;	public ConceptDescription getDescription(Locale locale) {
+<b class="fc">&nbsp;		return getDescription(locale, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the preferred description for a locale.
+&nbsp;	 * 
+&nbsp;	 * @param locale the language and country in which the description is used
+&nbsp;	 * @param exact true/false to return only exact locale (no default locale)
+&nbsp;	 * @return the appropriate description, or null if not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return match on locale exactly
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return match on language only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return match on language only if exact match exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return language only match for exact matches
+&nbsp;	 */
+&nbsp;	public ConceptDescription getDescription(Locale locale, boolean exact) {
+<b class="fc">&nbsp;		log.debug(&quot;Getting ConceptDescription for locale: &quot; + locale);</b>
+&nbsp;		
+<b class="fc">&nbsp;		ConceptDescription foundDescription = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (locale == null) {</b>
+<b class="nc">&nbsp;			locale = LocaleUtility.getDefaultLocale();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Locale desiredLocale = locale;</b>
+&nbsp;		
+<b class="fc">&nbsp;		ConceptDescription defaultDescription = null;</b>
+<b class="fc">&nbsp;		for (ConceptDescription availableDescription : getDescriptions()) {</b>
+<b class="fc">&nbsp;			Locale availableLocale = availableDescription.getLocale();</b>
+<b class="fc">&nbsp;			if (availableLocale.equals(desiredLocale)) {</b>
+<b class="fc">&nbsp;				foundDescription = availableDescription;</b>
+&nbsp;				// skip out now because we found an exact locale match
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!exact &amp;&amp; LocaleUtility.areCompatible(availableLocale, desiredLocale)) {</b>
+<b class="fc">&nbsp;				foundDescription = availableDescription;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (availableLocale.equals(LocaleUtility.getDefaultLocale())) {</b>
+<b class="nc">&nbsp;				defaultDescription = availableDescription;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (foundDescription == null) {</b>
+&nbsp;			// no description with the given locale was found.
+&nbsp;			// return null if exact match desired
+<b class="fc">&nbsp;			if (exact) {</b>
+<b class="fc">&nbsp;				log.debug(&quot;No concept description found for concept id &quot; + conceptId + &quot; for locale &quot;</b>
+<b class="fc">&nbsp;				        + desiredLocale.toString());</b>
+&nbsp;			} else {
+&nbsp;				// returning default description locale (&quot;en&quot;) if exact match
+&nbsp;				// not desired
+<b class="fc">&nbsp;				if (defaultDescription == null) {</b>
+<b class="fc">&nbsp;					log.debug(&quot;No concept description found for default locale for concept id &quot; + conceptId);</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					foundDescription = defaultDescription;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return foundDescription;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the retiredBy
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getRetiredBy() {
+<b class="fc">&nbsp;		return retiredBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param retiredBy the retiredBy to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setRetiredBy(User retiredBy) {
+<b class="fc">&nbsp;		this.retiredBy = retiredBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the dateRetired
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateRetired() {
+<b class="fc">&nbsp;		return dateRetired;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateRetired the dateRetired to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateRetired(Date dateRetired) {
+<b class="fc">&nbsp;		this.dateRetired = dateRetired;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the retireReason
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getRetireReason() {
+<b class="fc">&nbsp;		return retireReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param retireReason the retireReason to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setRetireReason(String retireReason) {
+<b class="fc">&nbsp;		this.retireReason = retireReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the descriptions.
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptDescription&gt; getDescriptions() {
+<b class="fc">&nbsp;		if (descriptions == null) {</b>
+<b class="fc">&nbsp;			descriptions = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return descriptions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the collection of descriptions for this Concept.
+&nbsp;	 * 
+&nbsp;	 * @param descriptions the collection of descriptions
+&nbsp;	 */
+&nbsp;	public void setDescriptions(Collection&lt;ConceptDescription&gt; descriptions) {
+<b class="fc">&nbsp;		this.descriptions = descriptions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given description to the list of descriptions for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param description the description to add
+&nbsp;	 */
+&nbsp;	public void addDescription(ConceptDescription description) {
+<b class="fc">&nbsp;		if (description != null &amp;&amp; StringUtils.isNotBlank(description.getDescription()) &amp;&amp; !descriptions.contains(description)) {</b>
+<b class="fc">&nbsp;			description.setConcept(this);</b>
+<b class="fc">&nbsp;			descriptions.add(description);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given description from the list of descriptions for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param description the description to remove
+&nbsp;	 * @return true if the entity was removed, false otherwise
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should remove description passed from list of descriptions
+&nbsp;	 */
+&nbsp;	public boolean removeDescription(ConceptDescription description) {
+<b class="fc">&nbsp;		return descriptions.remove(description);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the retired.
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getRetired()}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isRetired() {
+<b class="fc">&nbsp;		return getRetired();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method delegates to {@link #isRetired()}. This is only needed for jstl syntax like
+&nbsp;	 * ${concept.retired} because the return type is a Boolean object instead of a boolean
+&nbsp;	 * primitive type.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Retireable#isRetired()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Boolean getRetired() {
+<b class="fc">&nbsp;		return retired;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param retired The retired to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setRetired(Boolean retired) {
+<b class="fc">&nbsp;		this.retired = retired;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the synonyms in the given locale. Returns a list of names from the same language with
+&nbsp;	 * the preferred synonym sorted first, or an empty list if none found.
+&nbsp;	 * 
+&nbsp;	 * @param locale
+&nbsp;	 * @return Collection of ConceptNames which are synonyms for the Concept in the given locale
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getSynonyms(Locale locale) {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;ConceptName&gt; syns = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		ConceptName preferredConceptName = null;</b>
+<b class="fc">&nbsp;		for (ConceptName possibleSynonymInLoc : getSynonyms()) {</b>
+<b class="fc">&nbsp;			if (locale.equals(possibleSynonymInLoc.getLocale())) {</b>
+<b class="fc">&nbsp;				if (possibleSynonymInLoc.isPreferred()) {</b>
+<b class="fc">&nbsp;					preferredConceptName = possibleSynonymInLoc;</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					syns.add(possibleSynonymInLoc);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// Add preferred name first in the list.
+<b class="fc">&nbsp;		if (preferredConceptName != null) {</b>
+<b class="fc">&nbsp;			syns.add(0, preferredConceptName);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		log.debug(&quot;returning: &quot; + syns);</b>
+<b class="fc">&nbsp;		return syns;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all the non-retired synonyms.
+&nbsp;	 * 
+&nbsp;	 * @return Collection of ConceptNames which are synonyms for the Concept or an empty list if
+&nbsp;	 *         none is found
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptName&gt; getSynonyms() {
+<b class="fc">&nbsp;		return getNames().stream()</b>
+<b class="fc">&nbsp;				.filter(ConceptName::isSynonym)</b>
+<b class="fc">&nbsp;				.collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the version.
+&nbsp;	 */
+&nbsp;	public String getVersion() {
+<b class="fc">&nbsp;		return version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param version The version to set.
+&nbsp;	 */
+&nbsp;	public void setVersion(String version) {
+<b class="fc">&nbsp;		this.version = version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptSets.
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptSet&gt; getConceptSets() {
+<b class="fc">&nbsp;		return conceptSets;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptSets The conceptSets to set.
+&nbsp;	 */
+&nbsp;	public void setConceptSets(Collection&lt;ConceptSet&gt; conceptSets) {
+<b class="fc">&nbsp;		this.conceptSets = conceptSets;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Whether this concept is numeric or not. This will &lt;i&gt;always&lt;/i&gt; return false for concept
+&nbsp;	 * objects. ConceptNumeric.isNumeric() will then &lt;i&gt;always&lt;/i&gt; return true.
+&nbsp;	 * 
+&nbsp;	 * @return false
+&nbsp;	 */
+&nbsp;	public boolean isNumeric() {
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptMappings for this concept
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptMap&gt; getConceptMappings() {
+<b class="fc">&nbsp;		if (conceptMappings == null) {</b>
+<b class="nc">&nbsp;			conceptMappings = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return conceptMappings;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptMappings the conceptMappings to set
+&nbsp;	 */
+&nbsp;	public void setConceptMappings(Collection&lt;ConceptMap&gt; conceptMappings) {
+<b class="fc">&nbsp;		this.conceptMappings = conceptMappings;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given ConceptMap object to this concept&#39;s list of concept mappings. If there is
+&nbsp;	 * already a corresponding ConceptMap object for this concept already, this one will not be
+&nbsp;	 * added.
+&nbsp;	 * 
+&nbsp;	 * @param newConceptMap
+&nbsp;	 */
+&nbsp;	public void addConceptMapping(ConceptMap newConceptMap) {
+<b class="fc">&nbsp;		if (newConceptMap != null) {</b>
+<b class="fc">&nbsp;			newConceptMap.setConcept(this);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (newConceptMap != null &amp;&amp; !getConceptMappings().contains(newConceptMap)) {</b>
+<b class="fc">&nbsp;			if (newConceptMap.getConceptMapType() == null) {</b>
+<b class="fc">&nbsp;				newConceptMap.setConceptMapType(Context.getConceptService().getDefaultConceptMapType());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			getConceptMappings().add(newConceptMap);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Child Class ConceptComplex overrides this method and returns true. See
+&nbsp;	 * {@link org.openmrs.ConceptComplex#isComplex()}. Otherwise this method returns false.
+&nbsp;	 * 
+&nbsp;	 * @return false
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public boolean isComplex() {
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given ConceptMap from the list of mappings for this Concept
+&nbsp;	 * 
+&nbsp;	 * @param conceptMap
+&nbsp;	 * @return true if the entity was removed, false otherwise
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove concept map passed from list of mappings 
+&nbsp;	 */
+&nbsp;	public boolean removeConceptMapping(ConceptMap conceptMap) {
+<b class="fc">&nbsp;		return getConceptMappings().remove(conceptMap);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;Concept #&quot; + conceptId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#findPossibleValues(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;Concept&gt; findPossibleValues(String searchText) {
+<b class="fc">&nbsp;		List&lt;Concept&gt; concepts = new ArrayList&lt;&gt;();</b>
+&nbsp;		try {
+&nbsp;			
+<b class="fc">&nbsp;			for (ConceptSearchResult searchResult : Context.getConceptService().getConcepts(searchText,</b>
+<b class="fc">&nbsp;			    Collections.singletonList(Context.getLocale()), false, null, null, null, null, null, null, null)) {</b>
+<b class="fc">&nbsp;				concepts.add(searchResult.getConcept());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+&nbsp;			// pass
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return concepts;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#getPossibleValues()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;Concept&gt; getPossibleValues() {
+&nbsp;		try {
+<b class="nc">&nbsp;			return Context.getConceptService().getConceptsByName(&quot;&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+&nbsp;			// pass
+&nbsp;		}
+<b class="nc">&nbsp;		return Collections.emptyList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#hydrate(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Concept hydrate(String reference) {
+&nbsp;		try {
+<b class="fc">&nbsp;			return Context.getConceptService().getConceptByReference(reference);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+&nbsp;			// pass
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Turns this concept into a very simple serialized string
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Attributable#serialize()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String serialize() {
+<b class="nc">&nbsp;		if (this.getConceptId() == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return &quot;&quot; + this.getConceptId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#getDisplayString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDisplayString() {
+<b class="fc">&nbsp;		if (getName() == null) {</b>
+<b class="nc">&nbsp;			return toString();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return getName().getName();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that returns a set of all the locales in which names have been added for
+&nbsp;	 * this concept.
+&nbsp;	 * 
+&nbsp;	 * @return a set of all locales for names for this concept
+&nbsp;	 * @since 1.7
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all locales for conceptNames for this concept without duplicates
+&nbsp;	 */
+&nbsp;	public Set&lt;Locale&gt; getAllConceptNameLocales() {
+<b class="fc">&nbsp;		if (getNames().isEmpty()) {</b>
+<b class="nc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;The Concept with id: &quot; + conceptId + &quot; has no names&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;Locale&gt; locales = new HashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (ConceptName cn : getNames()) {</b>
+<b class="fc">&nbsp;			locales.add(cn.getLocale());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return locales;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setConceptId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sort the ConceptSet based on the weight
+&nbsp;	 * 
+&nbsp;	 * @return sortedConceptSet Collection&amp;lt;ConceptSet&amp;gt;
+&nbsp;	 */
+&nbsp;	private List&lt;ConceptSet&gt; getSortedConceptSets() {
+<b class="fc">&nbsp;		List&lt;ConceptSet&gt; cs = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (conceptSets != null) {</b>
+<b class="fc">&nbsp;			cs.addAll(conceptSets);</b>
+<b class="fc">&nbsp;			Collections.sort(cs);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return cs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all the concept members of current concept
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 * @return List&amp;lt;Concept&amp;gt; the Concepts that are members of this Concept&#39;s set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept set members sorted according to the sort weight
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all the conceptMembers of current Concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unmodifiable list of conceptMember list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept set members sorted with retired last
+&nbsp;	 */
+&nbsp;	public List&lt;Concept&gt; getSetMembers() {
+<b class="fc">&nbsp;		List&lt;Concept&gt; conceptMembers = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Collection&lt;ConceptSet&gt; sortedConceptSet = getSortedConceptSets();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (ConceptSet conceptSet : sortedConceptSet) {</b>
+<b class="fc">&nbsp;			conceptMembers.add(conceptSet.getConcept());</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return Collections.unmodifiableList(conceptMembers);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * If includeRetired is true, then the returned object is the list of all the concept
+&nbsp;	 * set members of current concept, else retired concept set members are excluded.
+&nbsp;	 *
+&nbsp;	 * @param includeRetired true/false whether to also include/exclude the retired concepts
+&nbsp;	 * @since 2.5
+&nbsp;	 */
+&nbsp;	public List&lt;Concept&gt; getSetMembers(boolean includeRetired) {
+<b class="fc">&nbsp;		if (includeRetired) {</b>
+<b class="fc">&nbsp;			return getSetMembers();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return getSetMembers().stream()</b>
+<b class="fc">&nbsp;				.filter(a -&gt; !a.getRetired())</b>
+<b class="fc">&nbsp;				.collect(Collectors.toList());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Appends the concept to the end of the existing list of concept members for this Concept
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 * @param setMember Concept to add to the
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add concept as a conceptSet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; append concept to the existing list of conceptSet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; place the new concept last in the list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign the calling component as parent to the ConceptSet
+&nbsp;	 */
+&nbsp;	public void addSetMember(Concept setMember) {
+<b class="fc">&nbsp;		addSetMember(setMember, -1);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the concept to the existing member to the list of set members in the given location. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * index of 0 is before the first concept&lt;br&gt;
+&nbsp;	 * index of -1 is after last.&lt;br&gt;
+&nbsp;	 * index of 1 is after the first but before the second, etc&lt;br&gt;
+&nbsp;	 * 
+&nbsp;	 * @param setMember the Concept to add as a child of this Concept
+&nbsp;	 * @param index where in the list of set members to put this setMember
+&nbsp;	 * @since 1.7
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign the given concept as a ConceptSet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; insert the concept before the first with zero index
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; insert the concept at the end with negative one index
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; insert the concept in the third slot
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; assign the calling component as parent to the ConceptSet
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the concept to the current list of conceptSet
+&nbsp;	 * @see #getSortedConceptSets()
+&nbsp;	 */
+&nbsp;	public void addSetMember(Concept setMember, int index) {
+<b class="fc">&nbsp;		List&lt;ConceptSet&gt; sortedConceptSets = getSortedConceptSets();</b>
+<b class="fc">&nbsp;		int setsSize = sortedConceptSets.size();</b>
+&nbsp;		
+&nbsp;		//after sorting, we need to reset the sort weights because retired
+&nbsp;		//sets have moved to the bottom and hence need to be reassigned
+&nbsp;		//higher sort weights than the non retired ones
+<b class="fc">&nbsp;		double weight = 990.0;</b>
+<b class="fc">&nbsp;		for (ConceptSet conceptSet : sortedConceptSets) {</b>
+<b class="fc">&nbsp;			weight += 10.0;</b>
+<b class="fc">&nbsp;			conceptSet.setSortWeight(weight);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (sortedConceptSets.isEmpty()) {</b>
+<b class="fc">&nbsp;			weight = 1000.0;</b>
+<b class="fc">&nbsp;		} else if (index == -1 || index &gt;= setsSize) {</b>
+&nbsp;			// deals with list size of 1 and any large index given by dev
+<b class="fc">&nbsp;			weight = sortedConceptSets.get(setsSize - 1).getSortWeight() + 10.0;</b>
+<b class="fc">&nbsp;		} else if (index == 0) {</b>
+<b class="fc">&nbsp;			weight = sortedConceptSets.get(0).getSortWeight() - 10.0;</b>
+&nbsp;		} else {
+&nbsp;			// put the weight between two
+<b class="fc">&nbsp;			double prevSortWeight = sortedConceptSets.get(index - 1).getSortWeight();</b>
+<b class="fc">&nbsp;			double nextSortWeight = sortedConceptSets.get(index).getSortWeight();</b>
+<b class="fc">&nbsp;			weight = (prevSortWeight + nextSortWeight) / 2;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptSet conceptSet = new ConceptSet(setMember, weight);</b>
+<b class="fc">&nbsp;		conceptSet.setConceptSet(this);</b>
+<b class="fc">&nbsp;		conceptSets.add(conceptSet);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.Customizable#getAttributes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Set&lt;ConceptAttribute&gt; getAttributes() {
+<b class="fc">&nbsp;		if (attributes == null) {</b>
+<b class="nc">&nbsp;			attributes = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return attributes;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.Customizable#getActiveAttributes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;ConceptAttribute&gt; getActiveAttributes() {
+<b class="fc">&nbsp;		return getAttributes().stream()</b>
+<b class="fc">&nbsp;				.filter(attr -&gt; !attr.getVoided())</b>
+<b class="fc">&nbsp;				.collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.Customizable#getActiveAttributes(org.openmrs.customdatatype.CustomValueDescriptor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;ConceptAttribute&gt; getActiveAttributes(CustomValueDescriptor ofType) {
+<b class="nc">&nbsp;		return getAttributes().stream()</b>
+<b class="nc">&nbsp;				.filter(attr -&gt; attr.getAttributeType().equals(ofType) &amp;&amp; !attr.getVoided())</b>
+<b class="nc">&nbsp;				.collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param attributes the attributes to set
+&nbsp;	 */
+&nbsp;	public void setAttributes(Set&lt;ConceptAttribute&gt; attributes) {
+<b class="fc">&nbsp;		this.attributes = attributes;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.Customizable#addAttribute(Attribute)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void addAttribute(ConceptAttribute attribute) {
+<b class="nc">&nbsp;		getAttributes().add(attribute);</b>
+<b class="nc">&nbsp;		attribute.setOwner(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

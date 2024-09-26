@@ -1,0 +1,305 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Graph</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: Graph (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Graph</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (8/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (48/56)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Graph$Edge</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    70,6%
+  </span>
+  <span class="absValue">
+    (12/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,4%
+  </span>
+  <span class="absValue">
+    (54/64)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+<b class="fc">&nbsp;public class Graph&lt;T&gt; {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;T&gt; nodes = new HashSet&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;Edge&gt; edges = new HashSet&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	public class Edge {
+&nbsp;		
+&nbsp;		private T fromNode;
+&nbsp;		
+&nbsp;		private T toNode;
+&nbsp;		
+<b class="fc">&nbsp;		public Edge(T aFromNode, T aToNode) {</b>
+<b class="fc">&nbsp;			fromNode = aFromNode;</b>
+<b class="fc">&nbsp;			toNode = aToNode;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		public T getFromNode() {
+<b class="fc">&nbsp;			return fromNode;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		public void setFromNode(T fromNode) {
+<b class="nc">&nbsp;			this.fromNode = fromNode;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		public T getToNode() {
+<b class="fc">&nbsp;			return toNode;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		public void setToNode(T toNode) {
+<b class="nc">&nbsp;			this.toNode = toNode;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public String toString() {
+<b class="fc">&nbsp;			return toNode.toString() + &quot;-&gt;&quot; + fromNode.toString();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addNode(T aNode) {
+<b class="fc">&nbsp;		nodes.add(aNode);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addEdge(Edge anEdge) {
+<b class="fc">&nbsp;		edges.add(anEdge);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Set&lt;T&gt; getNodes() {
+<b class="nc">&nbsp;		return nodes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Set&lt;Edge&gt; getEdges() {
+<b class="nc">&nbsp;		return edges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public T getNode(T element) {
+<b class="fc">&nbsp;		for (T node : nodes) {</b>
+<b class="fc">&nbsp;			if (node.equals(element)) {</b>
+<b class="fc">&nbsp;				return node;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtains all nodes without incoming edges 
+&nbsp;	 * @return set of nodes
+&nbsp;	 */
+&nbsp;	private Set&lt;T&gt; getNodesWithNoIncomingEdges() {
+<b class="fc">&nbsp;		Set&lt;T&gt; nodesWithIncomingEdges = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (Edge edge : edges) {</b>
+<b class="fc">&nbsp;			nodesWithIncomingEdges.add(edge.getToNode());</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		Set&lt;T&gt; nodesWithoutIncomingEdges = new HashSet&lt;&gt;(nodes);</b>
+<b class="fc">&nbsp;		for (T node : nodesWithIncomingEdges) {</b>
+<b class="fc">&nbsp;			nodesWithoutIncomingEdges.remove(node);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return nodesWithoutIncomingEdges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determines if a node has incoming edges 
+&nbsp;	 * @param node
+&nbsp;	 * @return true if the node has an incoming edge, otherwise false
+&nbsp;	 */
+&nbsp;	private boolean hasIncomingEdges(T node) {
+<b class="fc">&nbsp;		for (Edge edge : edges) {</b>
+<b class="fc">&nbsp;			if (edge.getToNode().equals(node)) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtains the edges starting with a given node 
+&nbsp;	 * @param aNode
+&nbsp;	 * @return set of edges
+&nbsp;	 */
+&nbsp;	private Set&lt;Edge&gt; getEdgesStartingWith(T aNode) {
+<b class="fc">&nbsp;		Set&lt;Edge&gt; edgesPointing = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (Edge edge : edges) {</b>
+<b class="fc">&nbsp;			if (edge.getFromNode().equals(aNode)) {</b>
+<b class="fc">&nbsp;				edgesPointing.add(edge);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return edgesPointing;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtains the edges ending with a given node 
+&nbsp;	 * @param aNode
+&nbsp;	 * @return set of edges
+&nbsp;	 */
+&nbsp;	public Set&lt;Edge&gt; getEdgesEndingWith(T aNode) {
+<b class="nc">&nbsp;		Set&lt;Edge&gt; edgesPointing = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (Edge edge : edges) {</b>
+<b class="nc">&nbsp;			if (edge.getToNode().equals(aNode)) {</b>
+<b class="nc">&nbsp;				edgesPointing.add(edge);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return edgesPointing;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sort a graph in topological order
+&nbsp;	 * 
+&nbsp;	 * @return sorted nodes
+&nbsp;	 * @throws CycleException
+&nbsp;	 */
+&nbsp;	public List&lt;T&gt; topologicalSort() throws CycleException {
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;T&gt; queue = getNodesWithNoIncomingEdges();</b>
+<b class="fc">&nbsp;		List&lt;T&gt; result = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+&nbsp;		// The initial edges are stored.
+<b class="fc">&nbsp;		List&lt;Edge&gt; initialEdges = new ArrayList&lt;&gt;(edges);</b>
+<b class="fc">&nbsp;		while (!queue.isEmpty()) {</b>
+<b class="fc">&nbsp;			T node = queue.iterator().next();</b>
+<b class="fc">&nbsp;			queue.remove(node);</b>
+<b class="fc">&nbsp;			result.add(node);</b>
+<b class="fc">&nbsp;			Set&lt;Edge&gt; edgesStarting = getEdgesStartingWith(node);</b>
+<b class="fc">&nbsp;			for (Edge edge : edgesStarting) {</b>
+<b class="fc">&nbsp;				edges.remove(edge);</b>
+<b class="fc">&nbsp;				if (!hasIncomingEdges(edge.getToNode())) {</b>
+<b class="fc">&nbsp;					queue.add(edge.getToNode());</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		if (!edges.isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new CycleException(edges.toString(), result);</b>
+&nbsp;		}
+&nbsp;		// The old edges are restored in order to maintain the graph integrity.
+<b class="fc">&nbsp;		edges.addAll(initialEdges);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

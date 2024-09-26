@@ -1,0 +1,248 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptReferenceTermValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptReferenceTermValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptReferenceTermValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,5%
+  </span>
+  <span class="absValue">
+    (39/40)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.openmrs.ConceptReferenceTerm;
+&nbsp;import org.openmrs.ConceptReferenceTermMap;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validates {@link ConceptReferenceTerm} objects.
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = { ConceptReferenceTerm.class }, order = 50)
+<b class="fc">&nbsp;public class ConceptReferenceTermValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determines if the command object being submitted is a valid type
+&nbsp;	 *
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return ConceptReferenceTerm.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks that a given concept reference term object is valid.
+&nbsp;	 *
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the concept reference term object is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the name is a white space character
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the code is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the code is an empty string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the code is a white space character
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the concept reference term code is a duplicate in its concept source
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the concept source is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if all the required fields are set and valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if the duplicate name is for a term from another concept source
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if the duplicate code is for a term from another concept source
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a concept reference term map has no concept map type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if termB of a concept reference term map is not set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a term is mapped to itself
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a term is mapped multiple times to the same term
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if the duplicate concept reference term is retired
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (obj == null || !(obj instanceof ConceptReferenceTerm)) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;The parameter obj should not be null and must be of type&quot;</b>
+&nbsp;			        + ConceptReferenceTerm.class);
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptReferenceTerm conceptReferenceTerm = (ConceptReferenceTerm) obj;</b>
+&nbsp;		
+<b class="fc">&nbsp;		String code = conceptReferenceTerm.getCode();</b>
+<b class="fc">&nbsp;		boolean hasBlankFields = false;</b>
+<b class="fc">&nbsp;		if (!StringUtils.hasText(code)) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;code&quot;, &quot;ConceptReferenceTerm.error.codeRequired&quot;,</b>
+&nbsp;			    &quot;The code property is required for a concept reference term&quot;);
+<b class="fc">&nbsp;			hasBlankFields = true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (conceptReferenceTerm.getConceptSource() == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;conceptSource&quot;, &quot;ConceptReferenceTerm.error.sourceRequired&quot;,</b>
+&nbsp;			    &quot;The conceptSource property is required for a concept reference term&quot;);
+<b class="fc">&nbsp;			hasBlankFields = true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (hasBlankFields) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		code = code.trim();</b>
+&nbsp;		//Ensure that there are no terms with the same code in the same source
+<b class="fc">&nbsp;		ConceptReferenceTerm termWithDuplicateCode = Context.getConceptService().getConceptReferenceTermByCode(code,</b>
+<b class="fc">&nbsp;		    conceptReferenceTerm.getConceptSource());</b>
+<b class="fc">&nbsp;		if (termWithDuplicateCode != null &amp;&amp; !termWithDuplicateCode.getRetired()</b>
+<b class="fc">&nbsp;		        &amp;&amp; !OpenmrsUtil.nullSafeEquals(termWithDuplicateCode.getUuid(), conceptReferenceTerm.getUuid())) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;code&quot;, &quot;ConceptReferenceTerm.duplicate.code&quot;,</b>
+&nbsp;			    &quot;Duplicate concept reference term code in its concept source: &quot; + code);
+&nbsp;		}
+&nbsp;		
+&nbsp;		//validate the concept reference term maps
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(conceptReferenceTerm.getConceptReferenceTermMaps())) {</b>
+<b class="fc">&nbsp;			int index = 0;</b>
+<b class="fc">&nbsp;			Set&lt;String&gt; mappedTermUuids = null;</b>
+<b class="fc">&nbsp;			for (ConceptReferenceTermMap map : conceptReferenceTerm.getConceptReferenceTermMaps()) {</b>
+<b class="fc">&nbsp;				if (map == null) {</b>
+<b class="nc">&nbsp;					throw new APIException(&quot;ConceptReferenceTerm.add.null&quot;, (Object[]) null);</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (map.getConceptMapType() == null) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;conceptReferenceTermMaps[&quot; + index + &quot;].conceptMapType&quot;,</b>
+&nbsp;					    &quot;ConceptReferenceTerm.error.mapTypeRequired&quot;, &quot;Concept Map Type is required&quot;);
+<b class="fc">&nbsp;				} else if (map.getTermB() == null) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;conceptReferenceTermMaps[&quot; + index + &quot;].termB&quot;,</b>
+&nbsp;					    &quot;ConceptReferenceTerm.error.termBRequired&quot;, &quot;Mapped Term is required&quot;);
+<b class="fc">&nbsp;				} else if (map.getTermB().equals(conceptReferenceTerm)) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;conceptReferenceTermMaps[&quot; + index + &quot;].termB&quot;, &quot;ConceptReferenceTerm.map.sameTerm&quot;,</b>
+&nbsp;					    &quot;Cannot map a concept reference term to itself&quot;);
+&nbsp;				}
+&nbsp;				
+&nbsp;				//don&#39;t proceed to the next map
+<b class="fc">&nbsp;				if (errors.hasErrors()) {</b>
+&nbsp;					return;
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (mappedTermUuids == null) {</b>
+<b class="fc">&nbsp;					mappedTermUuids = new HashSet&lt;&gt;();</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				//if we already have a mapping to this term, reject it this map
+<b class="fc">&nbsp;				if (!mappedTermUuids.add(map.getTermB().getUuid())) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;conceptReferenceTermMaps[&quot; + index + &quot;].termB&quot;,</b>
+&nbsp;					    &quot;ConceptReferenceTerm.termToTerm.alreadyMapped&quot;,
+&nbsp;					    &quot;Cannot map a reference term multiple times to the same concept reference term&quot;);
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				index++;</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;name&quot;, &quot;code&quot;, &quot;version&quot;, &quot;description&quot;, &quot;retireReason&quot;);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

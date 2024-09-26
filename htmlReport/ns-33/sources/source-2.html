@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AlertReminderTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler.tasks</a>
+</div>
+
+<h1>Coverage Summary for Class: AlertReminderTask (org.openmrs.scheduler.tasks)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AlertReminderTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler.tasks;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.notification.Alert;
+&nbsp;import org.openmrs.notification.AlertRecipient;
+&nbsp;import org.openmrs.notification.Message;
+&nbsp;import org.openmrs.notification.MessageException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Sample implementation of task that shows how to send emails to users/roles via message service.
+&nbsp; */
+<b class="nc">&nbsp;public class AlertReminderTask extends AbstractTask {</b>
+&nbsp;	
+&nbsp;	// Logger 
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(AlertReminderTask.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send alert reminder email to user(s) associated with the alert.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute() {
+&nbsp;		try {
+&nbsp;			// Get all unread alerts
+&nbsp;			// TODO Change to getAllAlerts(Boolean includeRead, Boolean includeExpired);
+<b class="nc">&nbsp;			Collection&lt;Alert&gt; alerts = Context.getAlertService().getAllAlerts(false);</b>
+&nbsp;			
+&nbsp;			// Send alert notifications to users who have unread alerts
+<b class="nc">&nbsp;			sendAlertNotifications(alerts);</b>
+&nbsp;			
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Failed to send alert notifications&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send alerts
+&nbsp;	 * 
+&nbsp;	 * @param alerts the unread alerts
+&nbsp;	 */
+&nbsp;	private void sendAlertNotifications(Collection&lt;Alert&gt; alerts) {
+&nbsp;		
+&nbsp;		try {
+&nbsp;			
+&nbsp;			// Create a new message
+<b class="nc">&nbsp;			Message message = Context.getMessageService().createMessage(&quot;Alert Reminder&quot;, &quot;You have unread alerts.&quot;);</b>
+&nbsp;			
+&nbsp;			// Get all recipients
+<b class="nc">&nbsp;			Collection&lt;User&gt; users = getRecipients(alerts);</b>
+&nbsp;			
+&nbsp;			// Send a message to each person only once
+<b class="nc">&nbsp;			Context.getMessageService().sendMessage(message, users);</b>
+&nbsp;			
+&nbsp;		}
+<b class="nc">&nbsp;		catch (MessageException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Failed to send message&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the recipients of all unread alerts.
+&nbsp;	 * 
+&nbsp;	 * @param alerts
+&nbsp;	 * @return the users who have not read the alerts
+&nbsp;	 */
+&nbsp;	private Collection&lt;User&gt; getRecipients(Collection&lt;Alert&gt; alerts) {
+<b class="nc">&nbsp;		Collection&lt;User&gt; users = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (Alert alert : alerts) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Send email to alert recipient(s) ...&quot;);</b>
+<b class="nc">&nbsp;			if (!alert.isAlertRead() &amp;&amp; alert.getRecipients() != null) {</b>
+<b class="nc">&nbsp;				for (AlertRecipient recipient : alert.getRecipients()) {</b>
+<b class="nc">&nbsp;					if (!recipient.isAlertRead() &amp;&amp; recipient.getRecipient() != null) {</b>
+<b class="nc">&nbsp;						users.add(recipient.getRecipient());</b>
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return users;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

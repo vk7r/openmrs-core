@@ -1,0 +1,341 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Relationship</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Relationship (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Relationship</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,5%
+  </span>
+  <span class="absValue">
+    (25/34)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Relationship$HibernateProxy$pueblhis</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,5%
+  </span>
+  <span class="absValue">
+    (25/34)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.annotations.GenericGenerator;
+&nbsp;import org.hibernate.annotations.Parameter;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * Relationship
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;relationship&quot;)
+&nbsp;@Audited
+&nbsp;public class Relationship extends BaseChangeableOpenmrsData {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 323423L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@Id
+&nbsp;	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = &quot;relationship_id_seq&quot;)
+&nbsp;	@GenericGenerator(
+&nbsp;		name = &quot;relationship_id_seq&quot;,
+&nbsp;		strategy = &quot;native&quot;,
+&nbsp;		parameters = @Parameter(name = &quot;sequence&quot;, value = &quot;relationship_relationship_id_seq&quot;)
+&nbsp;	)
+&nbsp;	@Column(name = &quot;relationship_id&quot;)
+&nbsp;	private Integer relationshipId;
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;person_a&quot;, nullable = false)
+&nbsp;	private Person personA;
+&nbsp;
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;relationship&quot;, nullable = false)
+&nbsp;	private RelationshipType relationshipType;
+&nbsp;
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;person_b&quot;, nullable = false)
+&nbsp;	private Person personB;
+&nbsp;
+&nbsp;	@Column(name = &quot;start_date&quot;,length = 19)
+&nbsp;	private Date startDate;
+&nbsp;	@Column(name = &quot;end_date&quot;, length = 19)
+&nbsp;	private Date endDate;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Relationship() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public Relationship(Integer relationshipId) {</b>
+<b class="fc">&nbsp;		this.relationshipId = relationshipId;</b>
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	public Relationship(Person personA, Person personB, RelationshipType type) {</b>
+<b class="nc">&nbsp;		this.personA = personA;</b>
+<b class="nc">&nbsp;		this.personB = personB;</b>
+<b class="nc">&nbsp;		this.relationshipType = type;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Does a shallow copy of this Relationship. Does NOT copy relationshipId
+&nbsp;	 * 
+&nbsp;	 * @return a copy of this relationship
+&nbsp;	 */
+&nbsp;	public Relationship copy() {
+<b class="fc">&nbsp;		return copyHelper(new Relationship());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The purpose of this method is to allow subclasses of Relationship to delegate a portion of
+&nbsp;	 * their copy() method back to the superclass, in case the base class implementation changes.
+&nbsp;	 * 
+&nbsp;	 * @param target a Relationship that will have the state of &lt;code&gt;this&lt;/code&gt; copied into it
+&nbsp;	 * @return the Relationship that was passed in, with state copied into it
+&nbsp;	 */
+&nbsp;	protected Relationship copyHelper(Relationship target) {
+<b class="fc">&nbsp;		target.personA = getPersonA();</b>
+<b class="fc">&nbsp;		target.relationshipType = getRelationshipType();</b>
+<b class="fc">&nbsp;		target.personB = getPersonB();</b>
+<b class="fc">&nbsp;		target.setCreator(getCreator());</b>
+<b class="fc">&nbsp;		target.setDateCreated(getDateCreated());</b>
+<b class="fc">&nbsp;		target.setVoided(getVoided());</b>
+<b class="fc">&nbsp;		target.setVoidedBy(getVoidedBy());</b>
+<b class="fc">&nbsp;		target.setDateVoided(getDateVoided());</b>
+<b class="fc">&nbsp;		target.setVoidReason(getVoidReason());</b>
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the personA.
+&nbsp;	 */
+&nbsp;	public Person getPersonA() {
+<b class="fc">&nbsp;		return personA;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param personA The person to set.
+&nbsp;	 */
+&nbsp;	public void setPersonA(Person personA) {
+<b class="fc">&nbsp;		this.personA = personA;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the relationship type.
+&nbsp;	 */
+&nbsp;	public RelationshipType getRelationshipType() {
+<b class="fc">&nbsp;		return relationshipType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param type The relationship type to set.
+&nbsp;	 */
+&nbsp;	public void setRelationshipType(RelationshipType type) {
+<b class="fc">&nbsp;		this.relationshipType = type;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the relationshipId.
+&nbsp;	 */
+&nbsp;	public Integer getRelationshipId() {
+<b class="fc">&nbsp;		return relationshipId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param relationshipId The relationshipId to set.
+&nbsp;	 */
+&nbsp;	public void setRelationshipId(Integer relationshipId) {
+<b class="nc">&nbsp;		this.relationshipId = relationshipId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the personB.
+&nbsp;	 */
+&nbsp;	public Person getPersonB() {
+<b class="fc">&nbsp;		return personB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param personB The relative to set.
+&nbsp;	 */
+&nbsp;	public void setPersonB(Person personB) {
+<b class="fc">&nbsp;		this.personB = personB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If not null, this indicates that the relationship started on a particular date
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return the relationship&#39;s start date.
+&nbsp;	 */
+&nbsp;	public Date getStartDate() {
+<b class="fc">&nbsp;		return this.startDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.9
+&nbsp;	 * @param startDate relationship&#39;s start date.
+&nbsp;	 */
+&nbsp;	public void setStartDate(Date startDate) {
+<b class="fc">&nbsp;		this.startDate = startDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If not null, this indicates that the relationship ended on a particular date
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return Returns relationship&#39;s end date.
+&nbsp;	 */
+&nbsp;	public Date getEndDate() {
+<b class="fc">&nbsp;		return this.endDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.9
+&nbsp;	 * @param endDate relationship&#39;s end date.
+&nbsp;	 */
+&nbsp;	public void setEndDate(Date endDate) {
+<b class="fc">&nbsp;		this.endDate = endDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		String relType = getRelationshipType() == null ? &quot;NULL&quot; : getRelationshipType().getaIsToB();</b>
+<b class="nc">&nbsp;		return personA + &quot; is the &quot; + relType + &quot; of &quot; + personB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="nc">&nbsp;		return getRelationshipId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setRelationshipId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

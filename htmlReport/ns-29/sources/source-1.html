@@ -1,0 +1,228 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ComplexData</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.obs</a>
+</div>
+
+<h1>Coverage Summary for Class: ComplexData (org.openmrs.obs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ComplexData</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (10/11)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.obs;
+&nbsp;
+&nbsp;import java.io.InputStream;
+&nbsp;
+&nbsp;/**
+&nbsp; * ComplexObs is a transient Object that extends Obs but is not itself persisted in the database. It
+&nbsp; * has a data Object and a title. Alternatively, it can have a byte array in the Object. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Most handlers should support this data Object being an {@link InputStream}, at least prior to
+&nbsp; * saving the object.&lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * On pulling data out, the format is per-handler defined and the page doing the viewing should know
+&nbsp; * how to handle it.
+&nbsp; */
+&nbsp;public class ComplexData implements java.io.Serializable {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 345734100L;
+&nbsp;	
+&nbsp;	private Object data;
+&nbsp;	
+&nbsp;	private String title;
+&nbsp;	
+&nbsp;	private String mimeType;
+&nbsp;	
+&nbsp;	private Long length;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor requires title and data.
+&nbsp;	 * 
+&nbsp;	 * @param title Name or brief description of ComplexData.
+&nbsp;	 * @param data The complex data for an Obs
+&nbsp;	 */
+<b class="fc">&nbsp;	public ComplexData(String title, Object data) {</b>
+<b class="fc">&nbsp;		setTitle(title);</b>
+<b class="fc">&nbsp;		setData(data);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the title for this ComplexData
+&nbsp;	 * 
+&nbsp;	 * @param title
+&nbsp;	 */
+&nbsp;	private void setTitle(String title) {
+<b class="fc">&nbsp;		this.title = title;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the title for this ComplexData
+&nbsp;	 * 
+&nbsp;	 * @return the title as a &lt;code&gt;String&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public String getTitle() {
+<b class="fc">&nbsp;		return this.title;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the data Object.
+&nbsp;	 * 
+&nbsp;	 * @param data
+&nbsp;	 */
+&nbsp;	private void setData(Object data) {
+<b class="fc">&nbsp;		this.data = data;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the data Object. If this was initialized with a byte array, the output may not be
+&nbsp;	 * reliable. TODO: Should this even try to return the byte array?
+&nbsp;	 * 
+&nbsp;	 * @return the data as an &lt;code&gt;Object&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public Object getData() {
+<b class="fc">&nbsp;		return this.data;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the data MIME type
+&nbsp;	 * 
+&nbsp;	 * @param mimeType
+&nbsp;	 * @since 1.12
+&nbsp;	 */
+&nbsp;	public void setMimeType(String mimeType) {
+<b class="fc">&nbsp;		this.mimeType = mimeType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the data MIME type
+&nbsp;	 * 
+&nbsp;	 * @return data MIME type
+&nbsp;	 * @since 1.12
+&nbsp;	 */
+&nbsp;	public String getMimeType() {
+<b class="fc">&nbsp;		return this.mimeType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the data length
+&nbsp;	 *
+&nbsp;	 * @param length
+&nbsp;	 * @since 1.12
+&nbsp;	 */
+&nbsp;	public void setLength(Long length) {
+<b class="fc">&nbsp;		this.length = length;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the data length
+&nbsp;	 *
+&nbsp;	 * @return data length
+&nbsp;	 * @since 1.12
+&nbsp;	 */
+&nbsp;	public Long getLength() {
+<b class="nc">&nbsp;		return this.length;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

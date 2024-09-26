@@ -1,0 +1,313 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CohortMembership</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: CohortMembership (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CohortMembership</td>
+<td class="coverageStat">
+  <span class="percent">
+    95%
+  </span>
+  <span class="absValue">
+    (19/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,5%
+  </span>
+  <span class="absValue">
+    (39/40)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CohortMembership$HibernateProxy$2vqw2wjg</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    95%
+  </span>
+  <span class="absValue">
+    (19/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,5%
+  </span>
+  <span class="absValue">
+    (39/40)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 2.1.0
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class CohortMembership extends BaseChangeableOpenmrsData implements Comparable&lt;CohortMembership&gt; {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 0L;
+&nbsp;
+&nbsp;	private Integer cohortMemberId;
+&nbsp;	
+&nbsp;	private Cohort cohort;
+&nbsp;	
+&nbsp;	private Integer patientId;
+&nbsp;	
+&nbsp;	private Date startDate;
+&nbsp;	
+&nbsp;	private Date endDate;
+&nbsp;	
+&nbsp;	// Constructor
+<b class="fc">&nbsp;	public CohortMembership() {</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public CohortMembership(Integer patientId, Date startDate) {</b>
+<b class="fc">&nbsp;		this.patientId = patientId;</b>
+<b class="fc">&nbsp;		this.startDate = startDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public CohortMembership(Integer patientId) {
+<b class="fc">&nbsp;		this(patientId, new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares asOfDate to [startDate, endDate], inclusive of both endpoints.
+&nbsp;	 * @param asOfDate date to compare if membership is active or inactive
+&nbsp;	 * @return boolean true/false if membership is active/inactive
+&nbsp;	 */
+&nbsp;	public boolean isActive(Date asOfDate) {
+<b class="fc">&nbsp;		Date date = asOfDate == null ? new Date() : asOfDate;</b>
+<b class="fc">&nbsp;		return !this.getVoided() &amp;&amp; OpenmrsUtil.compare(startDate, date) &lt;= 0</b>
+<b class="fc">&nbsp;			&amp;&amp; OpenmrsUtil.compareWithNullAsLatest(date, endDate) &lt;= 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isActive() {
+<b class="fc">&nbsp;		return isActive(null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getCohortMemberId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setCohortMemberId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getCohortMemberId() {
+<b class="fc">&nbsp;		return cohortMemberId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setCohortMemberId(Integer cohortMemberId) {
+<b class="fc">&nbsp;		this.cohortMemberId = cohortMemberId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Cohort getCohort() {
+<b class="fc">&nbsp;		return cohort;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setCohort(Cohort cohort) {
+<b class="fc">&nbsp;		this.cohort = cohort;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getPatientId() {
+<b class="fc">&nbsp;		return patientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPatientId(Integer patientId) {
+<b class="fc">&nbsp;		this.patientId = patientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getStartDate() {
+<b class="fc">&nbsp;		return startDate != null ? (Date) startDate.clone() : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setStartDate(Date startDate) {
+<b class="fc">&nbsp;		 this.startDate = startDate != null ? new Date(startDate.getTime()) : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getEndDate() {
+<b class="fc">&nbsp;		return endDate != null ? (Date) endDate.clone() : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * OpenMRS treats a membership as active from its startDate to endDate &lt;em&gt;inclusive&lt;/em&gt; of both.
+&nbsp;	 * The underlying database field stores a date+time, so in the common case (where you don&#39;t care about the time of day
+&nbsp;	 * that cohort membership ended) you want to set the time component to 23:59:59.
+&nbsp;	 * @param endDate
+&nbsp;	 */
+&nbsp;	public void setEndDate(Date endDate) {
+<b class="fc">&nbsp;		this.endDate = endDate != null ? new Date(endDate.getTime()) : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sorts by following fields, in order:
+&nbsp;	 * &lt;ol&gt;
+&nbsp;	 *     &lt;li&gt;voided (voided memberships sort last)&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;endDate descending (so ended memberships are towards the end, and the older the more towards the end&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;startDate descending (so started more recently is towards the front)&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;patientId ascending (intuitive and consistent tiebreaker for client code)&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;uuid ascending (just so we have a final consistent tie breaker)&lt;/li&gt;
+&nbsp;	 * &lt;/ol&gt;
+&nbsp;	 *
+&nbsp;	 * @param o other membership to compare this to
+&nbsp;	 * @return value greater than &lt;code&gt;0&lt;/code&gt; if this is not voided and o is voided; or value less
+&nbsp;	 *         than &lt;code&gt;0&lt;/code&gt; if this is voided and o is not voided; if both is voided or not then
+&nbsp;	 *         value greater than &lt;code&gt;0&lt;/code&gt; if o.getEndDate() return null; or value less than
+&nbsp;	 *         &lt;code&gt;0&lt;/code&gt; if this.getEndDate() return null; if both are null or not then value
+&nbsp;	 *         greater than &lt;code&gt;0&lt;/code&gt; if this.getEndDate() is before o.getEndDate(); or value less
+&nbsp;	 *         than &lt;code&gt;0&lt;/code&gt; if this.getEndDate() is after o.getEndDate(); if are equal then value
+&nbsp;	 *         greater than &lt;code&gt;0&lt;/code&gt; if this.getStartDate() return null; or value less than
+&nbsp;	 *         &lt;code&gt;0&lt;/code&gt; if o.getStartDate() return null; if both are null or not then value greater
+&nbsp;	 *         than &lt;code&gt;0&lt;/code&gt; if this.getStartDate() is before o.getStartDate(); or value less than
+&nbsp;	 *         &lt;code&gt;0&lt;/code&gt; if this.getStartDate() is after o.getStartDate(); if are equal then value
+&nbsp;	 *         greater than &lt;code&gt;0&lt;/code&gt; if o.getPatientId() is greater than this.getPatientId(); or
+&nbsp;	 *         value less than &lt;code&gt;0&lt;/code&gt; if o.getPatientId() is less than this.getPatientId(); if
+&nbsp;	 *         are equal then value greater than &lt;code&gt;0&lt;/code&gt; if o.getUuid() is greater than
+&nbsp;	 *         this.getUuid(); or value less than &lt;code&gt;0&lt;/code&gt; if o.getUuid() is less than
+&nbsp;	 *         this.getUuid(); or &lt;code&gt;0&lt;/code&gt; if are equal
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int compareTo(CohortMembership o) {
+<b class="fc">&nbsp;		int ret = this.getVoided().compareTo(o.getVoided());</b>
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = -OpenmrsUtil.compareWithNullAsLatest(this.getEndDate(), o.getEndDate());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = -OpenmrsUtil.compareWithNullAsEarliest(this.getStartDate(), o.getStartDate());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = this.getPatientId().compareTo(o.getPatientId());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = this.getUuid().compareTo(o.getUuid());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.3.0
+&nbsp;	 * Indicates if a given cohortMembership object is equal to this one
+&nbsp;	 * 
+&nbsp;	 * @param otherCohortMembershipObject is a CohortMembership object that should be checked for equality with this object
+&nbsp;	 * @return true if both objects are logically equal. This is the case when endDate, startDate and patientId are equal  
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object otherCohortMembershipObject) {
+<b class="fc">&nbsp;		if(otherCohortMembershipObject == null || !(otherCohortMembershipObject instanceof CohortMembership)){</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		CohortMembership otherCohortMembership = (CohortMembership)otherCohortMembershipObject;</b>
+<b class="fc">&nbsp;		if(this == otherCohortMembership){</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		} 
+&nbsp;		
+&nbsp;		
+<b class="fc">&nbsp;		return ((endDate != null ) ? endDate.equals(otherCohortMembership.getEndDate()) : otherCohortMembership.getEndDate() == null)</b>
+&nbsp;			&amp;&amp;
+<b class="fc">&nbsp;			((startDate !=null) ? startDate.equals(otherCohortMembership.getStartDate())  : otherCohortMembership.getStartDate() == null)</b>
+&nbsp;			&amp;&amp; 
+<b class="fc">&nbsp;			((patientId != null) ? patientId.equals(otherCohortMembership.getPatientId()) : otherCohortMembership.getPatientId() == null);</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * @since 2.3.0
+&nbsp;	 * 
+&nbsp;	 * Creates a hash code of this object
+&nbsp;    */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		return Objects.hash(patientId, endDate, startDate);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

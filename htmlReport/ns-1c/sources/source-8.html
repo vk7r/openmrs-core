@@ -1,0 +1,226 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LogicContext</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicContext (org.openmrs.logic)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LogicContext</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.logic.datasource.LogicDataSource;
+&nbsp;import org.openmrs.logic.result.Result;
+&nbsp;
+&nbsp;/**
+&nbsp; *
+&nbsp; */
+&nbsp;public interface LogicContext {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the patient object for the given patient id (this patient must be in the cohort of this context)
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @return patient object
+&nbsp;	 */
+&nbsp;	public Patient getPatient(Integer patientId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluate a rule for a single patient
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param token
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of the evaluation
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see org.openmrs.logic.LogicService#eval(Integer, String)
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, String token) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluate a rule with parameters for a single patient
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param token
+&nbsp;	 * @param parameters
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of the evaluation
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see org.openmrs.logic.LogicService#eval(Integer, String, Map)
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, String token, Map&lt;String, Object&gt; parameters) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluate a rule with criteria and parameters for a single patient
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param criteria
+&nbsp;	 * @param parameters
+&nbsp;	 * @return A &lt;code&gt;Result&lt;/code&gt; object with the result of the evaluation
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see org.openmrs.logic.LogicService#eval(Integer, LogicCriteria, Map)
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, LogicCriteria criteria, Map&lt;String, Object&gt; parameters) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches a logic data source by name
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return the requested &lt;code&gt;LogicDataSource&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public LogicDataSource getLogicDataSource(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reads a key from a logic data source
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param dataSource
+&nbsp;	 * @param key
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of the read operation
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	public Result read(Integer patientId, LogicDataSource dataSource, String key) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reads a key from a logic data source
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param key
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of the read operation
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	public Result read(Integer patientId, String key) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reads a key with criteria from a logic data source
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param criteria
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of the read
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	public Result read(Integer patientId, LogicCriteria criteria) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reads a key with criteria from a logic data source
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 * @param dataSource
+&nbsp;	 * @param criteria
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of the read
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	public Result read(Integer patientId, LogicDataSource dataSource, LogicCriteria criteria) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Changes the index date for this logic context
+&nbsp;	 * 
+&nbsp;	 * @param indexDate the new &lt;code&gt;Date&lt;/code&gt; value for &quot;today&quot; to be used by rules within this
+&nbsp;	 *            logic context
+&nbsp;	 */
+&nbsp;	public void setIndexDate(Date indexDate);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the value of &quot;today&quot; within this logic context
+&nbsp;	 */
+&nbsp;	public Date getIndexDate();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the index date for the logic context (effective value of &quot;today&quot;)
+&nbsp;	 * @see #getIndexDate()
+&nbsp;	 */
+&nbsp;	public Date today();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Assigns a value to a global parameters within this logic context
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 * @param value
+&nbsp;	 * @return the value of the parameter that was set
+&nbsp;	 */
+&nbsp;	public Object setGlobalParameter(String id, Object value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches a global parameter value by name
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 * @return The requested Global parameter &lt;code&gt;Object&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public Object getGlobalParameter(String id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all global parameters defined within this logic context
+&nbsp;	 */
+&nbsp;	public Collection&lt;String&gt; getGlobalParameters();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

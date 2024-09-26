@@ -1,0 +1,287 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UserDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: UserDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">UserDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Privilege;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.UserService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Database methods for the UserService
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.api.UserService
+&nbsp; */
+&nbsp;public interface UserDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#saveUser(org.openmrs.User, java.lang.String)
+&nbsp;	 */
+&nbsp;	public User saveUser(User user, String password) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUser(Integer)
+&nbsp;	 */
+&nbsp;	public User getUser(Integer userId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUserByUsername(java.lang.String)
+&nbsp;	 */
+&nbsp;	public User getUserByUsername(String username) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUserByEmail(java.lang.String)
+&nbsp;	 */
+&nbsp;	public User getUserByEmail(String email);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#hasDuplicateUsername(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	public boolean hasDuplicateUsername(String username, String systemId, Integer userId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#purgeUser(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	public void deleteUser(User user) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getAllUsers()
+&nbsp;	 */
+&nbsp;	public List&lt;User&gt; getAllUsers() throws DAOException;
+&nbsp;	
+&nbsp;	// Role stuff
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#saveRole(org.openmrs.Role)
+&nbsp;	 */
+&nbsp;	public Role saveRole(Role role) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#purgeRole(org.openmrs.Role)
+&nbsp;	 */
+&nbsp;	public void deleteRole(Role role) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getRole(java.lang.String)
+&nbsp;	 */
+&nbsp;	public Role getRole(String r) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getAllRoles()
+&nbsp;	 */
+&nbsp;	public List&lt;Role&gt; getAllRoles() throws DAOException;
+&nbsp;	
+&nbsp;	// Privilege stuff
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#savePrivilege(org.openmrs.Privilege)
+&nbsp;	 */
+&nbsp;	public Privilege savePrivilege(Privilege privilege) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getPrivilege(java.lang.String)
+&nbsp;	 */
+&nbsp;	public Privilege getPrivilege(String p) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getAllPrivileges()
+&nbsp;	 */
+&nbsp;	public List&lt;Privilege&gt; getAllPrivileges() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#purgePrivilege(org.openmrs.Privilege)
+&nbsp;	 */
+&nbsp;	public void deletePrivilege(Privilege privilege) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUsersByName(java.lang.String, java.lang.String, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;User&gt; getUsersByName(String givenName, String familyName, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changePassword(org.openmrs.User, java.lang.String)
+&nbsp;	 */
+&nbsp;	public void changePassword(User u, String pw) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changePassword(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	public void changePassword(String pw, String pw2) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changeHashedPassword(User, String, String)
+&nbsp;	 */
+&nbsp;	public void changeHashedPassword(User user, String hashedPassword, String salt) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changeQuestionAnswer(User, String, String)
+&nbsp;	 */
+&nbsp;	public void changeQuestionAnswer(User u, String question, String answer) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changeQuestionAnswer(java.lang.String, java.lang.String,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	public void changeQuestionAnswer(String pw, String q, String a) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#isSecretAnswer(org.openmrs.User, java.lang.String)
+&nbsp;	 */
+&nbsp;	public boolean isSecretAnswer(User u, String answer) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return privilege or null
+&nbsp;	 */
+&nbsp;	public Privilege getPrivilegeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return role or null
+&nbsp;	 */
+&nbsp;	public Role getRoleByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return user or null
+&nbsp;	 */
+&nbsp;	public User getUserByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param user
+&nbsp;	 * @return The login credentials for a specified user.
+&nbsp;	 */
+&nbsp;	public LoginCredential getLoginCredential(User user);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return login credential or null
+&nbsp;	 */
+&nbsp;	public LoginCredential getLoginCredentialByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Updates a user&#39;s login credentials. Note that there is no
+&nbsp;	 * createLoginCredential(LoginCredential) method. Login credentials are dependent on a User
+&nbsp;	 * already existing.
+&nbsp;	 * 
+&nbsp;	 * @param credential
+&nbsp;	 */
+&nbsp;	public void updateLoginCredential(LoginCredential credential);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets User LoginCredential using activationKey
+&nbsp;	 * @param activationKey User&#39;s activation key for password reset 
+&nbsp;	 * @return LoginCredentail associated with activationKey 
+&nbsp;	 */
+&nbsp;	public LoginCredential getLoginCredentialByActivationKey(String activationKey);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#generateSystemId()
+&nbsp;	 */
+&nbsp;	public Integer generateSystemId() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see UserService#getUsersByPerson(Person, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;User&gt; getUsersByPerson(Person person, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see UserService#getUsers(String, List, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	public List&lt;User&gt; getUsers(String name, List&lt;Role&gt; roles, boolean includeRetired, Integer start, Integer length)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see UserService#getCountOfUsers(String, List, boolean)
+&nbsp;	 */
+&nbsp;	public Integer getCountOfUsers(String name, List&lt;Role&gt; roles, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see UserService#setUserActivationKey(LoginCredential)
+&nbsp;	 */
+&nbsp;	public void setUserActivationKey(LoginCredential credentials);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see UserService#getLastLoginTime(User)
+&nbsp;	 */
+&nbsp;	String getLastLoginTime(User user);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

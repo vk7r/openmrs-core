@@ -1,0 +1,142 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConditionDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: ConditionDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ConditionDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Condition;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;
+&nbsp;/**
+&nbsp; * This interface defines database methods for condition objects.
+&nbsp; *
+&nbsp; * @since 2.2
+&nbsp; */
+&nbsp;public interface ConditionDAO {
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a condition by id
+&nbsp;	 *
+&nbsp;	 * @param conditionId the id of the condition to return
+&nbsp;	 * @return the condition associated with the id
+&nbsp;	 */
+&nbsp;	Condition getCondition(Integer conditionId);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the condition attached to the specified UUID.
+&nbsp;	 *
+&nbsp;	 * @param uuid the UUID to search for in the database.
+&nbsp;	 * @return the condition associated with the UUID.
+&nbsp;	 */
+&nbsp;	Condition getConditionByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all active conditions related to the specified patient.
+&nbsp;	 *
+&nbsp;	 * @param patient the patient whose active conditions are being queried.
+&nbsp;	 * @return all active conditions associated with the specified patient.
+&nbsp;	 */
+&nbsp;	List&lt;Condition&gt; getActiveConditions(Patient patient);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConditionService#getAllConditions(Patient)
+&nbsp;	 */
+&nbsp;	List&lt;Condition&gt; getAllConditions(Patient patient);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConditionService#getConditionsByEncounter(Encounter)
+&nbsp;	 */
+&nbsp;	List&lt;Condition&gt; getConditionsByEncounter(Encounter encounter) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves the condition.
+&nbsp;	 *
+&nbsp;	 * @param condition the condition to save.
+&nbsp;	 * @return the saved condition.
+&nbsp;	 */
+&nbsp;	Condition saveCondition(Condition condition);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a condition from the database
+&nbsp;	 * 
+&nbsp;	 * @param condition the condition object to delete from database
+&nbsp;	 */
+&nbsp;	void deleteCondition(Condition condition) throws DAOException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

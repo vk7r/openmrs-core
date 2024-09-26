@@ -1,0 +1,348 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SimpleXStreamSerializer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.serialization</a>
+</div>
+
+<h1>Coverage Summary for Class: SimpleXStreamSerializer (org.openmrs.serialization)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SimpleXStreamSerializer</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93%
+  </span>
+  <span class="absValue">
+    (40/43)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SimpleXStreamSerializer$OpenmrsDynamicProxyConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,5%
+  </span>
+  <span class="absValue">
+    (43/47)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.serialization;
+&nbsp;
+&nbsp;import org.openmrs.ImplementationId;
+&nbsp;import org.openmrs.Patient;
+&nbsp;
+&nbsp;import com.thoughtworks.xstream.XStream;
+&nbsp;import com.thoughtworks.xstream.XStreamException;
+&nbsp;import com.thoughtworks.xstream.converters.MarshallingContext;
+&nbsp;import com.thoughtworks.xstream.converters.UnmarshallingContext;
+&nbsp;import com.thoughtworks.xstream.converters.extended.DynamicProxyConverter;
+&nbsp;import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+&nbsp;import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.impl.AdministrationServiceImpl;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * This serializer uses the xstream library to serialize and deserialize objects.
+&nbsp; * &lt;br&gt;
+&nbsp; * All classes are automatically aliased.  So a serialization of the {@link Patient} class
+&nbsp; * will not be:
+&nbsp; * &lt;code&gt;
+&nbsp; * &amp;lt;org.openmrs.Patient ...&amp;gt;
+&nbsp; *   &amp;lt;element
+&nbsp; *   ...
+&nbsp; * &amp;lt;/org.openmrs.Patient&amp;gt;
+&nbsp; * &lt;/code&gt;
+&nbsp; * but instead will be:
+&nbsp; * &lt;code&gt;
+&nbsp; * &amp;lt;patient ...&amp;gt;
+&nbsp; *   &amp;lt;element
+&nbsp; *   ...
+&nbsp; * &amp;lt;/patient&amp;gt;
+&nbsp; * &lt;/code&gt;
+&nbsp; *
+&nbsp; */
+&nbsp;@Component(&quot;simpleXStreamSerializer&quot;)
+&nbsp;public class SimpleXStreamSerializer implements OpenmrsSerializer {
+&nbsp;
+<b class="fc">&nbsp;	protected static final Logger log = LoggerFactory.getLogger(SimpleXStreamSerializer.class);</b>
+&nbsp;	
+&nbsp;	private volatile XStream xstream;
+&nbsp;	
+&nbsp;	private final XStream customXStream;
+&nbsp;	
+&nbsp;	private AdministrationService adminService;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default Constructor
+&nbsp;	 *
+&nbsp;	 * @throws SerializationException
+&nbsp;	 */
+&nbsp;	public SimpleXStreamSerializer() throws SerializationException {
+<b class="fc">&nbsp;		this(null, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Constructor that takes a custom XStream object. 
+&nbsp;	 * 
+&nbsp;	 * Please note that it is deprecated since it now requires AdministrationService to fully configure
+&nbsp;	 * whitelists defined via GPs.
+&nbsp;	 * 
+&nbsp;	 * @deprecated since 2.7.0, 2.6.2, 2.5.13 use SimpleXStreamSerializer(XStream, AdministrationService)
+&nbsp;	 * @param customXStream
+&nbsp;	 * @throws SerializationException
+&nbsp;	 */
+&nbsp;	public SimpleXStreamSerializer(XStream customXStream) throws SerializationException {
+<b class="nc">&nbsp;		this(customXStream, null);</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public SimpleXStreamSerializer(XStream customXStream, AdministrationService adminService) throws SerializationException {</b>
+<b class="fc">&nbsp;		this.customXStream = customXStream;</b>
+<b class="fc">&nbsp;		this.adminService = adminService;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Autowired
+<b class="fc">&nbsp;	public SimpleXStreamSerializer(AdministrationService adminService) {</b>
+<b class="fc">&nbsp;		this.customXStream = null;</b>
+<b class="fc">&nbsp;		this.adminService = adminService;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Setups XStream security using AdministrationService.getSerializerWhitelistTypes()
+&nbsp;	 * 
+&nbsp;	 * @since 2.7.0, 2.6.2, 2.5.13 
+&nbsp;	 * @param newXStream
+&nbsp;	 * @param adminService
+&nbsp;	 */
+&nbsp;	public static void setupXStreamSecurity(XStream newXStream, AdministrationService adminService) {
+<b class="fc">&nbsp;		if (adminService != null) {</b>
+<b class="fc">&nbsp;			List&lt;String&gt; serializerWhitelistTypes = adminService.getSerializerWhitelistTypes();</b>
+<b class="fc">&nbsp;			int prefixLength = AdministrationService.GP_SERIALIZER_WHITELIST_HIERARCHY_TYPES_PREFIX.length();</b>
+<b class="fc">&nbsp;			for (String type: serializerWhitelistTypes) {</b>
+<b class="fc">&nbsp;				if (type.startsWith(AdministrationService.GP_SERIALIZER_WHITELIST_HIERARCHY_TYPES_PREFIX)) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						Class&lt;?&gt; aClass = Class.forName(type.substring(prefixLength));</b>
+<b class="fc">&nbsp;						newXStream.allowTypeHierarchy(aClass);</b>
+<b class="nc">&nbsp;					} catch (ClassNotFoundException e) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;XStream serializer not configured to whitelist hierarchy of &quot; + type, e);</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				} else if (type.contains(&quot;*&quot;)) {</b>
+<b class="fc">&nbsp;					newXStream.allowTypesByWildcard(new String[] {type});</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					newXStream.allowTypes(new String[] {type});</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			log.warn(&quot;XStream serializer not configured with whitelists defined in GPs suffixed &quot; +</b>
+&nbsp;				&quot;with &#39;.serializer.whitelist.types&#39; due to adminService not being set.&quot;);
+<b class="fc">&nbsp;			List&lt;Class&lt;?&gt;&gt; types = AdministrationServiceImpl.getSerializerDefaultWhitelistHierarchyTypes();</b>
+<b class="fc">&nbsp;			for (Class&lt;?&gt; type: types) {</b>
+<b class="fc">&nbsp;				newXStream.allowTypeHierarchy(type);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Setups permissions and default attributes.
+&nbsp;	 *
+&nbsp;	 * @since 2.7.0, 2.6.2, 2.5.13 
+&nbsp;	 * @param newXStream
+&nbsp;	 */
+&nbsp;	public void initXStream(XStream newXStream) {
+<b class="fc">&nbsp;		setupXStreamSecurity(newXStream, adminService);</b>
+&nbsp;		
+<b class="fc">&nbsp;		newXStream.registerConverter(new OpenmrsDynamicProxyConverter(), XStream.PRIORITY_VERY_HIGH);</b>
+&nbsp;
+&nbsp;		//This is added to read the prior simpleframework-serialized values.
+&nbsp;		//TODO: find a better way to do this.
+<b class="fc">&nbsp;		newXStream.useAttributeFor(ImplementationId.class, &quot;implementationId&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Expose the xstream object, so that module can config with xstream as need
+&nbsp;	 *
+&nbsp;	 * @return xstream can be configured by module
+&nbsp;	 */
+&nbsp;	public XStream getXstream() {
+<b class="fc">&nbsp;		if (xstream == null) {</b>
+&nbsp;			//Lazy-init so that GPs are completely populated for initXStream
+<b class="fc">&nbsp;			XStream newXStream = customXStream;</b>
+<b class="fc">&nbsp;			if (newXStream == null) {	</b>
+<b class="fc">&nbsp;				newXStream = new XStream();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			initXStream(newXStream);</b>
+<b class="fc">&nbsp;			xstream = newXStream;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return xstream;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see OpenmrsSerializer#serialize(java.lang.Object)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not serialize proxies
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String serialize(Object o) throws SerializationException {
+<b class="fc">&nbsp;		return getXstream().toXML(o);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see OpenmrsSerializer#deserialize(String, Class)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not deserialize proxies
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; ignore entities
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not deserialize classes that are not whitelisted
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; deserialize whitelisted packages
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; deserialize whitelisted classes and packages
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; deserialize whitelisted hierarchies
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public &lt;T&gt; T deserialize(String serializedObject, Class&lt;? extends T&gt; clazz) throws SerializationException {
+&nbsp;		try {
+<b class="fc">&nbsp;			return (T) getXstream().fromXML(serializedObject);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (XStreamException e) {</b>
+<b class="fc">&nbsp;			throw new SerializationException(&quot;Unable to deserialize class: &quot; + clazz.getName(), e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * An instance of this converter needs to be registered with a higher priority than the rest so
+&nbsp;	 * that it&#39;s called early in the converter chain. This way, we can make sure we never get to
+&nbsp;	 * xstream&#39;s DynamicProxyConverter that can deserialize proxies.
+&nbsp;	 *
+&nbsp;	 * @see &lt;a href=&quot;http://tinyurl.com/ord2rry&quot;&gt;this blog&lt;/a&gt;
+&nbsp;	 */
+&nbsp;	private class OpenmrsDynamicProxyConverter extends DynamicProxyConverter {
+&nbsp;		
+<b class="fc">&nbsp;		OpenmrsDynamicProxyConverter() {</b>
+<b class="fc">&nbsp;			super(null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
+<b class="fc">&nbsp;			throw new XStreamException(&quot;Can&#39;t serialize proxies&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+<b class="nc">&nbsp;			throw new XStreamException(&quot;Can&#39;t deserialize proxies&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

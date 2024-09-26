@@ -1,0 +1,273 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateSchedulerDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateSchedulerDAO (org.openmrs.scheduler.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateSchedulerDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36,4%
+  </span>
+  <span class="absValue">
+    (4/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13,8%
+  </span>
+  <span class="absValue">
+    (4/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.hibernate.HibernateUtil;
+&nbsp;import org.openmrs.scheduler.TaskDefinition;
+&nbsp;import org.openmrs.scheduler.db.SchedulerDAO;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.orm.ObjectRetrievalFailureException;
+&nbsp;
+&nbsp;/**
+&nbsp; */
+&nbsp;public class HibernateSchedulerDAO implements SchedulerDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Logger
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HibernateSchedulerDAO.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default Public constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public HibernateSchedulerDAO() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 * 
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a new task.
+&nbsp;	 * 
+&nbsp;	 * @param task to be created
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void createTask(TaskDefinition task) throws DAOException {
+&nbsp;		// add all data minus the password as a new user
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().save(task);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get task by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param taskId internal task identifier
+&nbsp;	 * @return task with given internal identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public TaskDefinition getTask(Integer taskId) throws DAOException {
+<b class="nc">&nbsp;		TaskDefinition task = sessionFactory.getCurrentSession().get(TaskDefinition.class, taskId);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (task == null) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Task &#39;&quot; + taskId + &quot;&#39; not found&quot;);</b>
+<b class="nc">&nbsp;			throw new ObjectRetrievalFailureException(TaskDefinition.class, taskId);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return task;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get task by public name.
+&nbsp;	 * 
+&nbsp;	 * @param name public task name
+&nbsp;	 * @return task with given public name
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public TaskDefinition getTaskByName(String name) throws DAOException {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;TaskDefinition&gt; cq = cb.createQuery(TaskDefinition.class);</b>
+<b class="nc">&nbsp;		Root&lt;TaskDefinition&gt; root = cq.from(TaskDefinition.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), name));</b>
+&nbsp;
+<b class="nc">&nbsp;		TaskDefinition task = session.createQuery(cq).uniqueResult();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (task == null) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Task &#39;&quot; + name + &quot;&#39; not found&quot;);</b>
+<b class="nc">&nbsp;			throw new ObjectRetrievalFailureException(TaskDefinition.class, name);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return task;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Update task
+&nbsp;	 * 
+&nbsp;	 * @param task to be updated
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void updateTask(TaskDefinition task) throws DAOException {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().merge(task);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all tasks in the database
+&nbsp;	 * 
+&nbsp;	 * @return &lt;code&gt;List&amp;lt;TaskDefinition&amp;gt;&lt;/code&gt; of all tasks
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;TaskDefinition&gt; getTasks() throws DAOException {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;TaskDefinition&gt; cq = cb.createQuery(TaskDefinition.class);</b>
+<b class="nc">&nbsp;		cq.from(TaskDefinition.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Delete task from database.
+&nbsp;	 * 
+&nbsp;	 * @param taskId &lt;code&gt;Integer&lt;/code&gt; identifier of task to be deleted
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteTask(Integer taskId) throws DAOException {
+<b class="nc">&nbsp;		TaskDefinition taskConfig = getTask(taskId);</b>
+<b class="nc">&nbsp;		deleteTask(taskConfig);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete task from database.
+&nbsp;	 * 
+&nbsp;	 * @param taskConfig &lt;code&gt;TaskDefinition&lt;/code&gt; of task to be deleted
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteTask(TaskDefinition taskConfig) throws DAOException {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().delete(taskConfig);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.scheduler.db.SchedulerDAO#getTaskByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public TaskDefinition getTaskByUuid(String uuid) throws DAOException {
+<b class="nc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, TaskDefinition.class, uuid);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

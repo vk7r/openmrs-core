@@ -1,0 +1,563 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MedicationDispense</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: MedicationDispense (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MedicationDispense</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,8%
+  </span>
+  <span class="absValue">
+    (30/51)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,8%
+  </span>
+  <span class="absValue">
+    (30/51)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">MedicationDispense$HibernateProxy$TG9T275g</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    58,8%
+  </span>
+  <span class="absValue">
+    (30/51)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,8%
+  </span>
+  <span class="absValue">
+    (30/51)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * The MedicationDispense class records detailed information about the provision of a supply of a medication 
+&nbsp; * with the intention that it is subsequently consumed by a patient (usually in response to a prescription).
+&nbsp; * 
+&nbsp; * @see &lt;a href=&quot;https://www.hl7.org/fhir/medicationdispense.html&quot;&gt;
+&nbsp; *     		https://www.hl7.org/fhir/medicationdispense.html
+&nbsp; *     	&lt;/a&gt;
+&nbsp; * @since 2.6
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;medication_dispense&quot;)
+&nbsp;public class MedicationDispense extends BaseFormRecordableOpenmrsData {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	@Id
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	@Column(name = &quot;medication_dispense_id&quot;)
+&nbsp;	private Integer medicationDispenseId;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:subject
+&nbsp;	 * Patient for whom the medication is intended
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;patient_id&quot;)
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * FHIR:context
+&nbsp;	 * Encounter when the dispensing event occurred
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;encounter_id&quot;)
+&nbsp;	private Encounter encounter;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:medication.medicationCodeableConcept
+&nbsp;	 * Corresponds to drugOrder.concept
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;concept&quot;)
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * FHIR:medication.reference(Medication)
+&nbsp;	 * Corresponds to drugOrder.drug
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;drug_id&quot;)
+&nbsp;	private Drug drug;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:location
+&nbsp;	 * Where the dispensed event occurred
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;location_id&quot;)
+&nbsp;	private Location location;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:performer.actor with null for performer.function.
+&nbsp;	 * Per &lt;a href=&quot;https://www.hl7.org/fhir/medicationdispense-definitions.html#MedicationDispense.performer&quot;&gt;
+&nbsp;	 *     	https://www.hl7.org/fhir/medicationdispense-definitions.html#MedicationDispense.performer
+&nbsp;	 *     &lt;/a&gt;specification, It should be assumed that the actor is the dispenser of the medication
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;dispenser&quot;)
+&nbsp;	private Provider dispenser;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:authorizingPrescription
+&nbsp;	 * The drug order that led to this dispensing event; 
+&nbsp;	 * note that authorizing prescription maps to a &quot;MedicationRequest&quot; FHIR resource
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;drug_order_id&quot;)
+&nbsp;	private DrugOrder drugOrder;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:status
+&nbsp;	 * @see &lt;a href=&quot;https://www.hl7.org/fhir/valueset-medicationdispense-status.html&quot;&gt;
+&nbsp;	 *     		https://www.hl7.org/fhir/valueset-medicationdispense-status.html
+&nbsp;	 *     	&lt;/a&gt;
+&nbsp;	 * i.e. preparation, in-progress, cancelled, on-hold, completed, entered-in-error, stopped, declined, unknown
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;status&quot;)
+&nbsp;	private Concept status;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:statusReason.statusReasonCodeableConcept
+&nbsp;	 * @see &lt;a href=&quot;https://www.hl7.org/fhir/valueset-medicationdispense-status-reason.html&quot;&gt;
+&nbsp;	 *     		https://www.hl7.org/fhir/valueset-medicationdispense-status-reason.html
+&nbsp;	 *     	&lt;/a&gt;
+&nbsp;	 * i.e &quot;Stock Out&quot;
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;status_reason&quot;)
+&nbsp;	private Concept statusReason;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:type.codeableConcept
+&nbsp;	 * @see &lt;a href=&quot;https://www.hl7.org/fhir/v3/ActPharmacySupplyType/vs.html&quot;&gt;
+&nbsp;	 *     		https://www.hl7.org/fhir/v3/ActPharmacySupplyType/vs.html
+&nbsp;	 *     	&lt;/a&gt; for potential example concepts
+&nbsp;	 * i.e. &quot;Refill&quot; and &quot;Partial Fill&quot;
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;type&quot;)
+&nbsp;	private Concept type;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:quantity.value
+&nbsp;	 * Relates to drugOrder.quantity
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;quantity&quot;)
+&nbsp;	private Double quantity;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:quantity.unit and/or quanity.code
+&nbsp;	 * Relates to drugOrder.quantityUnits
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;quantity_units&quot;)
+&nbsp;	private Concept quantityUnits;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:dosageInstructions.doseAndRate.dose.doseQuantity
+&nbsp;	 * Relates to drugOrder.dose
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;dose&quot;)
+&nbsp;	private Double dose;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:dosageInstructions.doseAndRate.dose.quantity.unit and/or code
+&nbsp;	 * Relates to drugOrder.doseUnits
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;dose_units&quot;)
+&nbsp;	private Concept doseUnits;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:dosageInstructions.route
+&nbsp;	 * Relates to drugOrder.route
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;route&quot;)
+&nbsp;	private Concept route;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:DosageInstructions.timing.repeat.frequency+period+periodUnit
+&nbsp;	 * @see &lt;a href=&quot;https://build.fhir.org/datatypes.html#Timing&quot;&gt;https://build.fhir.org/datatypes.html#Timing&lt;/a&gt;
+&nbsp;	 * Note that we will continue to map this as a single &quot;frequency&quot; concept, although it doesn&#39;t map well to FHIR, 
+&nbsp;	 * to make consistent with DrugOrder in OpenMRS
+&nbsp;	 * Relates to drugOrder.frequency
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;frequency&quot;)
+&nbsp;	private OrderFrequency frequency;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:DosageInstructions.AsNeeded.asNeededBoolean
+&nbsp;	 * Relates to drugOrder.asNeeded
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;as_needed&quot;)
+&nbsp;	private Boolean asNeeded;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:DosageInstructions.patientInstructions
+&nbsp;	 * Relates to drugOrder.dosingInstructions
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;dosing_instructions&quot;, length=65535)
+&nbsp;	private String dosingInstructions;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:whenPrepared
+&nbsp;	 * From FHIR: &quot;When product was packaged and reviewed&quot;
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;date_prepared&quot;)
+&nbsp;	private Date datePrepared;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:whenHandedOver
+&nbsp;	 * From FHIR: &quot;When product was given out&quot;
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;date_handed_over&quot;)
+&nbsp;	private Date dateHandedOver;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:substitution.wasSubstituted
+&nbsp;	 * True/false whether a substitution was made during this dispense event
+&nbsp;	 */
+&nbsp;	@Column(name = &quot;was_substituted&quot;)
+&nbsp;	private Boolean wasSubstituted;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:substitution.type
+&nbsp;	 * @see &lt;a href=&quot;https://www.hl7.org/fhir/v3/ActSubstanceAdminSubstitutionCode/vs.html&quot;&gt;
+&nbsp;	 *     		https://www.hl7.org/fhir/v3/ActSubstanceAdminSubstitutionCode/vs.html
+&nbsp;	 *      &lt;/a&gt;
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;substitution_type&quot;)
+&nbsp;	private Concept substitutionType;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * FHIR:substitution.reason
+&nbsp;	 * @see &lt;a href=&quot;https://www.hl7.org/fhir/v3/SubstanceAdminSubstitutionReason/vs.html&quot;&gt;
+&nbsp;	 *     		https://www.hl7.org/fhir/v3/SubstanceAdminSubstitutionReason/vs.html
+&nbsp;	 *      &lt;/a&gt;
+&nbsp;	 */
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;substitution_reason&quot;)
+&nbsp;	private Concept substitutionReason;
+&nbsp;
+&nbsp;	
+<b class="fc">&nbsp;	public MedicationDispense() {</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see BaseOpenmrsObject#getId() 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getMedicationDispenseId();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see BaseOpenmrsObject#setId(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setMedicationDispenseId(id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Integer getMedicationDispenseId() {
+<b class="fc">&nbsp;		return medicationDispenseId;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setMedicationDispenseId(Integer medicationDispenseId) {
+<b class="nc">&nbsp;		this.medicationDispenseId = medicationDispenseId;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="nc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Drug getDrug() {
+<b class="fc">&nbsp;		return drug;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDrug(Drug drug) {
+<b class="nc">&nbsp;		this.drug = drug;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Location getLocation() {
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setLocation(Location location) {
+<b class="nc">&nbsp;		this.location = location;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Provider getDispenser() {
+<b class="fc">&nbsp;		return dispenser;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDispenser(Provider dispenser) {
+<b class="nc">&nbsp;		this.dispenser = dispenser;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public DrugOrder getDrugOrder() {
+<b class="fc">&nbsp;		return drugOrder;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDrugOrder(DrugOrder drugOrder) {
+<b class="nc">&nbsp;		this.drugOrder = drugOrder;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getStatus() {
+<b class="fc">&nbsp;		return status;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setStatus(Concept status) {
+<b class="fc">&nbsp;		this.status = status;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getStatusReason() {
+<b class="fc">&nbsp;		return statusReason;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setStatusReason(Concept statusReason) {
+<b class="fc">&nbsp;		this.statusReason = statusReason;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getType() {
+<b class="fc">&nbsp;		return type;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setType(Concept type) {
+<b class="nc">&nbsp;		this.type = type;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Double getQuantity() {
+<b class="fc">&nbsp;		return quantity;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setQuantity(Double quantity) {
+<b class="nc">&nbsp;		this.quantity = quantity;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getQuantityUnits() {
+<b class="fc">&nbsp;		return quantityUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setQuantityUnits(Concept quantityUnits) {
+<b class="nc">&nbsp;		this.quantityUnits = quantityUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Double getDose() {
+<b class="fc">&nbsp;		return dose;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDose(Double dose) {
+<b class="nc">&nbsp;		this.dose = dose;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getDoseUnits() {
+<b class="fc">&nbsp;		return doseUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDoseUnits(Concept doseUnits) {
+<b class="nc">&nbsp;		this.doseUnits = doseUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getRoute() {
+<b class="fc">&nbsp;		return route;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setRoute(Concept route) {
+<b class="nc">&nbsp;		this.route = route;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OrderFrequency getFrequency() {
+<b class="fc">&nbsp;		return frequency;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setFrequency(OrderFrequency frequency) {
+<b class="nc">&nbsp;		this.frequency = frequency;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Boolean getAsNeeded() {
+<b class="fc">&nbsp;		return asNeeded;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setAsNeeded(Boolean asNeeded) {
+<b class="nc">&nbsp;		this.asNeeded = asNeeded;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public String getDosingInstructions() {
+<b class="fc">&nbsp;		return dosingInstructions;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDosingInstructions(String dosingInstructions) {
+<b class="nc">&nbsp;		this.dosingInstructions = dosingInstructions;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Date getDatePrepared() {
+<b class="fc">&nbsp;		return datePrepared;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDatePrepared(Date datePrepared) {
+<b class="nc">&nbsp;		this.datePrepared = datePrepared;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Date getDateHandedOver() {
+<b class="fc">&nbsp;		return dateHandedOver;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDateHandedOver(Date dateHandedOver) {
+<b class="nc">&nbsp;		this.dateHandedOver = dateHandedOver;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Boolean getWasSubstituted() {
+<b class="fc">&nbsp;		return wasSubstituted;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setWasSubstituted(Boolean wasSubstituted) {
+<b class="nc">&nbsp;		this.wasSubstituted = wasSubstituted;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getSubstitutionType() {
+<b class="fc">&nbsp;		return substitutionType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setSubstitutionType(Concept substitutionType) {
+<b class="nc">&nbsp;		this.substitutionType = substitutionType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Concept getSubstitutionReason() {
+<b class="fc">&nbsp;		return substitutionReason;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setSubstitutionReason(Concept substitutionReason) {
+<b class="nc">&nbsp;		this.substitutionReason = substitutionReason;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

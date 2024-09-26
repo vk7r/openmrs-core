@@ -1,0 +1,1749 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ModuleFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: ModuleFactory (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ModuleFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,4%
+  </span>
+  <span class="absValue">
+    (43/62)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,5%
+  </span>
+  <span class="absValue">
+    (322/580)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; * 
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.net.MalformedURLException;
+&nbsp;import java.net.URL;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.SortedMap;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;import java.util.concurrent.ExecutionException;
+&nbsp;
+&nbsp;import com.google.common.cache.Cache;
+&nbsp;import com.google.common.cache.CacheBuilder;
+&nbsp;import org.aopalliance.aop.Advice;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.Privilege;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.Daemon;
+&nbsp;import org.openmrs.module.Extension.MEDIA_TYPE;
+&nbsp;import org.openmrs.util.CycleException;
+&nbsp;import org.openmrs.util.DatabaseUpdater;
+&nbsp;import org.openmrs.util.Graph;
+&nbsp;import org.openmrs.util.InputRequiredException;
+&nbsp;import org.openmrs.util.OpenmrsClassLoader;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.aop.Advisor;
+&nbsp;import org.springframework.context.support.AbstractRefreshableApplicationContext;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;import liquibase.Contexts;
+&nbsp;
+&nbsp;/**
+&nbsp; * Methods for loading, starting, stopping, and storing OpenMRS modules
+&nbsp; */
+&nbsp;public class ModuleFactory {
+&nbsp;	
+&nbsp;	private ModuleFactory() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ModuleFactory.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	protected static final Cache&lt;String, Module&gt; loadedModules = CacheBuilder.newBuilder()</b>
+<b class="fc">&nbsp;		.softValues().build();</b>
+&nbsp;	
+<b class="fc">&nbsp;	protected static final Cache&lt;String, Module&gt; startedModules = CacheBuilder.newBuilder()</b>
+<b class="fc">&nbsp;		.softValues().build();</b>
+&nbsp;	
+<b class="fc">&nbsp;	protected static final Map&lt;String, List&lt;Extension&gt;&gt; extensionMap = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// maps to keep track of the memory and objects to free/close
+<b class="fc">&nbsp;	protected static final Cache&lt;Module, ModuleClassLoader&gt; moduleClassLoaders = CacheBuilder.newBuilder().weakKeys()</b>
+<b class="fc">&nbsp;		.softValues().build();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Map&lt;String, Set&lt;ModuleClassLoader&gt;&gt; providedPackages = new ConcurrentHashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// the name of the file within a module file
+&nbsp;	private static final String MODULE_CHANGELOG_FILENAME = &quot;liquibase.xml&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Cache&lt;String, DaemonToken&gt; daemonTokens = CacheBuilder.newBuilder().softValues().build();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Set&lt;String&gt; actualStartupOrder = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a module (in the form of a jar file) to the list of openmrs modules Returns null if an error
+&nbsp;	 * occurred and/or module was not successfully loaded
+&nbsp;	 *
+&nbsp;	 * @param moduleFile
+&nbsp;	 * @return Module
+&nbsp;	 */
+&nbsp;	public static Module loadModule(File moduleFile) throws ModuleException {
+&nbsp;		
+<b class="nc">&nbsp;		return loadModule(moduleFile, true);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a module (in the form of a jar file) to the list of openmrs modules Returns null if an error
+&nbsp;	 * occurred and/or module was not successfully loaded
+&nbsp;	 *
+&nbsp;	 * @param moduleFile
+&nbsp;	 * @param replaceIfExists unload a module that has the same moduleId if one is loaded already
+&nbsp;	 * @return Module
+&nbsp;	 */
+&nbsp;	public static Module loadModule(File moduleFile, Boolean replaceIfExists) throws ModuleException {
+<b class="fc">&nbsp;		Module module = new ModuleFileParser(Context.getMessageSourceService()).parse(moduleFile);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (module != null) {</b>
+<b class="fc">&nbsp;			loadModule(module, replaceIfExists);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return module;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a module to the list of openmrs modules
+&nbsp;	 *
+&nbsp;	 * @param module
+&nbsp;	 * @param replaceIfExists unload a module that has the same moduleId if one is loaded already
+&nbsp;	 *            &lt;strong&gt;Should&lt;/strong&gt; load module if it is currently not loaded
+&nbsp;	 *            &lt;strong&gt;Should&lt;/strong&gt; not load module if already loaded &lt;strong&gt;Should&lt;/strong&gt;
+&nbsp;	 *            always load module if replacement is wanted &lt;strong&gt;Should&lt;/strong&gt; not load an older
+&nbsp;	 *            version of the same module &lt;strong&gt;Should&lt;/strong&gt; load a newer version of the same
+&nbsp;	 *            module
+&nbsp;	 * @return module the module that was loaded or if the module exists already with the same version,
+&nbsp;	 *         the old module
+&nbsp;	 */
+&nbsp;	public static Module loadModule(Module module, Boolean replaceIfExists) throws ModuleException {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Adding module {} to the module queue&quot;, module.getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		Module oldModule = getLoadedModulesMap().get(module.getModuleId());</b>
+<b class="fc">&nbsp;		if (oldModule != null) {</b>
+<b class="fc">&nbsp;			int versionComparison = ModuleUtil.compareVersion(oldModule.getVersion(), module.getVersion());</b>
+<b class="fc">&nbsp;			if (versionComparison &lt; 0) {</b>
+&nbsp;				// if oldModule version is lower, unload it and use the new
+<b class="fc">&nbsp;				unloadModule(oldModule);</b>
+<b class="fc">&nbsp;			} else if (versionComparison == 0) {</b>
+<b class="fc">&nbsp;				if (replaceIfExists) {</b>
+&nbsp;					// if the versions are the same and we&#39;re told to replaceIfExists, use the new
+<b class="fc">&nbsp;					unloadModule(oldModule);</b>
+&nbsp;				} else {
+&nbsp;					// if the versions are equal and we&#39;re not told to replaceIfExists, jump out of here in a bad way
+<b class="fc">&nbsp;					throw new ModuleException(&quot;A module with the same id and version already exists&quot;, module.getModuleId());</b>
+&nbsp;				}
+&nbsp;			} else {
+&nbsp;				// if the older (already loaded) module is newer, keep that original one that was loaded. return that one.
+<b class="fc">&nbsp;				return oldModule;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		getLoadedModulesMap().put(module.getModuleId(), module);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return module;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Load OpenMRS modules from &lt;code&gt;OpenmrsUtil.getModuleRepository()&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public static void loadModules() {
+&nbsp;		
+&nbsp;		// load modules from the user&#39;s module repository directory
+<b class="nc">&nbsp;		File modulesFolder = ModuleUtil.getModuleRepository();</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Loading modules from: {}&quot;, modulesFolder.getAbsolutePath());</b>
+&nbsp;		
+<b class="nc">&nbsp;		File[] files = modulesFolder.listFiles();</b>
+<b class="nc">&nbsp;		if (modulesFolder.isDirectory() &amp;&amp; files != null) {</b>
+<b class="nc">&nbsp;			loadModules(Arrays.asList(files));</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			log.error(&quot;modules folder: &#39;&quot; + modulesFolder.getAbsolutePath() + &quot;&#39; is not a directory or IO error occurred&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Attempt to load the given files as OpenMRS modules
+&nbsp;	 *
+&nbsp;	 * @param modulesToLoad the list of files to try and load &lt;strong&gt;Should&lt;/strong&gt; not crash when
+&nbsp;	 *            file is not found or broken &lt;strong&gt;Should&lt;/strong&gt; setup requirement mappings for
+&nbsp;	 *            every module &lt;strong&gt;Should&lt;/strong&gt; not start the loaded modules
+&nbsp;	 */
+&nbsp;	public static void loadModules(List&lt;File&gt; modulesToLoad) {
+&nbsp;		// loop over the modules and load all the modules that we can
+<b class="fc">&nbsp;		for (File f : modulesToLoad) {</b>
+<b class="fc">&nbsp;			if (f.exists()) {</b>
+&nbsp;				// ignore .svn folder and the like
+<b class="fc">&nbsp;				if (!f.getName().startsWith(&quot;.&quot;)) {</b>
+&nbsp;					try {
+&nbsp;						// last module loaded wins
+<b class="fc">&nbsp;						Module mod = loadModule(f, true);</b>
+<b class="fc">&nbsp;						log.debug(&quot;Loaded module: &quot; + mod + &quot; successfully&quot;);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (Exception e) {</b>
+<b class="nc">&nbsp;						log.error(&quot;Unable to load file in module directory: &quot; + f + &quot;. Skipping file.&quot;, e);</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;			} else {
+<b class="fc">&nbsp;				log.error(&quot;Could not find file in module directory: &quot; + f);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		//inform modules, that they can&#39;t start before other modules
+&nbsp;		
+<b class="fc">&nbsp;		Map&lt;String, Module&gt; loadedModulesMap = getLoadedModulesMapPackage();</b>
+<b class="fc">&nbsp;		for (Module m : loadedModulesMap.values()) {</b>
+<b class="fc">&nbsp;			Map&lt;String, String&gt; startBeforeModules = m.getStartBeforeModulesMap();</b>
+<b class="fc">&nbsp;			if (startBeforeModules.size() &gt; 0) {</b>
+<b class="fc">&nbsp;				for (String s : startBeforeModules.keySet()) {</b>
+<b class="fc">&nbsp;					Module mod = loadedModulesMap.get(s);</b>
+<b class="fc">&nbsp;					if (mod != null) {</b>
+<b class="fc">&nbsp;						mod.addRequiredModule(m.getPackageName(), m.getVersion());</b>
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Try to start all of the loaded modules that have the global property &lt;i&gt;moduleId&lt;/i&gt;.started is
+&nbsp;	 * set to &quot;true&quot; or the property does not exist. Otherwise, leave it as only &quot;loaded&quot;&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Modules that are already started will be skipped.
+&nbsp;	 */
+&nbsp;	public static void startModules() {
+&nbsp;		
+&nbsp;		// loop over and try starting each of the loaded modules
+<b class="fc">&nbsp;		if (!getLoadedModules().isEmpty()) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			List&lt;Module&gt; modules = getModulesThatShouldStart();</b>
+&nbsp;			
+&nbsp;			try {
+<b class="fc">&nbsp;				modules = getModulesInStartupOrder(modules);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (CycleException ex) {</b>
+<b class="nc">&nbsp;				String message = getCyclicDependenciesMessage(ex.getMessage());</b>
+<b class="nc">&nbsp;				log.error(message, ex);</b>
+<b class="nc">&nbsp;				notifySuperUsersAboutCyclicDependencies(ex);</b>
+<b class="nc">&nbsp;				modules = (List&lt;Module&gt;) ex.getExtraData();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// try and start the modules that should be started
+<b class="fc">&nbsp;			for (Module mod : modules) {</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (mod.isStarted()) {</b>
+&nbsp;					// skip over modules that are already started
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				// Skip module if required ones are not started
+<b class="fc">&nbsp;				if (!requiredModulesStarted(mod)) {</b>
+<b class="fc">&nbsp;					String message = getFailedToStartModuleMessage(mod);</b>
+<b class="fc">&nbsp;					log.error(message);</b>
+<b class="fc">&nbsp;					mod.setStartupErrorMessage(message);</b>
+<b class="fc">&nbsp;					notifySuperUsersAboutModuleFailure(mod);</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				try {
+<b class="fc">&nbsp;					log.debug(&quot;starting module: {}&quot;, mod.getModuleId());</b>
+<b class="fc">&nbsp;					startModule(mod);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Error while starting module: &quot; + mod.getName(), e);</b>
+<b class="nc">&nbsp;					mod.setStartupErrorMessage(&quot;Error while starting module&quot;, e);</b>
+<b class="nc">&nbsp;					notifySuperUsersAboutModuleFailure(mod);</b>
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtain the list of modules that should be started
+&nbsp;	 *
+&nbsp;	 * @return list of modules
+&nbsp;	 */
+&nbsp;	private static List&lt;Module&gt; getModulesThatShouldStart() {
+<b class="fc">&nbsp;		List&lt;Module&gt; modules = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		AdministrationService adminService = Context.getAdministrationService();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Module mod : getLoadedModulesCoreFirst()) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			String key = mod.getModuleId() + &quot;.started&quot;;</b>
+<b class="fc">&nbsp;			String startedProp = adminService.getGlobalProperty(key, null);</b>
+<b class="fc">&nbsp;			String mandatoryProp = adminService.getGlobalProperty(mod.getModuleId() + &quot;.mandatory&quot;, null);</b>
+&nbsp;			
+<b class="fc">&nbsp;			boolean isCoreToOpenmrs = mod.isCore() &amp;&amp; !ModuleUtil.ignoreCoreModules();</b>
+&nbsp;			
+&nbsp;			// if a &#39;moduleid.started&#39; property doesn&#39;t exist, start the module anyway
+&nbsp;			// as this is probably the first time they are loading it
+<b class="fc">&nbsp;			if (startedProp == null || &quot;true&quot;.equals(startedProp) || &quot;true&quot;.equalsIgnoreCase(mandatoryProp)</b>
+<b class="nc">&nbsp;				|| mod.isMandatory() || isCoreToOpenmrs) {</b>
+<b class="fc">&nbsp;				modules.add(mod);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return modules;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sort modules in startup order based on required and aware-of dependencies
+&nbsp;	 *
+&nbsp;	 * @param modules list of modules to sort
+&nbsp;	 * @return list of modules sorted by dependencies
+&nbsp;	 * @throws CycleException
+&nbsp;	 */
+&nbsp;	public static List&lt;Module&gt; getModulesInStartupOrder(Collection&lt;Module&gt; modules) throws CycleException {
+<b class="fc">&nbsp;		Graph&lt;Module&gt; graph = new Graph&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Module mod : modules) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			graph.addNode(mod);</b>
+&nbsp;			
+&nbsp;			// Required dependencies
+<b class="fc">&nbsp;			for (String key : mod.getRequiredModules()) {</b>
+<b class="fc">&nbsp;				Module module = getModuleByPackage(key);</b>
+<b class="fc">&nbsp;				Module fromNode = graph.getNode(module);</b>
+<b class="fc">&nbsp;				if (fromNode == null) {</b>
+<b class="fc">&nbsp;					fromNode = module;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (fromNode != null) {</b>
+<b class="fc">&nbsp;					graph.addEdge(graph.new Edge(</b>
+&nbsp;						fromNode,
+&nbsp;						mod));
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// Aware-of dependencies
+<b class="fc">&nbsp;			for (String key : mod.getAwareOfModules()) {</b>
+<b class="fc">&nbsp;				Module module = getModuleByPackage(key);</b>
+<b class="fc">&nbsp;				Module fromNode = graph.getNode(module);</b>
+<b class="fc">&nbsp;				if (fromNode == null) {</b>
+<b class="fc">&nbsp;					fromNode = module;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (fromNode != null) {</b>
+<b class="nc">&nbsp;					graph.addEdge(graph.new Edge(</b>
+&nbsp;						fromNode,
+&nbsp;						mod));
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return graph.topologicalSort();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send an Alert to all super users that the given module did not start successfully.
+&nbsp;	 *
+&nbsp;	 * @param mod The Module that failed
+&nbsp;	 */
+&nbsp;	private static void notifySuperUsersAboutModuleFailure(Module mod) {
+&nbsp;		try {
+&nbsp;			// Add the privileges necessary for notifySuperUsers
+<b class="fc">&nbsp;			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_ALERTS);</b>
+&nbsp;			
+&nbsp;			// Send an alert to all administrators
+<b class="fc">&nbsp;			Context.getAlertService().notifySuperUsers(&quot;Module.startupError.notification.message&quot;, null, mod.getName());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			log.error(&quot;Unable to send an alert to the super users&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+&nbsp;			// Remove added privileges
+<b class="fc">&nbsp;			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_ALERTS);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send an Alert to all super users that modules did not start due to cyclic dependencies
+&nbsp;	 */
+&nbsp;	private static void notifySuperUsersAboutCyclicDependencies(Exception ex) {
+&nbsp;		try {
+<b class="nc">&nbsp;			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_ALERTS);</b>
+<b class="nc">&nbsp;			Context.getAlertService().notifySuperUsers(&quot;Module.error.cyclicDependencies&quot;, ex, ex.getMessage());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to send an alert to the super users&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_ALERTS);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all modules found/loaded into the system (started and not started), with the core modules
+&nbsp;	 * at the start of that list
+&nbsp;	 *
+&nbsp;	 * @return &lt;code&gt;List&amp;lt;Module&amp;gt;&lt;/code&gt; of the modules loaded into the system, with the core
+&nbsp;	 *         modules first.
+&nbsp;	 */
+&nbsp;	public static List&lt;Module&gt; getLoadedModulesCoreFirst() {
+<b class="fc">&nbsp;		List&lt;Module&gt; list = new ArrayList&lt;&gt;(getLoadedModules());</b>
+<b class="fc">&nbsp;		final Collection&lt;String&gt; coreModuleIds = ModuleConstants.CORE_MODULES.keySet();</b>
+<b class="fc">&nbsp;		list.sort((left, right) -&gt; {</b>
+<b class="fc">&nbsp;			Integer leftVal = coreModuleIds.contains(left.getModuleId()) ? 0 : 1;</b>
+<b class="fc">&nbsp;			Integer rightVal = coreModuleIds.contains(right.getModuleId()) ? 0 : 1;</b>
+<b class="fc">&nbsp;			return leftVal.compareTo(rightVal);</b>
+&nbsp;		});
+<b class="fc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to return a List of Strings containing a description of which modules the
+&nbsp;	 * passed module requires but which are not started. The returned description of each module is the
+&nbsp;	 * moduleId followed by the required version if one is specified
+&nbsp;	 *
+&nbsp;	 * @param module the module to check required modules for
+&nbsp;	 * @return List&amp;lt;String&amp;gt; of module names + optional required versions: &quot;org.openmrs.formentry
+&nbsp;	 *         1.8, org.rg.patientmatching&quot;
+&nbsp;	 */
+&nbsp;	private static List&lt;String&gt; getMissingRequiredModules(Module module) {
+<b class="fc">&nbsp;		List&lt;String&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (String moduleName : module.getRequiredModules()) {</b>
+<b class="fc">&nbsp;			boolean started = false;</b>
+<b class="fc">&nbsp;			for (Module mod : getStartedModules()) {</b>
+<b class="nc">&nbsp;				if (mod.getPackageName().equals(moduleName)) {</b>
+<b class="nc">&nbsp;					String reqVersion = module.getRequiredModuleVersion(moduleName);</b>
+<b class="nc">&nbsp;					if (reqVersion == null || ModuleUtil.compareVersion(mod.getVersion(), reqVersion) &gt;= 0) {</b>
+<b class="nc">&nbsp;						started = true;</b>
+&nbsp;					}
+&nbsp;					break;
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!started) {</b>
+<b class="fc">&nbsp;				String moduleVersion = module.getRequiredModuleVersion(moduleName);</b>
+<b class="fc">&nbsp;				moduleName = moduleName.replace(&quot;org.openmrs.module.&quot;, &quot;&quot;).replace(&quot;org.openmrs.&quot;, &quot;&quot;);</b>
+<b class="fc">&nbsp;				ret.add(moduleName + (moduleVersion != null ? &quot; &quot; + moduleVersion : &quot;&quot;));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all modules found/loaded into the system (started and not started)
+&nbsp;	 *
+&nbsp;	 * @return &lt;code&gt;Collection&amp;lt;Module&amp;gt;&lt;/code&gt; of the modules loaded into the system
+&nbsp;	 */
+&nbsp;	public static Collection&lt;Module&gt; getLoadedModules() {
+<b class="fc">&nbsp;		if (getLoadedModulesMap().size() &gt; 0) {</b>
+<b class="fc">&nbsp;			return getLoadedModulesMap().values();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Collections.emptyList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all modules found/loaded into the system (started and not started) in the form of a
+&nbsp;	 * map&amp;lt;ModuleId, Module&amp;gt;
+&nbsp;	 *
+&nbsp;	 * @return map&amp;lt;ModuleId, Module&amp;gt;
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, Module&gt; getLoadedModulesMap() {
+<b class="fc">&nbsp;		return loadedModules.asMap();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all modules found/loaded into the system (started and not started) in the form of a
+&nbsp;	 * map&amp;lt;PackageName, Module&amp;gt;
+&nbsp;	 *
+&nbsp;	 * @return map&amp;lt;PackageName, Module&amp;gt;
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, Module&gt; getLoadedModulesMapPackage() {
+<b class="fc">&nbsp;		Map&lt;String, Module&gt; map = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (Module loadedModule : getLoadedModulesMap().values()) {</b>
+<b class="fc">&nbsp;			map.put(loadedModule.getPackageName(), loadedModule);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return map;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the modules that have been successfully started
+&nbsp;	 *
+&nbsp;	 * @return &lt;code&gt;Collection&amp;lt;Module&amp;gt;&lt;/code&gt; of the started modules
+&nbsp;	 */
+&nbsp;	public static Collection&lt;Module&gt; getStartedModules() {
+<b class="fc">&nbsp;		if (getStartedModulesMap().size() &gt; 0) {</b>
+<b class="fc">&nbsp;			return getStartedModulesMap().values();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Collections.emptyList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static List&lt;Module&gt; getStartedModulesInOrder() {
+<b class="nc">&nbsp;		List&lt;Module&gt; modules = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		if (actualStartupOrder != null) {</b>
+<b class="nc">&nbsp;			for (String moduleId : actualStartupOrder) {</b>
+<b class="nc">&nbsp;				modules.add(getStartedModulesMap().get(moduleId));</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			modules.addAll(getStartedModules());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return modules;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the modules that have been successfully started in the form of a map&amp;lt;ModuleId,
+&nbsp;	 * Module&amp;gt;
+&nbsp;	 *
+&nbsp;	 * @return Map&amp;lt;ModuleId, Module&amp;gt;
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, Module&gt; getStartedModulesMap() {
+<b class="fc">&nbsp;		return startedModules.asMap();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param moduleId
+&nbsp;	 * @return Module matching module id or null if none
+&nbsp;	 */
+&nbsp;	public static Module getModuleById(String moduleId) {
+<b class="fc">&nbsp;		return getLoadedModulesMap().get(moduleId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param moduleId
+&nbsp;	 * @return Module matching moduleId, if it is started or null otherwise
+&nbsp;	 */
+&nbsp;	public static Module getStartedModuleById(String moduleId) {
+<b class="fc">&nbsp;		return getStartedModulesMap().get(moduleId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param modulePackage
+&nbsp;	 * @return Module matching module package or null if none
+&nbsp;	 */
+&nbsp;	public static Module getModuleByPackage(String modulePackage) {
+<b class="fc">&nbsp;		for (Module mod : getLoadedModulesMap().values()) {</b>
+<b class="fc">&nbsp;			if (mod.getPackageName().equals(modulePackage)) {</b>
+<b class="fc">&nbsp;				return mod;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see #startModule(Module, boolean, AbstractRefreshableApplicationContext)
+&nbsp;	 * @see #startModuleInternal(Module)
+&nbsp;	 * @see Daemon#startModule(Module)
+&nbsp;	 */
+&nbsp;	public static Module startModule(Module module) throws ModuleException {
+<b class="fc">&nbsp;		return startModule(module, false, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Runs through extensionPoints and then calls {@link BaseModuleActivator#willStart()} on the
+&nbsp;	 * Module&#39;s activator. This method is run in a new thread and is authenticated as the Daemon user.
+&nbsp;	 * If a non null application context is passed in, it gets refreshed to make the module&#39;s services
+&nbsp;	 * available
+&nbsp;	 *
+&nbsp;	 * @param module Module to start
+&nbsp;	 * @param isOpenmrsStartup Specifies whether this module is being started at application startup or
+&nbsp;	 *            not, this argument is ignored if a null application context is passed in
+&nbsp;	 * @param applicationContext the spring application context instance to refresh
+&nbsp;	 * @throws ModuleException if the module throws any kind of error at startup or in an activator
+&nbsp;	 * @see #startModuleInternal(Module, boolean, AbstractRefreshableApplicationContext)
+&nbsp;	 * @see Daemon#startModule(Module, boolean, AbstractRefreshableApplicationContext)
+&nbsp;	 */
+&nbsp;	public static Module startModule(Module module, boolean isOpenmrsStartup,
+&nbsp;		AbstractRefreshableApplicationContext applicationContext) throws ModuleException {
+&nbsp;		
+<b class="fc">&nbsp;		if (!requiredModulesStarted(module)) {</b>
+<b class="fc">&nbsp;			int missingModules = 0;</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (String packageName : module.getRequiredModulesMap().keySet()) {</b>
+<b class="fc">&nbsp;				Module mod = getModuleByPackage(packageName);</b>
+&nbsp;				
+&nbsp;				// mod not installed
+<b class="fc">&nbsp;				if (mod == null) {</b>
+<b class="nc">&nbsp;					missingModules++;</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (!mod.isStarted()) {</b>
+<b class="fc">&nbsp;					startModule(mod);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (missingModules &gt; 0) {</b>
+<b class="nc">&nbsp;				String message = getFailedToStartModuleMessage(module);</b>
+<b class="nc">&nbsp;				log.error(message);</b>
+<b class="nc">&nbsp;				module.setStartupErrorMessage(message);</b>
+<b class="nc">&nbsp;				notifySuperUsersAboutModuleFailure(module);</b>
+&nbsp;				// instead of return null, i realized that Daemon.startModule() always returns a Module
+&nbsp;				// object,irrespective of whether the startup succeeded
+<b class="nc">&nbsp;				return module;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return Daemon.startModule(module, isOpenmrsStartup, applicationContext);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method should not be called directly.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * The {@link #startModule(Module)} (and hence {@link Daemon#startModule(Module)}) calls this method
+&nbsp;	 * in a new Thread and is authenticated as the {@link Daemon} user&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Runs through extensionPoints and then calls {@link BaseModuleActivator#willStart()} on the
+&nbsp;	 * Module&#39;s activator.
+&nbsp;	 *
+&nbsp;	 * @param module Module to start
+&nbsp;	 */
+&nbsp;	public static Module startModuleInternal(Module module) throws ModuleException {
+<b class="nc">&nbsp;		return startModuleInternal(module, false, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method should not be called directly.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * The {@link #startModule(Module)} (and hence {@link Daemon#startModule(Module)}) calls this method
+&nbsp;	 * in a new Thread and is authenticated as the {@link Daemon} user&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Runs through extensionPoints and then calls {@link BaseModuleActivator#willStart()} on the
+&nbsp;	 * Module&#39;s activator. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * If a non null application context is passed in, it gets refreshed to make the module&#39;s services
+&nbsp;	 * available
+&nbsp;	 *
+&nbsp;	 * @param module Module to start
+&nbsp;	 * @param isOpenmrsStartup Specifies whether this module is being started at application startup or
+&nbsp;	 *            not, this argument is ignored if a null application context is passed in
+&nbsp;	 * @param applicationContext the spring application context instance to refresh
+&nbsp;	 */
+&nbsp;	public static Module startModuleInternal(Module module, boolean isOpenmrsStartup,
+&nbsp;		AbstractRefreshableApplicationContext applicationContext) throws ModuleException {
+&nbsp;		
+<b class="fc">&nbsp;		if (module != null) {</b>
+<b class="fc">&nbsp;			String moduleId = module.getModuleId();</b>
+&nbsp;			
+&nbsp;			try {
+&nbsp;				
+&nbsp;				// check to be sure this module can run with our current version
+&nbsp;				// of OpenMRS code
+<b class="fc">&nbsp;				String requireVersion = module.getRequireOpenmrsVersion();</b>
+<b class="fc">&nbsp;				ModuleUtil.checkRequiredVersion(OpenmrsConstants.OPENMRS_VERSION_SHORT, requireVersion);</b>
+&nbsp;				
+&nbsp;				// check for required modules
+<b class="fc">&nbsp;				if (!requiredModulesStarted(module)) {</b>
+<b class="nc">&nbsp;					throw new ModuleException(getFailedToStartModuleMessage(module));</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				// fire up the classloader for this module
+<b class="fc">&nbsp;				ModuleClassLoader moduleClassLoader = new ModuleClassLoader(module, ModuleFactory.class.getClassLoader());</b>
+<b class="fc">&nbsp;				getModuleClassLoaderMap().put(module, moduleClassLoader);</b>
+<b class="fc">&nbsp;				registerProvidedPackages(moduleClassLoader);</b>
+&nbsp;				
+&nbsp;				// don&#39;t load the advice objects into the Context
+&nbsp;				// At startup, the spring context isn&#39;t refreshed until all modules
+&nbsp;				// have been loaded.  This causes errors if called here during a
+&nbsp;				// module&#39;s startup if one of these advice points is on another
+&nbsp;				// module because that other module&#39;s service won&#39;t have been loaded
+&nbsp;				// into spring yet.  All advice for all modules must be reloaded
+&nbsp;				// a spring context refresh anyway
+&nbsp;				
+&nbsp;				// map extension point to a list of extensions for this module only
+<b class="fc">&nbsp;				Map&lt;String, List&lt;Extension&gt;&gt; moduleExtensionMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;				for (Extension ext : module.getExtensions()) {</b>
+&nbsp;					
+<b class="nc">&nbsp;					String extId = ext.getExtensionId();</b>
+<b class="nc">&nbsp;					List&lt;Extension&gt; tmpExtensions = moduleExtensionMap.computeIfAbsent(extId, k -&gt; new ArrayList&lt;&gt;());</b>
+&nbsp;					
+<b class="nc">&nbsp;					tmpExtensions.add(ext);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// Sort this module&#39;s extensions, and merge them into the full extensions map
+<b class="fc">&nbsp;				Comparator&lt;Extension&gt; sortOrder = (e1, e2) -&gt; Integer.valueOf(e1.getOrder()).compareTo(e2.getOrder());</b>
+<b class="fc">&nbsp;				for (Map.Entry&lt;String, List&lt;Extension&gt;&gt; moduleExtensionEntry : moduleExtensionMap.entrySet()) {</b>
+&nbsp;					// Sort this module&#39;s extensions for current extension point
+<b class="nc">&nbsp;					List&lt;Extension&gt; sortedModuleExtensions = moduleExtensionEntry.getValue();</b>
+<b class="nc">&nbsp;					sortedModuleExtensions.sort(sortOrder);</b>
+&nbsp;					
+&nbsp;					// Get existing extensions, and append the ones from the new module
+<b class="nc">&nbsp;					List&lt;Extension&gt; extensions = getExtensionMap().computeIfAbsent(moduleExtensionEntry.getKey(),</b>
+<b class="nc">&nbsp;						k -&gt; new ArrayList&lt;&gt;());</b>
+<b class="nc">&nbsp;					for (Extension ext : sortedModuleExtensions) {</b>
+<b class="nc">&nbsp;						log.debug(&quot;Adding to mapping ext: &quot; + ext.getExtensionId() + &quot; ext.class: &quot; + ext.getClass());</b>
+<b class="nc">&nbsp;						extensions.add(ext);</b>
+<b class="nc">&nbsp;					}</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// run the module&#39;s sql update script
+&nbsp;				// This and the property updates are the only things that can&#39;t
+&nbsp;				// be undone at startup, so put these calls after any other
+&nbsp;				// calls that might hinder startup
+<b class="fc">&nbsp;				SortedMap&lt;String, String&gt; diffs = SqlDiffFileParser.getSqlDiffs(module);</b>
+&nbsp;				
+&nbsp;				try {
+&nbsp;					// this method must check and run queries against the database.
+&nbsp;					// to do this, it must be &quot;authenticated&quot;.  Give the current
+&nbsp;					// &quot;user&quot; the proxy privilege so this can be done. (&quot;user&quot; might
+&nbsp;					// be nobody because this is being run at startup)
+<b class="fc">&nbsp;					Context.addProxyPrivilege(&quot;&quot;);</b>
+&nbsp;					
+<b class="fc">&nbsp;					for (Map.Entry&lt;String, String&gt; entry : diffs.entrySet()) {</b>
+<b class="nc">&nbsp;						String version = entry.getKey();</b>
+<b class="nc">&nbsp;						String sql = entry.getValue();</b>
+<b class="nc">&nbsp;						if (StringUtils.hasText(sql)) {</b>
+<b class="nc">&nbsp;							runDiff(module, version, sql);</b>
+&nbsp;						}
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;				finally {
+&nbsp;					// take the &quot;authenticated&quot; privilege away from the current &quot;user&quot;
+<b class="fc">&nbsp;					Context.removeProxyPrivilege(&quot;&quot;);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// run module&#39;s optional liquibase.xml immediately after sqldiff.xml
+<b class="fc">&nbsp;				runLiquibase(module);</b>
+&nbsp;				
+&nbsp;				// effectively mark this module as started successfully
+<b class="fc">&nbsp;				getStartedModulesMap().put(moduleId, module);</b>
+&nbsp;
+<b class="fc">&nbsp;				actualStartupOrder.add(moduleId);</b>
+&nbsp;				
+&nbsp;				try {
+&nbsp;					// save the state of this module for future restarts
+<b class="fc">&nbsp;					saveGlobalProperty(moduleId + &quot;.started&quot;, &quot;true&quot;, getGlobalPropertyStartedDescription(moduleId));</b>
+&nbsp;					
+&nbsp;					// save the mandatory status
+<b class="fc">&nbsp;					saveGlobalProperty(moduleId + &quot;.mandatory&quot;, String.valueOf(module.isMandatory()),</b>
+<b class="fc">&nbsp;						getGlobalPropertyMandatoryModuleDescription(moduleId));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+&nbsp;					// pass over errors because this doesn&#39;t really concern startup
+&nbsp;					// passing over this also allows for multiple of the same-named modules
+&nbsp;					// to be loaded in junit tests that are run within one session
+<b class="nc">&nbsp;					log.debug(&quot;Got an error when trying to set the global property on module startup&quot;, e);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// (this must be done after putting the module in the started
+&nbsp;				// list)
+&nbsp;				// if this module defined any privileges or global properties,
+&nbsp;				// make sure they are added to the database
+&nbsp;				// (Unfortunately, placing the call here will duplicate work
+&nbsp;				// done at initial app startup)
+<b class="fc">&nbsp;				if (!module.getPrivileges().isEmpty() || !module.getGlobalProperties().isEmpty()) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;Updating core dataset&quot;);</b>
+<b class="nc">&nbsp;					Context.checkCoreDataset();</b>
+&nbsp;					// checkCoreDataset() currently doesn&#39;t throw an error. If
+&nbsp;					// it did, it needs to be
+&nbsp;					// caught and the module needs to be stopped and given a
+&nbsp;					// startup error
+&nbsp;				}
+&nbsp;				
+&nbsp;				// should be near the bottom so the module has all of its stuff
+&nbsp;				// set up for it already.
+&nbsp;				try {
+<b class="fc">&nbsp;					if (module.getModuleActivator() != null) {</b>
+&nbsp;						// if extends BaseModuleActivator
+<b class="fc">&nbsp;						module.getModuleActivator().willStart();</b>
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				catch (ModuleException e) {</b>
+&nbsp;					// just rethrow module exceptions. This should be used for a
+&nbsp;					// module marking that it had trouble starting
+<b class="nc">&nbsp;					throw e;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					throw new ModuleException(&quot;Error while calling module&#39;s Activator.startup()/willStart() method&quot;, e);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// erase any previous startup error
+<b class="fc">&nbsp;				module.clearStartupError();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (Exception e) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;Error while trying to start module: &quot; + moduleId, e);</b>
+<b class="fc">&nbsp;				module.setStartupErrorMessage(&quot;Error while trying to start module&quot;, e);</b>
+<b class="fc">&nbsp;				notifySuperUsersAboutModuleFailure(module);</b>
+&nbsp;				// undo all of the actions in startup
+&nbsp;				try {
+<b class="fc">&nbsp;					boolean skipOverStartedProperty = false;</b>
+&nbsp;					
+<b class="fc">&nbsp;					if (e instanceof ModuleMustStartException) {</b>
+<b class="nc">&nbsp;						skipOverStartedProperty = true;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					stopModule(module, skipOverStartedProperty, true);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e2) {</b>
+&nbsp;					// this will probably occur about the same place as the
+&nbsp;					// error in startup
+<b class="nc">&nbsp;					log.debug(&quot;Error while stopping module: &quot; + moduleId, e2);</b>
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (applicationContext != null) {</b>
+<b class="nc">&nbsp;			ModuleUtil.refreshApplicationContext(applicationContext, isOpenmrsStartup, module);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return module;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static void registerProvidedPackages(ModuleClassLoader moduleClassLoader) {
+<b class="fc">&nbsp;		for (String providedPackage : moduleClassLoader.getProvidedPackages()) {</b>
+<b class="fc">&nbsp;			Set&lt;ModuleClassLoader&gt; newSet = new HashSet&lt;&gt;();</b>
+&nbsp;			
+<b class="fc">&nbsp;			Set&lt;ModuleClassLoader&gt; set = providedPackages.get(providedPackage);</b>
+<b class="fc">&nbsp;			if (set != null) {</b>
+<b class="fc">&nbsp;				newSet.addAll(set);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			newSet.add(moduleClassLoader);</b>
+<b class="fc">&nbsp;			providedPackages.put(providedPackage, newSet);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static void unregisterProvidedPackages(ModuleClassLoader moduleClassLoader) {
+<b class="fc">&nbsp;		for (String providedPackage : moduleClassLoader.getProvidedPackages()) {</b>
+<b class="fc">&nbsp;			Set&lt;ModuleClassLoader&gt; newSet = new HashSet&lt;&gt;();</b>
+&nbsp;			
+<b class="fc">&nbsp;			Set&lt;ModuleClassLoader&gt; set = providedPackages.get(providedPackage);</b>
+<b class="fc">&nbsp;			if (set != null) {</b>
+<b class="fc">&nbsp;				newSet.addAll(set);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			newSet.remove(moduleClassLoader);</b>
+&nbsp;			
+<b class="fc">&nbsp;			providedPackages.put(providedPackage, newSet);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Set&lt;ModuleClassLoader&gt; getModuleClassLoadersForPackage(String packageName) {
+<b class="fc">&nbsp;		Set&lt;ModuleClassLoader&gt; set = providedPackages.get(packageName);</b>
+<b class="fc">&nbsp;		if (set == null) {</b>
+<b class="fc">&nbsp;			return Collections.emptySet();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return new HashSet&lt;&gt;(set);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the error message of a module which fails to start.
+&nbsp;	 *
+&nbsp;	 * @param module the module that has failed to start.
+&nbsp;	 * @return the message text.
+&nbsp;	 */
+&nbsp;	private static String getFailedToStartModuleMessage(Module module) {
+<b class="fc">&nbsp;		String[] params = { module.getName(), String.join(&quot;,&quot;, getMissingRequiredModules(module)) };</b>
+<b class="fc">&nbsp;		return Context.getMessageSourceService().getMessage(&quot;Module.error.moduleCannotBeStarted&quot;, params,</b>
+<b class="fc">&nbsp;			Context.getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the error message of cyclic dependencies between modules
+&nbsp;	 *
+&nbsp;	 * @return the message text.
+&nbsp;	 */
+&nbsp;	private static String getCyclicDependenciesMessage(String message) {
+<b class="nc">&nbsp;		return Context.getMessageSourceService().getMessage(&quot;Module.error.cyclicDependencies&quot;, new Object[] { message },</b>
+<b class="nc">&nbsp;			Context.getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Loop over the given module&#39;s advice objects and load them into the Context This needs to be
+&nbsp;	 * called for all started modules after every restart of the Spring Application Context
+&nbsp;	 *
+&nbsp;	 * @param module
+&nbsp;	 */
+&nbsp;	public static void loadAdvice(Module module) {
+<b class="nc">&nbsp;		for (AdvicePoint advice : module.getAdvicePoints()) {</b>
+&nbsp;			Class&lt;?&gt; cls;
+&nbsp;			try {
+<b class="nc">&nbsp;				cls = Context.loadClass(advice.getPoint());</b>
+<b class="nc">&nbsp;				Object aopObject = advice.getClassInstance();</b>
+<b class="nc">&nbsp;				if (aopObject instanceof Advisor) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;adding advisor [{}]&quot;, aopObject.getClass());</b>
+<b class="nc">&nbsp;					Context.addAdvisor(cls, (Advisor) aopObject);</b>
+<b class="nc">&nbsp;				} else if (aopObject != null) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;adding advice [{}]&quot;, aopObject.getClass());</b>
+<b class="nc">&nbsp;					Context.addAdvice(cls, (Advice) aopObject);</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					log.debug(&quot;Could not load advice class for {} [{}]&quot;, advice.getPoint(), advice.getClassName());</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (ClassNotFoundException | NoClassDefFoundError e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Could not load advice point [{}]&quot;, advice.getPoint(), e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Execute the given sql diff section for the given module
+&nbsp;	 *
+&nbsp;	 * @param module the module being executed on
+&nbsp;	 * @param version the version of this sql diff
+&nbsp;	 * @param sql the actual sql statements to run (separated by semi colons)
+&nbsp;	 */
+&nbsp;	private static void runDiff(Module module, String version, String sql) {
+<b class="nc">&nbsp;		AdministrationService as = Context.getAdministrationService();</b>
+&nbsp;		
+<b class="nc">&nbsp;		String key = module.getModuleId() + &quot;.database_version&quot;;</b>
+<b class="nc">&nbsp;		GlobalProperty gp = as.getGlobalPropertyObject(key);</b>
+&nbsp;		
+<b class="nc">&nbsp;		boolean executeSQL = false;</b>
+&nbsp;		
+&nbsp;		// check given version against current version
+<b class="nc">&nbsp;		if (gp != null &amp;&amp; StringUtils.hasLength(gp.getPropertyValue())) {</b>
+<b class="nc">&nbsp;			String currentDbVersion = gp.getPropertyValue();</b>
+<b class="nc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;version:column {}:{}&quot;, version, currentDbVersion);</b>
+<b class="nc">&nbsp;				log.debug(&quot;compare: {}&quot;, ModuleUtil.compareVersion(version, currentDbVersion));</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (ModuleUtil.compareVersion(version, currentDbVersion) &gt; 0) {</b>
+<b class="nc">&nbsp;				executeSQL = true;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			executeSQL = true;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// version is greater than the currently installed version. execute this update.
+<b class="nc">&nbsp;		if (executeSQL) {</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);</b>
+<b class="nc">&nbsp;				log.debug(&quot;Executing sql: &quot; + sql);</b>
+<b class="nc">&nbsp;				String[] sqlStatements = sql.split(&quot;;&quot;);</b>
+<b class="nc">&nbsp;				for (String sqlStatement : sqlStatements) {</b>
+<b class="nc">&nbsp;					if (sqlStatement.trim().length() &gt; 0) {</b>
+<b class="nc">&nbsp;						as.executeSQL(sqlStatement, false);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;			finally {
+<b class="nc">&nbsp;				Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// save the global property
+&nbsp;			try {
+<b class="nc">&nbsp;				Context.addProxyPrivilege(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES);</b>
+&nbsp;				
+<b class="nc">&nbsp;				String description = &quot;DO NOT MODIFY.  Current database version number for the &quot; + module.getModuleId()</b>
+&nbsp;					+ &quot; module.&quot;;
+&nbsp;				
+<b class="nc">&nbsp;				if (gp == null) {</b>
+<b class="nc">&nbsp;					log.info(&quot;Global property &quot; + key + &quot; was not found. Creating one now.&quot;);</b>
+<b class="nc">&nbsp;					gp = new GlobalProperty(key, version, description);</b>
+<b class="nc">&nbsp;					as.saveGlobalProperty(gp);</b>
+<b class="nc">&nbsp;				} else if (!gp.getPropertyValue().equals(version)) {</b>
+<b class="nc">&nbsp;					log.info(&quot;Updating global property &quot; + key + &quot; to version: &quot; + version);</b>
+<b class="nc">&nbsp;					gp.setDescription(description);</b>
+<b class="nc">&nbsp;					gp.setPropertyValue(version);</b>
+<b class="nc">&nbsp;					as.saveGlobalProperty(gp);</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					log.error(&quot;Should not be here. GP property value and sqldiff version should not be equal&quot;);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+&nbsp;			finally {
+<b class="nc">&nbsp;				Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Execute all not run changeSets in liquibase.xml for the given module
+&nbsp;	 *
+&nbsp;	 * @param module the module being executed on
+&nbsp;	 */
+&nbsp;	private static void runLiquibase(Module module) {
+<b class="fc">&nbsp;		ModuleClassLoader moduleClassLoader = getModuleClassLoader(module);</b>
+<b class="fc">&nbsp;		boolean liquibaseFileExists = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (moduleClassLoader != null) {</b>
+<b class="fc">&nbsp;			try (InputStream inStream = moduleClassLoader.getResourceAsStream(MODULE_CHANGELOG_FILENAME)) {</b>
+<b class="fc">&nbsp;				liquibaseFileExists = (inStream != null);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="nc">&nbsp;			catch (IOException ignored) {</b>
+&nbsp;				
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (liquibaseFileExists) {</b>
+&nbsp;			try {
+&nbsp;				// run liquibase.xml by Liquibase API
+<b class="nc">&nbsp;				DatabaseUpdater.executeChangelog(MODULE_CHANGELOG_FILENAME, new Contexts(), null, moduleClassLoader);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (InputRequiredException e) {</b>
+&nbsp;				// the user would be stepped through the questions returned here.
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Input during database updates is not yet implemented.&quot;, module.getName(), e);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Unable to update data model using &quot; + MODULE_CHANGELOG_FILENAME + &quot;.&quot;,</b>
+<b class="nc">&nbsp;					module.getName(), e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Runs through the advice and extension points and removes from api. &lt;br&gt;
+&nbsp;	 * Also calls mod.Activator.shutdown()
+&nbsp;	 *
+&nbsp;	 * @param mod module to stop
+&nbsp;	 * @see ModuleFactory#stopModule(Module, boolean, boolean)
+&nbsp;	 */
+&nbsp;	public static void stopModule(Module mod) {
+<b class="fc">&nbsp;		stopModule(mod, false, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Runs through the advice and extension points and removes from api.&lt;br&gt;
+&nbsp;	 * Also calls mod.Activator.shutdown()
+&nbsp;	 *
+&nbsp;	 * @param mod the module to stop
+&nbsp;	 * @param isShuttingDown true if this is called during the process of shutting down openmrs
+&nbsp;	 * @see #stopModule(Module, boolean, boolean)
+&nbsp;	 */
+&nbsp;	public static void stopModule(Module mod, boolean isShuttingDown) {
+<b class="fc">&nbsp;		stopModule(mod, isShuttingDown, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Runs through the advice and extension points and removes from api.&lt;br&gt;
+&nbsp;	 * &lt;code&gt;skipOverStartedProperty&lt;/code&gt; should only be true when openmrs is stopping modules because
+&nbsp;	 * it is shutting down. When normally stopping a module, use {@link #stopModule(Module)} (or leave
+&nbsp;	 * value as false). This property controls whether the globalproperty is set for startup/shutdown.
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Also calls module&#39;s {@link ModuleActivator#stopped()}
+&nbsp;	 *
+&nbsp;	 * @param mod module to stop
+&nbsp;	 * @param skipOverStartedProperty true if we don&#39;t want to set &amp;lt;moduleid&amp;gt;.started to false
+&nbsp;	 * @param isFailedStartup true if this is being called as a cleanup because of a failed module
+&nbsp;	 *            startup
+&nbsp;	 * @return list of dependent modules that were stopped because this module was stopped. This will
+&nbsp;	 *         never be null.
+&nbsp;	 */
+&nbsp;	public static List&lt;Module&gt; stopModule(Module mod, boolean skipOverStartedProperty, boolean isFailedStartup)
+&nbsp;		throws ModuleMustStartException {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Module&gt; dependentModulesStopped = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (mod != null) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!ModuleFactory.isModuleStarted(mod)) {</b>
+<b class="fc">&nbsp;				return dependentModulesStopped;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			try {
+&nbsp;				// if extends BaseModuleActivator
+<b class="fc">&nbsp;				if (mod.getModuleActivator() != null) {</b>
+<b class="fc">&nbsp;					mod.getModuleActivator().willStop();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception t) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Unable to call module&#39;s Activator.willStop() method&quot;, t);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			String moduleId = mod.getModuleId();</b>
+&nbsp;			
+&nbsp;			// don&#39;t allow mandatory modules to be stopped
+&nbsp;			// don&#39;t use database checks here because spring might be in a bad state
+<b class="fc">&nbsp;			if (!isFailedStartup &amp;&amp; mod.isMandatory()) {</b>
+<b class="nc">&nbsp;				throw new MandatoryModuleException(moduleId);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (!isFailedStartup &amp;&amp; ModuleConstants.CORE_MODULES.containsKey(moduleId)) {</b>
+<b class="nc">&nbsp;				throw new OpenmrsCoreModuleException(moduleId);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			String modulePackage = mod.getPackageName();</b>
+&nbsp;			
+&nbsp;			// stop all dependent modules
+&nbsp;			// copy modules to new list to avoid &quot;concurrent modification exception&quot;
+<b class="fc">&nbsp;			List&lt;Module&gt; startedModulesCopy = new ArrayList&lt;&gt;(getStartedModules());</b>
+<b class="fc">&nbsp;			for (Module dependentModule : startedModulesCopy) {</b>
+<b class="fc">&nbsp;				if (dependentModule != null &amp;&amp; !dependentModule.equals(mod)</b>
+<b class="fc">&nbsp;					&amp;&amp; isModuleRequiredByAnother(dependentModule, modulePackage)) {</b>
+<b class="nc">&nbsp;					dependentModulesStopped.add(dependentModule);</b>
+<b class="nc">&nbsp;					dependentModulesStopped.addAll(stopModule(dependentModule, skipOverStartedProperty, isFailedStartup));</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			getStartedModulesMap().remove(moduleId);</b>
+<b class="fc">&nbsp;			if (actualStartupOrder != null) {</b>
+<b class="fc">&nbsp;				actualStartupOrder.remove(moduleId);</b>
+<b class="fc">&nbsp;				for (Module depModule : dependentModulesStopped) {</b>
+<b class="nc">&nbsp;					actualStartupOrder.remove(depModule.getModuleId());</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (!skipOverStartedProperty &amp;&amp; !Context.isRefreshingContext()) {</b>
+<b class="nc">&nbsp;				saveGlobalProperty(moduleId + &quot;.started&quot;, &quot;false&quot;, getGlobalPropertyStartedDescription(moduleId));</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			ModuleClassLoader moduleClassLoader = getModuleClassLoaderMap().get(mod);</b>
+<b class="fc">&nbsp;			if (moduleClassLoader != null) {</b>
+<b class="fc">&nbsp;				unregisterProvidedPackages(moduleClassLoader);</b>
+&nbsp;				
+<b class="fc">&nbsp;				log.debug(&quot;Mod was in classloader map.  Removing advice and extensions.&quot;);</b>
+&nbsp;				// remove all advice by this module
+&nbsp;				try {
+<b class="fc">&nbsp;					for (AdvicePoint advice : mod.getAdvicePoints()) {</b>
+&nbsp;						Class cls;
+&nbsp;						try {
+<b class="nc">&nbsp;							cls = Context.loadClass(advice.getPoint());</b>
+<b class="nc">&nbsp;							Object aopObject = advice.getClassInstance();</b>
+<b class="nc">&nbsp;							if (aopObject instanceof Advisor) {</b>
+<b class="nc">&nbsp;								log.debug(&quot;adding advisor: &quot; + aopObject.getClass());</b>
+<b class="nc">&nbsp;								Context.removeAdvisor(cls, (Advisor) aopObject);</b>
+&nbsp;							} else {
+<b class="nc">&nbsp;								log.debug(&quot;Adding advice: &quot; + aopObject.getClass());</b>
+<b class="nc">&nbsp;								Context.removeAdvice(cls, (Advice) aopObject);</b>
+&nbsp;							}
+&nbsp;						}
+<b class="nc">&nbsp;						catch (Exception t) {</b>
+<b class="nc">&nbsp;							log.warn(&quot;Could not remove advice point: &quot; + advice.getPoint(), t);</b>
+<b class="nc">&nbsp;						}</b>
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception t) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Error while getting advicePoints from module: &quot; + moduleId, t);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// remove all extensions by this module
+&nbsp;				try {
+<b class="fc">&nbsp;					for (Extension ext : mod.getExtensions()) {</b>
+<b class="nc">&nbsp;						String extId = ext.getExtensionId();</b>
+&nbsp;						try {
+<b class="nc">&nbsp;							List&lt;Extension&gt; tmpExtensions = getExtensions(extId);</b>
+<b class="nc">&nbsp;							tmpExtensions.remove(ext);</b>
+<b class="nc">&nbsp;							getExtensionMap().put(extId, tmpExtensions);</b>
+&nbsp;						}
+<b class="nc">&nbsp;						catch (Exception exterror) {</b>
+<b class="nc">&nbsp;							log.warn(&quot;Error while getting extension: &quot; + ext, exterror);</b>
+<b class="nc">&nbsp;						}</b>
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception t) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Error while getting extensions from module: &quot; + moduleId, t);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//Run the onShutdown() method for openmrs services in this module.
+<b class="fc">&nbsp;			List&lt;OpenmrsService&gt; services = Context.getModuleOpenmrsServices(modulePackage);</b>
+<b class="fc">&nbsp;			if (services != null) {</b>
+<b class="fc">&nbsp;				for (OpenmrsService service : services) {</b>
+<b class="fc">&nbsp;					service.onShutdown();</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			try {
+<b class="fc">&nbsp;				if (mod.getModuleActivator() != null) {// extends BaseModuleActivator</b>
+<b class="fc">&nbsp;					mod.getModuleActivator().stopped();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception t) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Unable to call module&#39;s Activator.shutdown() method&quot;, t);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			//Since extensions are loaded by the module class loader which is about to be disposed,
+&nbsp;			//we need to clear them, else we shall never be able to unload the class loader until
+&nbsp;			//when we unload the module, hence resulting into two problems:
+&nbsp;			// 1) Memory leakage for start/stop module.
+&nbsp;			// 2) Calls to Context.getService(Service.class) which are made within these extensions 
+&nbsp;			//	  will throw APIException(&quot;Service not found: &quot;) because their calls to Service.class
+&nbsp;			//    will pass in a Class from the old module class loader (which loaded them) yet the
+&nbsp;			//    ServiceContext will have new services from a new module class loader.
+&nbsp;			//
+&nbsp;			//Same thing applies to activator, moduleActivator and AdvicePoint classInstance.
+<b class="fc">&nbsp;			mod.getExtensions().clear();</b>
+<b class="fc">&nbsp;			mod.setModuleActivator(null);</b>
+<b class="fc">&nbsp;			mod.disposeAdvicePointsClassInstance();</b>
+&nbsp;			
+<b class="fc">&nbsp;			ModuleClassLoader cl = removeClassLoader(mod);</b>
+<b class="fc">&nbsp;			if (cl != null) {</b>
+<b class="fc">&nbsp;				cl.dispose();</b>
+&nbsp;				// remove files from lib cache
+<b class="fc">&nbsp;				File folder = OpenmrsClassLoader.getLibCacheFolder();</b>
+<b class="fc">&nbsp;				File tmpModuleDir = new File(folder, moduleId);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					OpenmrsUtil.deleteDirectory(tmpModuleDir);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (IOException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Unable to delete libcachefolder for &quot; + moduleId);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dependentModulesStopped;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if a module is required by another
+&nbsp;	 *
+&nbsp;	 * @param dependentModule the module whose required modules are to be checked
+&nbsp;	 * @param modulePackage the package of the module to check if required by another
+&nbsp;	 * @return true if the module is required, else false
+&nbsp;	 */
+&nbsp;	private static boolean isModuleRequiredByAnother(Module dependentModule, String modulePackage) {
+<b class="fc">&nbsp;		return dependentModule.getRequiredModules() != null &amp;&amp; dependentModule.getRequiredModules().contains(modulePackage);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static ModuleClassLoader removeClassLoader(Module mod) {
+&nbsp;		// create map if it is null
+<b class="fc">&nbsp;		ModuleClassLoader cl = moduleClassLoaders.getIfPresent(mod);</b>
+<b class="fc">&nbsp;		if (cl == null) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Module: &quot; + mod.getModuleId() + &quot; does not exist&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		moduleClassLoaders.invalidate(mod);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return cl;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes module from module repository
+&nbsp;	 *
+&nbsp;	 * @param mod module to unload
+&nbsp;	 */
+&nbsp;	public static void unloadModule(Module mod) {
+&nbsp;		
+&nbsp;		// remove this module&#39;s advice and extensions
+<b class="fc">&nbsp;		if (isModuleStarted(mod)) {</b>
+<b class="fc">&nbsp;			stopModule(mod, true);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// remove from list of loaded modules
+<b class="fc">&nbsp;		getLoadedModules().remove(mod);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (mod != null) {</b>
+&nbsp;			// remove the file from the module repository
+<b class="fc">&nbsp;			File file = mod.getFile();</b>
+&nbsp;			
+<b class="fc">&nbsp;			boolean deleted = file.delete();</b>
+<b class="fc">&nbsp;			if (!deleted) {</b>
+<b class="nc">&nbsp;				file.deleteOnExit();</b>
+<b class="nc">&nbsp;				log.warn(&quot;Could not delete &quot; + file.getAbsolutePath());</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return all of the extensions associated with the given &lt;code&gt;pointId&lt;/code&gt; Returns empty
+&nbsp;	 * extension list if no modules extend this pointId
+&nbsp;	 *
+&nbsp;	 * @param pointId
+&nbsp;	 * @return List of extensions
+&nbsp;	 */
+&nbsp;	public static List&lt;Extension&gt; getExtensions(String pointId) {
+&nbsp;		List&lt;Extension&gt; extensions;
+<b class="nc">&nbsp;		Map&lt;String, List&lt;Extension&gt;&gt; extensionMap = getExtensionMap();</b>
+&nbsp;		
+&nbsp;		// get all extensions for this exact pointId
+<b class="nc">&nbsp;		extensions = extensionMap.get(pointId);</b>
+<b class="nc">&nbsp;		if (extensions == null) {</b>
+<b class="nc">&nbsp;			extensions = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if this pointId doesn&#39;t contain the separator character, search
+&nbsp;		// for this point prepended with each MEDIA TYPE
+<b class="nc">&nbsp;		if (!pointId.contains(Extension.EXTENSION_ID_SEPARATOR)) {</b>
+<b class="nc">&nbsp;			for (MEDIA_TYPE mediaType : Extension.MEDIA_TYPE.values()) {</b>
+&nbsp;				
+&nbsp;				// get all extensions for this type and point id
+<b class="nc">&nbsp;				List&lt;Extension&gt; tmpExtensions = extensionMap.get(Extension.toExtensionId(pointId, mediaType));</b>
+&nbsp;				
+&nbsp;				// &#39;extensions&#39; should be a unique list
+<b class="nc">&nbsp;				if (tmpExtensions != null) {</b>
+<b class="nc">&nbsp;					for (Extension ext : tmpExtensions) {</b>
+<b class="nc">&nbsp;						if (!extensions.contains(ext)) {</b>
+<b class="nc">&nbsp;							extensions.add(ext);</b>
+&nbsp;						}
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Getting extensions defined by : &quot; + pointId);</b>
+<b class="nc">&nbsp;		return extensions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return all of the extensions associated with the given &lt;code&gt;pointId&lt;/code&gt; Returns
+&nbsp;	 * getExtension(pointId) if no modules extend this pointId for given media type
+&nbsp;	 *
+&nbsp;	 * @param pointId
+&nbsp;	 * @param type Extension.MEDIA_TYPE
+&nbsp;	 * @return List of extensions
+&nbsp;	 */
+&nbsp;	public static List&lt;Extension&gt; getExtensions(String pointId, Extension.MEDIA_TYPE type) {
+<b class="nc">&nbsp;		String key = Extension.toExtensionId(pointId, type);</b>
+<b class="nc">&nbsp;		List&lt;Extension&gt; extensions = getExtensionMap().get(key);</b>
+<b class="nc">&nbsp;		if (extensions != null) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Getting extensions defined by : &quot; + key);</b>
+<b class="nc">&nbsp;			return extensions;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return getExtensions(pointId);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a list of required Privileges defined by the modules
+&nbsp;	 *
+&nbsp;	 * @return &lt;code&gt;List&amp;lt;Privilege&amp;gt;&lt;/code&gt; of the required privileges
+&nbsp;	 */
+&nbsp;	public static List&lt;Privilege&gt; getPrivileges() {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Privilege&gt; privileges = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Module mod : getStartedModules()) {</b>
+<b class="nc">&nbsp;			privileges.addAll(mod.getPrivileges());</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(privileges.size() + &quot; new privileges&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return privileges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a list of required GlobalProperties defined by the modules
+&nbsp;	 *
+&nbsp;	 * @return &lt;code&gt;List&amp;lt;GlobalProperty&amp;gt;&lt;/code&gt; object of the module&#39;s global properties
+&nbsp;	 */
+&nbsp;	public static List&lt;GlobalProperty&gt; getGlobalProperties() {
+&nbsp;		
+<b class="nc">&nbsp;		List&lt;GlobalProperty&gt; globalProperties = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (Module mod : getStartedModules()) {</b>
+<b class="nc">&nbsp;			globalProperties.addAll(mod.getGlobalProperties());</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(globalProperties.size() + &quot; new global properties&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return globalProperties;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the given module is activated
+&nbsp;	 *
+&nbsp;	 * @param mod Module to check
+&nbsp;	 * @return true if the module is started, false otherwise
+&nbsp;	 */
+&nbsp;	public static boolean isModuleStarted(Module mod) {
+<b class="fc">&nbsp;		return getStartedModulesMap().containsValue(mod);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the given module, identified by its id, is started.
+&nbsp;	 *
+&nbsp;	 * @param moduleId module id. e.g formentry, logic
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return true if the module is started, false otherwise
+&nbsp;	 */
+&nbsp;	public static boolean isModuleStarted(String moduleId) {
+<b class="fc">&nbsp;		return getStartedModulesMap().containsKey(moduleId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a module&#39;s classloader
+&nbsp;	 *
+&nbsp;	 * @param mod Module to fetch the class loader for
+&nbsp;	 * @return ModuleClassLoader pertaining to this module. Returns null if the module is not started
+&nbsp;	 * @throws ModuleException if the module does not have a registered classloader
+&nbsp;	 */
+&nbsp;	public static ModuleClassLoader getModuleClassLoader(Module mod) throws ModuleException {
+<b class="fc">&nbsp;		ModuleClassLoader mcl = getModuleClassLoaderMap().get(mod);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (mcl == null) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Module classloader not found for module with id: &quot; + mod.getModuleId());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return mcl;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a module&#39;s classloader via the module id
+&nbsp;	 *
+&nbsp;	 * @param moduleId &lt;code&gt;String&lt;/code&gt; id of the module
+&nbsp;	 * @return ModuleClassLoader pertaining to this module. Returns null if the module is not started
+&nbsp;	 * @throws ModuleException if this module isn&#39;t started or doesn&#39;t have a classloader
+&nbsp;	 * @see #getModuleClassLoader(Module)
+&nbsp;	 */
+&nbsp;	public static ModuleClassLoader getModuleClassLoader(String moduleId) throws ModuleException {
+<b class="nc">&nbsp;		Module mod = getStartedModulesMap().get(moduleId);</b>
+<b class="nc">&nbsp;		if (mod == null) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Module id not found in list of started modules: &quot; + moduleId);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return getModuleClassLoader(mod);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all module classloaders This method will not return null
+&nbsp;	 *
+&nbsp;	 * @return Collection&amp;lt;ModuleClassLoader&amp;gt; all known module classloaders or empty list.
+&nbsp;	 */
+&nbsp;	public static Collection&lt;ModuleClassLoader&gt; getModuleClassLoaders() {
+<b class="fc">&nbsp;		Map&lt;Module, ModuleClassLoader&gt; classLoaders = getModuleClassLoaderMap();</b>
+<b class="fc">&nbsp;		if (classLoaders.size() &gt; 0) {</b>
+<b class="fc">&nbsp;			return classLoaders.values();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Collections.emptyList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return all current classloaders keyed on module object
+&nbsp;	 *
+&nbsp;	 * @return Map&amp;lt;Module, ModuleClassLoader&amp;gt;
+&nbsp;	 */
+&nbsp;	public static Map&lt;Module, ModuleClassLoader&gt; getModuleClassLoaderMap() {
+&nbsp;		// because the OpenMRS classloader depends on this static function, it is weirdly possible for this to get called
+&nbsp;		// as this classfile is loaded, in which case, the static final field can be null.
+<b class="fc">&nbsp;		if (moduleClassLoaders == null) {</b>
+<b class="nc">&nbsp;			return Collections.emptyMap();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return moduleClassLoaders.asMap();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the current extension map keyed on extension point id
+&nbsp;	 *
+&nbsp;	 * @return Map&amp;lt;String, List&amp;lt;Extension&amp;gt;&amp;gt;
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, List&lt;Extension&gt;&gt; getExtensionMap() {
+<b class="nc">&nbsp;		return extensionMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Tests whether all modules mentioned in module.requiredModules are loaded and started already (by
+&nbsp;	 * being in the startedModules list)
+&nbsp;	 *
+&nbsp;	 * @param module
+&nbsp;	 * @return true/false boolean whether this module&#39;s required modules are all started
+&nbsp;	 */
+&nbsp;	private static boolean requiredModulesStarted(Module module) {
+&nbsp;		//required
+<b class="fc">&nbsp;		for (String reqModPackage : module.getRequiredModules()) {</b>
+<b class="fc">&nbsp;			boolean started = false;</b>
+<b class="fc">&nbsp;			for (Module mod : getStartedModules()) {</b>
+<b class="fc">&nbsp;				if (mod.getPackageName().equals(reqModPackage)) {</b>
+<b class="fc">&nbsp;					String reqVersion = module.getRequiredModuleVersion(reqModPackage);</b>
+<b class="fc">&nbsp;					if (reqVersion == null || ModuleUtil.compareVersion(mod.getVersion(), reqVersion) &gt;= 0) {</b>
+<b class="fc">&nbsp;						started = true;</b>
+&nbsp;					}
+&nbsp;					break;
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!started) {</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update the module: 1) Download the new module 2) Unload the old module 3) Load/start the new
+&nbsp;	 * module
+&nbsp;	 *
+&nbsp;	 * @param mod
+&nbsp;	 */
+&nbsp;	public static Module updateModule(Module mod) throws ModuleException {
+<b class="nc">&nbsp;		if (mod.getDownloadURL() == null) {</b>
+<b class="nc">&nbsp;			return mod;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		URL url;
+&nbsp;		try {
+<b class="nc">&nbsp;			url = new URL(mod.getDownloadURL());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (MalformedURLException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(&quot;Unable to download module update&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		unloadModule(mod);</b>
+&nbsp;		
+&nbsp;		// copy content to a temporary file
+<b class="nc">&nbsp;		InputStream inputStream = ModuleUtil.getURLStream(url);</b>
+<b class="nc">&nbsp;		log.warn(&quot;url pathname: &quot; + url.getPath());</b>
+<b class="nc">&nbsp;		String filename = url.getPath().substring(url.getPath().lastIndexOf(&quot;/&quot;));</b>
+<b class="nc">&nbsp;		File moduleFile = ModuleUtil.insertModuleFile(inputStream, filename);</b>
+&nbsp;		
+&nbsp;		try {
+&nbsp;			// load, and start the new module
+<b class="nc">&nbsp;			Module newModule = loadModule(moduleFile);</b>
+<b class="nc">&nbsp;			startModule(newModule);</b>
+<b class="nc">&nbsp;			return newModule;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error while unloading old module and loading in new module&quot;);</b>
+<b class="nc">&nbsp;			moduleFile.delete();</b>
+<b class="nc">&nbsp;			return mod;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates the given token.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is thread safe.
+&nbsp;	 *
+&nbsp;	 * @param token
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public static boolean isTokenValid(DaemonToken token) {
+<b class="nc">&nbsp;		if (token == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		} else {
+&nbsp;			//We need to synchronize to guarantee that the last passed token is valid.
+<b class="nc">&nbsp;			synchronized (daemonTokens) {</b>
+<b class="nc">&nbsp;				DaemonToken validToken = daemonTokens.getIfPresent(token.getId());</b>
+&nbsp;				//Compare by reference to defend from overridden equals.
+<b class="nc">&nbsp;				return validToken != null &amp;&amp; validToken == token;</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Passes a daemon token to the given module.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The token is passed to that module&#39;s {@link ModuleActivator} if it implements
+&nbsp;	 * {@link DaemonTokenAware}.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This method is called automatically before {@link ModuleActivator#contextRefreshed()} or
+&nbsp;	 * {@link ModuleActivator#started()}. Note that it may be called multiple times and there is no
+&nbsp;	 * guarantee that it will always pass the same token. The last passed token is valid, whereas
+&nbsp;	 * previously passed tokens may be invalidated.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is thread safe.
+&nbsp;	 *
+&nbsp;	 * @param module
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	static void passDaemonToken(Module module) {
+<b class="nc">&nbsp;		ModuleActivator moduleActivator = module.getModuleActivator();</b>
+<b class="nc">&nbsp;		if (moduleActivator instanceof DaemonTokenAware) {</b>
+<b class="nc">&nbsp;			DaemonToken daemonToken = getDaemonToken(module);</b>
+<b class="nc">&nbsp;			((DaemonTokenAware) module.getModuleActivator()).setDaemonToken(daemonToken);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a new or existing token. Uses weak references for tokens so that they are garbage collected
+&nbsp;	 * when not needed.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is thread safe.
+&nbsp;	 *
+&nbsp;	 * @param module
+&nbsp;	 * @return the token
+&nbsp;	 */
+&nbsp;	private static DaemonToken getDaemonToken(Module module) {
+&nbsp;		DaemonToken token;
+&nbsp;		try {
+<b class="nc">&nbsp;			token = daemonTokens.get(module.getModuleId(), () -&gt; new DaemonToken(module.getModuleId()));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ExecutionException e) {</b>
+<b class="nc">&nbsp;			throw new APIException(e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return token;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the description for the [moduleId].started global property
+&nbsp;	 *
+&nbsp;	 * @param moduleId
+&nbsp;	 * @return description to use for the .started property
+&nbsp;	 */
+&nbsp;	private static String getGlobalPropertyStartedDescription(String moduleId) {
+<b class="fc">&nbsp;		String ret = &quot;DO NOT MODIFY. true/false whether or not the &quot; + moduleId;</b>
+<b class="fc">&nbsp;		ret += &quot; module has been started.  This is used to make sure modules that were running &quot;;</b>
+<b class="fc">&nbsp;		ret += &quot; prior to a restart are started again&quot;;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the description for the [moduleId].mandatory global property
+&nbsp;	 *
+&nbsp;	 * @param moduleId
+&nbsp;	 * @return description to use for .mandatory property
+&nbsp;	 */
+&nbsp;	private static String getGlobalPropertyMandatoryModuleDescription(String moduleId) {
+<b class="fc">&nbsp;		String ret = &quot;true/false whether or not the &quot; + moduleId;</b>
+<b class="fc">&nbsp;		ret += &quot; module MUST start when openmrs starts.  This is used to make sure that mission critical&quot;;</b>
+<b class="fc">&nbsp;		ret += &quot; modules are always running if openmrs is running.&quot;;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to save a global property with the given value. Proxy privileges are added so
+&nbsp;	 * that this can occur at startup.
+&nbsp;	 *
+&nbsp;	 * @param key the property for this global property
+&nbsp;	 * @param value the value for this global property
+&nbsp;	 * @param desc the description
+&nbsp;	 * @see AdministrationService#saveGlobalProperty(GlobalProperty)
+&nbsp;	 */
+&nbsp;	private static void saveGlobalProperty(String key, String value, String desc) {
+&nbsp;		try {
+<b class="fc">&nbsp;			AdministrationService as = Context.getAdministrationService();</b>
+<b class="fc">&nbsp;			GlobalProperty gp = as.getGlobalPropertyObject(key);</b>
+<b class="fc">&nbsp;			if (gp == null) {</b>
+<b class="fc">&nbsp;				gp = new GlobalProperty(key, value, desc);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				gp.setPropertyValue(value);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			as.saveGlobalProperty(gp);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Unable to save the global property&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method used to identify module interdependencies and alert the user before modules
+&nbsp;	 * are shut down.
+&nbsp;	 *
+&nbsp;	 * @param moduleId the moduleId used to identify the module being validated
+&nbsp;	 * @return List&amp;lt;dependentModules&amp;gt; the list of moduleId&#39;s which depend on the module about to
+&nbsp;	 *         be shutdown.
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public static List&lt;String&gt; getDependencies(String moduleId) {
+<b class="nc">&nbsp;		List&lt;String&gt; dependentModules = null;</b>
+<b class="nc">&nbsp;		Module module = getModuleById(moduleId);</b>
+&nbsp;		
+<b class="nc">&nbsp;		Map&lt;String, Module&gt; startedModules = getStartedModulesMap();</b>
+<b class="nc">&nbsp;		String modulePackage = module.getPackageName();</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (Entry&lt;String, Module&gt; entry : startedModules.entrySet()) {</b>
+<b class="nc">&nbsp;			if (!moduleId.equals(entry.getKey()) &amp;&amp; entry.getValue().getRequiredModules().contains(modulePackage)) {</b>
+<b class="nc">&nbsp;				if (dependentModules == null) {</b>
+<b class="nc">&nbsp;					dependentModules = new ArrayList&lt;&gt;();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				dependentModules.add(entry.getKey() + &quot; &quot; + entry.getValue().getVersion());</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return dependentModules;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

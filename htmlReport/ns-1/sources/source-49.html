@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ObsPostLoadEventListener</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ObsPostLoadEventListener (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ObsPostLoadEventListener</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.hibernate.event.service.spi.EventListenerRegistry;
+&nbsp;import org.hibernate.event.spi.EventType;
+&nbsp;import org.hibernate.event.spi.PostLoadEvent;
+&nbsp;import org.hibernate.event.spi.PostLoadEventListener;
+&nbsp;import org.hibernate.internal.SessionFactoryImpl;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate by default calls setters when initializing a persistent entity from the database
+&nbsp; * meaning an Obs would be marked dirty the first time it&#39;s loaded by hibernate, therefore we need
+&nbsp; * to use an instance of this PostLoadEventListener to mark an Obs as not dirty when it gets loaded.
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * Note that in hibernate 4, event listeners are now registered via the new integrator and service
+&nbsp; * capabilities which leverage Java&#39;s standard java.util.ServiceLoader mechanism to discover then
+&nbsp; * but unfortunately spring hasn&#39;t caught up with these integrator capabilities therefore we need to
+&nbsp; * manually &#39;springfy&#39; the registration of our EventListener
+&nbsp; * &lt;/pre&gt;
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class ObsPostLoadEventListener implements PostLoadEventListener {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ObsPostLoadEventListener.class);</b>
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	@PostConstruct
+&nbsp;	public void registerListener() {
+<b class="fc">&nbsp;		EventListenerRegistry registry = ((SessionFactoryImpl) sessionFactory).getServiceRegistry().getService(</b>
+&nbsp;		    EventListenerRegistry.class);
+<b class="fc">&nbsp;		registry.getEventListenerGroup(EventType.POST_LOAD).appendListener(this);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void onPostLoad(PostLoadEvent event) {
+<b class="fc">&nbsp;		if (Obs.class.isAssignableFrom(event.getEntity().getClass())) {</b>
+<b class="fc">&nbsp;			Field field = null;</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				field = Obs.class.getDeclaredField(&quot;dirty&quot;);</b>
+<b class="fc">&nbsp;				field.setAccessible(true);</b>
+<b class="fc">&nbsp;				field.set(event.getEntity(), false);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (ReflectiveOperationException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to unset an Obs as dirty after being loaded from the database&quot;, e);</b>
+&nbsp;			}
+&nbsp;			finally {
+<b class="fc">&nbsp;				if (field != null) {</b>
+<b class="fc">&nbsp;					field.setAccessible(false);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

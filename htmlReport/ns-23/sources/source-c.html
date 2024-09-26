@@ -1,0 +1,843 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ModuleFileParser</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: ModuleFileParser (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ModuleFileParser</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (44/44)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,3%
+  </span>
+  <span class="absValue">
+    (315/327)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.IdentityHashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.jar.JarFile;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.zip.ZipEntry;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.Privilege;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.customdatatype.CustomDatatype;
+&nbsp;import org.openmrs.messagesource.MessageSourceService;
+&nbsp;import org.openmrs.util.OpenmrsClassLoader;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.w3c.dom.Attr;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class will parse an OpenMRS module, specifically its {@code config.xml} file into a {@link org.openmrs.module.Module} object.
+&nbsp; * &lt;p&gt;Typical usage is:
+&nbsp; * &lt;ol&gt;
+&nbsp; * &lt;li&gt;Create a {@code ModuleFileParser} with {@link #ModuleFileParser(MessageSourceService)}.
+&nbsp; * &lt;li&gt;Parse the module by passing the file to {@link #parse(File)}.&lt;/li&gt;
+&nbsp; * &lt;/ol&gt;
+&nbsp; * Note that the parser does not validate the {@code config.xml} file against the document type definition&#39;s (DTD).
+&nbsp; */
+&nbsp;public class ModuleFileParser {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ModuleFileParser.class);</b>
+&nbsp;
+&nbsp;	private static final String MODULE_CONFIG_XML_FILENAME = &quot;config.xml&quot;;
+&nbsp;
+&nbsp;	private static final String OPENMRS_MODULE_FILE_EXTENSION = &quot;.omod&quot;;
+&nbsp;	
+&nbsp;	//https://resources.openmrs.org/doctype/config-1.5.dtd
+<b class="fc">&nbsp;	private static final Pattern OPENMRS_DTD_SYSTEM_ID_PATTERN = Pattern.compile(&quot;https?://resources.openmrs.org/doctype/(?&lt;config&gt;config-[0-9.]+\\.dtd)&quot;);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List out all of the possible version numbers for config files that openmrs has DTDs for.
+&nbsp;	 * These are usually stored at http://resources.openmrs.org/doctype/config-x.x.dt
+&nbsp;	 */
+<b class="fc">&nbsp;	private static List&lt;String&gt; validConfigVersions = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	static {
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.0&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.1&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.2&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.3&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.4&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.5&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.6&quot;);</b>
+<b class="fc">&nbsp;		validConfigVersions.add(&quot;1.7&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// TODO - remove this field once ModuleFileParser(File), ModuleFileParser(InputStream) are removed.
+&nbsp;	// There is no need to keep the file as state since moduleFileParser.parse(File) does not need it.
+&nbsp;	// this is also why all private methods that need access to the file for parsing or error message get it as a parameter
+&nbsp;	private File moduleFile;
+&nbsp;
+&nbsp;	private MessageSourceService messageSourceService;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a ModuleFileParser.
+&nbsp;	 *
+&nbsp;	 * @param messageSourceService the message source used for error messages
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+<b class="fc">&nbsp;	public ModuleFileParser(MessageSourceService messageSourceService) {</b>
+<b class="fc">&nbsp;		this.messageSourceService = Objects.requireNonNull(messageSourceService, &quot;messageSourceService must not be null&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor
+&nbsp;	 *
+&nbsp;	 * @param moduleFile the module (jar)file that will be parsed
+&nbsp;	 * @deprecated since 2.2.0 use {@link #ModuleFileParser(MessageSourceService)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+<b class="fc">&nbsp;	public ModuleFileParser(File moduleFile) {</b>
+<b class="fc">&nbsp;		this.messageSourceService = Context.getMessageSourceService();</b>
+<b class="fc">&nbsp;		validateFileIsNotNull(moduleFile);</b>
+<b class="fc">&nbsp;		validateFileHasModuleFileExtension(moduleFile);</b>
+<b class="nc">&nbsp;		this.moduleFile = moduleFile;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void validateFileIsNotNull(File moduleFile) {
+<b class="fc">&nbsp;		if (moduleFile == null) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.fileCannotBeNull&quot;));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void validateFileHasModuleFileExtension(File moduleFile) {
+<b class="fc">&nbsp;		if (!moduleFile.getName().endsWith(OPENMRS_MODULE_FILE_EXTENSION)) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.invalidFileExtension&quot;),</b>
+<b class="fc">&nbsp;				moduleFile.getName());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to parse the given inputStream file into an omod. &lt;br&gt;
+&nbsp;	 * This copies the stream into a temporary file just so things can be parsed.&lt;br&gt;
+&nbsp;	 *
+&nbsp;	 * @param inputStream the inputStream pointing to an omod file
+&nbsp;	 * @deprecated since 2.2.0 use {@link #ModuleFileParser(MessageSourceService)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+<b class="fc">&nbsp;	public ModuleFileParser(InputStream inputStream) {</b>
+<b class="fc">&nbsp;		this.messageSourceService = Context.getMessageSourceService();</b>
+<b class="fc">&nbsp;		this.moduleFile = createTempFile(&quot;moduleUpgrade&quot;, OPENMRS_MODULE_FILE_EXTENSION);</b>
+<b class="fc">&nbsp;		copyInputStreamToFile(inputStream, this.moduleFile);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Parses the given {@code InputStream} of an OpenMRS module into a {@code Module}.
+&nbsp;	 * This copies the stream into a temporary file and close given {@code InputStream}.
+&nbsp;	 *
+&nbsp;	 * @param inputStream the inputStream pointing to an omod file
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public Module parse(InputStream inputStream) {
+<b class="fc">&nbsp;		File moduleFile = createTempFile(&quot;moduleUpgrade&quot;, OPENMRS_MODULE_FILE_EXTENSION);</b>
+<b class="fc">&nbsp;		copyInputStreamToFile(inputStream, moduleFile);</b>
+<b class="fc">&nbsp;		return parse(moduleFile);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private File createTempFile(String prefix, String suffix) {
+&nbsp;		File file;
+&nbsp;		try {
+<b class="fc">&nbsp;			file = File.createTempFile(prefix, suffix);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.cannotCreateFile&quot;), e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return file;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void copyInputStreamToFile(InputStream inputStream, File file) {
+<b class="fc">&nbsp;		try (FileOutputStream outputStream = new FileOutputStream(file)) {</b>
+<b class="fc">&nbsp;			OpenmrsUtil.copyFile(inputStream, outputStream);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		catch (IOException e) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.cannotCreateFile&quot;), e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			try {</b>
+<b class="fc">&nbsp;				inputStream.close();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (Exception e) { /* pass */}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This constructor was created for testing purposes and is now deprecated.
+&nbsp;	 * DO NOT USE.
+&nbsp;	 *
+&nbsp;	 * @deprecated since 2.2.0 use {@link #ModuleFileParser(MessageSourceService)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+<b class="fc">&nbsp;	ModuleFileParser() {</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get the module.
+&nbsp;	 * If you use this method only do so together with {@link #ModuleFileParser(File)} or {@link #ModuleFileParser(InputStream)}.
+&nbsp;	 * Best use {@link #ModuleFileParser(MessageSourceService)} and {@link #parse(File)}
+&nbsp;	 * since this method is deprecated.
+&nbsp;	 *
+&nbsp;	 * @return new module object
+&nbsp;	 * @deprecated since 2.2.0 use {@link #parse(File)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public Module parse() throws ModuleException {
+<b class="fc">&nbsp;		return parse(this.moduleFile);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get the module from an OpenMRS module file.
+&nbsp;	 * 
+&nbsp;	 * @param moduleFile the module file to be parsed
+&nbsp;	 * @return new module object
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public Module parse(File moduleFile) {
+<b class="fc">&nbsp;		validateFileIsNotNull(moduleFile);</b>
+<b class="fc">&nbsp;		validateFileHasModuleFileExtension(moduleFile);</b>
+<b class="fc">&nbsp;		return createModule(getModuleConfigXml(moduleFile), moduleFile);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Document getModuleConfigXml(File moduleFile) {
+&nbsp;		Document config;
+<b class="fc">&nbsp;		try (JarFile jarfile = new JarFile(moduleFile)) {</b>
+<b class="fc">&nbsp;			ZipEntry configEntry = getConfigXmlZipEntry(jarfile, moduleFile);</b>
+<b class="fc">&nbsp;			config = parseConfigXml(jarfile, configEntry, moduleFile);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		catch (IOException e) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.cannotGetJarFile&quot;),</b>
+<b class="fc">&nbsp;				moduleFile.getName(), e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return config;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private ZipEntry getConfigXmlZipEntry(JarFile jarfile, File moduleFile) {
+<b class="fc">&nbsp;		ZipEntry config = jarfile.getEntry(MODULE_CONFIG_XML_FILENAME);</b>
+<b class="fc">&nbsp;		if (config == null) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.noConfigFile&quot;),</b>
+<b class="fc">&nbsp;				moduleFile.getName());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return config;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Document parseConfigXml(JarFile jarfile, ZipEntry configEntry, File moduleFile) {
+&nbsp;		Document config;
+<b class="fc">&nbsp;		try (InputStream configStream = jarfile.getInputStream(configEntry)) {</b>
+<b class="fc">&nbsp;			config = parseConfigXmlStream(configStream, moduleFile);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="nc">&nbsp;		catch (IOException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(</b>
+<b class="nc">&nbsp;				&quot;Module.error.cannotGetConfigFileStream&quot;), moduleFile.getName(), e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return config;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Document parseConfigXmlStream(InputStream configStream, File moduleFile) {
+&nbsp;		Document config;
+&nbsp;		try {
+<b class="fc">&nbsp;			DocumentBuilder db = newDocumentBuilder();</b>
+<b class="fc">&nbsp;			config = db.parse(configStream);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			log.error(&quot;Error parsing &quot; + MODULE_CONFIG_XML_FILENAME + &quot;: &quot; + configStream.toString(), e);</b>
+&nbsp;
+<b class="fc">&nbsp;			String output = &quot;&quot;;</b>
+<b class="fc">&nbsp;			try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {</b>
+&nbsp;				// Now copy bytes from the URL to the output stream
+<b class="fc">&nbsp;				byte[] buffer = new byte[4096];</b>
+&nbsp;				int bytesRead;
+<b class="fc">&nbsp;				while ((bytesRead = configStream.read(buffer)) != -1) {</b>
+<b class="nc">&nbsp;					out.write(buffer, 0, bytesRead);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				output = out.toString(StandardCharsets.UTF_8.name());</b>
+<b class="nc">&nbsp;			}</b>
+<b class="fc">&nbsp;			catch (Exception e2) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;Another error parsing &quot; + MODULE_CONFIG_XML_FILENAME, e2);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;
+<b class="fc">&nbsp;			log.error(&quot;{} content: {}&quot;, MODULE_CONFIG_XML_FILENAME, output);</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(&quot;Module.error.cannotParseConfigFile&quot;),</b>
+<b class="fc">&nbsp;				moduleFile.getName(), e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return config;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+<b class="fc">&nbsp;		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;		DocumentBuilder db = dbf.newDocumentBuilder();</b>
+&nbsp;
+&nbsp;		// When asked to resolve external entities (such as a
+&nbsp;		// DTD) we return an InputSource
+&nbsp;		// with no data at the end, causing the parser to ignore
+&nbsp;		// the DTD.
+<b class="fc">&nbsp;		db.setEntityResolver((publicId, systemId) -&gt; {</b>
+<b class="fc">&nbsp;			Matcher dtdMatcher = OPENMRS_DTD_SYSTEM_ID_PATTERN.matcher(systemId);</b>
+<b class="fc">&nbsp;			if (dtdMatcher.matches()) {</b>
+<b class="fc">&nbsp;				String dtdFile = dtdMatcher.group(&quot;config&quot;);</b>
+<b class="fc">&nbsp;				return new InputSource(OpenmrsClassLoader.getInstance().getResourceAsStream(&quot;org/openmrs/module/dtd/&quot; + dtdFile));</b>
+&nbsp;			}
+<b class="nc">&nbsp;			return new InputSource(new StringReader(&quot;&quot;));</b>
+&nbsp;		});
+&nbsp;		
+<b class="fc">&nbsp;		return db;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Module createModule(Document config, File moduleFile) {
+<b class="fc">&nbsp;		Element configRoot = config.getDocumentElement();</b>
+&nbsp;
+<b class="fc">&nbsp;		String configVersion = ensureValidModuleConfigVersion(configRoot, moduleFile);</b>
+&nbsp;		
+<b class="fc">&nbsp;		String name = ensureNonEmptyName(configRoot, moduleFile);</b>
+<b class="fc">&nbsp;		String moduleId = ensureNonEmptyId(configRoot, name);</b>
+<b class="fc">&nbsp;		String packageName = ensureNonEmptyPackage(configRoot, name);</b>
+&nbsp;		
+<b class="fc">&nbsp;		String author = getElementTrimmed(configRoot, &quot;author&quot;);</b>
+<b class="fc">&nbsp;		String desc = getElementTrimmed(configRoot, &quot;description&quot;);</b>
+<b class="fc">&nbsp;		String version = getElementTrimmed(configRoot, &quot;version&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		Module module = new Module(name, moduleId, packageName, author, desc, version);</b>
+&nbsp;
+<b class="fc">&nbsp;		module.setActivatorName(getElementTrimmed(configRoot, &quot;activator&quot;));</b>
+<b class="fc">&nbsp;		module.setRequireDatabaseVersion(getElementTrimmed(configRoot, &quot;require_database_version&quot;));</b>
+<b class="fc">&nbsp;		module.setRequireOpenmrsVersion(getElementTrimmed(configRoot, &quot;require_version&quot;));</b>
+<b class="fc">&nbsp;		module.setUpdateURL(getElementTrimmed(configRoot, &quot;updateURL&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;		module.setRequiredModulesMap(extractRequiredModules(configRoot));</b>
+<b class="fc">&nbsp;		module.setAwareOfModulesMap(extractAwareOfModules(configRoot));</b>
+<b class="fc">&nbsp;		module.setStartBeforeModulesMap(extractStartBeforeModules(configRoot));</b>
+<b class="fc">&nbsp;		module.setAdvicePoints(extractAdvice(configRoot, module));</b>
+<b class="fc">&nbsp;		module.setExtensionNames(extractExtensions(configRoot));</b>
+<b class="fc">&nbsp;		module.setPrivileges(extractPrivileges(configRoot));</b>
+<b class="fc">&nbsp;		module.setGlobalProperties(extractGlobalProperties(configRoot));</b>
+<b class="fc">&nbsp;		module.setMappingFiles(extractMappingFiles(configRoot));</b>
+<b class="fc">&nbsp;		module.setPackagesWithMappedClasses(extractPackagesWithMappedClasses(configRoot));</b>
+<b class="fc">&nbsp;		module.setMandatory(extractMandatory(configRoot, configVersion));</b>
+<b class="fc">&nbsp;		module.setConditionalResources(extractConditionalResources(configRoot));</b>
+&nbsp;
+<b class="fc">&nbsp;		module.setConfig(config);</b>
+<b class="fc">&nbsp;		module.setFile(moduleFile);</b>
+&nbsp;
+<b class="fc">&nbsp;		return module;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private String ensureValidModuleConfigVersion(Element configRoot, File moduleFile) {
+<b class="fc">&nbsp;		String configVersion = configRoot.getAttribute(&quot;configVersion&quot;).trim();</b>
+<b class="fc">&nbsp;		validateModuleConfigVersion(configVersion, moduleFile);</b>
+<b class="fc">&nbsp;		return configVersion;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void validateModuleConfigVersion(String version, File moduleFile) {
+<b class="fc">&nbsp;		if (!validConfigVersions.contains(version)) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(Context.getMessageSourceService().getMessage(&quot;Module.error.invalidConfigVersion&quot;,</b>
+<b class="fc">&nbsp;				new Object[] { version, String.join(&quot;, &quot;, validConfigVersions) }, Context.getLocale()),</b>
+<b class="fc">&nbsp;				moduleFile.getName());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private String ensureNonEmptyName(Element configRoot, File moduleFile) {
+<b class="fc">&nbsp;		return getTrimmedElementOrFail(configRoot, &quot;name&quot;, &quot;Module.error.nameCannotBeEmpty&quot;, moduleFile.getName());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private String ensureNonEmptyId(Element configRoot, String name) {
+<b class="fc">&nbsp;		return getTrimmedElementOrFail(configRoot, &quot;id&quot;, &quot;Module.error.idCannotBeEmpty&quot;, name);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private String ensureNonEmptyPackage(Element configRoot, String name) {
+<b class="fc">&nbsp;		return getTrimmedElementOrFail(configRoot, &quot;package&quot;, &quot;Module.error.packageCannotBeEmpty&quot;, name);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * load in required modules list
+&nbsp;	 *
+&nbsp;	 * @return map from module package name to required version
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	private Map&lt;String, String&gt; extractRequiredModules(Element configRoot) {
+<b class="fc">&nbsp;		return extractModulesWithVersionAttribute(configRoot, &quot;require_module&quot;, &quot;require_modules&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * load in list of modules we are aware of.
+&nbsp;	 *
+&nbsp;	 * @return map from module package name to aware of version
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	private Map&lt;String, String&gt; extractAwareOfModules(Element configRoot) {
+<b class="fc">&nbsp;		return extractModulesWithVersionAttribute(configRoot, &quot;aware_of_module&quot;, &quot;aware_of_modules&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Map&lt;String, String&gt; extractStartBeforeModules(Element configRoot) {
+<b class="fc">&nbsp;		Map&lt;String, String&gt; result = extractModulesWithVersionAttribute(configRoot, &quot;module&quot;, &quot;start_before_modules&quot;);</b>
+<b class="fc">&nbsp;		result.putAll(extractModulesWithVersionAttribute(configRoot, &quot;start_before_module&quot;, &quot;start_before_modules&quot;));</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Map&lt;String, String&gt; extractModulesWithVersionAttribute(Element configRoot, String elementName,
+&nbsp;		String elementParentName) {
+&nbsp;		
+<b class="fc">&nbsp;		NodeList parents = configRoot.getElementsByTagName(elementParentName);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Map&lt;String, String&gt; result = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (parents.getLength() == 0) {</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Element firstParent = (Element) parents.item(0);</b>
+<b class="fc">&nbsp;		NodeList children = firstParent.getElementsByTagName(elementName);</b>
+&nbsp;		
+<b class="fc">&nbsp;		int i = 0;</b>
+<b class="fc">&nbsp;		while (i &lt; children.getLength()) {</b>
+<b class="fc">&nbsp;			Element child = (Element) children.item(i);</b>
+<b class="fc">&nbsp;			Attr versionAttribute = child.getAttributeNode(&quot;version&quot;);</b>
+<b class="fc">&nbsp;			String version = versionAttribute == null ? null : versionAttribute.getValue();</b>
+<b class="fc">&nbsp;			result.put(child.getTextContent().trim(), version);</b>
+<b class="fc">&nbsp;			i++;</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private List&lt;AdvicePoint&gt; extractAdvice(Element configRoot, Module module) {
+&nbsp;
+<b class="fc">&nbsp;		List&lt;AdvicePoint&gt; result = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		NodeList advice = configRoot.getElementsByTagName(&quot;advice&quot;);</b>
+<b class="fc">&nbsp;		if (advice.getLength() == 0) {</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		log.debug(&quot;# advice: {}&quot;, advice.getLength());</b>
+<b class="fc">&nbsp;		int i = 0;</b>
+<b class="fc">&nbsp;		while (i &lt; advice.getLength()) {</b>
+<b class="fc">&nbsp;			Element element = (Element) advice.item(i);</b>
+<b class="fc">&nbsp;			String point = getElementTrimmed(element, &quot;point&quot;);</b>
+<b class="fc">&nbsp;			String adviceClass = getElementTrimmed(element, &quot;class&quot;);</b>
+<b class="fc">&nbsp;			log.debug(&quot;advice point: {}, class: {}&quot;, point, adviceClass);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (point.isEmpty() || adviceClass.isEmpty()) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;&#39;point&#39; and &#39;class&#39; are required for advice. Given &#39;{}&#39; and &#39;{}&#39;&quot;, point, adviceClass);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				result.add(new AdvicePoint(module, point, adviceClass));</b>
+&nbsp;			}
+<b class="fc">&nbsp;			i++;</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Map&lt;String, String&gt; extractExtensions(Element configRoot) {
+&nbsp;
+<b class="fc">&nbsp;		Map&lt;String, String&gt; result = new IdentityHashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		NodeList extensions = configRoot.getElementsByTagName(&quot;extension&quot;);</b>
+<b class="fc">&nbsp;		if (extensions.getLength() == 0) {</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		log.debug(&quot;# extensions: {}&quot;, extensions.getLength());</b>
+<b class="fc">&nbsp;		int i = 0;</b>
+<b class="fc">&nbsp;		while (i &lt; extensions.getLength()) {</b>
+<b class="fc">&nbsp;			Element element = (Element) extensions.item(i);</b>
+<b class="fc">&nbsp;			String point = getElementTrimmed(element, &quot;point&quot;);</b>
+<b class="fc">&nbsp;			String extClass = getElementTrimmed(element, &quot;class&quot;);</b>
+<b class="fc">&nbsp;			log.debug(&quot;extension point: {}, class: {}&quot;, point, extClass);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (point.isEmpty() || extClass.isEmpty()) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;&#39;point&#39; and &#39;class&#39; are required for extensions. Given &#39;{}&#39; and &#39;{}&#39;&quot;, point, extClass);</b>
+<b class="fc">&nbsp;			} else if (point.contains(Extension.EXTENSION_ID_SEPARATOR)) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;Point id contains illegal character: &#39;{}&#39;&quot;, Extension.EXTENSION_ID_SEPARATOR);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				result.put(point, extClass);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			i++;</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private List&lt;Privilege&gt; extractPrivileges(Element configRoot) {
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Privilege&gt; result = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		NodeList privileges = configRoot.getElementsByTagName(&quot;privilege&quot;);</b>
+<b class="fc">&nbsp;		if (privileges.getLength() == 0) {</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		log.debug(&quot;# privileges: {}&quot;, privileges.getLength());</b>
+<b class="fc">&nbsp;		int i = 0;</b>
+<b class="fc">&nbsp;		while (i &lt; privileges.getLength()) {</b>
+<b class="fc">&nbsp;			Element element = (Element) privileges.item(i);</b>
+<b class="fc">&nbsp;			String name = getElementTrimmed(element, &quot;name&quot;);</b>
+<b class="fc">&nbsp;			String description = getElementTrimmed(element, &quot;description&quot;);</b>
+<b class="fc">&nbsp;			log.debug(&quot;extension name: {}, description: {}&quot;, name, description);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (name.isEmpty() || description.isEmpty()) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;&#39;name&#39; and &#39;description&#39; are required for privilege. Given &#39;{}&#39; and &#39;{}&#39;&quot;, name, description);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				result.add(new Privilege(name, description));</b>
+&nbsp;			}
+<b class="fc">&nbsp;			i++;</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;GlobalProperty&gt; extractGlobalProperties(Element configRoot) {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;GlobalProperty&gt; result = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		NodeList propNodes = configRoot.getElementsByTagName(&quot;globalProperty&quot;);</b>
+<b class="fc">&nbsp;		if (propNodes.getLength() == 0) {</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;# global properties: {}&quot;, propNodes.getLength());</b>
+<b class="fc">&nbsp;		int i = 0;</b>
+<b class="fc">&nbsp;		while (i &lt; propNodes.getLength()) {</b>
+<b class="fc">&nbsp;			Element gpElement = (Element) propNodes.item(i);</b>
+<b class="fc">&nbsp;			GlobalProperty globalProperty = extractGlobalProperty(gpElement);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (globalProperty != null) {</b>
+<b class="fc">&nbsp;				result.add(globalProperty);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			i++;</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private GlobalProperty extractGlobalProperty(Element element) {
+<b class="fc">&nbsp;		String property = getElementTrimmed(element, &quot;property&quot;);</b>
+<b class="fc">&nbsp;		String defaultValue = getElementTrimmed(element, &quot;defaultValue&quot;);</b>
+<b class="fc">&nbsp;		String description = removeTabsAndTrim(getElementTrimmed(element, &quot;description&quot;));</b>
+<b class="fc">&nbsp;		String datatypeClassname = getElementTrimmed(element, &quot;datatypeClassname&quot;);</b>
+<b class="fc">&nbsp;		String datatypeConfig = getElementTrimmed(element, &quot;datatypeConfig&quot;);</b>
+<b class="fc">&nbsp;		String viewPrivilege = removeTabsAndTrim(getElementTrimmed(element, &quot;viewPrivilege&quot;));</b>
+<b class="fc">&nbsp;		String editPrivilege = removeTabsAndTrim(getElementTrimmed(element, &quot;editPrivilege&quot;));</b>
+<b class="fc">&nbsp;		String deletePrivilege = removeTabsAndTrim(getElementTrimmed(element, &quot;deletePrivilege&quot;));</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;property: {}, defaultValue: {}&quot;, property, defaultValue);</b>
+<b class="fc">&nbsp;		log.debug(&quot;description: {}, datatypeClassname: {}&quot;, description, datatypeClassname);</b>
+<b class="fc">&nbsp;		log.debug(&quot;datatypeConfig: {}&quot;, datatypeConfig);</b>
+<b class="fc">&nbsp;		log.debug(&quot;viewPrivilege: {}, editPrivilege: {}, deletePrivilege: {}&quot;, viewPrivilege, editPrivilege, deletePrivilege);</b>
+&nbsp;
+<b class="fc">&nbsp;		return createGlobalProperty(property, defaultValue, description, datatypeClassname,</b>
+&nbsp;			datatypeConfig, viewPrivilege, editPrivilege, deletePrivilege);
+&nbsp;	}
+&nbsp;
+&nbsp;	private String removeTabsAndTrim(String string) {
+<b class="fc">&nbsp;		return string.replaceAll(&quot;	&quot;, &quot;&quot;).trim();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private GlobalProperty createGlobalProperty(String property, String defaultValue, String description,
+&nbsp;		String datatypeClassname, String datatypeConfig, String viewPrivilege, String editPrivilege, String deletePrivilege) {
+&nbsp;
+<b class="fc">&nbsp;		GlobalProperty globalProperty = null;</b>
+<b class="fc">&nbsp;		if (property.isEmpty()) {</b>
+<b class="fc">&nbsp;			log.warn(&quot;&#39;property&#39; is required for global properties. Given &#39;{}&#39;&quot;, property);</b>
+<b class="fc">&nbsp;			return globalProperty;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!datatypeClassname.isEmpty()) {</b>
+<b class="fc">&nbsp;			globalProperty = createGlobalPropertyWithDatatype(property, defaultValue, description, datatypeClassname,</b>
+&nbsp;				datatypeConfig);
+&nbsp;		} else {
+<b class="fc">&nbsp;			globalProperty = new GlobalProperty(property, defaultValue, description);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (!viewPrivilege.isEmpty()) {</b>
+<b class="fc">&nbsp;			globalProperty.setViewPrivilege(new Privilege(viewPrivilege));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!editPrivilege.isEmpty()) {</b>
+<b class="fc">&nbsp;			globalProperty.setEditPrivilege(new Privilege(editPrivilege));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!deletePrivilege.isEmpty()) {</b>
+<b class="fc">&nbsp;			globalProperty.setDeletePrivilege(new Privilege(deletePrivilege));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return globalProperty;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private GlobalProperty createGlobalPropertyWithDatatype(String property, String defaultValue, String description,
+&nbsp;		String datatypeClassname, String datatypeConfig) {
+<b class="fc">&nbsp;		GlobalProperty globalProperty = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			Class&lt;CustomDatatype&lt;?&gt;&gt; datatypeClazz = (Class&lt;CustomDatatype&lt;?&gt;&gt;) Class.forName(datatypeClassname)</b>
+<b class="fc">&nbsp;				.asSubclass(CustomDatatype.class);</b>
+<b class="fc">&nbsp;			globalProperty = new GlobalProperty(property, defaultValue, description, datatypeClazz, datatypeConfig);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (ClassCastException ex) {</b>
+<b class="fc">&nbsp;			log.error(&quot;The class specified by &#39;datatypeClassname&#39; (&quot; + datatypeClassname</b>
+&nbsp;				+ &quot;) must be a subtype of &#39;org.openmrs.customdatatype.CustomDatatype&lt;?&gt;&#39;.&quot;, ex);
+&nbsp;		}
+<b class="fc">&nbsp;		catch (ClassNotFoundException ex) {</b>
+<b class="fc">&nbsp;			log.error(&quot;The class specified by &#39;datatypeClassname&#39; (&quot; + datatypeClassname</b>
+&nbsp;				+ &quot;) could not be found.&quot;, ex);
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return globalProperty;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private List&lt;String&gt; extractMappingFiles(Element configRoot) {
+<b class="fc">&nbsp;		List&lt;String&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		splitTagContentByWhitespace(configRoot, &quot;mappingFiles&quot;, result);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Set&lt;String&gt; extractPackagesWithMappedClasses(Element configRoot) {
+<b class="fc">&nbsp;		Set&lt;String&gt; result = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		splitTagContentByWhitespace(configRoot, &quot;packagesWithMappedClasses&quot;, result);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Collection&lt;String&gt; splitTagContentByWhitespace(Element rootNode, String tag, Collection&lt;String&gt; result) {
+<b class="fc">&nbsp;		String content = getElement(rootNode, tag);</b>
+<b class="fc">&nbsp;		for (String s : content.split(&quot;\\s&quot;)) {</b>
+<b class="fc">&nbsp;			String s2 = s.trim();</b>
+<b class="fc">&nbsp;			if (s2.length() &gt; 0) {</b>
+<b class="fc">&nbsp;				result.add(s2);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private String getTrimmedElementOrFail(Element rootNode, String elementName, String errorMessageKey, String moduleName) {
+<b class="fc">&nbsp;		String element = getElementTrimmed(rootNode, elementName);</b>
+<b class="fc">&nbsp;		if (element == null || element.length() == 0) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(messageSourceService.getMessage(errorMessageKey),</b>
+&nbsp;				moduleName);
+&nbsp;		}
+<b class="fc">&nbsp;		return element;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private String getElementTrimmed(Element element, String name) {
+<b class="fc">&nbsp;		return getElement(element, name).trim();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private String getElement(Element root, String tag) {
+<b class="fc">&nbsp;		if (root.getElementsByTagName(tag).getLength() &gt; 0) {</b>
+<b class="fc">&nbsp;			return root.getElementsByTagName(tag).item(0).getTextContent();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Looks for the &quot;&lt;mandatory&gt;&quot; element in the config file and returns true if the value is
+&nbsp;	 * exactly &quot;true&quot;.
+&nbsp;	 */
+&nbsp;	private boolean extractMandatory(Element configRoot, String configVersion) {
+<b class="fc">&nbsp;		if (Double.parseDouble(configVersion) &gt;= 1.3) {</b>
+<b class="fc">&nbsp;			String mandatory = getElementTrimmed(configRoot, &quot;mandatory&quot;);</b>
+<b class="fc">&nbsp;			return &quot;true&quot;.equalsIgnoreCase(mandatory);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// this module has an older config file
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Parses conditionalResources tag.
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse openmrsVersion and modules
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse conditionalResource with whitespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception if multiple conditionalResources tags found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception if conditionalResources contains invalid tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception if path is blank
+&nbsp;	 */
+&nbsp;	List&lt;ModuleConditionalResource&gt; extractConditionalResources(Element configRoot) {
+<b class="fc">&nbsp;		List&lt;ModuleConditionalResource&gt; conditionalResources = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		NodeList parentConditionalResources = configRoot.getElementsByTagName(&quot;conditionalResources&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (parentConditionalResources.getLength() == 0) {</b>
+<b class="fc">&nbsp;			return new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		} else if (parentConditionalResources.getLength() &gt; 1) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;Found multiple conditionalResources tags. There can be only one.&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		NodeList conditionalResourcesNode = parentConditionalResources.item(0).getChildNodes();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; conditionalResourcesNode.getLength(); i++) {</b>
+<b class="fc">&nbsp;			Node conditionalResourceNode = conditionalResourcesNode.item(i);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (&quot;#text&quot;.equals(conditionalResourceNode.getNodeName())) {</b>
+&nbsp;				//ignore text and whitespace in particular
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!&quot;conditionalResource&quot;.equals(conditionalResourceNode.getNodeName())) {</b>
+<b class="fc">&nbsp;				throw new IllegalArgumentException(&quot;Found the &quot; + conditionalResourceNode.getNodeName()</b>
+&nbsp;					+ &quot; node under conditionalResources. Only conditionalResource is allowed.&quot;);
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			NodeList resourceElements = conditionalResourceNode.getChildNodes();</b>
+&nbsp;
+<b class="fc">&nbsp;			ModuleConditionalResource resource = new ModuleConditionalResource();</b>
+<b class="fc">&nbsp;			conditionalResources.add(resource);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int j = 0; j &lt; resourceElements.getLength(); j++) {</b>
+<b class="fc">&nbsp;				Node resourceElement = resourceElements.item(j);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (&quot;path&quot;.equals(resourceElement.getNodeName())) {</b>
+<b class="fc">&nbsp;					if (StringUtils.isBlank(resourceElement.getTextContent())) {</b>
+<b class="fc">&nbsp;						throw new IllegalArgumentException(&quot;The path of a conditional resource must not be blank&quot;);</b>
+&nbsp;					}
+<b class="fc">&nbsp;					resource.setPath(resourceElement.getTextContent());</b>
+<b class="fc">&nbsp;				} else if (&quot;openmrsVersion&quot;.equals(resourceElement.getNodeName())) {</b>
+<b class="fc">&nbsp;					if (StringUtils.isBlank(resource.getOpenmrsPlatformVersion())) {</b>
+<b class="fc">&nbsp;						resource.setOpenmrsPlatformVersion(resourceElement.getTextContent());</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else if (&quot;openmrsPlatformVersion&quot;.equals(resourceElement.getNodeName())) {</b>
+<b class="nc">&nbsp;					resource.setOpenmrsPlatformVersion(resourceElement.getTextContent());</b>
+<b class="fc">&nbsp;				} else if (&quot;modules&quot;.equals(resourceElement.getNodeName())) {</b>
+<b class="fc">&nbsp;					NodeList modulesNode = resourceElement.getChildNodes();</b>
+<b class="fc">&nbsp;					for (int k = 0; k &lt; modulesNode.getLength(); k++) {</b>
+<b class="fc">&nbsp;						Node moduleNode = modulesNode.item(k);</b>
+<b class="fc">&nbsp;						if (&quot;module&quot;.equals(moduleNode.getNodeName())) {</b>
+<b class="fc">&nbsp;							NodeList moduleElements = moduleNode.getChildNodes();</b>
+&nbsp;
+<b class="fc">&nbsp;							ModuleConditionalResource.ModuleAndVersion module = new ModuleConditionalResource.ModuleAndVersion();</b>
+<b class="fc">&nbsp;							resource.getModules().add(module);</b>
+<b class="fc">&nbsp;							for (int m = 0; m &lt; moduleElements.getLength(); m++) {</b>
+<b class="fc">&nbsp;								Node moduleElement = moduleElements.item(m);</b>
+&nbsp;
+<b class="fc">&nbsp;								if (&quot;moduleId&quot;.equals(moduleElement.getNodeName())) {</b>
+<b class="fc">&nbsp;									module.setModuleId(moduleElement.getTextContent());</b>
+<b class="fc">&nbsp;								} else if (&quot;version&quot;.equals(moduleElement.getNodeName())) {</b>
+<b class="fc">&nbsp;									module.setVersion(moduleElement.getTextContent());</b>
+&nbsp;								}
+&nbsp;							}
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return conditionalResources;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

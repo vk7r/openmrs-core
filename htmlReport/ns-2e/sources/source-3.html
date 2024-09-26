@@ -1,0 +1,243 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VerhoeffIdentifierValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.patient.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: VerhoeffIdentifierValidator (org.openmrs.patient.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VerhoeffIdentifierValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,5%
+  </span>
+  <span class="absValue">
+    (39/40)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.patient.impl;
+&nbsp;
+&nbsp;import org.openmrs.patient.UnallowedIdentifierException;
+&nbsp;
+&nbsp;/**
+&nbsp; * The Verhoeff Check Digit Validator catches all single errors and all adjacent transpositions.
+&nbsp; * See: http://www.cs.utsa.edu/~wagner/laws/verhoeff.html and Wagner, Neal.
+&nbsp; * &quot;Verhoeff&#39;s Decimal Error Detection&quot;. The Laws of Cryptography with Java Code. p 54. San Antonio,
+&nbsp; * TX: 2003. http://www.cs.utsa.edu/~wagner/lawsbookcolor/laws.pdf
+&nbsp; */
+&nbsp;public class VerhoeffIdentifierValidator extends BaseHyphenatedIdentifierValidator {
+&nbsp;	
+&nbsp;	private static final String ALLOWED_CHARS = &quot;0123456789&quot;;
+&nbsp;	
+&nbsp;	private static final String VERHOEFF_NAME = &quot;Verhoeff Check Digit Validator.&quot;;
+&nbsp;	
+&nbsp;	private static final int VERHOEFF_ID_LENGTH = 10;
+&nbsp;	
+&nbsp;	private static final int VERHOEFF_UNDECORATED_ID_LENGTH = VERHOEFF_ID_LENGTH - 2;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.patient.impl.BaseHyphenatedIdentifierValidator#getAllowedCharacters()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAllowedCharacters() {
+<b class="fc">&nbsp;		return ALLOWED_CHARS;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.patient.impl.BaseHyphenatedIdentifierValidator#getName()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return VERHOEFF_NAME;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.patient.impl.BaseHyphenatedIdentifierValidator#getCheckDigit(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	protected int getCheckDigit(String undecoratedIdentifier) {
+<b class="fc">&nbsp;		int[] a = getBase(Integer.parseInt(undecoratedIdentifier), undecoratedIdentifier.length());</b>
+<b class="fc">&nbsp;		insertCheck(a);</b>
+<b class="fc">&nbsp;		return a[0];</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Override to disallow numeric check digits and identifiers that are not exactly
+&nbsp;	 * VERHOEFF_ID_LENGTH long.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.patient.impl.BaseHyphenatedIdentifierValidator#isValid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isValid(String identifier) throws UnallowedIdentifierException {
+&nbsp;		
+<b class="fc">&nbsp;		boolean result = super.isValid(identifier);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (Character.isDigit(identifier.charAt(identifier.length() - 1))) {</b>
+<b class="fc">&nbsp;			throw new UnallowedIdentifierException(&quot;Check digit can not be numeric.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (identifier.length() != VERHOEFF_ID_LENGTH) {</b>
+<b class="nc">&nbsp;			throw new UnallowedIdentifierException(&quot;Identifier must be &quot; + VERHOEFF_ID_LENGTH + &quot; digits long.&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Override to disallow identifiers that are not exactly VERHOEFF_UNDECORATED_ID_LENGTH long.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.patient.impl.BaseHyphenatedIdentifierValidator#getValidIdentifier(java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get valid identifier
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getValidIdentifier(String undecoratedIdentifier) throws UnallowedIdentifierException {
+&nbsp;		
+<b class="fc">&nbsp;		String result = super.getValidIdentifier(undecoratedIdentifier);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (undecoratedIdentifier.length() != VERHOEFF_UNDECORATED_ID_LENGTH) {</b>
+<b class="fc">&nbsp;			throw new UnallowedIdentifierException(&quot;Undecorated identifier must be &quot; + VERHOEFF_UNDECORATED_ID_LENGTH</b>
+&nbsp;			        + &quot; digits long.&quot;);
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private int[] getBase(int num, int length) {
+<b class="fc">&nbsp;		int[] a = new int[length + 1];</b>
+<b class="fc">&nbsp;		int x = 1;</b>
+<b class="fc">&nbsp;		for (int i = length; i-- &gt; 0;) {</b>
+<b class="fc">&nbsp;			int y = num / x;</b>
+<b class="fc">&nbsp;			a[i + 1] = y % 10;</b>
+<b class="fc">&nbsp;			x = x * 10;</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return a;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private int insertCheck(int[] a) {
+<b class="fc">&nbsp;		int check = 0;</b>
+<b class="fc">&nbsp;		for (int i = 1; i &lt; a.length; i++) {</b>
+<b class="fc">&nbsp;			check = op[check][F[i % 8][a[i]]];</b>
+&nbsp;		}
+<b class="fc">&nbsp;		a[0] = inv[check];</b>
+<b class="fc">&nbsp;		return a[0];</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public VerhoeffIdentifierValidator() {</b>
+<b class="fc">&nbsp;		F[0] = F0;</b>
+<b class="fc">&nbsp;		F[1] = F1;</b>
+<b class="fc">&nbsp;		for (int i = 2; i &lt; 8; i++) {</b>
+<b class="fc">&nbsp;			F[i] = new int[10];</b>
+<b class="fc">&nbsp;			for (int j = 0; j &lt; 10; j++) {</b>
+<b class="fc">&nbsp;				F[i][j] = F[i - 1][F[1][j]];</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private int[][] F = new int[8][];</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final int[] F0 = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final int[] F1 = { 1, 5, 7, 6, 2, 8, 3, 0, 9, 4 };</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final int[][] op = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, { 1, 2, 3, 4, 0, 6, 7, 8, 9, 5 },</b>
+&nbsp;	        { 2, 3, 4, 0, 1, 7, 8, 9, 5, 6 }, { 3, 4, 0, 1, 2, 8, 9, 5, 6, 7 }, { 4, 0, 1, 2, 3, 9, 5, 6, 7, 8 },
+&nbsp;	        { 5, 9, 8, 7, 6, 0, 4, 3, 2, 1 }, { 6, 5, 9, 8, 7, 1, 0, 4, 3, 2 }, { 7, 6, 5, 9, 8, 2, 1, 0, 4, 3 },
+&nbsp;	        { 8, 7, 6, 5, 9, 3, 2, 1, 0, 4 }, { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 } };
+&nbsp;	
+<b class="fc">&nbsp;	private static final int[] inv = { 0, 4, 3, 2, 1, 5, 6, 7, 8, 9 };</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

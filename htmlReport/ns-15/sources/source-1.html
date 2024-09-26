@@ -1,0 +1,444 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ADTA28Handler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: ADTA28Handler (org.openmrs.hl7.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ADTA28Handler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (2/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    1,7%
+  </span>
+  <span class="absValue">
+    (2/117)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7.handler;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.PatientIdentifierException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.validator.PatientIdentifierValidator;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import ca.uhn.hl7v2.HL7Exception;
+&nbsp;import ca.uhn.hl7v2.app.Application;
+&nbsp;import ca.uhn.hl7v2.app.ApplicationException;
+&nbsp;import ca.uhn.hl7v2.model.Message;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.CX;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.ID;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.TS;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.XPN;
+&nbsp;import ca.uhn.hl7v2.model.v25.message.ADT_A05;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.MSH;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.PID;
+&nbsp;
+&nbsp;/* HL7 using HAPI to handle ADT A28 Messages
+&nbsp; * 
+&nbsp; * ADT/ACK - Add person or patient information (Event A28)
+&nbsp; * 
+&nbsp; * FYI:  The 3rd field of MSH contains the sending application.  
+&nbsp; * For example, the Rwanda lab system uses &#39;neal_lims&#39;.  
+&nbsp; * If neal_lims exists as an OpenMRS username, then this handler
+&nbsp; * will use that user as the creator for patients it creates.
+&nbsp; * If the sending application isn&#39;t setup as an OpenMRS user,
+&nbsp; * the creator will default to the user running this task.
+&nbsp; *  
+&nbsp; * TODO: You may wonder why the createPatient, validate, getMSH, 
+&nbsp; * getPIH and tsToDate code is duplicated in this file (and the R01
+&nbsp; * message handler file? It would be more useful to have these in the 
+&nbsp; * HL7 Utility file.  It&#39;s a good question, and it will happen 
+&nbsp; * soon.
+&nbsp; * 
+&nbsp; * The HL7 v2.5 manual table 0354 (section 2.17.3) describes A28.
+&nbsp; *   
+&nbsp; * There are many cases in HL7 where events (like A05, A14, A28, and A31) 
+&nbsp; * share a common structure.  This table also represented in HL7APIs 
+&nbsp; * eventmap properties file (http://tinyurl.com/2almfx)  -- describes 
+&nbsp; * exactly which events share which structures.
+&nbsp; *
+&nbsp; * So the answer to the A28 event is to use the ADT_A05 message 
+&nbsp; * structure from within the v2.5 object hierarchy.  Without going 
+&nbsp; * to the table, you can see this relationship in the description 
+&nbsp; * of the A28 event message structure (3.3.28), which is labeled as 
+&nbsp; * ADT^A28^ADT_A05.  This represents the message type (ADT), 
+&nbsp; * event (A28), and message structure (ADT_A05).
+&nbsp; * 
+&nbsp; * TODO: This ADT A28 handler does NOT currently handle ALL possible segments.
+&nbsp; * 		 Some of the segments that are not handled include these:
+&nbsp; * 			
+&nbsp; * 			EVN (Event type) - required to be backwardly compatible
+&nbsp; * 			SFT (Software segment)
+&nbsp; * 			PD1 (Additional demographics) (*)
+&nbsp; * 			ROL (Role)
+&nbsp; * 			NK1 (Next of Kin / associated parties) (*)
+&nbsp; * 			PV1/2 (Patient visit - additional information) (*)
+&nbsp; * 			DB1 (Disability information)
+&nbsp; * 			OBX (Observation / result)  (***)
+&nbsp; * 			AL1 (Allergy information)
+&nbsp; * 			DG1 (Diagnosis information)
+&nbsp; * 			DRG (Diagnosis related group)
+&nbsp; * 			PR1	(Procedures)
+&nbsp; * 			GT1 (Guarantor)
+&nbsp; * 			IN1 (Insurance)
+&nbsp; * 			ACC (Accident information)
+&nbsp; * 			UB1/2 (Universal Bill Information)
+&nbsp; * 
+&nbsp; *  NOTE:  The ones with (*) could be useful in the near future.
+&nbsp; */
+<b class="fc">&nbsp;public class ADTA28Handler implements Application {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ADTA28Handler.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Always returns true, assuming that the router calling this handler will only call this
+&nbsp;	 * handler with ADT_A28 messages.
+&nbsp;	 *
+&nbsp;	 * @return true
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean canProcess(Message message) {
+<b class="nc">&nbsp;		return message != null &amp;&amp; &quot;ADT_A28&quot;.equals(message.getName());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Processes an ADT A28 event message
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message processMessage(Message message) throws ApplicationException {
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Processing ADT_A28 message&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (!(message instanceof ADT_A05)) {</b>
+<b class="nc">&nbsp;			throw new ApplicationException(&quot;Invalid message sent to ADT_A28 handler&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		Message response;
+&nbsp;		try {
+<b class="nc">&nbsp;			ADT_A05 adt = (ADT_A05) message;</b>
+<b class="nc">&nbsp;			response = processADT_A28(adt);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassCastException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error casting &quot; + message.getClass().getName() + &quot; to ADT_A28&quot;, e);</b>
+<b class="nc">&nbsp;			throw new ApplicationException(&quot;Invalid message type for handler&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (HL7Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error while processing ADT_A28 message&quot;, e);</b>
+<b class="nc">&nbsp;			throw new ApplicationException(e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Finished processing ADT_A28 message&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return response;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Message processADT_A28(ADT_A05 adt) throws HL7Exception {
+&nbsp;		
+&nbsp;		// validate HL7 version
+<b class="nc">&nbsp;		validate(adt);</b>
+&nbsp;		
+&nbsp;		// extract segments for convenient use below
+<b class="nc">&nbsp;		MSH msh = getMSH(adt);</b>
+<b class="nc">&nbsp;		PID pid = getPID(adt);</b>
+&nbsp;		
+&nbsp;		// Obtain message control id (unique ID for message from sending
+&nbsp;		// application). Eventually avoid replaying the same message.
+<b class="nc">&nbsp;		String messageControlId = msh.getMessageControlID().getValue();</b>
+<b class="nc">&nbsp;		log.debug(&quot;Found HL7 message in inbound queue with control id = &quot; + messageControlId);</b>
+&nbsp;		
+&nbsp;		// Add creator of the patient to application
+<b class="nc">&nbsp;		String sendingApp = msh.getSendingApplication().getComponent(0).toString();</b>
+<b class="nc">&nbsp;		log.debug(&quot;SendingApplication = &quot; + sendingApp);</b>
+&nbsp;		
+&nbsp;		// Search for the patient  
+<b class="nc">&nbsp;		Integer patientId = findPatientId(pid);</b>
+&nbsp;		
+&nbsp;		// Create new patient if the patient id doesn&#39;t exist yet
+<b class="nc">&nbsp;		if (patientId == null) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Creating new patient in response to ADT_A28 &quot; + messageControlId);</b>
+<b class="nc">&nbsp;			Patient patient = createPatient(pid, sendingApp);</b>
+<b class="nc">&nbsp;			if (patient == null) {</b>
+<b class="nc">&nbsp;				throw new HL7Exception(&quot;Couldn&#39;t create Patient object from PID&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			Context.getPatientService().savePatient(patient);</b>
+&nbsp;			
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			log.info(&quot;Ignoring ADT_A28 message because patient (&quot; + patientId + &quot;) already exists.&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Assumption: all observations (OBX) messages will be in the R01
+&nbsp;		
+<b class="nc">&nbsp;		return adt;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Look for patient using the patient id
+&nbsp;	private Integer findPatientId(PID pid) throws HL7Exception {
+&nbsp;		
+<b class="nc">&nbsp;		Integer patientId = Context.getHL7Service().resolvePatientId(pid);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (patientId == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return patientId;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Create a new patient when this patient doesn&#39;t exist in the database
+&nbsp;	private Patient createPatient(PID pid, String creatorName) throws HL7Exception {
+&nbsp;		
+<b class="nc">&nbsp;		Patient patient = new Patient();</b>
+&nbsp;		
+&nbsp;		// Try to use the specified username as the creator
+<b class="nc">&nbsp;		User creator = Context.getUserService().getUserByUsername(creatorName);</b>
+<b class="nc">&nbsp;		if (creator != null) {</b>
+<b class="nc">&nbsp;			patient.setCreator(creator);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Create all patient identifiers specified in the message
+&nbsp;		// Copied code from resolvePatientId() in HL7ServiceImpl.java
+<b class="nc">&nbsp;		CX[] idList = pid.getPatientIdentifierList();</b>
+<b class="nc">&nbsp;		if (idList == null || idList.length &lt; 1) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Missing patient identifier in PID segment&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		List&lt;PatientIdentifier&gt; goodIdentifiers = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (CX id : idList) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			String assigningAuthority = id.getAssigningAuthority().getNamespaceID().getValue();</b>
+<b class="nc">&nbsp;			String hl7PatientId = id.getIDNumber().getValue();</b>
+&nbsp;			
+<b class="nc">&nbsp;			log.debug(&quot;identifier has id=&quot; + hl7PatientId + &quot; assigningAuthority=&quot; + assigningAuthority);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (assigningAuthority != null &amp;&amp; assigningAuthority.length() &gt; 0) {</b>
+&nbsp;				
+&nbsp;				try {
+<b class="nc">&nbsp;					PatientIdentifierType pit = Context.getPatientService().getPatientIdentifierTypeByName(</b>
+&nbsp;					    assigningAuthority);
+<b class="nc">&nbsp;					if (pit == null) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;Can&#39;t find PatientIdentifierType named &#39;&quot; + assigningAuthority + &quot;&#39;&quot;);</b>
+<b class="nc">&nbsp;						continue; // skip identifiers with unknown type</b>
+&nbsp;					}
+<b class="nc">&nbsp;					PatientIdentifier pi = new PatientIdentifier();</b>
+<b class="nc">&nbsp;					if (creator != null) {</b>
+<b class="nc">&nbsp;						pi.setCreator(creator);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					pi.setIdentifierType(pit);</b>
+<b class="nc">&nbsp;					pi.setIdentifier(hl7PatientId);</b>
+&nbsp;					
+&nbsp;					// Get default location
+<b class="nc">&nbsp;					Location location = Context.getLocationService().getDefaultLocation();</b>
+<b class="nc">&nbsp;					if (location == null) {</b>
+<b class="nc">&nbsp;						throw new HL7Exception(&quot;Cannot find default location&quot;);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					pi.setLocation(location);</b>
+&nbsp;					
+&nbsp;					try {
+<b class="nc">&nbsp;						PatientIdentifierValidator.validateIdentifier(pi);</b>
+<b class="nc">&nbsp;						goodIdentifiers.add(pi);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (PatientIdentifierException ex) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;Patient identifier in PID is invalid: &quot; + pi, ex);</b>
+<b class="nc">&nbsp;					}</b>
+&nbsp;					
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Uncaught error parsing/creating patient identifier &#39;&quot; + hl7PatientId</b>
+&nbsp;					        + &quot;&#39; for assigning authority &#39;&quot; + assigningAuthority + &quot;&#39;&quot;, e);
+<b class="nc">&nbsp;				}</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				log.error(&quot;PID contains identifier with no assigning authority&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		if (goodIdentifiers.isEmpty()) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;PID segment has no recognizable patient identifiers.&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		patient.addIdentifiers(goodIdentifiers);</b>
+&nbsp;		
+&nbsp;		// Extract patient name from the message
+<b class="nc">&nbsp;		XPN patientNameX = pid.getPatientName(0);</b>
+<b class="nc">&nbsp;		if (patientNameX == null) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Missing patient name in the PID segment&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Patient name
+<b class="nc">&nbsp;		PersonName name = new PersonName();</b>
+<b class="nc">&nbsp;		name.setFamilyName(patientNameX.getFamilyName().getSurname().getValue());</b>
+<b class="nc">&nbsp;		name.setGivenName(patientNameX.getGivenName().getValue());</b>
+<b class="nc">&nbsp;		name.setMiddleName(patientNameX.getSecondAndFurtherGivenNamesOrInitialsThereof().getValue());</b>
+<b class="nc">&nbsp;		if (creator != null) {</b>
+<b class="nc">&nbsp;			name.setCreator(creator);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		patient.addName(name);</b>
+&nbsp;		
+&nbsp;		// Gender (checks for null, but not for &#39;M&#39; or &#39;F&#39;)
+<b class="nc">&nbsp;		String gender = pid.getAdministrativeSex().getValue();</b>
+<b class="nc">&nbsp;		if (gender == null) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Missing gender in the PID segment&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		gender = gender.toUpperCase();</b>
+<b class="nc">&nbsp;		if (!OpenmrsConstants.GENDERS.contains(gender)) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Unrecognized gender: &quot; + gender);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		patient.setGender(gender);</b>
+&nbsp;		
+&nbsp;		// Date of Birth
+<b class="nc">&nbsp;		TS dateOfBirth = pid.getDateTimeOfBirth();</b>
+<b class="nc">&nbsp;		if (dateOfBirth == null || dateOfBirth.getTime() == null || dateOfBirth.getTime().getValue() == null) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Missing birth date in the PID segment&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		patient.setBirthdate(tsToDate(dateOfBirth));</b>
+&nbsp;		
+&nbsp;		// Estimated birthdate?
+<b class="nc">&nbsp;		ID precisionTemp = dateOfBirth.getDegreeOfPrecision();</b>
+<b class="nc">&nbsp;		if (precisionTemp != null &amp;&amp; precisionTemp.getValue() != null) {</b>
+<b class="nc">&nbsp;			String precision = precisionTemp.getValue().toUpperCase();</b>
+<b class="nc">&nbsp;			log.debug(&quot;The birthdate is estimated: &quot; + precision);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (&quot;Y&quot;.equals(precision) || &quot;L&quot;.equals(precision)) {</b>
+<b class="nc">&nbsp;				patient.setBirthdateEstimated(true);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// TODO:  Move these to hl7 handler utilities
+&nbsp;	// Check version, etc.
+&nbsp;	private void validate(Message message) throws HL7Exception {
+<b class="nc">&nbsp;		message.getVersion();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private MSH getMSH(ADT_A05 adt) {
+<b class="nc">&nbsp;		return adt.getMSH();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private PID getPID(ADT_A05 adt) {
+<b class="nc">&nbsp;		return adt.getPID();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	//TODO: Debug (and use) methods in HL7Util instead
+&nbsp;	private Date tsToDate(TS ts) throws HL7Exception {
+&nbsp;		// need to handle timezone
+<b class="nc">&nbsp;		String dtm = ts.getTime().getValue();</b>
+<b class="nc">&nbsp;		int year = Integer.parseInt(dtm.substring(0, 4));</b>
+<b class="nc">&nbsp;		int month = (dtm.length() &gt;= 6 ? Integer.parseInt(dtm.substring(4, 6)) - 1 : 0);</b>
+<b class="nc">&nbsp;		int day = (dtm.length() &gt;= 8 ? Integer.parseInt(dtm.substring(6, 8)) : 1);</b>
+<b class="nc">&nbsp;		int hour = (dtm.length() &gt;= 10 ? Integer.parseInt(dtm.substring(8, 10)) : 0);</b>
+<b class="nc">&nbsp;		int min = (dtm.length() &gt;= 12 ? Integer.parseInt(dtm.substring(10, 12)) : 0);</b>
+<b class="nc">&nbsp;		int sec = (dtm.length() &gt;= 14 ? Integer.parseInt(dtm.substring(12, 14)) : 0);</b>
+<b class="nc">&nbsp;		Calendar cal = Calendar.getInstance();</b>
+<b class="nc">&nbsp;		cal.set(year, month, day, hour, min, sec);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return cal.getTime();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

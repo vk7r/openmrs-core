@@ -1,0 +1,277 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MigrateAllergiesChangeSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: MigrateAllergiesChangeSet (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MigrateAllergiesChangeSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (4/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5,6%
+  </span>
+  <span class="absValue">
+    (4/72)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.openmrs.AllergySeverity;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * Moves un voided allergies from the old active_list and active_list_allergy tables to the new
+&nbsp; * allergy and allergy_recation tables
+&nbsp; */
+<b class="fc">&nbsp;public class MigrateAllergiesChangeSet implements CustomTaskChange {</b>
+&nbsp;	
+&nbsp;	private Integer mildConcept;
+&nbsp;	private Integer moderateConcept;
+&nbsp;	private Integer severeConcept;
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Successfully moved un voided allergies from old to new tables&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+&nbsp;		
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor resourceAccessor) {
+&nbsp;		
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+&nbsp;		try {
+<b class="nc">&nbsp;			loadSeverityConcepts(database);</b>
+&nbsp;			
+<b class="nc">&nbsp;			JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;			
+<b class="nc">&nbsp;			String sql = &quot;select active_list_type_id from active_list_type where name = &#39;Allergy&#39;&quot;;</b>
+<b class="nc">&nbsp;			Statement selectStatement = connection.createStatement();</b>
+<b class="nc">&nbsp;			ResultSet rs = selectStatement.executeQuery(sql);</b>
+<b class="nc">&nbsp;			if (!rs.next()) {</b>
+<b class="nc">&nbsp;				throw new CustomChangeException(&quot;Failed to find row with name &#39;Allergy&#39; in the active_list_type&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			int allergyTypeId = rs.getInt(1);</b>
+&nbsp;			
+<b class="nc">&nbsp;			sql = &quot;insert into allergy (patient_id, coded_allergen, severity_concept_id, creator, date_created, uuid, comment, allergen_type) &quot; +</b>
+&nbsp;					&quot;values(?,?,?,?,?,?,?,?)&quot;;
+<b class="nc">&nbsp;			PreparedStatement allergyInsertStatement = connection.prepareStatement(sql);</b>
+&nbsp;			
+<b class="nc">&nbsp;			sql = &quot;insert into allergy_reaction (allergy_id, reaction_concept_id, uuid) &quot; +</b>
+&nbsp;					&quot;values (?,?,?)&quot;;
+<b class="nc">&nbsp;			PreparedStatement reactionInsertStatement = connection.prepareStatement(sql);</b>
+&nbsp;			
+<b class="nc">&nbsp;			sql = &quot;select allergy_id from allergy where uuid = ?&quot;;</b>
+<b class="nc">&nbsp;			PreparedStatement allergySelectStatement = connection.prepareStatement(sql);</b>
+&nbsp;			
+<b class="nc">&nbsp;			sql = &quot;select person_id, concept_id, comments, creator, date_created, uuid, reaction_concept_id, severity, allergy_type &quot;</b>
+&nbsp;			        + &quot;from active_list al inner join active_list_allergy ala on al.active_list_id=ala.active_list_id &quot;
+&nbsp;			        + &quot;where voided = 0 and active_list_type_id = &quot; + allergyTypeId;
+&nbsp;			
+<b class="nc">&nbsp;			selectStatement = connection.createStatement();</b>
+<b class="nc">&nbsp;			rs = selectStatement.executeQuery(sql);</b>
+<b class="nc">&nbsp;			while (rs.next()) {</b>
+<b class="nc">&nbsp;				String uuid = rs.getString(&quot;uuid&quot;);	</b>
+&nbsp;				
+&nbsp;				//insert allergy
+<b class="nc">&nbsp;				allergyInsertStatement.setInt(1, rs.getInt(&quot;person_id&quot;));</b>
+<b class="nc">&nbsp;				allergyInsertStatement.setInt(2, rs.getInt(&quot;concept_id&quot;));</b>
+&nbsp;				
+<b class="nc">&nbsp;				Integer severityConcept = null;</b>
+<b class="nc">&nbsp;				String severity = rs.getString(&quot;severity&quot;);</b>
+<b class="nc">&nbsp;				if (AllergySeverity.MILD.name().equals(severity)) {</b>
+<b class="nc">&nbsp;					severityConcept = mildConcept;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				else if (AllergySeverity.MODERATE.name().equals(severity)) {</b>
+<b class="nc">&nbsp;					severityConcept = moderateConcept;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				else if (AllergySeverity.SEVERE.name().equals(severity)) {</b>
+<b class="nc">&nbsp;					severityConcept = severeConcept;</b>
+&nbsp;				}
+&nbsp;				//TODO what do we do with the other severities?
+&nbsp;				
+<b class="nc">&nbsp;				if (severityConcept != null) {</b>
+<b class="nc">&nbsp;					allergyInsertStatement.setInt(3, severityConcept);</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				allergyInsertStatement.setInt(4, rs.getInt(&quot;creator&quot;));</b>
+<b class="nc">&nbsp;				allergyInsertStatement.setDate(5, rs.getDate(&quot;date_created&quot;));</b>
+<b class="nc">&nbsp;				allergyInsertStatement.setString(6, uuid);</b>
+<b class="nc">&nbsp;				allergyInsertStatement.setString(7, rs.getString(&quot;comments&quot;));</b>
+&nbsp;				
+<b class="nc">&nbsp;				String allergyType = rs.getString(&quot;allergy_type&quot;);</b>
+<b class="nc">&nbsp;				if (allergyType == null) {</b>
+<b class="nc">&nbsp;					allergyType = &quot;DRUG&quot;;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				else if (&quot;ENVIRONMENTAL&quot;.equals(allergyType)) {</b>
+<b class="nc">&nbsp;					allergyType = &quot;ENVIRONMENT&quot;;</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				allergyInsertStatement.setString(8, allergyType);</b>
+&nbsp;				
+<b class="nc">&nbsp;				allergyInsertStatement.execute();</b>
+&nbsp;				
+&nbsp;				//get inserted allergy_id
+<b class="nc">&nbsp;				allergySelectStatement.setString(1, uuid);</b>
+<b class="nc">&nbsp;				ResultSet rs2 = allergySelectStatement.executeQuery();</b>
+<b class="nc">&nbsp;				rs2.next();</b>
+&nbsp;				
+&nbsp;				//insert reaction
+<b class="nc">&nbsp;				reactionInsertStatement.setInt(1, rs2.getInt(1));</b>
+<b class="nc">&nbsp;				reactionInsertStatement.setInt(2, rs.getInt(&quot;reaction_concept_id&quot;));</b>
+<b class="nc">&nbsp;				reactionInsertStatement.setString(3, UUID.randomUUID().toString());</b>
+&nbsp;				
+&nbsp;				//some active lists do not have reactions recorded
+<b class="nc">&nbsp;				if (!rs.wasNull()) {</b>
+<b class="nc">&nbsp;					reactionInsertStatement.execute();</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(ex);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void loadSeverityConcepts(Database database) throws Exception {
+<b class="nc">&nbsp;		mildConcept = getConceptByGlobalProperty(database, &quot;allergy.concept.severity.mild&quot;);</b>
+<b class="nc">&nbsp;		moderateConcept = getConceptByGlobalProperty(database, &quot;allergy.concept.severity.moderate&quot;);</b>
+<b class="nc">&nbsp;		severeConcept = getConceptByGlobalProperty(database, &quot;allergy.concept.severity.severe&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Integer getConceptByGlobalProperty(Database database, String globalPropertyName) throws Exception {
+<b class="nc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+<b class="nc">&nbsp;		PreparedStatement stmt = connection.prepareStatement(&quot;SELECT property_value FROM global_property WHERE property = ?&quot;);</b>
+<b class="nc">&nbsp;		stmt.setString(1, globalPropertyName);</b>
+<b class="nc">&nbsp;		ResultSet rs = stmt.executeQuery();</b>
+<b class="nc">&nbsp;		if (rs.next()) {</b>
+<b class="nc">&nbsp;			String uuid = rs.getString(&quot;property_value&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			rs = stmt.executeQuery(&quot;SELECT concept_id FROM concept WHERE uuid = &#39;&quot; + uuid + &quot;&#39;&quot;);</b>
+<b class="nc">&nbsp;			if (rs.next()) {</b>
+<b class="nc">&nbsp;				return rs.getInt(&quot;concept_id&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		throw new IllegalStateException(&quot;Configuration required: &quot; + globalPropertyName);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,275 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Provider</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Provider (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Provider</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,1%
+  </span>
+  <span class="absValue">
+    (16/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (20/22)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Provider$HibernateProxy$elJNM9rn</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    94,1%
+  </span>
+  <span class="absValue">
+    (16/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,9%
+  </span>
+  <span class="absValue">
+    (20/22)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a person who may provide care to a patient during an encounter
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Provider extends BaseCustomizableMetadata&lt;ProviderAttribute&gt; {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Provider.class);</b>
+&nbsp;	
+&nbsp;	private Integer providerId;
+&nbsp;	
+&nbsp;	private Person person;
+&nbsp;	
+&nbsp;	private String identifier;
+&nbsp;	
+&nbsp;	private Concept role;
+&nbsp;	
+&nbsp;	private Concept speciality;
+&nbsp;	
+<b class="fc">&nbsp;	public Provider() {</b>
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	public Provider(Integer providerId) {</b>
+<b class="nc">&nbsp;		this.providerId = providerId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getProviderId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setProviderId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param providerId the providerId to set
+&nbsp;	 */
+&nbsp;	public void setProviderId(Integer providerId) {
+<b class="fc">&nbsp;		this.providerId = providerId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the providerId
+&nbsp;	 */
+&nbsp;	public Integer getProviderId() {
+<b class="fc">&nbsp;		return providerId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param person the person to set
+&nbsp;	 */
+&nbsp;	public void setPerson(Person person) {
+<b class="fc">&nbsp;		this.person = person;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the person
+&nbsp;	 */
+&nbsp;	public Person getPerson() {
+<b class="fc">&nbsp;		return person;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param identifier the identifier to set
+&nbsp;	 */
+&nbsp;	public void setIdentifier(String identifier) {
+<b class="fc">&nbsp;		this.identifier = identifier;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the identifier
+&nbsp;	 */
+&nbsp;	public String getIdentifier() {
+<b class="fc">&nbsp;		return identifier;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the role concept
+&nbsp;	 * 
+&nbsp;	 * @since 2.2
+&nbsp;	 * @param role the role to set
+&nbsp;	 */
+&nbsp;	public void setRole(Concept role) {
+<b class="fc">&nbsp;		this.role = role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the role concept
+&nbsp;	 * 
+&nbsp;	 * @since 2.2
+&nbsp;	 * @return the role
+&nbsp;	 */
+&nbsp;	public Concept getRole() {
+<b class="fc">&nbsp;		return role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the speciality concept
+&nbsp;	 * 
+&nbsp;	 * @since 2.2
+&nbsp;	 * @param speciality the speciality to set
+&nbsp;	 */
+&nbsp;	public void setSpeciality(Concept speciality) {
+<b class="fc">&nbsp;		this.speciality = speciality;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the speciality concept
+&nbsp;	 * 
+&nbsp;	 * @since 2.2
+&nbsp;	 * @return the speciality
+&nbsp;	 */
+&nbsp;	public Concept getSpeciality() {
+<b class="fc">&nbsp;		return speciality;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		String provider = String.valueOf(providerId) + &quot; providerName:&quot; + ((person != null) ? person.getNames() : &quot;&quot;);</b>
+<b class="fc">&nbsp;		return &quot;[Provider: providerId:&quot; + provider + &quot; ]&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.BaseOpenmrsMetadata#getName()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return person full name if person is not null or null otherwise
+&nbsp;	 */
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		if (getPerson() != null &amp;&amp; getPerson().getPersonName() != null) {</b>
+<b class="fc">&nbsp;			return getPerson().getPersonName().getFullName();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			log.warn(&quot;We no longer support providers who are not linked to person. Set the name on the linked person&quot;);</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,408 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderSearchCriteria</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.parameter</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderSearchCriteria (org.openmrs.parameter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderSearchCriteria</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,5%
+  </span>
+  <span class="absValue">
+    (19/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (37/39)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.parameter;
+&nbsp;
+&nbsp;import org.openmrs.CareSetting;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Order;
+&nbsp;import org.openmrs.OrderType;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * The search parameter object for orders. A convenience interface for building
+&nbsp; * instances is provided by {@link OrderSearchCriteriaBuilder}.
+&nbsp; *
+&nbsp; * @since 2.2
+&nbsp; * @see OrderSearchCriteriaBuilder
+&nbsp; */
+&nbsp;public class OrderSearchCriteria {
+&nbsp;
+&nbsp;	private final Patient patient;
+&nbsp;
+&nbsp;	private final CareSetting careSetting;
+&nbsp;
+&nbsp;	private final Collection&lt;Concept&gt; concepts;
+&nbsp;
+&nbsp;	private final Collection&lt;OrderType&gt; orderTypes;
+&nbsp;
+&nbsp;	private final Visit visit;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Accession Number to match on; performs an exact match, case-insensitive
+&nbsp;	 */
+&nbsp;	private String accessionNumber;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Accession Number to match on; performs an exact match, case-insensitive
+&nbsp;	 */
+&nbsp;	private String orderNumber;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matches on dateActivated that is any time on this date or less
+&nbsp;	 */
+&nbsp;	private final Date activatedOnOrBeforeDate;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matches on dateActivated that is any time on this date or more
+&nbsp;	 */
+&nbsp;	private final Date activatedOnOrAfterDate;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matches on autoExpireDate that is any time on this date or less
+&nbsp;	 */
+&nbsp;	private final Date autoExpireOnOrBeforeDate;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matches on dateStopped that is any time on this date or less
+&nbsp;	 */
+&nbsp;	private final boolean isStopped;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * All canceled or auto expired orders before date
+&nbsp;	 */
+&nbsp;	private final Date canceledOrExpiredOnOrBeforeDate;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matches on fulfillerStatus
+&nbsp;	 */
+&nbsp;	private final Order.FulfillerStatus fulfillerStatus;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matches on orders with fulfiller_status = null
+&nbsp;	 * This parameter could work in conjunction with fulfillerStatus.
+&nbsp;	 *  If fulfillerStatus is specified then includeNullFulfillerStatus=true would include
+&nbsp;	 *  all orders where fulfillerStatus=null OR fulfillerStatus = specified value
+&nbsp;	 */
+&nbsp;	private final Boolean includeNullFulfillerStatus;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Matches on action
+&nbsp;     */
+&nbsp;	private final Order.Action action;
+&nbsp;
+&nbsp;	private final boolean includeVoided;
+&nbsp;
+&nbsp;	private final boolean excludeCanceledAndExpired;
+&nbsp;
+&nbsp;	private final boolean excludeDiscontinueOrders;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Instead of calling this constructor directly, it is recommended to use {@link OrderSearchCriteriaBuilder}.
+&nbsp;	 * @param patient the patient the order is for
+&nbsp;	 * @param careSetting the care setting to match on
+&nbsp;	 * @param concepts the concepts to match on; if not specified, matches on all concepts
+&nbsp;	 * @param orderTypes the order types to match on; if not specified, matches all order types
+&nbsp;	 * @param accessionNumber to match on; performs exact match if specified
+&nbsp;	 * @param orderNumber to match on; performs exact match if specifed
+&nbsp;	 * @param activatedOnOrBeforeDate orders must have dateActivated on or before this date
+&nbsp;	 * @param activatedOnOrAfterDate orders must have dateActivated on or after this date
+&nbsp;	 * @param includeVoided whether to include the voided orders or not
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteria(Patient patient, CareSetting careSetting, Collection&lt;Concept&gt; concepts,
+&nbsp;			   Collection&lt;OrderType&gt; orderTypes, String accessionNumber, String orderNumber,
+&nbsp;			   Date activatedOnOrBeforeDate, Date activatedOnOrAfterDate, boolean isStopped,
+&nbsp;			   Date autoExpireOnOrBeforeDate,
+&nbsp;			   Date canceledOrExpiredOnOrBeforeDate,
+&nbsp;			   Order.Action action,
+&nbsp;			   Order.FulfillerStatus fulfillerStatus,
+&nbsp;			   Boolean includeNullFulfillerStatus,
+&nbsp;			   boolean excludeCanceledAndExpired,
+&nbsp;			   boolean excludeDiscontinueOrders,
+&nbsp;			   boolean includeVoided) {
+&nbsp;		
+<b class="nc">&nbsp;		this(patient, careSetting, concepts, orderTypes, null, null,</b>
+&nbsp;				activatedOnOrBeforeDate, activatedOnOrAfterDate, isStopped, autoExpireOnOrBeforeDate, canceledOrExpiredOnOrBeforeDate,
+&nbsp;				action, fulfillerStatus, includeNullFulfillerStatus, excludeCanceledAndExpired, excludeDiscontinueOrders, includeVoided, null);
+&nbsp;	}
+&nbsp;
+&nbsp;	public OrderSearchCriteria(Patient patient, CareSetting careSetting, Collection&lt;Concept&gt; concepts,
+&nbsp;							   Collection&lt;OrderType&gt; orderTypes, String accessionNumber, String orderNumber,
+&nbsp;							   Date activatedOnOrBeforeDate, Date activatedOnOrAfterDate, boolean isStopped,
+&nbsp;							   Date autoExpireOnOrBeforeDate,
+&nbsp;							   Date canceledOrExpiredOnOrBeforeDate,
+&nbsp;							   Order.Action action,
+&nbsp;							   Order.FulfillerStatus fulfillerStatus,
+&nbsp;							   Boolean includeNullFulfillerStatus,
+&nbsp;							   boolean excludeCanceledAndExpired,
+&nbsp;							   boolean excludeDiscontinueOrders,
+&nbsp;							   boolean includeVoided,
+<b class="fc">&nbsp;							   Visit visit) {</b>
+<b class="fc">&nbsp;		this.patient = patient;</b>
+<b class="fc">&nbsp;		this.careSetting = careSetting;</b>
+<b class="fc">&nbsp;		this.concepts = concepts;</b>
+<b class="fc">&nbsp;		this.orderTypes = orderTypes;</b>
+<b class="fc">&nbsp;		this.accessionNumber = accessionNumber;</b>
+<b class="fc">&nbsp;		this.orderNumber = orderNumber;</b>
+<b class="fc">&nbsp;		this.activatedOnOrBeforeDate = activatedOnOrBeforeDate;</b>
+<b class="fc">&nbsp;		this.activatedOnOrAfterDate = activatedOnOrAfterDate;</b>
+<b class="fc">&nbsp;		this.isStopped = isStopped;</b>
+<b class="fc">&nbsp;		this.autoExpireOnOrBeforeDate = autoExpireOnOrBeforeDate;</b>
+<b class="fc">&nbsp;		this.canceledOrExpiredOnOrBeforeDate = canceledOrExpiredOnOrBeforeDate;</b>
+<b class="fc">&nbsp;		this.action = action;</b>
+<b class="fc">&nbsp;		this.fulfillerStatus = fulfillerStatus;</b>
+<b class="fc">&nbsp;		this.includeNullFulfillerStatus = includeNullFulfillerStatus;</b>
+<b class="fc">&nbsp;		this.excludeCanceledAndExpired = excludeCanceledAndExpired;</b>
+<b class="fc">&nbsp;		this.excludeDiscontinueOrders = excludeDiscontinueOrders;</b>
+<b class="fc">&nbsp;		this.includeVoided = includeVoided;</b>
+<b class="fc">&nbsp;		this.visit = visit;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * (Legacy constructor, before addition of Order Number and Accession Number fields)
+&nbsp;	 * Instead of calling this constructor directly, it is recommended to use {@link OrderSearchCriteriaBuilder}.
+&nbsp;	 * @param patient the patient the order is for
+&nbsp;	 * @param careSetting the care setting to match on
+&nbsp;	 * @param concepts the concepts to match on; if not specified, matches on all concepts
+&nbsp;	 * @param orderTypes the order types to match on; if not specified, matches all order types
+&nbsp;	 * @param activatedOnOrBeforeDate orders must have dateActivated on or before this date
+&nbsp;	 * @param activatedOnOrAfterDate orders must have dateActivated on or after this date
+&nbsp;	 * @param includeVoided whether to include the voided orders or not
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public OrderSearchCriteria(Patient patient, CareSetting careSetting, Collection&lt;Concept&gt; concepts,
+&nbsp;							   Collection&lt;OrderType&gt; orderTypes, Date activatedOnOrBeforeDate,
+&nbsp;							   Date activatedOnOrAfterDate, boolean isStopped, Date autoExpireOnOrBeforeDate,
+&nbsp;							   Date canceledOrExpiredOnOrBeforeDate,
+&nbsp;							   Order.Action action,
+&nbsp;							   Order.FulfillerStatus fulfillerStatus,
+&nbsp;							   Boolean includeNullFulfillerStatus,
+&nbsp;							   boolean excludeCanceledAndExpired,
+&nbsp;							   boolean excludeDiscontinueOrders,
+&nbsp;							   boolean includeVoided) {
+&nbsp;
+<b class="nc">&nbsp;		this(patient, careSetting, concepts, orderTypes, null, null,</b>
+&nbsp;			activatedOnOrBeforeDate, activatedOnOrAfterDate, isStopped, autoExpireOnOrBeforeDate, canceledOrExpiredOnOrBeforeDate,
+&nbsp;			action, fulfillerStatus, includeNullFulfillerStatus, excludeCanceledAndExpired, excludeDiscontinueOrders, includeVoided);
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the patient the order is for
+&nbsp;	 */
+<b class="fc">&nbsp;	public Patient getPatient() { return patient; }</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the care setting to match on
+&nbsp;	 */
+<b class="fc">&nbsp;	public CareSetting getCareSetting() { return careSetting; }</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the concepts defining the order must be in this collection
+&nbsp;	 */
+<b class="fc">&nbsp;	public Collection&lt;Concept&gt; getConcepts() { return concepts; }</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the order types to match on must be in this collection
+&nbsp;	 */
+<b class="fc">&nbsp;	public Collection&lt;OrderType&gt; getOrderTypes() { return orderTypes; }</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the visit the order is for
+&nbsp;	 * @since 2.7.0
+&nbsp;	 */
+<b class="fc">&nbsp;	public Visit getVisit() { return visit; }</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the accession number to match on; must be case-insensitive exact-match
+&nbsp;	 * @since 2.3.1
+&nbsp;	 */
+&nbsp;	public String getAccessionNumber() {
+<b class="fc">&nbsp;		return accessionNumber;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the order number to match on; must be case-insensitive exact-match
+&nbsp;	 * @since 2.3.1
+&nbsp;	 */
+&nbsp;	public String getOrderNumber() {
+<b class="fc">&nbsp;		return orderNumber;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return orders must have dateActivated on or before this date
+&nbsp;	 */
+<b class="fc">&nbsp;	public Date getActivatedOnOrBeforeDate() { return activatedOnOrBeforeDate; }</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return orders must have dateActivated on or after this date
+&nbsp;	 */
+<b class="fc">&nbsp;	public Date getActivatedOnOrAfterDate() { return activatedOnOrAfterDate; }</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @return orders must have dateStopped on or before this date
+&nbsp;	 */
+&nbsp;	public boolean isStopped() {
+<b class="fc">&nbsp;		return isStopped;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @return orders must have autoExpireDate on or before this date
+&nbsp;	 */
+&nbsp;	public Date getAutoExpireOnOrBeforeDate() {
+<b class="fc">&nbsp;		return autoExpireOnOrBeforeDate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @return orders that are canceled or have autoExpireDate on or before this date
+&nbsp;	 */
+&nbsp;	public Date getCanceledOrExpiredOnOrBeforeDate() {
+<b class="fc">&nbsp;		return canceledOrExpiredOnOrBeforeDate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;     *
+&nbsp;     * @return orders must match the action
+&nbsp;     */
+&nbsp;	public Order.Action getAction() {
+<b class="fc">&nbsp;        return action;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;	 *
+&nbsp;	 * @return orders must match the fulfillerstatus
+&nbsp;	 */
+&nbsp;	public Order.FulfillerStatus getFulfillerStatus() {
+<b class="fc">&nbsp;		return fulfillerStatus;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @return include(OR) orders with fulfiller_status = null
+&nbsp;	 */
+&nbsp;	public Boolean getIncludeNullFulfillerStatus() {
+<b class="fc">&nbsp;		return includeNullFulfillerStatus;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean getExcludeCanceledAndExpired() {
+<b class="fc">&nbsp;		return excludeCanceledAndExpired;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	public boolean getExcludeDiscontinueOrders() {
+<b class="fc">&nbsp;		return excludeDiscontinueOrders;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return whether to include the voided orders or not
+&nbsp;	 */
+<b class="fc">&nbsp;	public boolean getIncludeVoided() { return includeVoided; }</b>
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

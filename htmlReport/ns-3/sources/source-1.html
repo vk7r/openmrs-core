@@ -1,0 +1,251 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AuthorizationAdvice</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.aop</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthorizationAdvice (org.openmrs.aop)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthorizationAdvice</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,6%
+  </span>
+  <span class="absValue">
+    (29/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.aop;
+&nbsp;
+&nbsp;import java.lang.reflect.Method;
+&nbsp;import java.util.Collection;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.AuthorizedAnnotationAttributes;
+&nbsp;import org.openmrs.api.APIAuthenticationException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.Daemon;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.aop.MethodBeforeAdvice;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides the authorization AOP advice performed before every service layer method
+&nbsp; * call.
+&nbsp; */
+<b class="fc">&nbsp;public class AuthorizationAdvice implements MethodBeforeAdvice {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Logger for this class and subclasses
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(AuthorizationAdvice.class);</b>
+&nbsp;        private static final String USER_IS_NOT_AUTHORIZED_TO_ACCESS = &quot;User {} is not authorized to access {}&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allows us to check whether a user is authorized to access a particular method.
+&nbsp;	 * 
+&nbsp;	 * @param method
+&nbsp;	 * @param args
+&nbsp;	 * @param target
+&nbsp;	 * @throws Throwable
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; notify listeners about checked privileges
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void before(Method method, Object[] args, Object target) throws Throwable {
+<b class="fc">&nbsp;		log.debug(&quot;Calling authorization advice before {}&quot;, method.getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			User user = Context.getAuthenticatedUser();</b>
+<b class="nc">&nbsp;			log.debug(&quot;User {}&quot;, user);</b>
+<b class="nc">&nbsp;			if (user != null) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;has roles {}&quot;, user.getAllRoles());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (Daemon.isDaemonThread()) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		AuthorizedAnnotationAttributes attributes = new AuthorizedAnnotationAttributes();</b>
+<b class="fc">&nbsp;		Collection&lt;String&gt; privileges = attributes.getAttributes(method);</b>
+<b class="fc">&nbsp;		boolean requireAll = attributes.getRequireAll(method);</b>
+&nbsp;		
+&nbsp;		// Only execute if the &quot;secure&quot; method has authorization attributes
+&nbsp;		// Iterate through required privileges and return only if the user has
+&nbsp;		// one of them
+<b class="fc">&nbsp;		if (!privileges.isEmpty()) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Context.addProxyPrivilege(PrivilegeConstants.GET_ROLES);</b>
+<b class="fc">&nbsp;				for (String privilege : privileges) {</b>
+&nbsp;					// skip null privileges
+<b class="fc">&nbsp;					if (privilege == null || privilege.isEmpty()) {</b>
+&nbsp;						return;
+&nbsp;					}
+<b class="fc">&nbsp;					boolean hasPrivilege  = Context.hasPrivilege(privilege);</b>
+<b class="fc">&nbsp;					log.debug(&quot;User has privilege {}? {}&quot;, privilege, hasPrivilege);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (hasPrivilege) {</b>
+<b class="fc">&nbsp;						if (!requireAll) {</b>
+&nbsp;							// if not all required, the first one that they have
+&nbsp;							// causes them to &quot;pass&quot;
+&nbsp;							return;
+&nbsp;						}
+&nbsp;					} else {
+<b class="fc">&nbsp;						if (requireAll) {</b>
+&nbsp;							// if all are required, the first miss causes them
+&nbsp;							// to &quot;fail&quot;
+<b class="nc">&nbsp;							throwUnauthorized(Context.getAuthenticatedUser(), method, privilege);</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;			} finally {
+<b class="fc">&nbsp;				Context.removeProxyPrivilege(PrivilegeConstants.GET_ROLES);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!requireAll) {</b>
+&nbsp;				// If there&#39;s no match, then we know there are privileges and
+&nbsp;				// that the user didn&#39;t have any of them. The user is not
+&nbsp;				// authorized to access the method
+<b class="fc">&nbsp;				throwUnauthorized(Context.getAuthenticatedUser(), method, privileges);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;		} else if (attributes.hasAuthorizedAnnotation(method) &amp;&amp; !Context.isAuthenticated()) {</b>
+<b class="fc">&nbsp;			throwUnauthorized(Context.getAuthenticatedUser(), method);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Throws an APIAuthorization exception stating why the user failed
+&nbsp;	 * 
+&nbsp;	 * @param user authenticated user
+&nbsp;	 * @param method acting method
+&nbsp;	 * @param attrs Collection of String privilege names that the user must have
+&nbsp;	 */
+&nbsp;	private void throwUnauthorized(User user, Method method, Collection&lt;String&gt; attrs) {
+<b class="fc">&nbsp;		log.debug(USER_IS_NOT_AUTHORIZED_TO_ACCESS, user, method.getName());</b>
+<b class="fc">&nbsp;		throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(&quot;error.privilegesRequired&quot;,</b>
+<b class="fc">&nbsp;		    new Object[] { StringUtils.join(attrs, &quot;,&quot;) }, null));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Throws an APIAuthorization exception stating why the user failed
+&nbsp;	 * 
+&nbsp;	 * @param user authenticated user
+&nbsp;	 * @param method acting method
+&nbsp;	 * @param attrs privilege names that the user must have
+&nbsp;	 */
+&nbsp;	private void throwUnauthorized(User user, Method method, String attr) {
+<b class="nc">&nbsp;		log.debug(USER_IS_NOT_AUTHORIZED_TO_ACCESS, user, method.getName());</b>
+<b class="nc">&nbsp;		throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(&quot;error.privilegesRequired&quot;,</b>
+&nbsp;		    new Object[] { attr }, null));
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Throws an APIAuthorization exception stating why the user failed
+&nbsp;	 * 
+&nbsp;	 * @param user authenticated user
+&nbsp;	 * @param method acting method
+&nbsp;	 */
+&nbsp;	private void throwUnauthorized(User user, Method method) {
+<b class="fc">&nbsp;		log.debug(USER_IS_NOT_AUTHORIZED_TO_ACCESS, user, method.getName());</b>
+<b class="fc">&nbsp;		throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(&quot;error.aunthenticationRequired&quot;));</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

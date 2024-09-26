@@ -1,0 +1,265 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > EncounterSearchCriteria</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.parameter</a>
+</div>
+
+<h1>Coverage Summary for Class: EncounterSearchCriteria (org.openmrs.parameter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EncounterSearchCriteria</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.parameter;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Provider;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.VisitType;
+&nbsp;
+&nbsp;/**
+&nbsp; * The search parameter object for encounters. A convenience interface for building
+&nbsp; * instances is provided by {@link EncounterSearchCriteriaBuilder}.
+&nbsp; *
+&nbsp; * @since 1.12
+&nbsp; * @see EncounterSearchCriteriaBuilder
+&nbsp; */
+&nbsp;public class EncounterSearchCriteria {
+&nbsp;	
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	private Location location;
+&nbsp;	
+&nbsp;	private Date fromDate;
+&nbsp;	
+&nbsp;	private Date toDate;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	private Collection&lt;Form&gt; enteredViaForms;
+&nbsp;	
+&nbsp;	private Collection&lt;EncounterType&gt; encounterTypes;
+&nbsp;	
+&nbsp;	private Collection&lt;Provider&gt; providers;
+&nbsp;	
+&nbsp;	private Collection&lt;VisitType&gt; visitTypes;
+&nbsp;	
+&nbsp;	private Collection&lt;Visit&gt; visits;
+&nbsp;	
+&nbsp;	private boolean includeVoided;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Instead of calling this constructor directly, it is recommended to use {@link EncounterSearchCriteriaBuilder}.
+&nbsp;	 * @param patient the patient the encounter is for
+&nbsp;	 * @param location the location this encounter took place
+&nbsp;	 * @param fromDate the minimum date (inclusive) the encounter took place
+&nbsp;	 * @param toDate the maximum date (exclusive) the encounter took place
+&nbsp;	 * @param dateChanged the minimum date the encounter was changed
+&nbsp;	 * @param enteredViaForms the form that entered this encounter must be in this collection
+&nbsp;	 * @param encounterTypes the type of the encounter must be in this collection
+&nbsp;	 * @param providers the provider of the encounter must be in this collection
+&nbsp;	 * @param visitTypes the visit types of the encounter must be in this collection
+&nbsp;	 * @param visits the visits of the encounter must be in this collection
+&nbsp;	 * @param includeVoided whether to include the voided encounters or not
+&nbsp;	 */
+&nbsp;	public EncounterSearchCriteria(Patient patient, Location location, Date fromDate, Date toDate, Date dateChanged,
+&nbsp;								   Collection&lt;Form&gt; enteredViaForms, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;								   Collection&lt;Provider&gt; providers, Collection&lt;VisitType&gt; visitTypes,
+<b class="fc">&nbsp;								   Collection&lt;Visit&gt; visits, boolean includeVoided) {</b>
+<b class="fc">&nbsp;		this.patient = patient;</b>
+<b class="fc">&nbsp;		this.location = location;</b>
+<b class="fc">&nbsp;		this.fromDate = fromDate;</b>
+<b class="fc">&nbsp;		this.toDate = toDate;</b>
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+<b class="fc">&nbsp;		this.enteredViaForms = enteredViaForms;</b>
+<b class="fc">&nbsp;		this.encounterTypes = encounterTypes;</b>
+<b class="fc">&nbsp;		this.providers = providers;</b>
+<b class="fc">&nbsp;		this.visitTypes = visitTypes;</b>
+<b class="fc">&nbsp;		this.visits = visits;</b>
+<b class="fc">&nbsp;		this.includeVoided = includeVoided;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the patient the encounter is for
+&nbsp;	 */
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the location this encounter took place
+&nbsp;	 */
+&nbsp;	public Location getLocation() {
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the minimum date (inclusive) this encounter took place
+&nbsp;	 */
+&nbsp;	public Date getFromDate() {
+<b class="fc">&nbsp;		return fromDate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the maximum date (exclusive) this encounter took place
+&nbsp;	 */
+&nbsp;	public Date getToDate() {
+<b class="fc">&nbsp;		return toDate;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the minimum date this encounter was changed
+&nbsp;	 */
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the form that entered this encounter must be in this collection
+&nbsp;	 */
+&nbsp;	public Collection&lt;Form&gt; getEnteredViaForms() {
+<b class="fc">&nbsp;		return enteredViaForms;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the type of encounter must be in this list
+&nbsp;	 */
+&nbsp;	public Collection&lt;EncounterType&gt; getEncounterTypes() {
+<b class="fc">&nbsp;		return encounterTypes;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the provider of this encounter must be in this list
+&nbsp;	 */
+&nbsp;	public Collection&lt;Provider&gt; getProviders() {
+<b class="fc">&nbsp;		return providers;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the visit types of this encounter must be in this list
+&nbsp;	 */
+&nbsp;	public Collection&lt;VisitType&gt; getVisitTypes() {
+<b class="fc">&nbsp;		return visitTypes;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the visits of this encounter must be in this list
+&nbsp;	 */
+&nbsp;	public Collection&lt;Visit&gt; getVisits() {
+<b class="fc">&nbsp;		return visits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return whether to include the voided encounters or not
+&nbsp;	 */
+&nbsp;	public boolean getIncludeVoided() {
+<b class="fc">&nbsp;		return includeVoided;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

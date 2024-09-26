@@ -1,0 +1,335 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptNumeric</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptNumeric (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptNumeric</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (66/66)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.Indexed;
+&nbsp;
+&nbsp;/**
+&nbsp; * The ConceptNumeric extends upon the Concept object by adding some number range values
+&nbsp; * 
+&nbsp; * @see Concept
+&nbsp; */
+&nbsp;@Indexed
+&nbsp;@Audited
+&nbsp;public class ConceptNumeric extends Concept {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 47323L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private Double hiAbsolute;
+&nbsp;	
+&nbsp;	private Double hiCritical;
+&nbsp;	
+&nbsp;	private Double hiNormal;
+&nbsp;	
+&nbsp;	private Double lowAbsolute;
+&nbsp;	
+&nbsp;	private Double lowCritical;
+&nbsp;	
+&nbsp;	private Double lowNormal;
+&nbsp;	
+&nbsp;	private String units;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean allowDecimal = false;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * displayPrecision, represents the number of significant digits
+&nbsp;	 * to be used for display of a numeric value
+&nbsp;	 */
+&nbsp;	private Integer displayPrecision;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptNumeric() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Generic constructor taking the primary key
+&nbsp;	 * 
+&nbsp;	 * @param conceptId key for this numeric concept
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptNumeric(Integer conceptId) {</b>
+<b class="fc">&nbsp;		setConceptId(conceptId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Optional constructor for turning a Concept into a ConceptNumeric &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Note: This cannot copy over numeric specific values
+&nbsp;	 * 
+&nbsp;	 * @param c
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; make deep copy of collections
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change reference to the parent object  for objects in answers collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change reference to the parent object  for objects in conceptSets collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change reference to the parent object  for objects in names collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change reference to the parent object  for objects in descriptions collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change reference to the parent object  for objects in conceptMappings collection
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptNumeric(Concept c) {</b>
+<b class="fc">&nbsp;		this.setChangedBy(c.getChangedBy());</b>
+<b class="fc">&nbsp;		this.setConceptClass(c.getConceptClass());</b>
+<b class="fc">&nbsp;		this.setConceptId(c.getConceptId());</b>
+<b class="fc">&nbsp;		this.setCreator(c.getCreator());</b>
+<b class="fc">&nbsp;		this.setDatatype(c.getDatatype());</b>
+<b class="fc">&nbsp;		this.setDateChanged(c.getDateChanged());</b>
+<b class="fc">&nbsp;		this.setDateCreated(c.getDateCreated());</b>
+<b class="fc">&nbsp;		this.setSet(c.getSet());</b>
+<b class="fc">&nbsp;		this.setRetired(c.getRetired());</b>
+<b class="fc">&nbsp;		this.setRetiredBy(c.getRetiredBy());</b>
+<b class="fc">&nbsp;		this.setRetireReason(c.getRetireReason());</b>
+<b class="fc">&nbsp;		this.setVersion(c.getVersion());</b>
+<b class="fc">&nbsp;		this.setUuid(c.getUuid());</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.setNames(new HashSet&lt;&gt;(c.getNames()));</b>
+<b class="fc">&nbsp;		for (ConceptName cName : this.getNames()) {</b>
+<b class="fc">&nbsp;			cName.setConcept(this);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.setAnswers(new HashSet&lt;&gt;(c.getAnswers(true)));</b>
+<b class="fc">&nbsp;		for (ConceptAnswer cAnswer : this.getAnswers()) {</b>
+<b class="fc">&nbsp;			cAnswer.setConcept(this);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.setConceptSets(new TreeSet&lt;&gt;(c.getConceptSets()));</b>
+<b class="fc">&nbsp;		for (ConceptSet cSet : this.getConceptSets()) {</b>
+<b class="fc">&nbsp;			cSet.setConceptSet(this);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.setDescriptions(new HashSet&lt;&gt;(c.getDescriptions()));</b>
+<b class="fc">&nbsp;		for (ConceptDescription cDescription : this.getDescriptions()) {</b>
+<b class="fc">&nbsp;			cDescription.setConcept(this);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.setConceptMappings(new HashSet&lt;&gt;(c.getConceptMappings()));</b>
+<b class="fc">&nbsp;		for (ConceptMap cMap : this.getConceptMappings()) {</b>
+<b class="fc">&nbsp;			cMap.setConcept(this);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.hiAbsolute = null;</b>
+<b class="fc">&nbsp;		this.hiCritical = null;</b>
+<b class="fc">&nbsp;		this.hiNormal = null;</b>
+<b class="fc">&nbsp;		this.lowAbsolute = null;</b>
+<b class="fc">&nbsp;		this.lowCritical = null;</b>
+<b class="fc">&nbsp;		this.lowNormal = null;</b>
+<b class="fc">&nbsp;		this.units = &quot;&quot;;</b>
+<b class="fc">&nbsp;		this.allowDecimal = false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	public Double getHiAbsolute() {
+<b class="fc">&nbsp;		return this.hiAbsolute;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setHiAbsolute(Double hiAbsolute) {
+<b class="fc">&nbsp;		this.hiAbsolute = hiAbsolute;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getHiCritical() {
+<b class="fc">&nbsp;		return this.hiCritical;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setHiCritical(Double hiCritical) {
+<b class="fc">&nbsp;		this.hiCritical = hiCritical;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getHiNormal() {
+<b class="fc">&nbsp;		return this.hiNormal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setHiNormal(Double hiNormal) {
+<b class="fc">&nbsp;		this.hiNormal = hiNormal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getLowAbsolute() {
+<b class="fc">&nbsp;		return this.lowAbsolute;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setLowAbsolute(Double lowAbsolute) {
+<b class="fc">&nbsp;		this.lowAbsolute = lowAbsolute;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getLowCritical() {
+<b class="fc">&nbsp;		return this.lowCritical;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setLowCritical(Double lowCritical) {
+<b class="fc">&nbsp;		this.lowCritical = lowCritical;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getLowNormal() {
+<b class="fc">&nbsp;		return this.lowNormal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setLowNormal(Double lowNormal) {
+<b class="fc">&nbsp;		this.lowNormal = lowNormal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getUnits() {
+<b class="fc">&nbsp;		return this.units;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setUnits(String units) {
+<b class="fc">&nbsp;		this.units = units;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This method will &lt;i&gt;always&lt;/i&gt; return true for ConceptNumeric objects that have a datatype of
+&nbsp;	 * Numeric
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Concept#isNumeric()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isNumeric() {
+<b class="fc">&nbsp;		return &quot;Numeric&quot;.equals(getDatatype().getName());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return displayPrecision to be used for the display of a numeric value
+&nbsp;	 */
+&nbsp;	public Integer getDisplayPrecision() {
+<b class="fc">&nbsp;		return displayPrecision;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param displayPrecision sets displayPrecision to be used for the display of a numeric value
+&nbsp;	 */
+&nbsp;	public void setDisplayPrecision(Integer displayPrecision) {
+<b class="fc">&nbsp;		this.displayPrecision = displayPrecision;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getAllowDecimal() {
+<b class="fc">&nbsp;		return allowDecimal == null ? Boolean.FALSE : allowDecimal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setAllowDecimal(Boolean allowDecimal) {
+<b class="fc">&nbsp;		this.allowDecimal = allowDecimal;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of 2.0, use {@link #getAllowDecimal()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isAllowDecimal() {
+<b class="fc">&nbsp;		return getAllowDecimal();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

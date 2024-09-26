@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateTemplateDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateTemplateDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateTemplateDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (3/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,8%
+  </span>
+  <span class="absValue">
+    (3/16)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.TemplateDAO;
+&nbsp;import org.openmrs.notification.Template;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;public class HibernateTemplateDAO implements TemplateDAO {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HibernateTemplateDAO.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+<b class="fc">&nbsp;	public HibernateTemplateDAO() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 * 
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;Template&gt; getTemplates() {
+<b class="nc">&nbsp;		log.info(&quot;Getting all templates from the database&quot;);</b>
+<b class="nc">&nbsp;		return sessionFactory.getCurrentSession().createQuery(&quot;from Template&quot;).list();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Template getTemplate(Integer id) {
+<b class="nc">&nbsp;		log.info(&quot;Get template &quot; + id);</b>
+<b class="nc">&nbsp;		return (Template) sessionFactory.getCurrentSession().get(Template.class, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;Template&gt; getTemplatesByName(String name) {
+<b class="nc">&nbsp;		log.info(&quot;Get template &quot; + name);</b>
+<b class="nc">&nbsp;		return sessionFactory.getCurrentSession().createQuery(&quot;from Template as template where template.name = ?&quot;)</b>
+<b class="nc">&nbsp;		        .setString(0, name).list();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void createTemplate(Template template) throws DAOException {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(template);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void updateTemplate(Template template) throws DAOException {
+<b class="nc">&nbsp;		if (template.getId() == null) {</b>
+<b class="nc">&nbsp;			createTemplate(template);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			template = (Template) sessionFactory.getCurrentSession().merge(template);</b>
+<b class="nc">&nbsp;			sessionFactory.getCurrentSession().saveOrUpdate(template);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void deleteTemplate(Template template) throws DAOException {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().delete(template);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

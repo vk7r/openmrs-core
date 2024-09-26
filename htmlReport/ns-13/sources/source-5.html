@@ -1,0 +1,225 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HL7InQueueProcessor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7</a>
+</div>
+
+<h1>Coverage Summary for Class: HL7InQueueProcessor (org.openmrs.hl7)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HL7InQueueProcessor</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7;
+&nbsp;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import ca.uhn.hl7v2.HL7Exception;
+&nbsp;
+&nbsp;/**
+&nbsp; * Processes message in the HL7 inbound queue. Messages are moved into either the archive or error
+&nbsp; * table depending on success or failure of the processing. You may, however, set a global property
+&nbsp; * that causes the processor to ignore messages regarding unknown patients from a non-local HL7
+&nbsp; * source. (i.e. those messages neither go to the archive or the error table.)
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;@Transactional
+&nbsp;public class HL7InQueueProcessor /* implements Runnable */{
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HL7InQueueProcessor.class);</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static Boolean isRunning = false; // allow only one running</b>
+&nbsp;
+<b class="nc">&nbsp;	private static final Object lock = new Object();</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static Integer count = 0;</b>
+&nbsp;	
+&nbsp;	// processor per JVM
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Empty constructor (requires context to be set using &lt;code&gt;setContext(Context)&lt;/code&gt; method
+&nbsp;	 * before any other calls are made)
+&nbsp;	 */
+<b class="nc">&nbsp;	public HL7InQueueProcessor() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setCount(Integer count) {
+<b class="nc">&nbsp;		HL7InQueueProcessor.count = count;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Process a single queue entry from the inbound HL7 queue
+&nbsp;	 *
+&nbsp;	 * @param hl7InQueue queue entry to be processed
+&nbsp;	 */
+&nbsp;	public void processHL7InQueue(HL7InQueue hl7InQueue) {
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Processing HL7 inbound queue (id={} ,key={})&quot;, hl7InQueue.getHL7InQueueId(),</b>
+<b class="nc">&nbsp;		    hl7InQueue.getHL7SourceKey());</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			Context.getHL7Service().processHL7InQueue(hl7InQueue);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (HL7Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to process hl7 in queue&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		setCount(count + 1);</b>
+<b class="nc">&nbsp;		if (count &gt; 25) {</b>
+&nbsp;			// clean up memory after processing each queue entry (otherwise, the
+&nbsp;			// memory-intensive process may crash or eat up all our memory)
+&nbsp;			try {
+<b class="nc">&nbsp;				Context.getHL7Service().garbageCollect();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Exception while performing garbagecollect in hl7 inbound processor&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Transform the next pending HL7 inbound queue entry. If there are no pending items in the
+&nbsp;	 * queue, this method simply returns quietly.
+&nbsp;	 *
+&nbsp;	 * @return true if a queue entry was processed, false if queue was empty
+&nbsp;	 */
+&nbsp;	public boolean processNextHL7InQueue() {
+<b class="nc">&nbsp;		boolean entryProcessed = false;</b>
+<b class="nc">&nbsp;		HL7Service hl7Service = Context.getHL7Service();</b>
+<b class="nc">&nbsp;		HL7InQueue hl7InQueue = hl7Service.getNextHL7InQueue();</b>
+<b class="nc">&nbsp;		if (hl7InQueue != null) {</b>
+<b class="nc">&nbsp;			processHL7InQueue(hl7InQueue);</b>
+<b class="nc">&nbsp;			entryProcessed = true;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return entryProcessed;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Starts up a thread to process all existing HL7InQueue entries
+&nbsp;	 */
+&nbsp;	public void processHL7InQueue() throws HL7Exception {
+<b class="nc">&nbsp;		synchronized (lock) {</b>
+<b class="nc">&nbsp;			if (isRunning) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;HL7 processor aborting (another processor already running)&quot;);</b>
+<b class="nc">&nbsp;				return;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			isRunning = true;</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			log.debug(&quot;Start processing hl7 in queue&quot;);</b>
+<b class="nc">&nbsp;			while (processNextHL7InQueue()) {</b>
+&nbsp;				// loop until queue is empty
+&nbsp;			}
+<b class="nc">&nbsp;			log.debug(&quot;Done processing hl7 in queue&quot;);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			isRunning = false;</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

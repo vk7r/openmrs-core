@@ -1,0 +1,2257 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsUtil (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,4%
+  </span>
+  <span class="absValue">
+    (53/81)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47,3%
+  </span>
+  <span class="absValue">
+    (380/804)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.io.BufferedInputStream;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.ByteArrayInputStream;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.Closeable;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileInputStream;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.OutputStreamWriter;
+&nbsp;import java.io.UnsupportedEncodingException;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;import java.lang.reflect.Method;
+&nbsp;import java.net.MalformedURLException;
+&nbsp;import java.net.URL;
+&nbsp;import java.nio.charset.Charset;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.sql.Timestamp;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.Random;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.StringTokenizer;
+&nbsp;import java.util.jar.JarFile;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.regex.PatternSyntaxException;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;import java.util.zip.ZipEntry;
+&nbsp;
+&nbsp;import javax.activation.MimetypesFileTypeMap;
+&nbsp;import javax.xml.transform.OutputKeys;
+&nbsp;import javax.xml.transform.Transformer;
+&nbsp;import javax.xml.transform.TransformerException;
+&nbsp;import javax.xml.transform.TransformerFactory;
+&nbsp;import javax.xml.transform.dom.DOMSource;
+&nbsp;import javax.xml.transform.stream.StreamResult;
+&nbsp;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptNumeric;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.PersonAttributeType;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramWorkflowState;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.AddOnStartup;
+&nbsp;import org.openmrs.annotation.HasAddOnStartupPrivileges;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.InvalidCharactersPasswordException;
+&nbsp;import org.openmrs.api.PasswordException;
+&nbsp;import org.openmrs.api.ShortPasswordException;
+&nbsp;import org.openmrs.api.WeakPasswordException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.logging.OpenmrsLoggingUtil;
+&nbsp;import org.openmrs.module.ModuleException;
+&nbsp;import org.openmrs.module.ModuleFactory;
+&nbsp;import org.openmrs.propertyeditor.CohortEditor;
+&nbsp;import org.openmrs.propertyeditor.ConceptEditor;
+&nbsp;import org.openmrs.propertyeditor.DrugEditor;
+&nbsp;import org.openmrs.propertyeditor.EncounterTypeEditor;
+&nbsp;import org.openmrs.propertyeditor.FormEditor;
+&nbsp;import org.openmrs.propertyeditor.LocationEditor;
+&nbsp;import org.openmrs.propertyeditor.PersonAttributeTypeEditor;
+&nbsp;import org.openmrs.propertyeditor.ProgramEditor;
+&nbsp;import org.openmrs.propertyeditor.ProgramWorkflowStateEditor;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.slf4j.MarkerFactory;
+&nbsp;import org.springframework.beans.propertyeditors.CustomDateEditor;
+&nbsp;import org.springframework.context.NoSuchMessageException;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.DocumentType;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility methods used in openmrs
+&nbsp; */
+&nbsp;public class OpenmrsUtil {
+&nbsp;	private OpenmrsUtil() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static volatile MimetypesFileTypeMap mimetypesFileTypeMap = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static org.slf4j.Logger log = LoggerFactory.getLogger(OpenmrsUtil.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static Map&lt;Locale, SimpleDateFormat&gt; dateFormatCache = new HashMap&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static Map&lt;Locale, SimpleDateFormat&gt; timeFormatCache = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares origList to newList returning map of differences
+&nbsp;	 * 
+&nbsp;	 * @param origList
+&nbsp;	 * @param newList
+&nbsp;	 * @return [List toAdd, List toDelete] with respect to origList
+&nbsp;	 */
+&nbsp;	public static &lt;E&gt; Collection&lt;Collection&lt;E&gt;&gt; compareLists(Collection&lt;E&gt; origList, Collection&lt;E&gt; newList) {	
+<b class="fc">&nbsp;		Collection&lt;Collection&lt;E&gt;&gt; returnList = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Collection&lt;E&gt; toAdd = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;		Collection&lt;E&gt; toDel = new LinkedList&lt;&gt;();</b>
+&nbsp;		
+&nbsp;		// loop over the new list.
+<b class="fc">&nbsp;		for (E currentNewListObj : newList) {</b>
+&nbsp;			// loop over the original list
+<b class="fc">&nbsp;			boolean foundInList = false;</b>
+<b class="fc">&nbsp;			for (E currentOrigListObj : origList) {</b>
+&nbsp;				// checking if the current new list object is in the original
+&nbsp;				// list
+<b class="fc">&nbsp;				if (currentNewListObj.equals(currentOrigListObj)) {</b>
+<b class="fc">&nbsp;					foundInList = true;</b>
+<b class="fc">&nbsp;					origList.remove(currentOrigListObj);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			if (!foundInList) {</b>
+<b class="fc">&nbsp;				toAdd.add(currentNewListObj);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// all found new objects were removed from the orig list,
+&nbsp;			// leaving only objects needing to be removed
+<b class="fc">&nbsp;			toDel = origList;</b>
+&nbsp;			
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		returnList.add(toAdd);</b>
+<b class="fc">&nbsp;		returnList.add(toDel);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return returnList;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static boolean isStringInArray(String str, String[] arr) {
+<b class="fc">&nbsp;		if (str != null &amp;&amp; arr != null) {</b>
+<b class="fc">&nbsp;			for (String anArr : arr) {</b>
+<b class="fc">&nbsp;				if (str.equals(anArr)) {</b>
+<b class="fc">&nbsp;					return true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Boolean isInNormalNumericRange(Float value, ConceptNumeric concept) {
+<b class="fc">&nbsp;		if (concept.getHiNormal() == null || concept.getLowNormal() == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return (value &lt;= concept.getHiNormal() &amp;&amp; value &gt;= concept.getLowNormal());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Boolean isInCriticalNumericRange(Float value, ConceptNumeric concept) {
+<b class="fc">&nbsp;		if (concept.getHiCritical() == null || concept.getLowCritical() == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return (value &lt;= concept.getHiCritical() &amp;&amp; value &gt;= concept.getLowCritical());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Boolean isInAbsoluteNumericRange(Float value, ConceptNumeric concept) {
+<b class="fc">&nbsp;		if (concept.getHiAbsolute() == null || concept.getLowAbsolute() == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return (value &lt;= concept.getHiAbsolute() &amp;&amp; value &gt;= concept.getLowAbsolute());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Boolean isValidNumericValue(Float value, ConceptNumeric concept) {
+<b class="fc">&nbsp;		if (concept.getHiAbsolute() == null || concept.getLowAbsolute() == null) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return (value &lt;= concept.getHiAbsolute() &amp;&amp; value &gt;= concept.getLowAbsolute());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a string representation of the given file
+&nbsp;	 * 
+&nbsp;	 * @param file
+&nbsp;	 * @return String file contents
+&nbsp;	 * @throws IOException
+&nbsp;	 */
+&nbsp;	public static String getFileAsString(File file) throws IOException {
+<b class="nc">&nbsp;		StringBuilder fileData = new StringBuilder(1000);</b>
+<b class="nc">&nbsp;		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));</b>
+<b class="nc">&nbsp;		char[] buf = new char[1024];</b>
+&nbsp;		int numRead;
+<b class="nc">&nbsp;		while ((numRead = reader.read(buf)) != -1) {</b>
+<b class="nc">&nbsp;			String readData = String.valueOf(buf, 0, numRead);</b>
+<b class="nc">&nbsp;			fileData.append(readData);</b>
+<b class="nc">&nbsp;			buf = new char[1024];</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		reader.close();</b>
+<b class="nc">&nbsp;		return fileData.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a byte array representation of the given file
+&nbsp;	 * 
+&nbsp;	 * @param file
+&nbsp;	 * @return byte[] file contents
+&nbsp;	 * @throws IOException
+&nbsp;	 */
+&nbsp;	public static byte[] getFileAsBytes(File file) throws IOException {
+<b class="fc">&nbsp;		FileInputStream fileInputStream = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			fileInputStream = new FileInputStream(file);</b>
+<b class="fc">&nbsp;			byte[] b = new byte[fileInputStream.available()];</b>
+<b class="fc">&nbsp;			fileInputStream.read(b);</b>
+<b class="fc">&nbsp;			return b;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to get file as byte array&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (fileInputStream != null) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					fileInputStream.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (IOException io) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Couldn&#39;t close fileInputStream: &quot; + io);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Copy file from inputStream onto the outputStream inputStream is not closed in this method
+&nbsp;	 * outputStream /is/ closed at completion of this method
+&nbsp;	 * 
+&nbsp;	 * @param inputStream Stream to copy from
+&nbsp;	 * @param outputStream Stream/location to copy to
+&nbsp;	 * @throws IOException thrown if an error occurs during read/write
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not copy the outputstream if outputstream is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not copy the outputstream if inputstream is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy inputstream to outputstream and close the outputstream
+&nbsp;	 */
+&nbsp;	public static void copyFile(InputStream inputStream, OutputStream outputStream) throws IOException {
+&nbsp;		
+<b class="fc">&nbsp;		if (inputStream == null || outputStream == null) {</b>
+<b class="fc">&nbsp;			if (outputStream != null) {</b>
+<b class="fc">&nbsp;				IOUtils.closeQuietly(outputStream);</b>
+&nbsp;			}
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			IOUtils.copy(inputStream, outputStream);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			IOUtils.closeQuietly(outputStream);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get mime type of the given file
+&nbsp;	 *
+&nbsp;	 * @param file
+&nbsp;	 * @return mime type
+&nbsp;	 */
+&nbsp;	public static String getFileMimeType(File file) {
+<b class="fc">&nbsp;		if (mimetypesFileTypeMap == null) {</b>
+<b class="fc">&nbsp;			synchronized (OpenmrsUtil.class) {</b>
+<b class="fc">&nbsp;				mimetypesFileTypeMap = new MimetypesFileTypeMap();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return mimetypesFileTypeMap.getContentType(file);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Look for a file named &lt;code&gt;filename&lt;/code&gt; in folder
+&nbsp;	 * 
+&nbsp;	 * @param folder
+&nbsp;	 * @param filename
+&nbsp;	 * @return true/false whether filename exists in folder
+&nbsp;	 */
+&nbsp;	public static boolean folderContains(File folder, String filename) {
+<b class="nc">&nbsp;		if (folder == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (!folder.isDirectory()) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		File[] files = folder.listFiles();</b>
+<b class="nc">&nbsp;		if (files == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		for (File f : files) {</b>
+<b class="nc">&nbsp;			if (f.getName().equals(filename)) {</b>
+<b class="nc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * These are the privileges that are required by OpenMRS. This looks for privileges marked as
+&nbsp;	 * {@link AddOnStartup} to know which privs, upon startup or loading of a module, to insert into
+&nbsp;	 * the database if they do not exist already. These privileges are not allowed to be deleted.
+&nbsp;	 * They are marked as &#39;locked&#39; in the administration screens.
+&nbsp;	 * 
+&nbsp;	 * @return privileges core to the system
+&nbsp;	 * @see PrivilegeConstants
+&nbsp;	 * @see Context#checkCoreDataset()
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, String&gt; getCorePrivileges() {
+<b class="fc">&nbsp;		Map&lt;String, String&gt; corePrivileges = new HashMap&lt;&gt;();</b>
+&nbsp;		
+&nbsp;		// TODO getCorePrivileges() is called so so many times that getClassesWithAnnotation() better do some catching.
+<b class="fc">&nbsp;		Set&lt;Class&lt;?&gt;&gt; classes = OpenmrsClassScanner.getInstance().getClassesWithAnnotation(HasAddOnStartupPrivileges.class);</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Class cls : classes) {</b>
+<b class="fc">&nbsp;			Field[] flds = cls.getDeclaredFields();</b>
+<b class="fc">&nbsp;			for (Field fld : flds) {</b>
+<b class="fc">&nbsp;				String fieldValue = null;</b>
+&nbsp;				
+<b class="fc">&nbsp;				AddOnStartup privilegeAnnotation = fld.getAnnotation(AddOnStartup.class);</b>
+<b class="fc">&nbsp;				if (null == privilegeAnnotation) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (!privilegeAnnotation.core()) {</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				try {
+<b class="fc">&nbsp;					fieldValue = (String) fld.get(null);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (IllegalAccessException e) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Field is inaccessible.&quot;, e);</b>
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;				corePrivileges.put(fieldValue, privilegeAnnotation.description());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// always add the module core privileges back on
+<b class="fc">&nbsp;		for (org.openmrs.Privilege privilege : ModuleFactory.getPrivileges()) {</b>
+<b class="nc">&nbsp;			corePrivileges.put(privilege.getPrivilege(), privilege.getDescription());</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return corePrivileges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * All roles returned by this method are inserted into the database if they do not exist
+&nbsp;	 * already. These roles are also forbidden to be deleted from the administration screens.
+&nbsp;	 * 
+&nbsp;	 * @return roles that are core to the system
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, String&gt; getCoreRoles() {
+<b class="fc">&nbsp;		Map&lt;String, String&gt; roles = new HashMap&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Field[] flds = RoleConstants.class.getDeclaredFields();</b>
+<b class="fc">&nbsp;		for (Field fld : flds) {</b>
+<b class="fc">&nbsp;			String fieldValue = null;</b>
+&nbsp;			
+<b class="fc">&nbsp;			AddOnStartup roleAnnotation = fld.getAnnotation(AddOnStartup.class);</b>
+<b class="fc">&nbsp;			if (null == roleAnnotation) {</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!roleAnnotation.core()) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			try {
+<b class="fc">&nbsp;				fieldValue = (String) fld.get(null);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (IllegalAccessException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Field is inaccessible.&quot;, e);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			roles.put(fieldValue, roleAnnotation.description());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return roles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Initialize global settings Find and load modules
+&nbsp;	 * 
+&nbsp;	 * @param p properties from runtime configuration
+&nbsp;	 */
+&nbsp;	public static void startup(Properties p) {
+&nbsp;		
+&nbsp;		// Override global OpenMRS constants if specified by the user
+&nbsp;		
+&nbsp;		// Allow for &quot;demo&quot; mode where patient data is obscured
+<b class="nc">&nbsp;		String val = p.getProperty(&quot;obscure_patients&quot;, null);</b>
+<b class="nc">&nbsp;		if (val != null &amp;&amp; &quot;true&quot;.equalsIgnoreCase(val)) {</b>
+<b class="nc">&nbsp;			OpenmrsConstants.OBSCURE_PATIENTS = true;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		val = p.getProperty(&quot;obscure_patients.family_name&quot;, null);</b>
+<b class="nc">&nbsp;		if (val != null) {</b>
+<b class="nc">&nbsp;			OpenmrsConstants.OBSCURE_PATIENTS_FAMILY_NAME = val;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		val = p.getProperty(&quot;obscure_patients.given_name&quot;, null);</b>
+<b class="nc">&nbsp;		if (val != null) {</b>
+<b class="nc">&nbsp;			OpenmrsConstants.OBSCURE_PATIENTS_GIVEN_NAME = val;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		val = p.getProperty(&quot;obscure_patients.middle_name&quot;, null);</b>
+<b class="nc">&nbsp;		if (val != null) {</b>
+<b class="nc">&nbsp;			OpenmrsConstants.OBSCURE_PATIENTS_MIDDLE_NAME = val;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Override the default &quot;openmrs&quot; database name
+<b class="nc">&nbsp;		val = p.getProperty(&quot;connection.database_name&quot;, null);</b>
+<b class="nc">&nbsp;		if (val == null) {</b>
+&nbsp;			// the database name wasn&#39;t supplied explicitly, guess it
+&nbsp;			// from the connection string
+<b class="nc">&nbsp;			val = p.getProperty(&quot;connection.url&quot;, null);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (val != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					int endIndex = val.lastIndexOf(&quot;?&quot;);</b>
+<b class="nc">&nbsp;					if (endIndex == -1) {</b>
+<b class="nc">&nbsp;						endIndex = val.length();</b>
+&nbsp;					}
+<b class="nc">&nbsp;					int startIndex = val.lastIndexOf(&quot;/&quot;, endIndex);</b>
+<b class="nc">&nbsp;					val = val.substring(startIndex + 1, endIndex);</b>
+<b class="nc">&nbsp;					OpenmrsConstants.DATABASE_NAME = val;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					log.error(MarkerFactory.getMarker(&quot;FATAL&quot;), &quot;Database name cannot be configured from &#39;connection.url&#39; .&quot;</b>
+&nbsp;					        + &quot;Either supply &#39;connection.database_name&#39; or correct the url&quot;,
+&nbsp;					    e);
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// set the business database name
+<b class="nc">&nbsp;		val = p.getProperty(&quot;connection.database_business_name&quot;, null);</b>
+<b class="nc">&nbsp;		if (val == null) {</b>
+<b class="nc">&nbsp;			val = OpenmrsConstants.DATABASE_NAME;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		OpenmrsConstants.DATABASE_BUSINESS_NAME = val;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the in-memory log appender. This method needed to be added as it is much more difficult to
+&nbsp;	 * get a specific appender in the Log4J2 architecture. This method is called in places where we need
+&nbsp;	 * to display logging message.
+&nbsp;	 *
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @deprecated As of 2.4.4, 2.5.1, and 2.6.0; replaced by {@link OpenmrsLoggingUtil#getMemoryAppender()} instead
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static MemoryAppender getMemoryAppender() {
+<b class="nc">&nbsp;		return new MemoryAppender(OpenmrsLoggingUtil.getMemoryAppender());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the org.openmrs log4j logger&#39;s level if global property log.level.openmrs (
+&nbsp;	 * OpenmrsConstants.GLOBAL_PROPERTY_LOG_LEVEL ) exists. Valid values for global property are
+&nbsp;	 * trace, debug, info, warn, error or fatal.
+&nbsp;	 * 
+&nbsp;	 * @deprecated As of 2.4.4, 2.5.1, and 2.6.0; replaced by {@link OpenmrsLoggingUtil#applyLogLevels()}
+&nbsp;	 */
+&nbsp;	@Logging(ignore = true)
+&nbsp;	@Deprecated
+&nbsp;	public static void applyLogLevels() {
+<b class="fc">&nbsp;		OpenmrsLoggingUtil.applyLogLevels();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Setup root level log appenders.
+&nbsp;	 *
+&nbsp;	 * @since 1.9.2
+&nbsp;	 * @deprecated As of 2.4.4, 2.5.1, and 2.6.0; replaced by {@link OpenmrsLoggingUtil#reloadLoggingConfiguration()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static void setupLogAppenders() {
+<b class="nc">&nbsp;		OpenmrsLoggingUtil.reloadLoggingConfiguration();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the log4j log level for class &lt;code&gt;logClass&lt;/code&gt; to &lt;code&gt;logLevel&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param logClass optional string giving the class level to change. Defaults to
+&nbsp;	 *            OpenmrsConstants.LOG_CLASS_DEFAULT . Should be something like org.openmrs.___
+&nbsp;	 * @param logLevel one of OpenmrsConstants.LOG_LEVEL_*
+&nbsp;	 *                 
+&nbsp;	 * @deprecated As of 2.4.4, 2.5.1, and 2.6.0; replaced by {@link OpenmrsLoggingUtil#applyLogLevel(String, String)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static void applyLogLevel(String logClass, String logLevel) {
+<b class="fc">&nbsp;		OpenmrsLoggingUtil.applyLogLevel(logClass, logLevel);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes a String like &quot;size=compact|order=date&quot; and returns a Map&amp;lt;String,String&amp;gt; from the
+&nbsp;	 * keys to the values.
+&nbsp;	 * 
+&nbsp;	 * @param paramList &lt;code&gt;String&lt;/code&gt; with a list of parameters
+&nbsp;	 * @return Map&amp;lt;String, String&amp;gt; of the parameters passed
+&nbsp;	 */
+&nbsp;	public static Map&lt;String, String&gt; parseParameterList(String paramList) {
+<b class="fc">&nbsp;		Map&lt;String, String&gt; ret = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (paramList != null &amp;&amp; paramList.length() &gt; 0) {</b>
+<b class="fc">&nbsp;			String[] args = paramList.split(&quot;\\|&quot;);</b>
+<b class="fc">&nbsp;			for (String s : args) {</b>
+<b class="fc">&nbsp;				int ind = s.indexOf(&#39;=&#39;);</b>
+<b class="fc">&nbsp;				if (ind &lt;= 0) {</b>
+<b class="fc">&nbsp;					throw new IllegalArgumentException(</b>
+&nbsp;					        &quot;Misformed argument in dynamic page specification string: &#39;&quot; + s + &quot;&#39; is not &#39;key=value&#39;.&quot;);
+&nbsp;				}
+<b class="fc">&nbsp;				String name = s.substring(0, ind);</b>
+<b class="fc">&nbsp;				String value = s.substring(ind + 1);</b>
+<b class="fc">&nbsp;				ret.put(name, value);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;Arg1, Arg2 extends Arg1&gt; boolean nullSafeEquals(Arg1 d1, Arg2 d2) {
+<b class="fc">&nbsp;		if (d1 == null) {</b>
+<b class="fc">&nbsp;			return d2 == null;</b>
+<b class="fc">&nbsp;		} else if (d2 == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return (d1 instanceof Date &amp;&amp; d2 instanceof Date) ? compare((Date) d1, (Date) d2) == 0 : d1.equals(d2);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares two java.util.Date objects, but handles java.sql.Timestamp (which is not directly
+&nbsp;	 * comparable to a date) by dropping its nanosecond value.
+&nbsp;	 */
+&nbsp;	public static int compare(Date d1, Date d2) {
+<b class="fc">&nbsp;		if (d1 instanceof Timestamp &amp;&amp; d2 instanceof Timestamp) {</b>
+<b class="fc">&nbsp;			return d1.compareTo(d2);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (d1 instanceof Timestamp) {</b>
+<b class="fc">&nbsp;			d1 = new Date(d1.getTime());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (d2 instanceof Timestamp) {</b>
+<b class="fc">&nbsp;			d2 = new Date(d2.getTime());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return d1.compareTo(d2);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares two Date/Timestamp objects, treating null as the earliest possible date.
+&nbsp;	 */
+&nbsp;	public static int compareWithNullAsEarliest(Date d1, Date d2) {
+<b class="fc">&nbsp;		if (d1 == null &amp;&amp; d2 == null) {</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (d1 == null) {</b>
+<b class="fc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		} else if (d2 == null) {</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return compare(d1, d2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares two Date/Timestamp objects, treating null as the earliest possible date.
+&nbsp;	 */
+&nbsp;	public static int compareWithNullAsLatest(Date d1, Date d2) {
+<b class="fc">&nbsp;		if (d1 == null &amp;&amp; d2 == null) {</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (d1 == null) {</b>
+<b class="fc">&nbsp;			return 1;</b>
+<b class="fc">&nbsp;		} else if (d2 == null) {</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return compare(d1, d2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;E extends Comparable&lt;E&gt;&gt; int compareWithNullAsLowest(E c1, E c2) {
+<b class="fc">&nbsp;		if (c1 == null &amp;&amp; c2 == null) {</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (c1 == null) {</b>
+<b class="fc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		} else if (c2 == null) {</b>
+<b class="nc">&nbsp;			return 1;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return c1.compareTo(c2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;E extends Comparable&lt;E&gt;&gt; int compareWithNullAsGreatest(E c1, E c2) {
+<b class="fc">&nbsp;		if (c1 == null &amp;&amp; c2 == null) {</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (c1 == null) {</b>
+<b class="fc">&nbsp;			return 1;</b>
+<b class="fc">&nbsp;		} else if (c2 == null) {</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return c1.compareTo(c2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts a collection to a String with a specified separator between all elements
+&nbsp;	 * 
+&nbsp;	 * @param c Collection to be joined
+&nbsp;	 * @param separator string to put between all elements
+&nbsp;	 * @return a String representing the toString() of all elements in c, separated by separator
+&nbsp;	 * @deprecated as of 2.2 use Java&#39;s {@link String#join} or Apache Commons StringUtils.join for iterables which do not extend {@link CharSequence}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static &lt;E&gt; String join(Collection&lt;E&gt; c, String separator) {
+<b class="fc">&nbsp;		if (c == null) {</b>
+<b class="fc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		StringBuilder ret = new StringBuilder();</b>
+<b class="fc">&nbsp;		for (Iterator&lt;E&gt; i = c.iterator(); i.hasNext();) {</b>
+<b class="fc">&nbsp;			ret.append(i.next());</b>
+<b class="fc">&nbsp;			if (i.hasNext()) {</b>
+<b class="fc">&nbsp;				ret.append(separator);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return ret.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Set&lt;Concept&gt; conceptSetHelper(String descriptor) {
+<b class="nc">&nbsp;		Set&lt;Concept&gt; ret = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		if (descriptor == null || descriptor.length() == 0) {</b>
+<b class="nc">&nbsp;			return ret;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		ConceptService cs = Context.getConceptService();</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (StringTokenizer st = new StringTokenizer(descriptor, &quot;|&quot;); st.hasMoreTokens();) {</b>
+<b class="nc">&nbsp;			String s = st.nextToken().trim();</b>
+<b class="nc">&nbsp;			boolean isSet = s.startsWith(&quot;set:&quot;);</b>
+<b class="nc">&nbsp;			if (isSet) {</b>
+<b class="nc">&nbsp;				s = s.substring(4).trim();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			Concept c = null;</b>
+<b class="nc">&nbsp;			if (s.startsWith(&quot;name:&quot;)) {</b>
+<b class="nc">&nbsp;				String name = s.substring(5).trim();</b>
+<b class="nc">&nbsp;				c = cs.getConceptByName(name);</b>
+<b class="nc">&nbsp;			} else {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					c = cs.getConcept(Integer.valueOf(s.trim()));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception ex) {}</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (c != null) {</b>
+<b class="nc">&nbsp;				if (isSet) {</b>
+<b class="nc">&nbsp;					List&lt;Concept&gt; inSet = cs.getConceptsByConceptSet(c);</b>
+<b class="nc">&nbsp;					ret.addAll(inSet);</b>
+<b class="nc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					ret.add(c);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parses and loads a delimited list of concept ids or names
+&nbsp;	 * 
+&nbsp;	 * @param delimitedString the delimited list of concept ids or names
+&nbsp;	 * @param delimiter the delimiter, e.g. &quot;,&quot;
+&nbsp;	 * @return the list of concepts
+&nbsp;	 * @since 1.10, 1.9.2, 1.8.5
+&nbsp;	 */
+&nbsp;	public static List&lt;Concept&gt; delimitedStringToConceptList(String delimitedString, String delimiter) {
+<b class="nc">&nbsp;		List&lt;Concept&gt; ret = null;</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (delimitedString != null) {</b>
+<b class="nc">&nbsp;			String[] tokens = delimitedString.split(delimiter);</b>
+<b class="nc">&nbsp;			for (String token : tokens) {</b>
+&nbsp;				Integer conceptId;
+&nbsp;				
+&nbsp;				try {
+<b class="nc">&nbsp;					conceptId = Integer.valueOf(token);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (NumberFormatException nfe) {</b>
+<b class="nc">&nbsp;					conceptId = null;</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				Concept c;
+&nbsp;				
+<b class="nc">&nbsp;				if (conceptId != null) {</b>
+<b class="nc">&nbsp;					c = Context.getConceptService().getConcept(conceptId);</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					c = Context.getConceptService().getConceptByName(token);</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				if (c != null) {</b>
+<b class="nc">&nbsp;					if (ret == null) {</b>
+<b class="nc">&nbsp;						ret = new ArrayList&lt;&gt;();</b>
+&nbsp;					}
+<b class="nc">&nbsp;					ret.add(c);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Map&lt;String, Concept&gt; delimitedStringToConceptMap(String delimitedString, String delimiter) {
+<b class="nc">&nbsp;		Map&lt;String, Concept&gt; ret = null;</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (delimitedString != null) {</b>
+<b class="nc">&nbsp;			String[] tokens = delimitedString.split(delimiter);</b>
+<b class="nc">&nbsp;			for (String token : tokens) {</b>
+<b class="nc">&nbsp;				Concept c = Context.getConceptService().getConcept(token);</b>
+&nbsp;				
+<b class="nc">&nbsp;				if (c != null) {</b>
+<b class="nc">&nbsp;					if (ret == null) {</b>
+<b class="nc">&nbsp;						ret = new HashMap&lt;&gt;();</b>
+&nbsp;					}
+<b class="nc">&nbsp;					ret.put(token, c);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static List&lt;Concept&gt; conceptListHelper(String descriptor) {
+<b class="fc">&nbsp;		Set&lt;Concept&gt; ret = new LinkedHashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (descriptor == null || descriptor.length() == 0) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		ConceptService cs = Context.getConceptService();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (StringTokenizer st = new StringTokenizer(descriptor, &quot;|&quot;); st.hasMoreTokens();) {</b>
+<b class="fc">&nbsp;			String s = st.nextToken().trim();</b>
+<b class="fc">&nbsp;			boolean isSet = s.startsWith(&quot;set:&quot;);</b>
+<b class="fc">&nbsp;			if (isSet) {</b>
+<b class="fc">&nbsp;				s = s.substring(4).trim();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			Concept c = null;</b>
+<b class="fc">&nbsp;			if (s.startsWith(&quot;name:&quot;)) {</b>
+<b class="fc">&nbsp;				String name = s.substring(5).trim();</b>
+<b class="fc">&nbsp;				c = cs.getConceptByName(name);</b>
+<b class="fc">&nbsp;			} else {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					c = cs.getConcept(Integer.valueOf(s.trim()));</b>
+&nbsp;				}
+<b class="fc">&nbsp;				catch (Exception ex) {}</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (c != null) {</b>
+<b class="fc">&nbsp;				if (isSet) {</b>
+<b class="fc">&nbsp;					List&lt;Concept&gt; inSet = cs.getConceptsByConceptSet(c);</b>
+<b class="fc">&nbsp;					ret.addAll(inSet);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					ret.add(c);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return new ArrayList&lt;&gt;(ret);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the date having the last millisecond of a given day. Meaning that the hours, seconds,
+&nbsp;	 * and milliseconds are the latest possible for that day.
+&nbsp;	 * 
+&nbsp;	 * @param day the day.
+&nbsp;	 * @return the date with the last millisecond of the day.
+&nbsp;	 */
+&nbsp;	public static Date getLastMomentOfDay(Date day) {
+<b class="fc">&nbsp;		Calendar calender = Calendar.getInstance();</b>
+<b class="fc">&nbsp;		calender.setTime(day);</b>
+<b class="fc">&nbsp;		calender.set(Calendar.HOUR_OF_DAY, 23);</b>
+<b class="fc">&nbsp;		calender.set(Calendar.MINUTE, 59);</b>
+<b class="fc">&nbsp;		calender.set(Calendar.SECOND, 59);</b>
+<b class="fc">&nbsp;		calender.set(Calendar.MILLISECOND, 999);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return calender.getTime();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a date that is the same day as the passed in date, but the hours and seconds are the
+&nbsp;	 * earliest possible for that day.
+&nbsp;	 * 
+&nbsp;	 * @param date date to adjust
+&nbsp;	 * @return a date that is the first possible time in the day
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static Date firstSecondOfDay(Date date) {
+<b class="fc">&nbsp;		if (date == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Calendar c = Calendar.getInstance();</b>
+<b class="fc">&nbsp;		c.setTime(date);</b>
+<b class="fc">&nbsp;		c.set(Calendar.HOUR_OF_DAY, 0);</b>
+<b class="fc">&nbsp;		c.set(Calendar.MINUTE, 0);</b>
+<b class="fc">&nbsp;		c.set(Calendar.SECOND, 0);</b>
+<b class="fc">&nbsp;		c.set(Calendar.MILLISECOND, 0);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return c.getTime();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Date safeDate(Date d1) {
+<b class="nc">&nbsp;		return new Date(d1.getTime());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Recursively deletes files in the given &lt;code&gt;dir&lt;/code&gt; folder
+&nbsp;	 * 
+&nbsp;	 * @param dir File directory to delete
+&nbsp;	 * @return true/false whether the delete was completed successfully
+&nbsp;	 * @throws IOException if &lt;code&gt;dir&lt;/code&gt; is not a directory
+&nbsp;	 */
+&nbsp;	public static boolean deleteDirectory(File dir) throws IOException {
+<b class="fc">&nbsp;		if (!dir.exists() || !dir.isDirectory()) {</b>
+<b class="nc">&nbsp;			throw new IOException(&quot;Could not delete directory &#39;&quot; + dir.getAbsolutePath() + &quot;&#39; (not a directory)&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Deleting directory {}&quot;, dir.getAbsolutePath());</b>
+&nbsp;		
+<b class="fc">&nbsp;		File[] fileList = dir.listFiles();</b>
+<b class="fc">&nbsp;		if (fileList == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		for (File f : fileList) {</b>
+<b class="fc">&nbsp;			if (f.isDirectory()) {</b>
+<b class="fc">&nbsp;				deleteDirectory(f);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			boolean success = f.delete();</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;   deleting &quot; + f.getName() + &quot; : &quot; + (success ? &quot;ok&quot; : &quot;failed&quot;));</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (!success) {</b>
+<b class="fc">&nbsp;				f.deleteOnExit();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		boolean success = dir.delete();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!success) {</b>
+<b class="fc">&nbsp;			log.warn(&quot;   ...could not remove directory: &quot; + dir.getAbsolutePath());</b>
+<b class="fc">&nbsp;			dir.deleteOnExit();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (success &amp;&amp; log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;   ...and directory itself&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return success;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method to convert local URL to a File object.
+&nbsp;	 * 
+&nbsp;	 * @param url an URL
+&nbsp;	 * @return file object for given URL or &lt;code&gt;null&lt;/code&gt; if URL is not local
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null given null parameter
+&nbsp;	 */
+&nbsp;	public static File url2file(final URL url) {
+<b class="fc">&nbsp;		if (url == null || !&quot;file&quot;.equalsIgnoreCase(url.getProtocol())) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return new File(url.getFile().replaceAll(&quot;%20&quot;, &quot; &quot;));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Opens input stream for given resource. This method behaves differently for different URL
+&nbsp;	 * types:
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;for &lt;b&gt;local files&lt;/b&gt; it returns buffered file input stream;&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;for &lt;b&gt;local JAR files&lt;/b&gt; it reads resource content into memory buffer and returns byte
+&nbsp;	 * array input stream that wraps those buffer (this prevents locking JAR file);&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;for &lt;b&gt;common URL&#39;s&lt;/b&gt; this method simply opens stream to that URL using standard URL
+&nbsp;	 * API.&lt;/li&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * It is not recommended to use this method for big resources within JAR files.
+&nbsp;	 * 
+&nbsp;	 * @param url resource URL
+&nbsp;	 * @return input stream for given resource
+&nbsp;	 * @throws IOException if any I/O error has occurred
+&nbsp;	 */
+&nbsp;	public static InputStream getResourceInputStream(final URL url) throws IOException {
+<b class="nc">&nbsp;		File file = url2file(url);</b>
+<b class="nc">&nbsp;		if (file != null) {</b>
+<b class="nc">&nbsp;			return new BufferedInputStream(new FileInputStream(file));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (!&quot;jar&quot;.equalsIgnoreCase(url.getProtocol())) {</b>
+<b class="nc">&nbsp;			return url.openStream();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		String urlStr = url.toExternalForm();</b>
+<b class="nc">&nbsp;		if (urlStr.endsWith(&quot;!/&quot;)) {</b>
+&nbsp;			// JAR URL points to a root entry
+<b class="nc">&nbsp;			throw new FileNotFoundException(url.toExternalForm());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		int p = urlStr.indexOf(&quot;!/&quot;);</b>
+<b class="nc">&nbsp;		if (p == -1) {</b>
+<b class="nc">&nbsp;			throw new MalformedURLException(url.toExternalForm());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		String path = urlStr.substring(p + 2);</b>
+<b class="nc">&nbsp;		file = url2file(new URL(urlStr.substring(4, p)));</b>
+<b class="nc">&nbsp;		if (file == null) {// non-local JAR file URL</b>
+<b class="nc">&nbsp;			return url.openStream();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		try (JarFile jarFile = new JarFile(file)) {</b>
+<b class="nc">&nbsp;			ZipEntry entry = jarFile.getEntry(path);</b>
+<b class="nc">&nbsp;			if (entry == null) {</b>
+<b class="nc">&nbsp;				throw new FileNotFoundException(url.toExternalForm());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			try (InputStream in = jarFile.getInputStream(entry)) {</b>
+<b class="nc">&nbsp;				ByteArrayOutputStream out = new ByteArrayOutputStream();</b>
+<b class="nc">&nbsp;				copyFile(in, out);</b>
+<b class="nc">&nbsp;				return new ByteArrayInputStream(out.toByteArray());</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;pre&gt;
+&nbsp;	 * Returns the application data directory. Searches for the value first 
+&nbsp;	 * in the &quot;OPENMRS_APPLICATION_DATA_DIRECTORY&quot; system property and &quot;application_data_directory&quot; runtime property, then in the servlet
+&nbsp;	 * init parameter &quot;application.data.directory.&quot; If not found, returns:
+&nbsp;	 * a) &quot;{user.home}/.OpenMRS&quot; on UNIX-based systems
+&nbsp;	 * b) &quot;{user.home}\Application Data\OpenMRS&quot; on Windows
+&nbsp;	 * 
+&nbsp;	 * &lt;/pre&gt;
+&nbsp;	 * 
+&nbsp;	 * @return The path to the directory on the file system that will hold miscellaneous data about
+&nbsp;	 *         the application (runtime properties, modules, etc)
+&nbsp;	 */
+&nbsp;	public static String getApplicationDataDirectory() {
+<b class="fc">&nbsp;		return getApplicationDataDirectoryAsFile().toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static File getApplicationDataDirectoryAsFile() {
+<b class="fc">&nbsp;		String filepath = null;</b>
+<b class="fc">&nbsp;		final String openmrsDir = &quot;OpenMRS&quot;;</b>
+&nbsp;		
+<b class="fc">&nbsp;		String systemProperty = System.getProperty(OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY);</b>
+&nbsp;		//System and runtime property take precedence
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(systemProperty)) {</b>
+<b class="fc">&nbsp;			filepath = systemProperty;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			String runtimeProperty = Context.getRuntimeProperties()</b>
+<b class="fc">&nbsp;				.getProperty(OpenmrsConstants.APPLICATION_DATA_DIRECTORY_RUNTIME_PROPERTY, null);</b>
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(runtimeProperty)) {</b>
+<b class="nc">&nbsp;				filepath = runtimeProperty;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (filepath == null) {</b>
+<b class="fc">&nbsp;			if (OpenmrsConstants.UNIX_BASED_OPERATING_SYSTEM) {</b>
+<b class="nc">&nbsp;				filepath = Paths.get(System.getProperty(&quot;user.home&quot;), &quot;.&quot; + openmrsDir).toString();</b>
+<b class="nc">&nbsp;				if (!canWrite(new File(filepath))) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Unable to write to users home dir, fallback to: &quot;</b>
+&nbsp;						+ OpenmrsConstants.APPLICATION_DATA_DIRECTORY_FALLBACK_UNIX);
+<b class="nc">&nbsp;					filepath = Paths.get(OpenmrsConstants.APPLICATION_DATA_DIRECTORY_FALLBACK_UNIX, openmrsDir).toString();</b>
+&nbsp;				}
+&nbsp;			} else {
+<b class="fc">&nbsp;				filepath = Paths.get(System.getProperty(&quot;user.home&quot;), &quot;Application Data&quot;, &quot;OpenMRS&quot;).toString();</b>
+<b class="fc">&nbsp;				if (!new File(filepath).exists()) {</b>
+<b class="nc">&nbsp;					filepath = Paths.get(System.getenv(&quot;appdata&quot;), &quot;OpenMRS&quot;).toString();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (!canWrite(new File(filepath))) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Unable to write to users home dir, fallback to: &quot;</b>
+&nbsp;						+ OpenmrsConstants.APPLICATION_DATA_DIRECTORY_FALLBACK_WIN);
+<b class="nc">&nbsp;					filepath = OpenmrsConstants.APPLICATION_DATA_DIRECTORY_FALLBACK_WIN + File.separator + openmrsDir;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			filepath = filepath + File.separator;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		File folder = new File(filepath);</b>
+<b class="fc">&nbsp;		if (!folder.exists()) {</b>
+<b class="nc">&nbsp;			folder.mkdirs();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return folder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Can be used to override default application data directory.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Note that it will not override application data directory provided as a system property.
+&nbsp;	 * 
+&nbsp;	 * @param path
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	public static void setApplicationDataDirectory(String path) {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(path)) {</b>
+<b class="nc">&nbsp;			System.clearProperty(OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			System.setProperty(OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY, path);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if we can write to a given folder.
+&nbsp;	 * 
+&nbsp;	 * @param folder the directory to check.
+&nbsp;	 * @return true if we can write to it, else false.
+&nbsp;	 */
+&nbsp;	private static boolean canWrite(File folder) {
+&nbsp;		try {
+&nbsp;			//We need to first create the folder if it does not exist, 
+&nbsp;			//else File.canWrite() will return false even when we
+&nbsp;			//have the necessary permissions.
+<b class="fc">&nbsp;			if (!folder.exists()) {</b>
+<b class="nc">&nbsp;				folder.mkdirs();</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			return folder.canWrite();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SecurityException ex) {</b>
+&nbsp;			//all we wanted to know is whether we have permissions
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the location of the OpenMRS log file.
+&nbsp;	 * &lt;p/&gt;
+&nbsp;	 * &lt;strong&gt;Warning:&lt;/strong&gt; as of 2.4.4, 2.5.1, and 2.6.0 which allows configuration via a configuration file, the
+&nbsp;	 * result of this call can return null if either the file appender uses a name other than
+&nbsp;	 * {@link OpenmrsConstants#LOG_OPENMRS_FILE_APPENDER} or if the appender with that name is not one of the default file
+&nbsp;	 * appending types.
+&nbsp;	 * 
+&nbsp;	 * @return the path to the OpenMRS log file
+&nbsp;	 * @since 1.9.2
+&nbsp;	 * @deprecated As of 2.4.4, 2.5.1, and 2.6.0; replaced by {@link OpenmrsLoggingUtil#getOpenmrsLogLocation()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static String getOpenmrsLogLocation() {
+<b class="nc">&nbsp;		return OpenmrsLoggingUtil.getOpenmrsLogLocation();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the current JVM version is at least Java 8.
+&nbsp;	 * 
+&nbsp;	 * @throws APIException if the current JVM version is earlier than Java 8
+&nbsp;	 */
+&nbsp;	public static void validateJavaVersion() {
+&nbsp;		// check whether the current JVM version is at least Java 8
+<b class="fc">&nbsp;		if (System.getProperty(&quot;java.version&quot;).matches(&quot;1\\.[0-7]\\.(.*)&quot;)) {</b>
+<b class="nc">&nbsp;			throw new APIException(</b>
+&nbsp;				&quot;OpenMRS &quot; + OpenmrsConstants.OPENMRS_VERSION_SHORT + &quot; requires Java 8 and above, but is running under &quot; + 
+<b class="nc">&nbsp;					System.getProperty(&quot;java.version&quot;));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find the given folderName in the application data directory. Or, treat folderName like an
+&nbsp;	 * absolute url to a directory
+&nbsp;	 * 
+&nbsp;	 * @param folderName
+&nbsp;	 * @return folder capable of storing information
+&nbsp;	 */
+&nbsp;	public static File getDirectoryInApplicationDataDirectory(String folderName) throws APIException {
+&nbsp;		// try to load the repository folder straight away.
+<b class="fc">&nbsp;		File folder = new File(folderName);</b>
+&nbsp;		
+&nbsp;		// if the property wasn&#39;t a full path already, assume it was intended to
+&nbsp;		// be a folder in the
+&nbsp;		// application directory
+<b class="fc">&nbsp;		if (!folder.isAbsolute()) {</b>
+<b class="fc">&nbsp;			folder = new File(getApplicationDataDirectoryAsFile(), folderName);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// now create the directory folder if it doesn&#39;t exist
+<b class="fc">&nbsp;		if (!folder.exists()) {</b>
+<b class="fc">&nbsp;			log.warn(&quot;&#39;&quot; + folder.getAbsolutePath() + &quot;&#39; doesn&#39;t exist.  Creating directories now.&quot;);</b>
+<b class="fc">&nbsp;			folder.mkdirs();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (!folder.isDirectory()) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;should.be.directory&quot;, new Object[] { folder.getAbsolutePath() });</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return folder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given xml document to the given outfile
+&nbsp;	 * 
+&nbsp;	 * @param doc Document to be saved
+&nbsp;	 * @param outFile file pointer to the location the xml file is to be saved to
+&nbsp;	 */
+&nbsp;	public static void saveDocument(Document doc, File outFile) {
+<b class="nc">&nbsp;		OutputStream outStream = null;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			outStream = new FileOutputStream(outFile);</b>
+<b class="nc">&nbsp;			TransformerFactory tFactory = TransformerFactory.newInstance();</b>
+<b class="nc">&nbsp;			Transformer transformer = tFactory.newTransformer();</b>
+<b class="nc">&nbsp;			transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			DocumentType doctype = doc.getDoctype();</b>
+<b class="nc">&nbsp;			if (doctype != null) {</b>
+<b class="nc">&nbsp;				transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, doctype.getPublicId());</b>
+<b class="nc">&nbsp;				transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.getSystemId());</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			DOMSource source = new DOMSource(doc);</b>
+<b class="nc">&nbsp;			StreamResult result = new StreamResult(outStream);</b>
+<b class="nc">&nbsp;			transformer.transform(source, result);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (TransformerException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(&quot;Error while saving dwrmodulexml back to dwr-modules.xml&quot;, e);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (FileNotFoundException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(outFile.getAbsolutePath() + &quot; file doesn&#39;t exist.&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			try {</b>
+<b class="nc">&nbsp;				if (outStream != null) {</b>
+<b class="nc">&nbsp;					outStream.close();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Unable to close outstream&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static List&lt;Integer&gt; delimitedStringToIntegerList(String delimitedString, String delimiter) {
+<b class="nc">&nbsp;		List&lt;Integer&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		String[] tokens = delimitedString.split(delimiter);</b>
+<b class="nc">&nbsp;		for (String token : tokens) {</b>
+<b class="nc">&nbsp;			token = token.trim();</b>
+<b class="nc">&nbsp;			if (token.length() != 0) {</b>
+<b class="nc">&nbsp;				ret.add(Integer.valueOf(token));</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Tests if the given String starts with any of the specified prefixes
+&nbsp;	 * 
+&nbsp;	 * @param str the string to test
+&nbsp;	 * @param prefixes an array of prefixes to test against
+&nbsp;	 * @return true if the String starts with any of the specified prefixes, otherwise false.
+&nbsp;	 */
+&nbsp;	public static boolean stringStartsWith(String str, String[] prefixes) {
+<b class="fc">&nbsp;		for (String prefix : prefixes) {</b>
+<b class="fc">&nbsp;			if (StringUtils.startsWith(str, prefix)) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static boolean isConceptInList(Concept concept, List&lt;Concept&gt; list) {
+<b class="nc">&nbsp;		boolean ret = false;</b>
+<b class="nc">&nbsp;		if (concept != null &amp;&amp; list != null) {</b>
+<b class="nc">&nbsp;			for (Concept c : list) {</b>
+<b class="nc">&nbsp;				if (c.equals(concept)) {</b>
+<b class="nc">&nbsp;					ret = true;</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Date fromDateHelper(Date comparisonDate, Integer withinLastDays, Integer withinLastMonths,
+&nbsp;	        Integer untilDaysAgo, Integer untilMonthsAgo, Date sinceDate, Date untilDate) {
+&nbsp;		
+<b class="nc">&nbsp;		Date ret = null;</b>
+<b class="nc">&nbsp;		if (withinLastDays != null || withinLastMonths != null) {</b>
+<b class="nc">&nbsp;			Calendar gc = Calendar.getInstance();</b>
+<b class="nc">&nbsp;			gc.setTime(comparisonDate != null ? comparisonDate : new Date());</b>
+<b class="nc">&nbsp;			if (withinLastDays != null) {</b>
+<b class="nc">&nbsp;				gc.add(Calendar.DAY_OF_MONTH, -withinLastDays);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (withinLastMonths != null) {</b>
+<b class="nc">&nbsp;				gc.add(Calendar.MONTH, -withinLastMonths);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			ret = gc.getTime();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (sinceDate != null &amp;&amp; (ret == null || sinceDate.after(ret))) {</b>
+<b class="nc">&nbsp;			ret = sinceDate;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Date toDateHelper(Date comparisonDate, Integer withinLastDays, Integer withinLastMonths,
+&nbsp;	        Integer untilDaysAgo, Integer untilMonthsAgo, Date sinceDate, Date untilDate) {
+&nbsp;		
+<b class="nc">&nbsp;		Date ret = null;</b>
+<b class="nc">&nbsp;		if (untilDaysAgo != null || untilMonthsAgo != null) {</b>
+<b class="nc">&nbsp;			Calendar gc = Calendar.getInstance();</b>
+<b class="nc">&nbsp;			gc.setTime(comparisonDate != null ? comparisonDate : new Date());</b>
+<b class="nc">&nbsp;			if (untilDaysAgo != null) {</b>
+<b class="nc">&nbsp;				gc.add(Calendar.DAY_OF_MONTH, -untilDaysAgo);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (untilMonthsAgo != null) {</b>
+<b class="nc">&nbsp;				gc.add(Calendar.MONTH, -untilMonthsAgo);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			ret = gc.getTime();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (untilDate != null &amp;&amp; (ret == null || untilDate.before(ret))) {</b>
+<b class="nc">&nbsp;			ret = untilDate;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param collection
+&nbsp;	 * @param elements
+&nbsp;	 * @return Whether _collection_ contains any of _elements_
+&nbsp;	 */
+&nbsp;	public static &lt;T&gt; boolean containsAny(Collection&lt;T&gt; collection, Collection&lt;T&gt; elements) {
+<b class="nc">&nbsp;		for (T obj : elements) {</b>
+<b class="nc">&nbsp;			if (collection.contains(obj)) {</b>
+<b class="nc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allows easy manipulation of a Map&amp;lt;?, Set&amp;gt;
+&nbsp;	 */
+&nbsp;	public static &lt;K, V&gt; void addToSetMap(Map&lt;K, Set&lt;V&gt;&gt; map, K key, V obj) {
+<b class="nc">&nbsp;		Set&lt;V&gt; set = map.computeIfAbsent(key, k -&gt; new HashSet&lt;&gt;());</b>
+<b class="nc">&nbsp;		set.add(obj);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;K, V&gt; void addToListMap(Map&lt;K, List&lt;V&gt;&gt; map, K key, V obj) {
+<b class="nc">&nbsp;		List&lt;V&gt; list = map.computeIfAbsent(key, k -&gt; new ArrayList&lt;&gt;());</b>
+<b class="nc">&nbsp;		list.add(obj);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the current user&#39;s date format Will look similar to &quot;mm-dd-yyyy&quot;. Depends on user&#39;s
+&nbsp;	 * locale.
+&nbsp;	 * 
+&nbsp;	 * @return a simple date format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a pattern with four y characters in it
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not allow the returned SimpleDateFormat to be modified
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public static SimpleDateFormat getDateFormat(Locale locale) {
+<b class="fc">&nbsp;		if (dateFormatCache.containsKey(locale)) {</b>
+<b class="fc">&nbsp;			return (SimpleDateFormat) dateFormatCache.get(locale).clone();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// note that we are using the custom OpenmrsDateFormat class here which prevents erroneous parsing of 2-digit years
+<b class="fc">&nbsp;		SimpleDateFormat sdf = new OpenmrsDateFormat((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, locale),</b>
+&nbsp;		        locale);
+<b class="fc">&nbsp;		String pattern = sdf.toPattern();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!pattern.contains(&quot;yyyy&quot;)) {</b>
+&nbsp;			// otherwise, change the pattern to be a four digit year
+<b class="fc">&nbsp;			String regex = &quot;yy&quot;;</b>
+<b class="fc">&nbsp;			if (!pattern.contains(&quot;yy&quot;)) {</b>
+&nbsp;				//Java 11 has dd/MM/y instead of dd/MM/yy
+<b class="nc">&nbsp;				regex = &quot;y&quot;;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			pattern = pattern.replaceFirst(regex, &quot;yyyy&quot;);</b>
+<b class="fc">&nbsp;			sdf.applyPattern(pattern);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!pattern.contains(&quot;MM&quot;)) {</b>
+&nbsp;			// change the pattern to be a two digit month
+<b class="fc">&nbsp;			pattern = pattern.replaceFirst(&quot;M&quot;, &quot;MM&quot;);</b>
+<b class="fc">&nbsp;			sdf.applyPattern(pattern);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!pattern.contains(&quot;dd&quot;)) {</b>
+&nbsp;			// change the pattern to be a two digit day
+<b class="fc">&nbsp;			pattern = pattern.replaceFirst(&quot;d&quot;, &quot;dd&quot;);</b>
+<b class="fc">&nbsp;			sdf.applyPattern(pattern);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		dateFormatCache.put(locale, sdf);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return (SimpleDateFormat) sdf.clone();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the current user&#39;s time format Will look similar to &quot;hh:mm a&quot;. Depends on user&#39;s locale.
+&nbsp;	 * 
+&nbsp;	 * @return a simple time format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a pattern with two h characters in it
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not allow the returned SimpleDateFormat to be modified
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static SimpleDateFormat getTimeFormat(Locale locale) {
+<b class="fc">&nbsp;		if (timeFormatCache.containsKey(locale)) {</b>
+<b class="fc">&nbsp;			return (SimpleDateFormat) timeFormatCache.get(locale).clone();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		SimpleDateFormat sdf = (SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.SHORT, locale);</b>
+<b class="fc">&nbsp;		String pattern = sdf.toPattern();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!(pattern.contains(&quot;hh&quot;) || pattern.contains(&quot;HH&quot;))) {</b>
+&nbsp;			// otherwise, change the pattern to be a two digit hour
+<b class="nc">&nbsp;			pattern = pattern.replaceFirst(&quot;h&quot;, &quot;hh&quot;).replaceFirst(&quot;H&quot;, &quot;HH&quot;);</b>
+<b class="nc">&nbsp;			sdf.applyPattern(pattern);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		timeFormatCache.put(locale, sdf);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return (SimpleDateFormat) sdf.clone();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the current user&#39;s datetime format Will look similar to &quot;mm-dd-yyyy hh:mm a&quot;. Depends on
+&nbsp;	 * user&#39;s locale.
+&nbsp;	 * 
+&nbsp;	 * @return a simple date format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a pattern with four y characters and two h characters in it
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not allow the returned SimpleDateFormat to be modified
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static SimpleDateFormat getDateTimeFormat(Locale locale) {
+&nbsp;		SimpleDateFormat dateFormat;
+&nbsp;		SimpleDateFormat timeFormat;
+&nbsp;		
+<b class="fc">&nbsp;		dateFormat = getDateFormat(locale);</b>
+<b class="fc">&nbsp;		timeFormat = getTimeFormat(locale);</b>
+&nbsp;		
+<b class="fc">&nbsp;		String pattern = dateFormat.toPattern() + &quot; &quot; + timeFormat.toPattern();</b>
+<b class="fc">&nbsp;		SimpleDateFormat sdf = new SimpleDateFormat();</b>
+<b class="fc">&nbsp;		sdf.applyPattern(pattern);</b>
+<b class="fc">&nbsp;		return sdf;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes a String (e.g. a user-entered one) and parses it into an object of the specified class
+&nbsp;	 * 
+&nbsp;	 * @param string
+&nbsp;	 * @param clazz
+&nbsp;	 * @return Object of type &lt;code&gt;clazz&lt;/code&gt; with the data from &lt;code&gt;string&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public static Object parse(String string, Class clazz) {
+&nbsp;		try {
+&nbsp;			// If there&#39;s a valueOf(String) method, just use that (will cover at
+&nbsp;			// least String, Integer, Double, Boolean)
+<b class="nc">&nbsp;			Method valueOfMethod = null;</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				valueOfMethod = clazz.getMethod(&quot;valueOf&quot;, String.class);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (NoSuchMethodException ex) {}</b>
+<b class="nc">&nbsp;			if (valueOfMethod != null) {</b>
+<b class="nc">&nbsp;				return valueOfMethod.invoke(null, string);</b>
+<b class="nc">&nbsp;			} else if (clazz.isEnum()) {</b>
+&nbsp;				// Special-case for enum types
+<b class="nc">&nbsp;				List&lt;Enum&gt; constants = Arrays.asList((Enum[]) clazz.getEnumConstants());</b>
+<b class="nc">&nbsp;				for (Enum e : constants) {</b>
+<b class="nc">&nbsp;					if (e.toString().equals(string)) {</b>
+<b class="nc">&nbsp;						return e;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(string + &quot; is not a legal value of enum class &quot; + clazz);</b>
+<b class="nc">&nbsp;			} else if (String.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				return string;</b>
+<b class="nc">&nbsp;			} else if (Location.class.equals(clazz)) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					Integer.parseInt(string);</b>
+<b class="nc">&nbsp;					LocationEditor ed = new LocationEditor();</b>
+<b class="nc">&nbsp;					ed.setAsText(string);</b>
+<b class="nc">&nbsp;					return ed.getValue();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (NumberFormatException ex) {</b>
+<b class="nc">&nbsp;					return Context.getLocationService().getLocation(string);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			} else if (Concept.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				ConceptEditor ed = new ConceptEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (Program.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				ProgramEditor ed = new ProgramEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (ProgramWorkflowState.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				ProgramWorkflowStateEditor ed = new ProgramWorkflowStateEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (EncounterType.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				EncounterTypeEditor ed = new EncounterTypeEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (Form.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				FormEditor ed = new FormEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (Drug.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				DrugEditor ed = new DrugEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (PersonAttributeType.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				PersonAttributeTypeEditor ed = new PersonAttributeTypeEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (Cohort.class.equals(clazz)) {</b>
+<b class="nc">&nbsp;				CohortEditor ed = new CohortEditor();</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (Date.class.equals(clazz)) {</b>
+&nbsp;				// TODO: this uses the date format from the current session,
+&nbsp;				// which could cause problems if the user changes it after
+&nbsp;				// searching.
+<b class="nc">&nbsp;				CustomDateEditor ed = new CustomDateEditor(Context.getDateFormat(), true, 10);</b>
+<b class="nc">&nbsp;				ed.setAsText(string);</b>
+<b class="nc">&nbsp;				return ed.getValue();</b>
+<b class="nc">&nbsp;			} else if (Object.class.equals(clazz)) {</b>
+&nbsp;				// TODO: Decide whether this is a hack. Currently setting Object
+&nbsp;				// arguments with a String
+<b class="nc">&nbsp;				return string;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Don&#39;t know how to handle class: &quot; + clazz);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			log.error(&quot;error converting \&quot;&quot; + string + &quot;\&quot; to &quot; + clazz, ex);</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(ex);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Loops over the collection to check to see if the given object is in that collection. This
+&nbsp;	 * method &lt;i&gt;only&lt;/i&gt; uses the .equals() method for comparison. This should be used in the
+&nbsp;	 * patient/person objects on their collections. Their collections are SortedSets which use the
+&nbsp;	 * compareTo method for equality as well. The compareTo method is currently optimized for
+&nbsp;	 * sorting, not for equality. A null &lt;code&gt;obj&lt;/code&gt; will return false
+&nbsp;	 * 
+&nbsp;	 * @param objects collection to loop over
+&nbsp;	 * @param obj Object to look for in the &lt;code&gt;objects&lt;/code&gt;
+&nbsp;	 * @return true/false whether the given object is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; use equals method for comparison instead of compareTo given List collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; use equals method for comparison instead of compareTo given SortedSet collection
+&nbsp;	 */
+&nbsp;	public static boolean collectionContains(Collection&lt;?&gt; objects, Object obj) {
+<b class="fc">&nbsp;		if (obj == null || objects == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (Object o : objects) {</b>
+<b class="fc">&nbsp;			if (o != null &amp;&amp; o.equals(obj)) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets an out File object. If date is not provided, the current timestamp is used. If user is
+&nbsp;	 * not provided, the user id is not put into the filename. Assumes dir is already created
+&nbsp;	 * 
+&nbsp;	 * @param dir directory to make the random filename in
+&nbsp;	 * @param date optional Date object used for the name
+&nbsp;	 * @param user optional User creating this file object
+&nbsp;	 * @return file new file that is able to be written to
+&nbsp;	 */
+&nbsp;	public static File getOutFile(File dir, Date date, User user) {
+<b class="nc">&nbsp;		Random gen = new Random();</b>
+&nbsp;		File outFile;
+&nbsp;		do {
+&nbsp;			// format to print date in filename
+<b class="nc">&nbsp;			DateFormat dateFormat = new SimpleDateFormat(&quot;yyyy.MM.dd-HHmm-ssSSS&quot;);</b>
+&nbsp;			
+&nbsp;			// use current date if none provided
+<b class="nc">&nbsp;			if (date == null) {</b>
+<b class="nc">&nbsp;				date = new Date();</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			StringBuilder filename = new StringBuilder();</b>
+&nbsp;			
+&nbsp;			// the start of the filename is the time so we can do some sorting
+<b class="nc">&nbsp;			filename.append(dateFormat.format(date));</b>
+&nbsp;			
+&nbsp;			// insert the user id if they provided it
+<b class="nc">&nbsp;			if (user != null) {</b>
+<b class="nc">&nbsp;				filename.append(&quot;-&quot;);</b>
+<b class="nc">&nbsp;				filename.append(user.getUserId());</b>
+<b class="nc">&nbsp;				filename.append(&quot;-&quot;);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// the end of the filename is a randome number between 0 and 10000
+<b class="nc">&nbsp;			filename.append(gen.nextInt() * 10000);</b>
+<b class="nc">&nbsp;			filename.append(&quot;.xml&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			outFile = new File(dir, filename.toString());</b>
+&nbsp;			
+&nbsp;			// set to null to avoid very minimal possiblity of an infinite loop
+<b class="nc">&nbsp;			date = null;</b>
+&nbsp;			
+<b class="nc">&nbsp;		} while (outFile.exists());</b>
+&nbsp;		
+<b class="nc">&nbsp;		return outFile;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a relatively acceptable unique string of the give size
+&nbsp;	 * 
+&nbsp;	 * @return unique string
+&nbsp;	 */
+&nbsp;	public static String generateUid(Integer size) {
+<b class="nc">&nbsp;		Random gen = new Random();</b>
+<b class="nc">&nbsp;		StringBuilder sb = new StringBuilder(size);</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; size; i++) {</b>
+<b class="nc">&nbsp;			int ch = gen.nextInt() * 62;</b>
+<b class="nc">&nbsp;			if (ch &lt; 10) {</b>
+&nbsp;				// 0-9
+<b class="nc">&nbsp;				sb.append(ch);</b>
+<b class="nc">&nbsp;			} else if (ch &lt; 36) {</b>
+&nbsp;				// a-z
+<b class="nc">&nbsp;				sb.append((char) (ch - 10 + &#39;a&#39;));</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				sb.append((char) (ch - 36 + &#39;A&#39;));</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return sb.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a uid of length 20
+&nbsp;	 * 
+&nbsp;	 * @see #generateUid(Integer)
+&nbsp;	 */
+&nbsp;	public static String generateUid() {
+<b class="nc">&nbsp;		return generateUid(20);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to replace Properties.store(), which isn&#39;t UTF-8 compliant &lt;br&gt;
+&nbsp;	 * NOTE: In Java 6, you will be able to pass the load() and store() methods a UTF-8
+&nbsp;	 * Reader/Writer object as an argument, making this method unnecessary.
+&nbsp;	 * 
+&nbsp;	 * @param properties
+&nbsp;	 * @param file
+&nbsp;	 * @param comment
+&nbsp;	 */
+&nbsp;	public static void storeProperties(Properties properties, File file, String comment) {
+<b class="nc">&nbsp;		OutputStream outStream = null;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			outStream = new FileOutputStream(file, true);</b>
+<b class="nc">&nbsp;			storeProperties(properties, outStream, comment);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException ex) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to create file &quot; + file.getAbsolutePath() + &quot; in storeProperties routine.&quot;);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			try {</b>
+<b class="nc">&nbsp;				if (outStream != null) {</b>
+<b class="nc">&nbsp;					outStream.close();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (IOException ioe) {</b>
+&nbsp;				// pass
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to replace Properties.store(), which isn&#39;t UTF-8 compliant NOTE: In Java
+&nbsp;	 * 6, you will be able to pass the load() and store() methods a UTF-8 Reader/Writer object as an
+&nbsp;	 * argument.
+&nbsp;	 * 
+&nbsp;	 * @param properties
+&nbsp;	 * @param outStream
+&nbsp;	 * @param comment (which appears in comments in properties file)
+&nbsp;	 */
+&nbsp;	public static void storeProperties(Properties properties, OutputStream outStream, String comment) {
+&nbsp;		try {
+<b class="fc">&nbsp;			Charset utf8 = StandardCharsets.UTF_8;</b>
+<b class="fc">&nbsp;			properties.store(new OutputStreamWriter(outStream, utf8), comment);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (FileNotFoundException fnfe) {</b>
+<b class="nc">&nbsp;			log.error(&quot;target file not found&quot; + fnfe);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (UnsupportedEncodingException ex) { // pass</b>
+<b class="nc">&nbsp;			log.error(&quot;unsupported encoding error hit&quot; + ex);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException ioex) {</b>
+<b class="nc">&nbsp;			log.error(&quot;IO exception encountered trying to append to properties file&quot; + ioex);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method is a replacement for Properties.load(InputStream) so that we can load in utf-8
+&nbsp;	 * characters. Currently the load method expects the inputStream to point to a latin1 encoded
+&nbsp;	 * file. &lt;br&gt;
+&nbsp;	 * NOTE: In Java 6, you will be able to pass the load() and store() methods a UTF-8
+&nbsp;	 * Reader/Writer object as an argument, making this method unnecessary.
+&nbsp;	 * 
+&nbsp;	 * @param props the properties object to write into
+&nbsp;	 * @param inputStream the input stream to read from
+&nbsp;	 */
+&nbsp;	public static void loadProperties(Properties props, InputStream inputStream) {
+<b class="fc">&nbsp;		InputStreamReader reader = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);</b>
+<b class="fc">&nbsp;			props.load(reader);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (FileNotFoundException fnfe) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to find properties file&quot; + fnfe);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (UnsupportedEncodingException uee) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unsupported encoding used in properties file&quot; + uee);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException ioe) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to read properties from properties file&quot; + ioe);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			try {</b>
+<b class="fc">&nbsp;				if (reader != null) {</b>
+<b class="fc">&nbsp;					reader.close();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (IOException ioe) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Unable to close properties file &quot; + ioe);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method used to load properties from the given file.
+&nbsp;	 * 
+&nbsp;	 * @param props the properties object to be loaded into
+&nbsp;	 * @param propertyFile the properties file to read
+&nbsp;	 */
+&nbsp;	public static void loadProperties(Properties props, File propertyFile) {
+&nbsp;		try {
+<b class="fc">&nbsp;			loadProperties(props, new FileInputStream(propertyFile));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (FileNotFoundException fnfe) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to find properties file&quot; + fnfe);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method for getting the translation for the passed code
+&nbsp;	 * 
+&nbsp;	 * @param code the message key to lookup
+&nbsp;	 * @param args the replacement values for the translation string
+&nbsp;	 * @return the message, or if not found, the code
+&nbsp;	 */
+&nbsp;	public static String getMessage(String code, Object... args) {
+<b class="fc">&nbsp;		Locale l = Context.getLocale();</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			String translation = Context.getMessageSourceService().getMessage(code, args, l);</b>
+<b class="fc">&nbsp;			if (translation != null) {</b>
+<b class="fc">&nbsp;				return translation;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (NoSuchMessageException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Message code &lt;&quot; + code + &quot;&gt; not found for locale &quot; + l);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (APIException apiEx) {</b>
+&nbsp;			// in case the services aren&#39;t set up yet
+<b class="nc">&nbsp;			log.debug(&quot;Unable to get code: &quot; + code, apiEx);</b>
+<b class="nc">&nbsp;			return code;</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return code;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility to check the validity of a password for a certain {@link User}. Passwords must be
+&nbsp;	 * non-null. Their required strength is configured via global properties:
+&nbsp;	 * &lt;table summary=&quot;Configuration props&quot;&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Description&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;Property&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;Default Value&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Require that it not match the {@link User}&#39;s username or system id
+&nbsp;	 * &lt;th&gt;{@link OpenmrsConstants#GP_PASSWORD_CANNOT_MATCH_USERNAME_OR_SYSTEMID}&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;true&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Require a minimum length
+&nbsp;	 * &lt;th&gt;{@link OpenmrsConstants#GP_PASSWORD_MINIMUM_LENGTH}&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;8&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Require both an upper and lower case character
+&nbsp;	 * &lt;th&gt;{@link OpenmrsConstants#GP_PASSWORD_REQUIRES_UPPER_AND_LOWER_CASE}&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;true&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Require at least one numeric character
+&nbsp;	 * &lt;th&gt;{@link OpenmrsConstants#GP_PASSWORD_REQUIRES_DIGIT}&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;true&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Require at least one non-numeric character
+&nbsp;	 * &lt;th&gt;{@link OpenmrsConstants#GP_PASSWORD_REQUIRES_NON_DIGIT}&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;true&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;tr&gt;
+&nbsp;	 * &lt;th&gt;Require a match on the specified regular expression
+&nbsp;	 * &lt;th&gt;{@link OpenmrsConstants#GP_PASSWORD_CUSTOM_REGEX}&lt;/th&gt;
+&nbsp;	 * &lt;th&gt;null&lt;/th&gt;
+&nbsp;	 * &lt;/tr&gt;
+&nbsp;	 * &lt;/table&gt;
+&nbsp;	 * 
+&nbsp;	 * @param username user name of the user with password to validated
+&nbsp;	 * @param password string that will be validated
+&nbsp;	 * @param systemId system id of the user with password to be validated
+&nbsp;	 * @throws PasswordException
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with short password by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with short password if not allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass with short password if allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with digit only password by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with digit only password if not allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass with digit only password if allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with char only password by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with char only password if not allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass with char only password if allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail without both upper and lower case password by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail without both upper and lower case password if not allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass without both upper and lower case password if allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with password equals to user name by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with password equals to user name if not allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass with password equals to user name if allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with password equals to system id by default
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with password equals to system id if not allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass with password equals to system id if allowed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with password not matching configured regex
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass with password matching configured regex
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; allow password to contain non alphanumeric characters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; allow password to contain white spaces
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; still work without an open session
+&nbsp;	 */
+&nbsp;	public static void validatePassword(String username, String password, String systemId) throws PasswordException {
+&nbsp;		
+&nbsp;		// default values for all of the global properties
+<b class="fc">&nbsp;		String userGp = &quot;true&quot;;</b>
+<b class="fc">&nbsp;		String lengthGp = &quot;8&quot;;</b>
+<b class="fc">&nbsp;		String caseGp = &quot;true&quot;;</b>
+<b class="fc">&nbsp;		String digitGp = &quot;true&quot;;</b>
+<b class="fc">&nbsp;		String nonDigitGp = &quot;true&quot;;</b>
+<b class="fc">&nbsp;		String regexGp = null;</b>
+<b class="fc">&nbsp;		AdministrationService svc = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			svc = Context.getAdministrationService();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (APIException apiEx) {</b>
+&nbsp;			// if a service isn&#39;t available, fail quietly and just do the
+&nbsp;			// defaults
+<b class="nc">&nbsp;			log.debug(&quot;Unable to get global properties&quot;, apiEx);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (svc != null &amp;&amp; Context.isSessionOpen()) {</b>
+&nbsp;			// (the session won&#39;t be open here to allow for the unit test to
+&nbsp;			// fake not having the admin service available)
+<b class="fc">&nbsp;			userGp = svc.getGlobalProperty(OpenmrsConstants.GP_PASSWORD_CANNOT_MATCH_USERNAME_OR_SYSTEMID, userGp);</b>
+<b class="fc">&nbsp;			lengthGp = svc.getGlobalProperty(OpenmrsConstants.GP_PASSWORD_MINIMUM_LENGTH, lengthGp);</b>
+<b class="fc">&nbsp;			caseGp = svc.getGlobalProperty(OpenmrsConstants.GP_PASSWORD_REQUIRES_UPPER_AND_LOWER_CASE, caseGp);</b>
+<b class="fc">&nbsp;			digitGp = svc.getGlobalProperty(OpenmrsConstants.GP_PASSWORD_REQUIRES_DIGIT, digitGp);</b>
+<b class="fc">&nbsp;			nonDigitGp = svc.getGlobalProperty(OpenmrsConstants.GP_PASSWORD_REQUIRES_NON_DIGIT, nonDigitGp);</b>
+<b class="fc">&nbsp;			regexGp = svc.getGlobalProperty(OpenmrsConstants.GP_PASSWORD_CUSTOM_REGEX, regexGp);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (password == null) {</b>
+<b class="nc">&nbsp;			throw new WeakPasswordException();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (&quot;true&quot;.equals(userGp) &amp;&amp; (password.equals(username) || password.equals(systemId))) {</b>
+<b class="fc">&nbsp;			throw new WeakPasswordException();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (StringUtils.isNotEmpty(lengthGp)) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				int minLength = Integer.parseInt(lengthGp);</b>
+<b class="fc">&nbsp;				if (password.length() &lt; minLength) {</b>
+<b class="fc">&nbsp;					throw new ShortPasswordException(getMessage(&quot;error.password.length&quot;, lengthGp));</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (NumberFormatException nfe) {</b>
+<b class="nc">&nbsp;				log.warn(</b>
+&nbsp;				    &quot;Error in global property &lt;&quot; + OpenmrsConstants.GP_PASSWORD_MINIMUM_LENGTH + &quot;&gt; must be an Integer&quot;);
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (&quot;true&quot;.equals(caseGp) &amp;&amp; !containsUpperAndLowerCase(password)) {</b>
+<b class="fc">&nbsp;			throw new InvalidCharactersPasswordException(getMessage(&quot;error.password.requireMixedCase&quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (&quot;true&quot;.equals(digitGp) &amp;&amp; !containsDigit(password)) {</b>
+<b class="nc">&nbsp;			throw new InvalidCharactersPasswordException(getMessage(&quot;error.password.requireNumber&quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (&quot;true&quot;.equals(nonDigitGp) &amp;&amp; containsOnlyDigits(password)) {</b>
+<b class="nc">&nbsp;			throw new InvalidCharactersPasswordException(getMessage(&quot;error.password.requireLetter&quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (StringUtils.isNotEmpty(regexGp)) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Pattern pattern = Pattern.compile(regexGp);</b>
+<b class="fc">&nbsp;				Matcher matcher = pattern.matcher(password);</b>
+<b class="fc">&nbsp;				if (!matcher.matches()) {</b>
+<b class="fc">&nbsp;					throw new InvalidCharactersPasswordException(getMessage(&quot;error.password.different&quot;));</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (PatternSyntaxException pse) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Invalid regex of &quot; + regexGp + &quot; defined in global property &lt;&quot;</b>
+&nbsp;				        + OpenmrsConstants.GP_PASSWORD_CUSTOM_REGEX + &quot;&gt;.&quot;);
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param test the string to test
+&nbsp;	 * @return true if the passed string contains both upper and lower case characters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if string contains upper and lower case
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if string does not contain lower case characters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if string does not contain upper case characters
+&nbsp;	 */
+&nbsp;	public static boolean containsUpperAndLowerCase(String test) {
+<b class="fc">&nbsp;		if (test != null) {</b>
+<b class="fc">&nbsp;			Pattern pattern = Pattern.compile(&quot;^(?=.*?[A-Z])(?=.*?[a-z])[\\w|\\W]*$&quot;);</b>
+<b class="fc">&nbsp;			Matcher matcher = pattern.matcher(test);</b>
+<b class="fc">&nbsp;			return matcher.matches();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param test the string to test
+&nbsp;	 * @return true if the passed string contains only numeric characters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if string contains only digits
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if string contains any non-digits
+&nbsp;	 */
+&nbsp;	public static boolean containsOnlyDigits(String test) {
+<b class="fc">&nbsp;		if (test != null) {</b>
+<b class="fc">&nbsp;			for (char c : test.toCharArray()) {</b>
+<b class="fc">&nbsp;				if (!Character.isDigit(c)) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return StringUtils.isNotEmpty(test);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param test the string to test
+&nbsp;	 * @return true if the passed string contains any numeric characters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if string contains any digits
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if string contains no digits
+&nbsp;	 */
+&nbsp;	public static boolean containsDigit(String test) {
+<b class="fc">&nbsp;		if (test != null) {</b>
+<b class="fc">&nbsp;			for (char c : test.toCharArray()) {</b>
+<b class="fc">&nbsp;				if (Character.isDigit(c)) {</b>
+<b class="fc">&nbsp;					return true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A null-safe and exception safe way to close an inputstream or an outputstream
+&nbsp;	 * 
+&nbsp;	 * @param closableStream an InputStream or OutputStream to close
+&nbsp;	 */
+&nbsp;	public static void closeStream(Closeable closableStream) {
+<b class="nc">&nbsp;		if (closableStream != null) {</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				closableStream.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (IOException io) {</b>
+<b class="nc">&nbsp;				log.trace(&quot;Error occurred while closing stream&quot;, io);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convert a stack trace into a shortened version for easier viewing and data storage, excluding
+&nbsp;	 * those lines we are least concerned with; should average about 60% reduction in stack trace
+&nbsp;	 * length
+&nbsp;	 * 
+&nbsp;	 * @param stackTrace original stack trace from an error
+&nbsp;	 * @return shortened stack trace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if stackTrace is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove springframework and reflection related lines
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static String shortenedStackTrace(String stackTrace) {
+<b class="fc">&nbsp;		if (stackTrace == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;String&gt; results = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		final Pattern exclude = Pattern.compile(&quot;(org.springframework.|java.lang.reflect.Method.invoke|sun.reflect.)&quot;);</b>
+<b class="fc">&nbsp;		boolean found = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (String line : stackTrace.split(&quot;\n&quot;)) {</b>
+<b class="fc">&nbsp;			Matcher m = exclude.matcher(line);</b>
+<b class="fc">&nbsp;			if (m.find()) {</b>
+<b class="fc">&nbsp;				found = true;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				if (found) {</b>
+<b class="fc">&nbsp;					found = false;</b>
+<b class="fc">&nbsp;					results.add(&quot;\tat [ignored] ...&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				results.add(line);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return StringUtils.join(results, &quot;\n&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;pre&gt;
+&nbsp;	 * Finds and loads the runtime properties file for a specific OpenMRS application.
+&nbsp;	 * Searches for the file in this order:
+&nbsp;	 * 1) {current directory}/{applicationname}_runtime.properties
+&nbsp;	 * 2) an environment variable called &quot;{APPLICATIONNAME}_RUNTIME_PROPERTIES_FILE&quot;
+&nbsp;	 * 3) {openmrs_app_dir}/{applicationName}_runtime.properties   // openmrs_app_dir is typically {user_home}/.OpenMRS
+&nbsp;	 * &lt;/pre&gt;
+&nbsp;	 * 
+&nbsp;	 * @see #getApplicationDataDirectory()
+&nbsp;	 * @param applicationName (defaults to &quot;openmrs&quot;) the name of the running OpenMRS application,
+&nbsp;	 *            e.g. if you have deployed OpenMRS as a web application you would give the deployed
+&nbsp;	 *            context path here
+&nbsp;	 * @return runtime properties, or null if none can be found
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	public static Properties getRuntimeProperties(String applicationName) {
+<b class="nc">&nbsp;		if (applicationName == null) {</b>
+<b class="nc">&nbsp;			applicationName = &quot;openmrs&quot;;</b>
+&nbsp;		}
+&nbsp;		String pathName;
+<b class="nc">&nbsp;		pathName = getRuntimePropertiesFilePathName(applicationName);</b>
+<b class="nc">&nbsp;		FileInputStream propertyStream = null;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			if (pathName != null) {</b>
+<b class="nc">&nbsp;				propertyStream = new FileInputStream(pathName);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (FileNotFoundException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Unable to find a runtime properties file at &quot; + new File(pathName).getAbsolutePath());</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			if (propertyStream == null) {</b>
+<b class="nc">&nbsp;				throw new IOException(&quot;Could not find a runtime properties file named &quot; + pathName</b>
+&nbsp;				        + &quot; in the OpenMRS application data directory, or the current directory&quot;);
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			Properties props = new Properties();</b>
+<b class="nc">&nbsp;			OpenmrsUtil.loadProperties(props, propertyStream);</b>
+<b class="nc">&nbsp;			propertyStream.close();</b>
+<b class="nc">&nbsp;			log.info(&quot;Using runtime properties file: &quot; + pathName);</b>
+<b class="nc">&nbsp;			return props;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Got an error while attempting to load the runtime properties&quot;, ex);</b>
+<b class="nc">&nbsp;			log.warn(</b>
+&nbsp;			    &quot;Unable to find a runtime properties file. Initial setup is needed. View the webapp to run the setup wizard.&quot;);
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the system is running in test mode
+&nbsp;	 * 
+&nbsp;	 * @return boolean
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public static boolean isTestMode() {
+<b class="fc">&nbsp;		return &quot;true&quot;.equalsIgnoreCase(System.getProperty(&quot;FUNCTIONAL_TEST_MODE&quot;));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the full path and name of the runtime properties file.
+&nbsp;	 * 
+&nbsp;	 * @param applicationName (defaults to &quot;openmrs&quot;) the name of the running OpenMRS application,
+&nbsp;	 *            e.g. if you have deployed OpenMRS as a web application you would give the deployed
+&nbsp;	 *            context path here
+&nbsp;	 * @return runtime properties file path and name, or null if none can be found
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static String getRuntimePropertiesFilePathName(String applicationName) {
+<b class="fc">&nbsp;		if (applicationName == null) {</b>
+<b class="nc">&nbsp;			applicationName = &quot;openmrs&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		String defaultFileName = applicationName + &quot;-runtime.properties&quot;;</b>
+<b class="fc">&nbsp;		String fileNameInTestMode = getRuntimePropertiesFileNameInTestMode();</b>
+&nbsp;		
+&nbsp;		// first look in the current directory (that java was started from)
+<b class="fc">&nbsp;		String pathName = fileNameInTestMode != null ? fileNameInTestMode : defaultFileName;</b>
+<b class="fc">&nbsp;		log.debug(&quot;Attempting to look for properties file in current directory: &quot; + pathName);</b>
+<b class="fc">&nbsp;		if (new File(pathName).exists()) {</b>
+<b class="nc">&nbsp;			return pathName;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			log.warn(&quot;Unable to find a runtime properties file at &quot; + new File(pathName).getAbsolutePath());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// next look from environment variable
+<b class="fc">&nbsp;		String envVarName = applicationName.toUpperCase() + &quot;_RUNTIME_PROPERTIES_FILE&quot;;</b>
+<b class="fc">&nbsp;		String envFileName = System.getenv(envVarName);</b>
+<b class="fc">&nbsp;		if (envFileName != null) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Atempting to look for runtime properties from: &quot; + pathName);</b>
+<b class="nc">&nbsp;			if (new File(envFileName).exists()) {</b>
+<b class="nc">&nbsp;				return envFileName;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				log.warn(&quot;Unable to find properties file with path: &quot; + pathName + &quot;. (derived from environment variable &quot;</b>
+&nbsp;				        + envVarName + &quot;)&quot;);
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			log.info(&quot;Couldn&#39;t find an environment variable named &quot; + envVarName);</b>
+<b class="fc">&nbsp;			if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;Available environment variables are named: &quot; + System.getenv().keySet());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// next look in the OpenMRS application data directory
+<b class="fc">&nbsp;		File file = new File(getApplicationDataDirectory(), pathName);</b>
+<b class="fc">&nbsp;		pathName = file.getAbsolutePath();</b>
+<b class="fc">&nbsp;		log.debug(&quot;Attempting to look for property file from: &quot; + pathName);</b>
+<b class="fc">&nbsp;		if (file.exists()) {</b>
+<b class="nc">&nbsp;			return pathName;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			log.warn(&quot;Unable to find properties file: &quot; + pathName);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String getRuntimePropertiesFileNameInTestMode() {
+<b class="fc">&nbsp;		String filename = null;</b>
+<b class="fc">&nbsp;		if (isTestMode()) {</b>
+<b class="nc">&nbsp;			log.info(&quot;In functional testing mode. Ignoring the existing runtime properties file&quot;);</b>
+<b class="nc">&nbsp;			filename = getOpenMRSVersionInTestMode() + &quot;-test-runtime.properties&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return filename;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets OpenMRS version name under test mode.
+&nbsp;	 * 
+&nbsp;	 * @return String openmrs version number
+&nbsp;	 */
+&nbsp;	public static String getOpenMRSVersionInTestMode() {
+<b class="nc">&nbsp;		return System.getProperty(&quot;OPENMRS_VERSION&quot;, &quot;openmrs&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Performs a case insensitive Comparison of two strings taking care of null values
+&nbsp;	 * 
+&nbsp;	 * @param s1 the string to compare
+&nbsp;	 * @param s2 the string to compare
+&nbsp;	 * @return true if strings are equal (ignoring case)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if only one of the strings is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be case insensitive
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	public static boolean nullSafeEqualsIgnoreCase(String s1, String s2) {
+<b class="fc">&nbsp;		if (s1 == null) {</b>
+<b class="fc">&nbsp;			return s2 == null;</b>
+<b class="fc">&nbsp;		} else if (s2 == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return s1.equalsIgnoreCase(s2);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method converts the given Long value to an Integer. If the Long value will not fit in an
+&nbsp;	 * Integer an exception is thrown
+&nbsp;	 * 
+&nbsp;	 * @param longValue the value to convert
+&nbsp;	 * @return the long value in integer form.
+&nbsp;	 * @throws IllegalArgumentException if the long value does not fit into an integer
+&nbsp;	 */
+&nbsp;	public static Integer convertToInteger(Long longValue) {
+<b class="fc">&nbsp;		if (longValue &lt; Integer.MIN_VALUE || longValue &gt; Integer.MAX_VALUE) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(longValue + &quot; cannot be cast to Integer without changing its value.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return longValue.intValue();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the passed in date&#39;s day of the year is the one that comes immediately before that
+&nbsp;	 * of the current date
+&nbsp;	 * 
+&nbsp;	 * @param date the date to check
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return true if the date comes immediately before the current date otherwise false
+&nbsp;	 */
+&nbsp;	public static boolean isYesterday(Date date) {
+<b class="nc">&nbsp;		if (date == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		Calendar c1 = Calendar.getInstance();</b>
+<b class="nc">&nbsp;		c1.add(Calendar.DAY_OF_YEAR, -1); // yesterday</b>
+&nbsp;		
+<b class="nc">&nbsp;		Calendar c2 = Calendar.getInstance();</b>
+<b class="nc">&nbsp;		c2.setTime(date);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return (c1.get(Calendar.ERA) == c2.get(Calendar.ERA) &amp;&amp; c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)</b>
+<b class="nc">&nbsp;		        &amp;&amp; c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get declared field names of a class
+&nbsp;	 * 
+&nbsp;	 * @param clazz
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	public static Set&lt;String&gt; getDeclaredFields(Class&lt;?&gt; clazz) {
+<b class="fc">&nbsp;		return Arrays.stream(clazz.getDeclaredFields()).map(Field::getName).collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

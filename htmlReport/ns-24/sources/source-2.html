@@ -1,0 +1,302 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AlertRecipient</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification</a>
+</div>
+
+<h1>Coverage Summary for Class: AlertRecipient (org.openmrs.notification)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AlertRecipient</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (6/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,3%
+  </span>
+  <span class="absValue">
+    (11/26)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AlertRecipient$HibernateProxy$XxSAcWAQ</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (6/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,3%
+  </span>
+  <span class="absValue">
+    (11/26)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.BaseOpenmrsObject;
+&nbsp;import org.openmrs.User;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is essentially a wrapper for the user object. The alert is assigned to each recipient.
+&nbsp; * A recipient then has either &quot;read&quot; the alert or has not.
+&nbsp; * 
+&nbsp; * @see org.openmrs.notification.Alert
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;notification_alert_recipient&quot;)
+&nbsp;@Audited
+&nbsp;public class AlertRecipient extends BaseOpenmrsObject {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = -507111109155L;
+&nbsp;	
+&nbsp;	@JoinColumn(name = &quot;alert_id&quot;)
+&nbsp;	@Id
+&nbsp;	@ManyToOne
+&nbsp;	private Alert alert;
+&nbsp;
+&nbsp;	@JoinColumn(name = &quot;user_id&quot;, updatable = false, insertable = false)
+&nbsp;	@Id
+&nbsp;	@ManyToOne
+&nbsp;	private User recipient;
+&nbsp;	
+<b class="fc">&nbsp;	@Column(name = &quot;alert_read&quot;, length = 1)</b>
+<b class="fc">&nbsp;	private Boolean alertRead = false;</b>
+&nbsp;	
+&nbsp;	@Column(name = &quot;date_changed&quot;, length = 19, updatable = false, insertable = false)
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	// necessary for hql queries
+&nbsp;	@Column(name = &quot;user_id&quot;, nullable = false, updatable = false, insertable = false)
+&nbsp;	private Integer recipientId;
+&nbsp;	
+&nbsp;	/** Default empty constructor */
+<b class="fc">&nbsp;	public AlertRecipient() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** Initializes a recipient with the given alert */
+<b class="nc">&nbsp;	public AlertRecipient(Alert a) {</b>
+<b class="nc">&nbsp;		this.alert = a;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** Initializes a recipient with the given alert and recipient/user */
+<b class="nc">&nbsp;	public AlertRecipient(Alert a, User recipient) {</b>
+<b class="nc">&nbsp;		this.alert = a;</b>
+<b class="nc">&nbsp;		setRecipient(recipient);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Initializes a recipient with the given user
+&nbsp;	 * 
+&nbsp;	 * @param read
+&nbsp;	 * @param user
+&nbsp;	 */
+<b class="fc">&nbsp;	public AlertRecipient(User user, Boolean read) {</b>
+<b class="fc">&nbsp;		setRecipient(user);</b>
+<b class="fc">&nbsp;		this.alertRead = read;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the alert.
+&nbsp;	 */
+&nbsp;	public Alert getAlert() {
+<b class="fc">&nbsp;		return alert;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param alert The alert to set.
+&nbsp;	 */
+&nbsp;	public void setAlert(Alert alert) {
+<b class="fc">&nbsp;		this.alert = alert;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the date this alert was changed
+&nbsp;	 */
+&nbsp;	public Date getDateChanged() {
+<b class="nc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged The date this alert was changed
+&nbsp;	 */
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="nc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// @override
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return &quot;Alert: &quot; + alert + &quot;. Recipient: &quot; + recipient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the read status
+&nbsp;	 */
+&nbsp;	public Boolean isAlertRead() {
+<b class="nc">&nbsp;		return alertRead;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see #getAlertRead()
+&nbsp;	 */
+&nbsp;	public Boolean getAlertRead() {
+<b class="nc">&nbsp;		return isAlertRead();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param alertRead The alertRead to set.
+&nbsp;	 */
+&nbsp;	public void setAlertRead(Boolean alertRead) {
+<b class="nc">&nbsp;		this.alertRead = alertRead;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the recipient/user.
+&nbsp;	 */
+&nbsp;	public User getRecipient() {
+<b class="nc">&nbsp;		return recipient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param user The recipient/user to set.
+&nbsp;	 */
+&nbsp;	public void setRecipient(User user) {
+<b class="fc">&nbsp;		this.recipient = user;</b>
+<b class="fc">&nbsp;		setRecipientId(user.getUserId());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the recipientId.
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unused&quot;)
+&nbsp;	private Integer getRecipientId() {
+<b class="nc">&nbsp;		return recipientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param recipientId The recipientId to set.
+&nbsp;	 */
+&nbsp;	private void setRecipientId(Integer recipientId) {
+<b class="fc">&nbsp;		this.recipientId = recipientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

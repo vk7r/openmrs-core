@@ -1,0 +1,181 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ObsDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: ObsDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ObsDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.api.ObsService;
+&nbsp;import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+&nbsp;
+&nbsp;/**
+&nbsp; * Observation-related database functions
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.ObsService
+&nbsp; */
+&nbsp;public interface ObsDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#saveObs(org.openmrs.Obs, String)
+&nbsp;	 */
+&nbsp;	public Obs saveObs(Obs obs) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObs(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	public Obs getObs(Integer obsId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#purgeObs(Obs)
+&nbsp;	 */
+&nbsp;	public void deleteObs(Obs obs) throws DAOException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservations(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.util.List,
+&nbsp;	 *      java.lang.Integer, java.lang.Integer, java.util.Date, java.util.Date, boolean,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sort,
+&nbsp;	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservationCount(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.lang.Integer,
+&nbsp;	 *      java.util.Date, java.util.Date, boolean, java.lang.String)
+&nbsp;	 * @see ObsService#getObservationCount(List, boolean)
+&nbsp;	 */
+&nbsp;	public Long getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId,
+&nbsp;	        Date fromDate, Date toDate, List&lt;ConceptName&gt; valueCodedNameAnswers, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return obs or null
+&nbsp;	 */
+&nbsp;	public Obs getObsByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getRevisionObs(org.openmrs.Obs)
+&nbsp;	 * @param initialObs
+&nbsp;	 * @return Obs or null
+&nbsp;	 */
+&nbsp;	public Obs getRevisionObs(Obs initialObs);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the value of status currently saved in the database for the given obs, bypassing any caches. This is used
+&nbsp;	 * when the user updates an existing obs so we can determine whether to change its status or not.
+&nbsp;	 * @param obs
+&nbsp;	 * @return
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	public Obs.Status getSavedStatus(Obs obs);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservations(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.util.List, java.util.List,
+&nbsp;	 *      java.lang.Integer, java.lang.Integer, java.util.Date, java.util.Date, boolean,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;			List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sortList,
+&nbsp;			List&lt;Visit&gt; visits, Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate,
+&nbsp;			boolean includeVoidedObs, String accessionNumber) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservationCount(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.lang.Integer,
+&nbsp;	 *      java.util.Date, java.util.Date, java.util.List, java.util.List, boolean, java.lang.String)
+&nbsp;	 * @see ObsService#getObservationCount(List, boolean)
+&nbsp;	 */
+&nbsp;	public Long getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;			List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId,
+&nbsp;			Date fromDate, Date toDate, List&lt;ConceptName&gt; valueCodedNameAnswers, List&lt;Visit&gt; visits,
+&nbsp;			boolean includeVoidedObs, String accessionNumber) throws DAOException;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

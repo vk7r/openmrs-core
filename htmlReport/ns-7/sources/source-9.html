@@ -1,0 +1,303 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SerializedObjectDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: SerializedObjectDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SerializedObjectDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.OpenmrsMetadata;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.serialization.OpenmrsSerializer;
+&nbsp;
+&nbsp;/**
+&nbsp; * The SerializedObjectDAO is meant to be used as a means for persisting objects for which a typical
+&nbsp; * relational table model is impractical. A typical example is for persisting multiple different
+&nbsp; * user-configurable implementations of a particular interface. Because it is impossible to know
+&nbsp; * what properties a given implementation will have and which will need to be persisted, it might be
+&nbsp; * more practical to use serialization for this. Each available method for managing Serialized
+&nbsp; * Objects on this class is available in two forms. The first form operates on OpenmrsObject
+&nbsp; * instances directly, and isolates the consumer completely from the mechanics of Serialization. You
+&nbsp; * pass in OpenmrsObjects and you get out OpenmrsObjects. For example:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * MyOpenmrsObject m = getObject(MyOpenmrsObject.class, 10);
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * The second form operates on SerializedObject instances directly, and provides the consumer with
+&nbsp; * more control over how to handle these SerializedObjects. A typical reason why this might be
+&nbsp; * useful is to provide graceful failure in the event that a persisted Object has had an API change,
+&nbsp; * and thus would fail to deserialize properly. In this case, the consumer can use something like
+&nbsp; * the following:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * MyOpenmrsObject m = null;
+&nbsp; * SerializedObject s = getSerializedObject(10);
+&nbsp; * try {
+&nbsp; *     m = convertSerializedObject(MyOpenmrsObject.class, s);
+&nbsp; * }
+&nbsp; * catch (Exception e) {
+&nbsp; *     // Handle this exception however you need to for your use case.
+&nbsp; * }
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;public interface SerializedObjectDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the raw SerializedObject from the database by id
+&nbsp;	 * 
+&nbsp;	 * @param id the id to lookup
+&nbsp;	 * @return the SerializedObject with the given id
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the saved serialized object
+&nbsp;	 */
+&nbsp;	public SerializedObject getSerializedObject(Integer id) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the saved object of the passed type from the database by it&#39;s id
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @param id The primary key id of the object to retrieve
+&nbsp;	 * @return the saved object
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the saved object
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T getObject(Class&lt;T&gt; type, Integer id) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the raw Serialized Object from the database by uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid The UUID of the object to retrieve
+&nbsp;	 * @return the SerializedObject with the given uuid
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the saved serialized object
+&nbsp;	 */
+&nbsp;	public SerializedObject getSerializedObjectByUuid(String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the saved object of the passed type from the database by it&#39;s uuid
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @param uuid The UUID of the object to retrieve
+&nbsp;	 * @return the saved object
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the saved object
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T getObjectByUuid(Class&lt;T&gt; type, String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves an object to the database in serialized form
+&nbsp;	 * 
+&nbsp;	 * @param object The object to save
+&nbsp;	 * @return the saved object
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save the passed object if supported
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an exception if object not supported
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T saveObject(T object) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves an object to the database, in serialized form, using the specified
+&nbsp;	 * {@link OpenmrsSerializer}
+&nbsp;	 * 
+&nbsp;	 * @param object The object to save
+&nbsp;	 * @param serializer The {@link OpenmrsSerializer} to use
+&nbsp;	 * @return the saved object
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save the passed object if supported
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an exception if object not supported
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set auditable fields before serializing
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T saveObject(T object, OpenmrsSerializer serializer) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves all raw Serialized Object from the database that match the passed type and
+&nbsp;	 * includeRetired flag
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @param includeRetired if true includes retired/voided objects, otherwise does not
+&nbsp;	 * @return &amp;lt;List&amp;gt; T A list of all the saved objects that match the passed type
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all objects of the passed type
+&nbsp;	 */
+&nbsp;	public List&lt;SerializedObject&gt; getAllSerializedObjects(Class&lt;?&gt; type, boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves all non-retired objects of the passed type from the database that have been saved
+&nbsp;	 * through serialization
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @return &amp;lt;List&amp;gt; T A list of all the saved objects that match the passed type
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all non-retired objects of the passed type
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; List&lt;T&gt; getAllObjects(Class&lt;T&gt; type) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves all objects from the database that match the passed type that have been saved
+&nbsp;	 * through serialization Returns voided / retired Objects only if includeRetired parameter is
+&nbsp;	 * true
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @param includeRetired includeRetired If true, returns voided/retired objects as well
+&nbsp;	 * @return &amp;lt;List&amp;gt; T A list of all the saved objects that match the passed type
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all saved objects of the passed type if includeRetired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only non-retired objects of the passed type if not includeRetired
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; List&lt;T&gt; getAllObjects(Class&lt;T&gt; type, boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves all raw Serialized Objects from the database that match the passed type and name
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @param name the name of the item to retrieve
+&nbsp;	 * @param exactMatchOnly if true will only return exact matches
+&nbsp;	 * @return &amp;lt;List&amp;gt; T A list of all the saved objects that match the passed type and name
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all saved objects with the given type and exact name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all saved objects with the given type and partial name
+&nbsp;	 */
+&nbsp;	public List&lt;SerializedObject&gt; getAllSerializedObjectsByName(Class&lt;?&gt; type, String name, boolean exactMatchOnly)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves all objects from the database that match the passed type and name that have been
+&nbsp;	 * saved through serialization
+&nbsp;	 * 
+&nbsp;	 * @param type The class of the object to retrieve
+&nbsp;	 * @param name the name of the item to retrieve
+&nbsp;	 * @param exactMatchOnly if true will only return exact matches
+&nbsp;	 * @return &amp;lt;List&amp;gt; T A list of all the saved objects that match the passed type and name
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all saved objects with the given type and exact name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all saved objects with the given type and partial name
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsMetadata&gt; List&lt;T&gt; getAllObjectsByName(Class&lt;T&gt; type, String name, boolean exactMatchOnly)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts a raw SerializedObject to an OpenmrsObject, using the appropriate Serializer
+&nbsp;	 * 
+&nbsp;	 * @param clazz the OpenmrsObject class to retrieve
+&nbsp;	 * @param serializedObject the raw SerializedObject to deserialize into an OpenmrsObject
+&nbsp;	 * @return an OpenmrsObject of the passed clazz from the passed SerializedObject
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T convertSerializedObject(Class&lt;T&gt; clazz, SerializedObject serializedObject)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes the item from the database with the given primary key id
+&nbsp;	 * 
+&nbsp;	 * @param id The id of the item to delete from the database
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the object with the passed id
+&nbsp;	 */
+&nbsp;	public void purgeObject(Integer id) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the registered class for the passed object, or null if none found For example, if the
+&nbsp;	 * supportedTypes property contains the CohortDefinition.class interface, and a particular
+&nbsp;	 * implementation of that interface is passed in, then this method would return
+&nbsp;	 * CohortDefinition.class.
+&nbsp;	 * 
+&nbsp;	 * @param object The object to check for the registered type
+&nbsp;	 * @return The registered type for the passed object, or null if not found
+&nbsp;	 */
+&nbsp;	public Class&lt;? extends OpenmrsObject&gt; getRegisteredTypeForObject(OpenmrsObject object);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all supported types that this class can manage
+&nbsp;	 */
+&nbsp;	public List&lt;Class&lt;? extends OpenmrsObject&gt;&gt; getSupportedTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Registers a class as one that should be supported
+&nbsp;	 * 
+&nbsp;	 * @param clazz The class to register
+&nbsp;	 */
+&nbsp;	public void registerSupportedType(Class&lt;? extends OpenmrsObject&gt; clazz) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes this class as one that should be supported
+&nbsp;	 * 
+&nbsp;	 * @param clazz The class to un-register
+&nbsp;	 */
+&nbsp;	public void unregisterSupportedType(Class&lt;? extends OpenmrsObject&gt; clazz) throws DAOException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

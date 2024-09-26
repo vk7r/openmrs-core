@@ -1,0 +1,524 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Patient</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Patient (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Patient</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (21/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,1%
+  </span>
+  <span class="absValue">
+    (80/111)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Patient$HibernateProxy$QIR4nMOC</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (21/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,1%
+  </span>
+  <span class="absValue">
+    (80/111)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.ContainedIn;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines a Patient in the system. A patient is simply an extension of a person and all that that
+&nbsp; * implies.
+&nbsp; * 
+&nbsp; * @version 2.0
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Patient extends Person {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 93123L;
+&nbsp;	
+&nbsp;	private Integer patientId;
+&nbsp;	
+<b class="fc">&nbsp;	private String allergyStatus = Allergies.UNKNOWN;</b>
+&nbsp;	
+&nbsp;	@ContainedIn
+&nbsp;	private Set&lt;PatientIdentifier&gt; identifiers;
+&nbsp;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Patient() {</b>
+<b class="fc">&nbsp;		setPatient(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor creates a new Patient object from the given {@link Person} object. All
+&nbsp;	 * attributes are copied over to the new object. NOTE! All child collection objects are copied
+&nbsp;	 * as pointers, each individual element is not copied. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 *
+&nbsp;	 * @param person the person object to copy onto a new Patient
+&nbsp;	 * @see Person#Person(Person)
+&nbsp;	 */
+&nbsp;	public Patient(Person person) {
+<b class="fc">&nbsp;		super(person);</b>
+<b class="fc">&nbsp;		if (person != null) {</b>
+<b class="fc">&nbsp;			this.patientId = person.getPersonId();</b>
+<b class="fc">&nbsp;			if (person.getUuid() != null) {</b>
+<b class="fc">&nbsp;				this.setUuid(person.getUuid());</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		setPatient(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor with default patient id
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 */
+&nbsp;	public Patient(Integer patientId) {
+<b class="fc">&nbsp;		super(patientId);</b>
+<b class="fc">&nbsp;		this.patientId = patientId;</b>
+<b class="fc">&nbsp;		setPatient(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor creates a new Patient object from the given {@link Patient} object. All
+&nbsp;	 * attributes are copied over to the new object. In effect creating a clone/duplicate. &lt;br&gt;
+&nbsp;	 *
+&nbsp;	 * @param patient the person object to copy onto a new Patient
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public Patient(Patient patient) {
+<b class="fc">&nbsp;		super(patient);</b>
+<b class="fc">&nbsp;		this.patientId = patient.getPatientId();</b>
+<b class="fc">&nbsp;		this.allergyStatus = patient.getAllergyStatus();</b>
+<b class="fc">&nbsp;		Set&lt;PatientIdentifier&gt; newIdentifiers = new TreeSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (PatientIdentifier pid : patient.getIdentifiers()) {</b>
+<b class="fc">&nbsp;			PatientIdentifier identifierClone = (PatientIdentifier) pid.clone();</b>
+<b class="fc">&nbsp;			identifierClone.setPatient(this);</b>
+<b class="fc">&nbsp;			newIdentifiers.add(identifierClone);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		this.identifiers = newIdentifiers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return internal identifier for patient
+&nbsp;	 */
+&nbsp;	public Integer getPatientId() {
+<b class="fc">&nbsp;		if (this.patientId == null) {</b>
+<b class="fc">&nbsp;			this.patientId = getPersonId();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return this.patientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the internal identifier for a patient. &lt;b&gt;This should never be called directly&lt;/b&gt;. It
+&nbsp;	 * exists only for the use of the supporting infrastructure.
+&nbsp;	 * 
+&nbsp;	 * @param patientId
+&nbsp;	 */
+&nbsp;	public void setPatientId(Integer patientId) {
+<b class="fc">&nbsp;		super.setPersonId(patientId);</b>
+<b class="fc">&nbsp;		this.patientId = patientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns allergy status maintained by the supporting infrastructure.
+&nbsp;	 * 
+&nbsp;	 * @return current allargy status for patient
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return allergy status maintained by the supporting infrastructure
+&nbsp;	 */
+&nbsp;	public String getAllergyStatus() {
+<b class="fc">&nbsp;		return this.allergyStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the allergy status for a patient. &lt;b&gt;This should never be called directly&lt;/b&gt;. It should
+&nbsp;	 * reflect allergy status maintained by the supporting infrastructure.
+&nbsp;	 * 
+&nbsp;	 * @param allergyStatus
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not be called by service client
+&nbsp;	 */
+&nbsp;	public void setAllergyStatus(String allergyStatus) {
+<b class="fc">&nbsp;		this.allergyStatus = allergyStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Overrides the parent setPersonId(Integer) so that we can be sure patient id is also set
+&nbsp;	 * correctly.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Person#setPersonId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setPersonId(Integer personId) {
+<b class="fc">&nbsp;		super.setPersonId(personId);</b>
+<b class="fc">&nbsp;		this.patientId = personId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all of this patients identifiers -- both voided and non-voided ones. If you want only
+&nbsp;	 * non-voided identifiers, use {@link #getActiveIdentifiers()}
+&nbsp;	 * 
+&nbsp;	 * @return Set of all known identifiers for this patient
+&nbsp;	 * @see org.openmrs.PatientIdentifier
+&nbsp;	 * @see #getActiveIdentifiers()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null
+&nbsp;	 */
+&nbsp;	public Set&lt;PatientIdentifier&gt; getIdentifiers() {
+<b class="fc">&nbsp;		if (identifiers == null) {</b>
+<b class="fc">&nbsp;			identifiers = new TreeSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return this.identifiers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update all identifiers for patient
+&nbsp;	 * 
+&nbsp;	 * @param identifiers Set&amp;lt;PatientIdentifier&amp;gt; to set as update all known identifiers for
+&nbsp;	 *            patient
+&nbsp;	 * @see org.openmrs.PatientIdentifier
+&nbsp;	 */
+&nbsp;	public void setIdentifiers(Set&lt;PatientIdentifier&gt; identifiers) {
+<b class="fc">&nbsp;		this.identifiers = identifiers;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds this PatientIdentifier if the patient doesn&#39;t contain it already
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier
+&nbsp;	 */
+&nbsp;	/**
+&nbsp;	 * Will only add PatientIdentifiers in this list that this patient does not have already
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifiers
+&nbsp;	 */
+&nbsp;	public void addIdentifiers(Collection&lt;PatientIdentifier&gt; patientIdentifiers) {
+<b class="fc">&nbsp;		for (PatientIdentifier identifier : patientIdentifiers) {</b>
+<b class="fc">&nbsp;			addIdentifier(identifier);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Will add this PatientIdentifier if the patient doesn&#39;t contain it already
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null identifiers list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add identifier to current list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not add identifier that is in list already
+&nbsp;	 */
+&nbsp;	public void addIdentifier(PatientIdentifier patientIdentifier) {
+<b class="fc">&nbsp;		if (patientIdentifier != null) {</b>
+<b class="fc">&nbsp;			patientIdentifier.setPatient(this);</b>
+&nbsp;			// make sure the set doesn&#39;t already contain an identifier with the same
+&nbsp;			// identifier, identifierType
+<b class="fc">&nbsp;			for (PatientIdentifier currentId : getActiveIdentifiers()) {</b>
+<b class="fc">&nbsp;				if (currentId.equalsContent(patientIdentifier)) {</b>
+&nbsp;					// fail silently if someone tries to add a duplicate
+&nbsp;					return;
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		getIdentifiers().add(patientIdentifier);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to remove the given identifier from this patient&#39;s list of identifiers. If
+&nbsp;	 * &lt;code&gt;patientIdentifier&lt;/code&gt; is null, nothing is done.
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier the identifier to remove
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove identifier if exists
+&nbsp;	 */
+&nbsp;	public void removeIdentifier(PatientIdentifier patientIdentifier) {
+<b class="fc">&nbsp;		if (patientIdentifier != null) {</b>
+<b class="fc">&nbsp;			getIdentifiers().remove(patientIdentifier);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the first &quot;preferred&quot; identifier for a patient. Otherwise, returns
+&nbsp;	 * the first non-voided identifier Otherwise, null
+&nbsp;	 * 
+&nbsp;	 * @return Returns the &quot;preferred&quot; patient identifier.
+&nbsp;	 */
+&nbsp;	public PatientIdentifier getPatientIdentifier() {
+&nbsp;		// normally the DAO layer returns these in the correct order, i.e. preferred and non-voided first, but it&#39;s possible that someone
+&nbsp;		// has fetched a Patient, changed their identifiers around, and then calls this method, so we have to be careful.
+<b class="fc">&nbsp;		if (!getIdentifiers().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="fc">&nbsp;				if (id.getPreferred() &amp;&amp; !id.getVoided()) {</b>
+<b class="fc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="fc">&nbsp;				if (!id.getVoided()) {</b>
+<b class="fc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the first (preferred) patient identifier matching a
+&nbsp;	 * &lt;code&gt;PatientIdentifierType&lt;/code&gt; Otherwise, returns the first non-voided identifier
+&nbsp;	 * Otherwise, null
+&nbsp;	 * 
+&nbsp;	 * @param pit The PatientIdentifierType of which to return the PatientIdentifier
+&nbsp;	 * @return Returns a PatientIdentifier of the specified type.
+&nbsp;	 */
+&nbsp;	public PatientIdentifier getPatientIdentifier(PatientIdentifierType pit) {
+<b class="nc">&nbsp;		if (!getIdentifiers().isEmpty()) {</b>
+<b class="nc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="nc">&nbsp;				if (id.getPreferred() &amp;&amp; !id.getVoided() &amp;&amp; pit.equals(id.getIdentifierType())) {</b>
+<b class="nc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="nc">&nbsp;				if (!id.getVoided() &amp;&amp; pit.equals(id.getIdentifierType())) {</b>
+<b class="nc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the first (preferred) patient identifier matching &lt;code&gt;identifierTypeId&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param identifierTypeId
+&nbsp;	 * @return preferred patient identifier
+&nbsp;	 */
+&nbsp;	public PatientIdentifier getPatientIdentifier(Integer identifierTypeId) {
+<b class="fc">&nbsp;		if (!getIdentifiers().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="fc">&nbsp;				if (id.getPreferred() &amp;&amp; !id.getVoided()</b>
+<b class="fc">&nbsp;				        &amp;&amp; identifierTypeId.equals(id.getIdentifierType().getPatientIdentifierTypeId())) {</b>
+<b class="fc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="fc">&nbsp;				if (!id.getVoided() &amp;&amp; identifierTypeId.equals(id.getIdentifierType().getPatientIdentifierTypeId())) {</b>
+<b class="fc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the (preferred) patient identifier matching &lt;code&gt;identifierTypeName&lt;/code&gt; Otherwise
+&nbsp;	 * returns that last &lt;code&gt;PatientIdenitifer&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param identifierTypeName
+&nbsp;	 * @return preferred patient identifier
+&nbsp;	 */
+&nbsp;	public PatientIdentifier getPatientIdentifier(String identifierTypeName) {
+<b class="nc">&nbsp;		if (!getIdentifiers().isEmpty()) {</b>
+<b class="nc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="nc">&nbsp;				if (id.getPreferred() &amp;&amp; !id.getVoided() &amp;&amp; identifierTypeName.equals(id.getIdentifierType().getName())) {</b>
+<b class="nc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			for (PatientIdentifier id : getIdentifiers()) {</b>
+<b class="nc">&nbsp;				if (!id.getVoided() &amp;&amp; identifierTypeName.equals(id.getIdentifierType().getName())) {</b>
+<b class="nc">&nbsp;					return id;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns only the non-voided identifiers for this patient. If you want &lt;u&gt;all&lt;/u&gt; identifiers,
+&nbsp;	 * use {@link #getIdentifiers()}
+&nbsp;	 * 
+&nbsp;	 * @return list of non-voided identifiers for this patient
+&nbsp;	 * @see #getIdentifiers()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return preferred identifiers first in the list
+&nbsp;	 */
+&nbsp;	public List&lt;PatientIdentifier&gt; getActiveIdentifiers() {
+<b class="fc">&nbsp;		List&lt;PatientIdentifier&gt; ids = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		List&lt;PatientIdentifier&gt; nonPreferred = new LinkedList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (PatientIdentifier pi : getIdentifiers()) {</b>
+<b class="fc">&nbsp;			if (!pi.getVoided()) {</b>
+<b class="fc">&nbsp;				if (pi.getPreferred()) {</b>
+<b class="fc">&nbsp;					ids.add(pi);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					nonPreferred.add(pi);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		ids.addAll(nonPreferred);</b>
+<b class="fc">&nbsp;		return ids;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns only the non-voided identifiers for this patient. If you want &lt;u&gt;all&lt;/u&gt; identifiers,
+&nbsp;	 * use {@link #getIdentifiers()}
+&nbsp;	 * 
+&nbsp;	 * @return list of non-voided identifiers for this patient
+&nbsp;	 * @param pit PatientIdentifierType
+&nbsp;	 * @see #getIdentifiers()
+&nbsp;	 */
+&nbsp;	public List&lt;PatientIdentifier&gt; getPatientIdentifiers(PatientIdentifierType pit) {
+<b class="nc">&nbsp;		List&lt;PatientIdentifier&gt; ids = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (PatientIdentifier pi : getIdentifiers()) {</b>
+<b class="nc">&nbsp;			if (!pi.getVoided() &amp;&amp; pit.equals(pi.getIdentifierType())) {</b>
+<b class="nc">&nbsp;				ids.add(pi);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ids;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;Patient#&quot; + patientId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getPatientId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setPatientId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the person represented
+&nbsp;	 * 
+&nbsp;	 * @return the person represented by this object
+&nbsp;	 * @since 1.10.0
+&nbsp;	 */
+&nbsp;	public Person getPerson() {
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

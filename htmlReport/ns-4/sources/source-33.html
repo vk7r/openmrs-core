@@ -1,0 +1,149 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MedicationDispenseService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: MedicationDispenseService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MedicationDispenseService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import org.openmrs.MedicationDispense;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.parameter.MedicationDispenseCriteria;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * This interface defines an API for interacting with MedicationDispense objects.
+&nbsp; * @since 2.6.0
+&nbsp; */
+&nbsp;public interface MedicationDispenseService extends OpenmrsService {
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a MedicationDispense by id
+&nbsp;	 * @param medicationDispenseId the id of the MedicationDispense to retrieve
+&nbsp;	 * @return the MedicationDispense with the given id, or null if none exists
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_MEDICATION_DISPENSE })
+&nbsp;	MedicationDispense getMedicationDispense(Integer medicationDispenseId);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a MedicationDispense based on the uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid - uuid of the MedicationDispense to be returned
+&nbsp;	 * @return the MedicationDispense
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_MEDICATION_DISPENSE })
+&nbsp;	MedicationDispense getMedicationDispenseByUuid(String uuid);
+&nbsp;
+&nbsp;    /**
+&nbsp;	 * Gets all MedicationDispense results that match the given criteria
+&nbsp;	 * @param criteria - the criteria for the returned MedicationDispense results
+&nbsp;	 * @return a list of MedicationDispenses
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_MEDICATION_DISPENSE })
+&nbsp;	List&lt;MedicationDispense&gt; getMedicationDispenseByCriteria(MedicationDispenseCriteria criteria);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves a MedicationDispense
+&nbsp;	 * @param medicationDispense - the MedicationDispense to be saved
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_MEDICATION_DISPENSE })
+&nbsp;	MedicationDispense saveMedicationDispense(MedicationDispense medicationDispense);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Voids a MedicationDispense
+&nbsp;	 * @param medicationDispense the MedicationDispense to be voided
+&nbsp;	 * @param reason the reason for voiding the MedicationDispense
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_MEDICATION_DISPENSE })
+&nbsp;	MedicationDispense voidMedicationDispense(MedicationDispense medicationDispense, String reason);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Un-void a previously voided MedicationDispense
+&nbsp;	 * @param medicationDispense MedicationDispense to un-void
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_MEDICATION_DISPENSE)
+&nbsp;	MedicationDispense unvoidMedicationDispense(MedicationDispense medicationDispense);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely remove a MedicationDispense from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidMedicationDispense(MedicationDispense) for that one) 
+&nbsp;	 * If other data references this medicationDispense, an error will be thrown.
+&nbsp;	 * @param medicationDispense the MedicationDispense to be purged
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_MEDICATION_DISPENSE)
+&nbsp;	void purgeMedicationDispense(MedicationDispense medicationDispense);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

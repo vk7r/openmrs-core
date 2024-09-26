@@ -1,0 +1,911 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptValidatorChangeSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptValidatorChangeSet (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptValidatorChangeSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    23,5%
+  </span>
+  <span class="absValue">
+    (4/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2,5%
+  </span>
+  <span class="absValue">
+    (9/366)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.BatchUpdateException;
+&nbsp;import java.sql.Date;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.sql.Types;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.collections.MapUtils;
+&nbsp;import org.apache.commons.collections.set.ListOrderedSet;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.api.ConceptNameType;
+&nbsp;import org.openmrs.api.db.hibernate.HibernateUtil;
+&nbsp;import org.openmrs.util.DatabaseUpdater;
+&nbsp;import org.openmrs.util.LocaleUtility;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * This change set is run just after the conversion of core concept name tags to concept name types&#39;
+&nbsp; * it runs through all the rows in the concept table and checks if all its conceptNames conform to
+&nbsp; * the constraints added with the conversion of the tags.
+&nbsp; */
+<b class="fc">&nbsp;public class ConceptValidatorChangeSet implements CustomTaskChange {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ConceptValidatorChangeSet.class);</b>
+&nbsp;	
+&nbsp;	//List to store warnings
+<b class="fc">&nbsp;	private List&lt;String&gt; updateWarnings = new LinkedList&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	//List to store info messages
+<b class="fc">&nbsp;	private List&lt;String&gt; logMessages = new LinkedList&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	//A set to store unique concept names that have been updated and changes have to be persisted to the database
+<b class="fc">&nbsp;	private Set&lt;ConceptName&gt; updatedConceptNames = new HashSet&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Locale defaultLocale = new Locale(&quot;en&quot;);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;Locale&gt; allowedLocales = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CustomTaskChange#execute(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+&nbsp;		
+<b class="nc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		//In the liquibase changelog file, there is a precondition that checks if this is a fresh installation
+&nbsp;		//with no rows in the concept table or if it has some active concepts, we don&#39;t need to check again.
+&nbsp;		
+&nbsp;		//validate all concepts and try to fix those that can be fixed, note that updates are not committed inside this methods
+<b class="nc">&nbsp;		validateAndCleanUpConcepts(connection);</b>
+&nbsp;		
+&nbsp;		//commit as a batch update
+<b class="nc">&nbsp;		if (!updatedConceptNames.isEmpty()) {</b>
+<b class="nc">&nbsp;			runBatchUpdate(connection);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			log.debug(&quot;No concept names to update&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (!logMessages.isEmpty() || !updateWarnings.isEmpty()) {</b>
+<b class="nc">&nbsp;			writeWarningsToFile();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (!updateWarnings.isEmpty()) {</b>
+<b class="nc">&nbsp;			DatabaseUpdater.reportUpdateWarnings(updateWarnings);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//we need this memory in case the lists are large
+<b class="nc">&nbsp;		updateWarnings = null;</b>
+<b class="nc">&nbsp;		updatedConceptNames = null;</b>
+<b class="nc">&nbsp;		logMessages = null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method is called by the execute {@link #execute(Database)} method to run through all
+&nbsp;	 * concept and their conceptNames and validates them, It also tries to fix any constraints that
+&nbsp;	 * are being violated.
+&nbsp;	 *
+&nbsp;	 * @param connection The database connection
+&nbsp;	 */
+&nbsp;	private void validateAndCleanUpConcepts(JdbcConnection connection) {
+<b class="nc">&nbsp;		List&lt;Integer&gt; conceptIds = getAllUnretiredConceptIds(connection);</b>
+<b class="nc">&nbsp;		allowedLocales = getAllowedLocalesList(connection);</b>
+&nbsp;		//default locale(if none, then &#39;en&#39;) is always the last in the list.
+<b class="nc">&nbsp;		defaultLocale = allowedLocales.get(allowedLocales.size() - 1);</b>
+&nbsp;		//a map to store all duplicates names found for each locale
+<b class="nc">&nbsp;		Map&lt;Locale, Set&lt;String&gt;&gt; localeDuplicateNamesMap = null;</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (Integer conceptId : conceptIds) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			Map&lt;Locale, List&lt;ConceptName&gt;&gt; localeConceptNamesMap = getLocaleConceptNamesMap(connection, conceptId);</b>
+<b class="nc">&nbsp;			if (localeConceptNamesMap == null) {</b>
+<b class="nc">&nbsp;				updateWarnings.add(&quot;No names added for concept with id: &quot; + conceptId);</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			boolean hasFullySpecifiedName = false;</b>
+<b class="nc">&nbsp;			List&lt;ConceptName&gt; namesWithNoLocale = null;</b>
+&nbsp;			
+&nbsp;			//for each locale
+<b class="nc">&nbsp;			for (Map.Entry&lt;Locale, List&lt;ConceptName&gt;&gt; e : localeConceptNamesMap.entrySet()) {</b>
+<b class="nc">&nbsp;				Locale conceptNameLocale = e.getKey();</b>
+<b class="nc">&nbsp;				boolean fullySpecifiedNameForLocaleFound = false;</b>
+<b class="nc">&nbsp;				boolean preferredNameForLocaleFound = false;</b>
+<b class="nc">&nbsp;				boolean shortNameForLocaleFound = false;</b>
+&nbsp;				//map to hold a name and a list of conceptNames that are found as duplicates
+<b class="nc">&nbsp;				Map&lt;String, List&lt;ConceptName&gt;&gt; nameDuplicateConceptNamesMap = new HashMap&lt;&gt;();</b>
+&nbsp;				
+&nbsp;				//for each name in the locale
+<b class="nc">&nbsp;				for (ConceptName nameInLocale : e.getValue()) {</b>
+<b class="nc">&nbsp;					if (StringUtils.isBlank(nameInLocale.getName())) {</b>
+<b class="nc">&nbsp;						updateWarnings.add(&quot;ConceptName with id &quot; + nameInLocale.getConceptNameId() + &quot; (&quot;</b>
+<b class="nc">&nbsp;						        + nameInLocale.getName() + &quot;) is null, white space character or empty string&quot;);</b>
+&nbsp;					}
+&nbsp;					//if the concept name has no locale, wonder why this would be the case but there was no not-null constraint originally
+<b class="nc">&nbsp;					if (conceptNameLocale == null) {</b>
+<b class="nc">&nbsp;						if (namesWithNoLocale == null) {</b>
+<b class="nc">&nbsp;							namesWithNoLocale = new LinkedList&lt;&gt;();</b>
+&nbsp;						}
+&nbsp;						
+<b class="nc">&nbsp;						namesWithNoLocale.add(nameInLocale);</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+&nbsp;					//The concept&#39;s locale should be among the allowed locales listed in global properties
+<b class="nc">&nbsp;					if (!allowedLocales.contains(conceptNameLocale)) {</b>
+<b class="nc">&nbsp;						updateWarnings.add(&quot;ConceptName with id: &quot; + nameInLocale.getConceptNameId() + &quot; (&quot;</b>
+<b class="nc">&nbsp;						        + nameInLocale.getName() + &quot;) has a locale (&quot; + conceptNameLocale</b>
+&nbsp;						        + &quot;) that isn&#39;t listed among the allowed ones by the system admin&quot;);
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					if (nameInLocale.getLocalePreferred() != null) {</b>
+<b class="nc">&nbsp;						if (nameInLocale.getLocalePreferred() &amp;&amp; !preferredNameForLocaleFound) {</b>
+<b class="nc">&nbsp;							if (nameInLocale.isIndexTerm()) {</b>
+<b class="nc">&nbsp;								nameInLocale.setLocalePreferred(false);</b>
+<b class="nc">&nbsp;								reportUpdatedName(nameInLocale, &quot;Preferred name &#39;&quot; + nameInLocale.getName()</b>
+<b class="nc">&nbsp;								        + &quot;&#39; in locale &#39;&quot; + conceptNameLocale.getDisplayName()</b>
+&nbsp;								        + &quot;&#39; has been dropped as the preferred name because it is a search term&quot;);
+<b class="nc">&nbsp;							} else if (nameInLocale.isShort()) {</b>
+<b class="nc">&nbsp;								nameInLocale.setLocalePreferred(false);</b>
+<b class="nc">&nbsp;								reportUpdatedName(nameInLocale, &quot;Preferred name &#39;&quot; + nameInLocale.getName()</b>
+<b class="nc">&nbsp;								        + &quot;&#39; in locale &#39;&quot; + conceptNameLocale.getDisplayName()</b>
+&nbsp;								        + &quot;&#39; has been dropped as the preferred name because it is a short name&quot;);
+&nbsp;							} else {
+<b class="nc">&nbsp;								preferredNameForLocaleFound = true;</b>
+&nbsp;							}
+&nbsp;						}
+&nbsp;						//should have one preferred name per locale
+<b class="nc">&nbsp;						else if (nameInLocale.getLocalePreferred() &amp;&amp; preferredNameForLocaleFound) {</b>
+&nbsp;							//drop this name as locale preferred so that we have only one
+<b class="nc">&nbsp;							nameInLocale.setLocalePreferred(false);</b>
+<b class="nc">&nbsp;							reportUpdatedName(</b>
+&nbsp;							    nameInLocale,
+&nbsp;							    &quot;Preferred name &#39;&quot;
+<b class="nc">&nbsp;							            + nameInLocale.getName()</b>
+&nbsp;							            + &quot;&#39; in locale &#39;&quot;
+<b class="nc">&nbsp;							            + conceptNameLocale.getDisplayName()</b>
+&nbsp;							            + &quot;&#39; has been dropped as the preferred name because there is already another preferred name in the same locale&quot;);
+&nbsp;						}
+&nbsp;					} else {
+&nbsp;						//Enforce not-null on locale preferred field constraint from the database table
+<b class="nc">&nbsp;						nameInLocale.setLocalePreferred(false);</b>
+<b class="nc">&nbsp;						reportUpdatedName(nameInLocale, &quot;The locale preferred property of name &#39;&quot; + nameInLocale.getName()</b>
+<b class="nc">&nbsp;						        + &quot;&#39; in locale &#39;&quot; + conceptNameLocale.getDisplayName()</b>
+&nbsp;						        + &quot;&#39; has been updated to false from null&quot;);
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					if (nameInLocale.isFullySpecifiedName()) {</b>
+<b class="nc">&nbsp;						if (!hasFullySpecifiedName) {</b>
+<b class="nc">&nbsp;							hasFullySpecifiedName = true;</b>
+&nbsp;						}
+<b class="nc">&nbsp;						if (!fullySpecifiedNameForLocaleFound) {</b>
+<b class="nc">&nbsp;							fullySpecifiedNameForLocaleFound = true;</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							nameInLocale.setConceptNameType(null);</b>
+<b class="nc">&nbsp;							reportUpdatedName(nameInLocale, &quot;The name &#39;&quot; + nameInLocale.getName() + &quot;&#39; in locale &#39;&quot;</b>
+<b class="nc">&nbsp;							        + conceptNameLocale.getDisplayName()</b>
+&nbsp;							        + &quot;&#39; has been converted from fully specified to a synonym&quot;);
+&nbsp;						}
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					if (nameInLocale.isShort()) {</b>
+<b class="nc">&nbsp;						if (!shortNameForLocaleFound) {</b>
+<b class="nc">&nbsp;							shortNameForLocaleFound = true;</b>
+&nbsp;						}
+&nbsp;						//should have one short name per locale
+&nbsp;						else {
+<b class="nc">&nbsp;							nameInLocale.setConceptNameType(null);</b>
+<b class="nc">&nbsp;							reportUpdatedName(nameInLocale, &quot;The name &#39;&quot; + nameInLocale.getName() + &quot;&#39; in locale &#39;&quot;</b>
+<b class="nc">&nbsp;							        + conceptNameLocale.getDisplayName()</b>
+&nbsp;							        + &quot;&#39; has been converted from a short name to a synonym&quot;);
+&nbsp;						}
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					if ((nameInLocale.isFullySpecifiedName() || nameInLocale.isPreferred())</b>
+<b class="nc">&nbsp;					        &amp;&amp; !isNameUniqueInLocale(connection, nameInLocale, conceptId)) {</b>
+<b class="nc">&nbsp;						if (localeDuplicateNamesMap == null) {</b>
+<b class="nc">&nbsp;							localeDuplicateNamesMap = new HashMap&lt;&gt;();</b>
+&nbsp;						}
+<b class="nc">&nbsp;						if (!localeDuplicateNamesMap.containsKey(conceptNameLocale)) {</b>
+<b class="nc">&nbsp;							localeDuplicateNamesMap.put(conceptNameLocale, new HashSet&lt;&gt;());</b>
+&nbsp;						}
+&nbsp;						
+<b class="nc">&nbsp;						localeDuplicateNamesMap.get(conceptNameLocale).add(nameInLocale.getName());</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					String name = nameInLocale.getName().toLowerCase();</b>
+<b class="nc">&nbsp;					if (!nameDuplicateConceptNamesMap.containsKey(name)) {</b>
+<b class="nc">&nbsp;						nameDuplicateConceptNamesMap.put(name, new ArrayList&lt;&gt;());</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					nameDuplicateConceptNamesMap.get(name).add(nameInLocale);</b>
+&nbsp;					
+<b class="nc">&nbsp;				}//close for each name</b>
+&nbsp;				
+&nbsp;				//No duplicate names allowed for the same locale and concept
+<b class="nc">&nbsp;				for (Map.Entry&lt;String, List&lt;ConceptName&gt;&gt; entry : nameDuplicateConceptNamesMap.entrySet()) {</b>
+&nbsp;					//no duplicates found for the current name
+<b class="nc">&nbsp;					if (entry.getValue().size() &lt; 2) {</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					logMessages.add(&quot;The name &#39;&quot; + entry.getKey() + &quot;&#39; was found multiple times for the concept with id &#39;&quot;</b>
+<b class="nc">&nbsp;					        + conceptId + &quot;&#39; in locale &#39;&quot; + conceptNameLocale.getDisplayName() + &quot;&#39;&quot;);					</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				//if this locale has no preferred name found, set one
+<b class="nc">&nbsp;				if (!preferredNameForLocaleFound) {</b>
+&nbsp;					//find the fully specified name and set it as the locale preferred
+<b class="nc">&nbsp;					for (ConceptName cn : localeConceptNamesMap.get(conceptNameLocale)) {</b>
+<b class="nc">&nbsp;						if (cn.isFullySpecifiedName()) {</b>
+<b class="nc">&nbsp;							cn.setLocalePreferred(true);</b>
+<b class="nc">&nbsp;							preferredNameForLocaleFound = true;</b>
+<b class="nc">&nbsp;							break;</b>
+&nbsp;						}
+<b class="nc">&nbsp;					}</b>
+&nbsp;					
+&nbsp;					//if there was no fully specified name found, mark one of the synonyms as locale preferred
+<b class="nc">&nbsp;					if (!preferredNameForLocaleFound) {</b>
+<b class="nc">&nbsp;						for (ConceptName cn : localeConceptNamesMap.get(conceptNameLocale)) {</b>
+<b class="nc">&nbsp;							if (cn.isSynonym()) {</b>
+<b class="nc">&nbsp;								cn.setLocalePreferred(true);</b>
+<b class="nc">&nbsp;								break;</b>
+&nbsp;							}
+<b class="nc">&nbsp;						}</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;			}//close for each locale</b>
+&nbsp;			
+&nbsp;			//Make the first name found the fully specified name if none exists
+<b class="nc">&nbsp;			if (!hasFullySpecifiedName) {</b>
+<b class="nc">&nbsp;				hasFullySpecifiedName = setFullySpecifiedName(conceptId, localeConceptNamesMap);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//set default locale for names with no locale, if there was no fully specified name for the current concept,
+&nbsp;			//set the first name found as the fully specified and drop locale preferred mark and short name concept name type
+<b class="nc">&nbsp;			if (!CollectionUtils.isEmpty(namesWithNoLocale)) {</b>
+<b class="nc">&nbsp;				for (ConceptName conceptName : namesWithNoLocale) {</b>
+<b class="nc">&nbsp;					conceptName.setLocale(defaultLocale);</b>
+<b class="nc">&nbsp;					reportUpdatedName(conceptName, &quot;The locale for ConceptName with id &quot; + conceptName.getConceptNameId()</b>
+<b class="nc">&nbsp;					        + &quot; (&quot; + conceptName.getName() + &quot;) has been set to &#39;&quot; + defaultLocale.getDisplayName() + &quot;&#39;&quot;);</b>
+<b class="nc">&nbsp;					if (!hasFullySpecifiedName) {</b>
+<b class="nc">&nbsp;						conceptName.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);</b>
+<b class="nc">&nbsp;						hasFullySpecifiedName = true;</b>
+<b class="nc">&nbsp;						reportUpdatedName(conceptName, &quot;ConceptName with id &quot; + conceptName.getConceptNameId() + &quot; (&quot;</b>
+<b class="nc">&nbsp;						        + conceptName.getName() + &quot;) in locale &#39;&quot; + defaultLocale.getDisplayName()</b>
+&nbsp;						        + &quot;&#39; has been set as the fully specified name for concept with id : &quot; + conceptId);
+&nbsp;					}
+&nbsp;					//convert to a synonym and should not be preferred, this will avoid inconsistencies, in case
+&nbsp;					//already short, fully specified and preferred names exist
+&nbsp;					else {
+<b class="nc">&nbsp;						conceptName.setLocalePreferred(false);</b>
+<b class="nc">&nbsp;						reportUpdatedName(conceptName, &quot;ConceptName with id &quot; + conceptName.getConceptNameId() + &quot; (&quot;</b>
+<b class="nc">&nbsp;						        + conceptName.getName() + &quot;) is no longer marked as preferred because it had no locale&quot;);</b>
+<b class="nc">&nbsp;						if (conceptName.isFullySpecifiedName() || conceptName.isShort()) {</b>
+<b class="nc">&nbsp;							conceptName.setConceptNameType(null);</b>
+<b class="nc">&nbsp;							reportUpdatedName(conceptName, &quot;The name &#39;&quot; + conceptName.getName() + &quot;&#39; in locale &#39;&quot;</b>
+<b class="nc">&nbsp;							        + conceptName.toString() + &quot;&#39; has been converted to a synonym because it had no locale&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			if (!hasFullySpecifiedName) {</b>
+<b class="nc">&nbsp;				updateWarnings.add(&quot;Concept with id: &quot; + conceptId + &quot; has no fully specified name&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (!MapUtils.isEmpty(localeDuplicateNamesMap)) {</b>
+<b class="nc">&nbsp;			for (Map.Entry&lt;Locale, Set&lt;String&gt;&gt; entry : localeDuplicateNamesMap.entrySet()) {</b>
+&nbsp;				//no duplicates found in the locale
+<b class="nc">&nbsp;				if (CollectionUtils.isEmpty(entry.getValue())) {</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				for (String duplicateName : entry.getValue()) {</b>
+<b class="nc">&nbsp;					updateWarnings.add(&quot;Concept Name &#39;&quot; + duplicateName + &quot;&#39; was found multiple times in locale &#39;&quot;</b>
+<b class="nc">&nbsp;					        + entry.getKey() + &quot;&#39;&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		logMessages.add(&quot;Number of Updated ConceptNames: &quot; + updatedConceptNames.size());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Method writes the log messages and error warnings to the application data directory
+&nbsp;	 */
+&nbsp;	private void writeWarningsToFile() {
+&nbsp;		
+<b class="nc">&nbsp;		String lineSeparator = System.getProperty(&quot;line.separator&quot;);</b>
+<b class="nc">&nbsp;		StringBuilder sb = new StringBuilder(&quot;WARNINGS:&quot;).append(lineSeparator);</b>
+<b class="nc">&nbsp;		for (String warning : updateWarnings) {</b>
+<b class="nc">&nbsp;			sb.append(lineSeparator).append(warning);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		sb.append(lineSeparator).append(lineSeparator).append(&quot;NOTIFICATIONS:&quot;).append(lineSeparator);</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (String message : logMessages) {</b>
+<b class="nc">&nbsp;			sb.append(lineSeparator).append(message);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		DatabaseUpdater.writeUpdateMessagesToFile(sb.toString());</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the fully specified name from available names
+&nbsp;	 *
+&nbsp;	 * @param localeConceptNamesMap, list of all concept names for the concept
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private boolean setFullySpecifiedName(int conceptId, Map&lt;Locale, List&lt;ConceptName&gt;&gt; localeConceptNamesMap) {
+&nbsp;		
+&nbsp;		//Pick the first name in any locale by searching in order from the allowed locales
+<b class="nc">&nbsp;		for (Locale allowedLoc : allowedLocales) {</b>
+<b class="nc">&nbsp;			List&lt;ConceptName&gt; possibleFullySpecNames = localeConceptNamesMap.get(allowedLoc);</b>
+<b class="nc">&nbsp;			if (CollectionUtils.isEmpty(possibleFullySpecNames)) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//try the synonyms
+<b class="nc">&nbsp;			for (ConceptName cn : possibleFullySpecNames) {</b>
+<b class="nc">&nbsp;				if (cn.isSynonym()) {</b>
+<b class="nc">&nbsp;					cn.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);</b>
+<b class="nc">&nbsp;					reportUpdatedName(cn, &quot;ConceptName with id &quot; + cn.getConceptNameId() + &quot; (&quot; + cn.getName()</b>
+<b class="nc">&nbsp;					        + &quot;) in locale &#39;&quot; + allowedLoc.getDisplayName()</b>
+&nbsp;					        + &quot;&#39; has been set as the fully specified name for concept with id : &quot; + conceptId);
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			//try the short names
+<b class="nc">&nbsp;			for (ConceptName cn : possibleFullySpecNames) {</b>
+<b class="nc">&nbsp;				if (cn.isShort()) {</b>
+<b class="nc">&nbsp;					cn.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);</b>
+<b class="nc">&nbsp;					reportUpdatedName(cn, &quot;ConceptName with id &quot; + cn.getConceptNameId() + &quot; (&quot; + cn.getName()</b>
+<b class="nc">&nbsp;					        + &quot;) in locale &#39;&quot; + allowedLoc.getDisplayName()</b>
+&nbsp;					        + &quot;&#39; has been changed from short to fully specified name for concept with id : &quot; + conceptId);
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		//pick a name randomly from the conceptName map
+<b class="nc">&nbsp;		for (Map.Entry&lt;Locale, List&lt;ConceptName&gt;&gt; entry : localeConceptNamesMap.entrySet()) {</b>
+<b class="nc">&nbsp;			Locale locale = entry.getKey();</b>
+<b class="nc">&nbsp;			if (locale != null) {</b>
+<b class="nc">&nbsp;				ConceptName fullySpecName = entry.getValue().get(0);</b>
+<b class="nc">&nbsp;				fullySpecName.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);</b>
+<b class="nc">&nbsp;				reportUpdatedName(fullySpecName, &quot;ConceptName with id &quot; + fullySpecName.getConceptNameId() + &quot; (&quot;</b>
+<b class="nc">&nbsp;				        + fullySpecName.getName() + &quot;) in locale &#39;&quot; + locale.getDisplayName()</b>
+&nbsp;				        + &quot;&#39; has been set as the fully specified name for concept with id : &quot; + conceptId);
+<b class="nc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		//most probably this concept has no names added to it yet
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds the specified concept name to the list of concept names to be updated and also adds the
+&nbsp;	 * specified message to the list of messages/warnings to be reported after the database updater
+&nbsp;	 * has terminated
+&nbsp;	 *
+&nbsp;	 * @param updatedName the name that has been updated
+&nbsp;	 * @param updateMessage the message to report
+&nbsp;	 */
+&nbsp;	private void reportUpdatedName(ConceptName updatedName, String updateMessage) {
+<b class="nc">&nbsp;		updatedConceptNames.add(updatedName);</b>
+<b class="nc">&nbsp;		logMessages.add(updateMessage);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches all conceptIds for un retired concepts from the database.
+&nbsp;	 *
+&nbsp;	 * @param connection The database connection
+&nbsp;	 * @return A list of all fetched conceptIds
+&nbsp;	 */
+&nbsp;	private List&lt;Integer&gt; getAllUnretiredConceptIds(JdbcConnection connection) {
+&nbsp;		
+<b class="nc">&nbsp;		LinkedList&lt;Integer&gt; conceptIds = null;</b>
+<b class="nc">&nbsp;		Statement stmt = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			stmt = connection.createStatement();</b>
+<b class="nc">&nbsp;			ResultSet rs = stmt.executeQuery(&quot;SELECT concept_id FROM concept WHERE retired = &#39;0&#39;&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			while (rs.next()) {</b>
+<b class="nc">&nbsp;				if (conceptIds == null) {</b>
+<b class="nc">&nbsp;					conceptIds = new LinkedList&lt;&gt;();</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				conceptIds.add(rs.getInt(&quot;concept_id&quot;));</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (stmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					stmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return conceptIds;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the conceptName is unique among all unvoided preferred and fully specified names
+&nbsp;	 * across all other un-retired concepts except the concept it is associated to.
+&nbsp;	 *
+&nbsp;	 * @param connection The datbase Connection
+&nbsp;	 * @param conceptName The conceptName to be validated
+&nbsp;	 * @return true if the conceptName is unique, otherwise false
+&nbsp;	 */
+&nbsp;	private boolean isNameUniqueInLocale(JdbcConnection connection, ConceptName conceptName, int conceptId) {
+&nbsp;		
+<b class="nc">&nbsp;		int duplicates = getInt(connection,</b>
+&nbsp;		    &quot;SELECT count(*) FROM concept_name cn, concept c WHERE cn.concept_id = c.concept_id  AND (cn.concept_name_type = &#39;&quot;
+&nbsp;		            + ConceptNameType.FULLY_SPECIFIED
+&nbsp;		            + &quot;&#39; OR cn.locale_preferred = &#39;1&#39;) AND cn.voided = &#39;0&#39; AND cn.name = &#39;&quot;
+<b class="nc">&nbsp;		            + HibernateUtil.escapeSqlWildcards(conceptName.getName(), connection.getUnderlyingConnection())</b>
+&nbsp;		            + &quot;&#39; AND cn.locale = &#39;&quot;
+<b class="nc">&nbsp;		            + HibernateUtil.escapeSqlWildcards(conceptName.getLocale().toString(), connection</b>
+<b class="nc">&nbsp;		                    .getUnderlyingConnection()) + &quot;&#39; AND c.retired = &#39;0&#39; AND c.concept_id != &quot; + conceptId);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return duplicates == 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the list of allowed locales from the database, sets the default locale, english and
+&nbsp;	 * the default locale will be added to the list allowed locales if not yet included
+&nbsp;	 *
+&nbsp;	 * @param connection The database connection
+&nbsp;	 * @return A list of allowed locales
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	private List&lt;Locale&gt; getAllowedLocalesList(JdbcConnection connection) {
+<b class="nc">&nbsp;		Statement stmt = null;</b>
+<b class="nc">&nbsp;		ListOrderedSet allowedLocales = new ListOrderedSet();</b>
+&nbsp;		
+&nbsp;		try {
+&nbsp;			//get the default locale
+<b class="nc">&nbsp;			stmt = connection.createStatement();</b>
+<b class="nc">&nbsp;			ResultSet rsDefaultLocale = stmt.executeQuery(&quot;SELECT property_value FROM global_property WHERE property = &#39;&quot;</b>
+&nbsp;			        + OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE + &quot;&#39;&quot;);
+&nbsp;			
+<b class="nc">&nbsp;			if (rsDefaultLocale.next()) {</b>
+<b class="nc">&nbsp;				String defaultLocaleStr = rsDefaultLocale.getString(&quot;property_value&quot;);</b>
+<b class="nc">&nbsp;				if (!StringUtils.isBlank(defaultLocaleStr) &amp;&amp; defaultLocaleStr.length() &gt; 1) {</b>
+<b class="nc">&nbsp;					Locale defaultLocaleGP = LocaleUtility.fromSpecification(defaultLocaleStr);</b>
+<b class="nc">&nbsp;					if (defaultLocaleGP != null) {</b>
+<b class="nc">&nbsp;						defaultLocale = defaultLocaleGP;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					updateWarnings.add(&quot;&#39;&quot; + defaultLocaleStr</b>
+&nbsp;					        + &quot;&#39; is an invalid value for the global property default locale&quot;);
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			allowedLocales.add(defaultLocale);</b>
+&nbsp;			
+&nbsp;			//get the locale.allowed.list
+<b class="nc">&nbsp;			ResultSet rsAllowedLocales = stmt.executeQuery(&quot;SELECT property_value FROM global_property WHERE property = &#39;&quot;</b>
+&nbsp;			        + OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST + &quot;&#39;&quot;);
+&nbsp;			
+<b class="nc">&nbsp;			if (rsAllowedLocales.next()) {</b>
+<b class="nc">&nbsp;				String allowedLocaleStr = rsAllowedLocales.getString(&quot;property_value&quot;);</b>
+<b class="nc">&nbsp;				if (!StringUtils.isBlank(allowedLocaleStr)) {</b>
+<b class="nc">&nbsp;					String[] localesArray = allowedLocaleStr.split(&quot;,&quot;);</b>
+<b class="nc">&nbsp;					for (String localeStr : localesArray) {</b>
+<b class="nc">&nbsp;						if (localeStr.trim().length() &gt; 1) {</b>
+<b class="nc">&nbsp;							allowedLocales.add(LocaleUtility.fromSpecification(localeStr.trim()));</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							updateWarnings.add(&quot;&#39;&quot; + localeStr</b>
+&nbsp;							        + &quot;&#39; is an invalid value for the global property locale.allowed.list&quot;);
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				log.warn(&quot;The global property &#39;&quot; + OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST + &quot;&#39; isn&#39;t set&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (stmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					stmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		//if it isn&#39;t among
+<b class="nc">&nbsp;		allowedLocales.add(new Locale(&quot;en&quot;));</b>
+&nbsp;		
+<b class="nc">&nbsp;		return allowedLocales.asList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience Method that fetches all non-voided concept names from the database associated to
+&nbsp;	 * a concept with a matching concept id, stores the names in a map with locales as the keys and
+&nbsp;	 * the lists of conceptNames in each locale as the values i.e &amp;lt;Locale List&amp;lt;ConceptNames&amp;gt;&amp;gt;.
+&nbsp;	 *
+&nbsp;	 * @param connection a DatabaseConnection
+&nbsp;	 * @param conceptId the conceptId for the conceptNames to fetch
+&nbsp;	 * @return a map of Locale with ConceptNames in them associated to the concept identified by the
+&nbsp;	 *         given conceptId
+&nbsp;	 */
+&nbsp;	private Map&lt;Locale, List&lt;ConceptName&gt;&gt; getLocaleConceptNamesMap(JdbcConnection connection, int conceptId) {
+<b class="nc">&nbsp;		PreparedStatement pStmt = null;</b>
+<b class="nc">&nbsp;		Map&lt;Locale, List&lt;ConceptName&gt;&gt; localeConceptNamesMap = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			pStmt = connection</b>
+<b class="nc">&nbsp;			        .prepareStatement(&quot;SELECT concept_name_id, name, concept_name_type, locale, locale_preferred FROM concept_name WHERE voided = &#39;0&#39; AND concept_id = ?&quot;);</b>
+<b class="nc">&nbsp;			pStmt.setInt(1, conceptId);</b>
+<b class="nc">&nbsp;			ResultSet rs = pStmt.executeQuery();</b>
+&nbsp;			
+<b class="nc">&nbsp;			while (rs.next()) {</b>
+<b class="nc">&nbsp;				if (localeConceptNamesMap == null) {</b>
+<b class="nc">&nbsp;					localeConceptNamesMap = new HashMap&lt;&gt;();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				ConceptName conceptName = new ConceptName();</b>
+<b class="nc">&nbsp;				conceptName.setConceptNameId(rs.getInt(&quot;concept_name_id&quot;));</b>
+<b class="nc">&nbsp;				conceptName.setName(rs.getString(&quot;name&quot;));</b>
+&nbsp;				
+<b class="nc">&nbsp;				String cnType = rs.getString(&quot;concept_name_type&quot;);</b>
+<b class="nc">&nbsp;				if (!StringUtils.isBlank(cnType)) {</b>
+<b class="nc">&nbsp;					ConceptNameType conceptNameType = null;</b>
+<b class="nc">&nbsp;					if (cnType.equals(ConceptNameType.FULLY_SPECIFIED.toString())) {</b>
+<b class="nc">&nbsp;						conceptNameType = ConceptNameType.FULLY_SPECIFIED;</b>
+<b class="nc">&nbsp;					} else if (cnType.equals(ConceptNameType.SHORT.toString())) {</b>
+<b class="nc">&nbsp;						conceptNameType = ConceptNameType.SHORT;</b>
+<b class="nc">&nbsp;					} else if (cnType.equals(ConceptNameType.INDEX_TERM.toString())) {</b>
+<b class="nc">&nbsp;						conceptNameType = ConceptNameType.INDEX_TERM;</b>
+&nbsp;					}
+<b class="nc">&nbsp;					conceptName.setConceptNameType(conceptNameType);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				String localeString = rs.getString(&quot;locale&quot;);</b>
+<b class="nc">&nbsp;				conceptName.setLocale(!StringUtils.isBlank(localeString) ? LocaleUtility.fromSpecification(localeString)</b>
+<b class="nc">&nbsp;				        : null);</b>
+<b class="nc">&nbsp;				conceptName.setLocalePreferred(rs.getBoolean(&quot;locale_preferred&quot;));</b>
+<b class="nc">&nbsp;				conceptName.setVoided(false);</b>
+&nbsp;				
+<b class="nc">&nbsp;				if (!localeConceptNamesMap.containsKey(conceptName.getLocale())) {</b>
+<b class="nc">&nbsp;					localeConceptNamesMap.put(conceptName.getLocale(), new LinkedList&lt;&gt;());</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				localeConceptNamesMap.get(conceptName.getLocale()).add(conceptName);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (pStmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					pStmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the prepared statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return localeConceptNamesMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes all the changes to the concept names as a batch update.
+&nbsp;	 *
+&nbsp;	 * @param connection The database connection
+&nbsp;	 */
+&nbsp;	private void runBatchUpdate(JdbcConnection connection) {
+<b class="nc">&nbsp;		PreparedStatement pStmt = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			connection.setAutoCommit(false);</b>
+<b class="nc">&nbsp;			pStmt = connection</b>
+<b class="nc">&nbsp;			        .prepareStatement(&quot;UPDATE concept_name SET locale = ?, concept_name_type = ?, locale_preferred = ?, voided = ?, date_voided = ?, void_reason = ?, voided_by = ? WHERE concept_name_id = ?&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			Integer userId = DatabaseUpdater.getAuthenticatedUserId();</b>
+&nbsp;			//is we have no authenticated user(for API users), set as Daemon
+<b class="nc">&nbsp;			if (userId == null || userId &lt; 1) {</b>
+<b class="nc">&nbsp;				userId = getInt(connection, &quot;SELECT min(user_id) FROM users&quot;);</b>
+&nbsp;				//leave it as null rather than setting it to 0
+<b class="nc">&nbsp;				if (userId &lt; 1) {</b>
+<b class="nc">&nbsp;					userId = null;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			for (ConceptName conceptName : updatedConceptNames) {</b>
+<b class="nc">&nbsp;				pStmt.setString(1, conceptName.getLocale().toString());</b>
+<b class="nc">&nbsp;				pStmt.setString(2, (conceptName.getConceptNameType() != null) ? conceptName.getConceptNameType().toString()</b>
+<b class="nc">&nbsp;				        : null);</b>
+<b class="nc">&nbsp;				pStmt.setBoolean(3, conceptName.getLocalePreferred());</b>
+<b class="nc">&nbsp;				pStmt.setBoolean(4, conceptName.getVoided());</b>
+<b class="nc">&nbsp;				pStmt.setDate(5, conceptName.getVoided() ? new Date(System.currentTimeMillis()) : null);</b>
+<b class="nc">&nbsp;				pStmt.setString(6, conceptName.getVoidReason());</b>
+&nbsp;				// &quot;Not all databases allow for a non-typed Null to be sent to the backend&quot;, so we can&#39;t use setInt
+<b class="nc">&nbsp;				pStmt.setObject(7, (conceptName.getVoided() &amp;&amp; userId != null) ? userId : null, Types.INTEGER);</b>
+<b class="nc">&nbsp;				pStmt.setInt(8, conceptName.getConceptNameId());</b>
+&nbsp;				
+<b class="nc">&nbsp;				pStmt.addBatch();</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			try {
+<b class="nc">&nbsp;				int[] updateCounts = pStmt.executeBatch();</b>
+<b class="nc">&nbsp;				for (int updateCount : updateCounts) {</b>
+<b class="nc">&nbsp;					if (updateCount &gt; -1) {</b>
+<b class="nc">&nbsp;						log.debug(&quot;Successfully executed: updateCount=&quot; + updateCount);</b>
+<b class="nc">&nbsp;					} else if (updateCount == Statement.SUCCESS_NO_INFO) {</b>
+<b class="nc">&nbsp;						log.debug(&quot;Successfully executed; No Success info&quot;);</b>
+<b class="nc">&nbsp;					} else if (updateCount == Statement.EXECUTE_FAILED) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;Failed to execute update&quot;);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				log.debug(&quot;Committing updates...&quot;);</b>
+<b class="nc">&nbsp;				connection.commit();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (BatchUpdateException be) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Error generated while processsing batch update&quot;, be);</b>
+<b class="nc">&nbsp;				int[] updateCounts = be.getUpdateCounts();</b>
+&nbsp;
+<b class="nc">&nbsp;				for (int updateCount : updateCounts) {</b>
+<b class="nc">&nbsp;					if (updateCount &gt; -1) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;Executed with exception: updateCount=&quot; + updateCount);</b>
+<b class="nc">&nbsp;					} else if (updateCount == Statement.SUCCESS_NO_INFO) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;Executed with exception; No Success info&quot;);</b>
+<b class="nc">&nbsp;					} else if (updateCount == Statement.EXECUTE_FAILED) {</b>
+<b class="nc">&nbsp;						log.warn(&quot;Failed to execute update with exception&quot;);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				
+&nbsp;				try {
+<b class="nc">&nbsp;					log.warn(&quot;Rolling back batch&quot;, be);</b>
+<b class="nc">&nbsp;					connection.rollback();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception rbe) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Error generated while rolling back batch update&quot;, be);</b>
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SQLException | DatabaseException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+&nbsp;			//reset to auto commit mode
+<b class="nc">&nbsp;			try {</b>
+<b class="nc">&nbsp;				connection.setAutoCommit(true);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (DatabaseException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Failed to reset auto commit back to true&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (pStmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					pStmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the prepared statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * returns an integer resulting from the execution of an sql statement
+&nbsp;	 *
+&nbsp;	 * @param connection a DatabaseConnection
+&nbsp;	 * @param sql the sql statement to execute
+&nbsp;	 * @return integer resulting from the execution of the sql statement
+&nbsp;	 */
+&nbsp;	private int getInt(JdbcConnection connection, String sql) {
+<b class="nc">&nbsp;		Statement stmt = null;</b>
+<b class="nc">&nbsp;		int result = 0;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			stmt = connection.createStatement();</b>
+<b class="nc">&nbsp;			ResultSet rs = stmt.executeQuery(sql);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (rs.next()) {</b>
+<b class="nc">&nbsp;				result = rs.getInt(1);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				log.warn(&quot;No row returned by getInt() method&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			if (rs.next()) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Multiple rows returned by getInt() method&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			return result;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (stmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					stmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the statement object&quot;);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Finished validating concepts&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor fileOpener) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="nc">&nbsp;		return new ValidationErrors();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

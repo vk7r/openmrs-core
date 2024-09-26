@@ -1,0 +1,571 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Allergy</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Allergy (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Allergy</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,5%
+  </span>
+  <span class="absValue">
+    (25/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75,2%
+  </span>
+  <span class="absValue">
+    (79/105)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Allergy$HibernateProxy$KAkhPVQi</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    73,5%
+  </span>
+  <span class="absValue">
+    (25/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75,2%
+  </span>
+  <span class="absValue">
+    (79/105)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.lang.reflect.InvocationTargetException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Embedded;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.annotations.LazyCollection;
+&nbsp;import org.hibernate.annotations.LazyCollectionOption;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represent allergy
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;allergy&quot;)
+&nbsp;@Audited
+&nbsp;public class Allergy extends BaseFormRecordableOpenmrsData {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 1;
+&nbsp;	
+&nbsp;	@Id
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	@Column(name = &quot;allergy_id&quot;)
+&nbsp;	private Integer allergyId;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;patient_id&quot;)
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	@Embedded
+&nbsp;	private Allergen allergen;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;severity_concept_id&quot;)
+&nbsp;	private Concept severity;
+&nbsp;	
+&nbsp;	@Column(name = &quot;comments&quot;, length = 1024)
+&nbsp;	private String comments;
+&nbsp;	
+&nbsp;
+<b class="fc">&nbsp;	@OneToMany(mappedBy = &quot;allergy&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</b>
+&nbsp;	@LazyCollection(LazyCollectionOption.FALSE)
+&nbsp;	private List&lt;AllergyReaction&gt; reactions = new ArrayList&lt;&gt;();
+&nbsp;	
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;encounter_id&quot;)
+&nbsp;	private Encounter encounter;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public Allergy(){</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patient the patient to set.
+&nbsp;	 * @param allergen the allergen to set
+&nbsp;	 * @param severity the severity to set
+&nbsp;	 * @param comments the comment to set
+&nbsp;	 * @param reactions the reactions to set
+&nbsp;	 */
+<b class="fc">&nbsp;	public Allergy(Patient patient, Allergen allergen, Concept severity, String comments, List&lt;AllergyReaction&gt; reactions) {</b>
+<b class="fc">&nbsp;		this.patient = patient;</b>
+<b class="fc">&nbsp;		this.allergen = allergen;</b>
+<b class="fc">&nbsp;		this.severity = severity;</b>
+<b class="fc">&nbsp;		this.comments = comments;</b>
+&nbsp;		
+&nbsp;		//we do not allow to be in a state where reactions is null
+<b class="fc">&nbsp;		if (reactions != null) {</b>
+<b class="fc">&nbsp;			this.reactions = reactions;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;    /**
+&nbsp;     * @return the allergyId
+&nbsp;     */
+&nbsp;    public Integer getAllergyId() {
+<b class="fc">&nbsp;    	return allergyId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * @param allergyId the allergyId to set
+&nbsp;     */
+&nbsp;    public void setAllergyId(Integer allergyId) {
+<b class="fc">&nbsp;    	this.allergyId = allergyId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return allergyId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer allergyId) {
+<b class="nc">&nbsp;		this.allergyId = allergyId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the patient
+&nbsp;	 */
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patient the patient to set
+&nbsp;	 */
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * @return the allergyType
+&nbsp;	 */
+&nbsp;	public AllergenType getAllergenType() {
+<b class="nc">&nbsp;		return allergen.getAllergenType();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * set the allergyType of the Allergy
+&nbsp;	 * @param allergenType the allergyType to set
+&nbsp;	 */
+&nbsp;	public void setAllergenType(AllergenType allergenType) {
+<b class="nc">&nbsp;		this.allergen.setAllergenType(allergenType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * set the allergyType of the Allergy. Here the allergy type will be chosen from the enum values in the {@link AllergenType}, according to the given String type. 
+&nbsp;	 * @param type the allergyType to set   
+&nbsp;	 */
+&nbsp;	public void setAllergenType(String type) {
+<b class="nc">&nbsp;		this.allergen.setAllergenType(StringUtils.isBlank(type) ? null : AllergenType.valueOf(type));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the allergen
+&nbsp;	 */
+&nbsp;	public Allergen getAllergen() {
+<b class="fc">&nbsp;		return allergen;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param allergen the allergen to set
+&nbsp;	 */
+&nbsp;	public void setAllergen(Allergen allergen) {
+<b class="fc">&nbsp;		this.allergen = allergen;</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * @return Returns the severity
+&nbsp;	 */
+&nbsp;	public Concept getSeverity() {
+<b class="fc">&nbsp;		return severity;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param severity the severity to set
+&nbsp;	 */
+&nbsp;	public void setSeverity(Concept severity) {
+<b class="fc">&nbsp;		this.severity = severity;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the comment
+&nbsp;	 * @deprecated as of 2.3.0, replaced by {@link #getComments()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public String getComment() {
+<b class="fc">&nbsp;		return getComments();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param comment the comment to set
+&nbsp;	 * @deprecated as of 2.3.0, replaced by {@link #setComments(String)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public void setComment(String comment) {
+<b class="fc">&nbsp;		setComments(comment);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the comments
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public String getComments() {
+<b class="fc">&nbsp;		return comments;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param comments the comments to set
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public void setComments(String comments) {
+<b class="fc">&nbsp;		this.comments = comments;</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * @return Returns the reactions
+&nbsp;	 */
+&nbsp;	public List&lt;AllergyReaction&gt; getReactions() {
+<b class="fc">&nbsp;		return reactions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param reactions the reactions to set
+&nbsp;	 */
+&nbsp;	public void setReactions(List&lt;AllergyReaction&gt; reactions) {
+&nbsp;		//we do not allow to be in a state where reactions is null
+<b class="fc">&nbsp;		if (reactions != null) {</b>
+<b class="fc">&nbsp;			this.reactions = reactions;</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="nc">&nbsp;			this.reactions.clear();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a new allergy reaction
+&nbsp;	 * 
+&nbsp;	 * @param reaction the reaction to add
+&nbsp;	 * @return true if the reaction was added, else false
+&nbsp;	 */
+&nbsp;	public boolean addReaction(AllergyReaction reaction) {
+<b class="fc">&nbsp;        if(getReactionConcepts().contains(reaction.getReaction())){</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;		reaction.setAllergy(this);</b>
+<b class="fc">&nbsp;		return getReactions().add(reaction);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes an allergy reaction
+&nbsp;	 * 
+&nbsp;	 * @param reaction the reaction to remove
+&nbsp;	 * @return true if the reaction was found and removed, else false.
+&nbsp;	 */
+&nbsp;	public boolean removeReaction(AllergyReaction reaction) {
+<b class="nc">&nbsp;		return getReactions().remove(reaction);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getDateLastUpdated() {
+<b class="nc">&nbsp;		if (getDateChanged() != null) {</b>
+<b class="nc">&nbsp;			return getDateChanged();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return getDateCreated();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if this allergy has the same values as a given one.
+&nbsp;	 * 
+&nbsp;	 * @param allergy the allergy whose values to compare with
+&nbsp;	 * @return true if the values match, else false
+&nbsp;	 */
+&nbsp;	public boolean hasSameValues(Allergy allergy) {
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getAllergyId(), allergy.getAllergyId())) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getPatient(), allergy.getPatient())) {</b>
+&nbsp;			//if object instances are different but with the same patient id, then not changed
+<b class="nc">&nbsp;			if (getPatient() != null &amp;&amp; allergy.getPatient() != null) {</b>
+<b class="nc">&nbsp;				if (!OpenmrsUtil.nullSafeEquals(getPatient().getPatientId(), allergy.getPatient().getPatientId())) {</b>
+<b class="nc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			else {
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getAllergen().getCodedAllergen(), allergy.getAllergen().getCodedAllergen())) {</b>
+&nbsp;			//if object instances are different but with the same concept id, then not changed
+<b class="fc">&nbsp;			if (getAllergen().getCodedAllergen() != null &amp;&amp; allergy.getAllergen().getCodedAllergen() != null) {</b>
+<b class="fc">&nbsp;				if (!OpenmrsUtil.nullSafeEquals(getAllergen().getCodedAllergen().getConceptId(), allergy.getAllergen().getCodedAllergen().getConceptId())) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			else {
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getAllergen().getNonCodedAllergen(), allergy.getAllergen().getNonCodedAllergen())) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getSeverity(), allergy.getSeverity())) {</b>
+&nbsp;			//if object instances are different but with the same concept id, then not changed
+<b class="fc">&nbsp;			if (getSeverity() != null &amp;&amp; allergy.getSeverity() != null) {</b>
+<b class="fc">&nbsp;				if (!OpenmrsUtil.nullSafeEquals(getSeverity().getConceptId(), allergy.getSeverity().getConceptId())) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			else {
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getComment(), allergy.getComment())) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return hasSameReactions(allergy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if this allergy has the same reaction values as those in the given one
+&nbsp;	 * 
+&nbsp;	 * @param allergy the allergy who reaction values to compare with
+&nbsp;	 * @return true if the values match, else false
+&nbsp;	 */
+&nbsp;	private boolean hasSameReactions(Allergy allergy) {
+<b class="fc">&nbsp;		if (getReactions().size() != allergy.getReactions().size()) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (AllergyReaction reaction : getReactions()) {</b>
+<b class="fc">&nbsp;			AllergyReaction rc = allergy.getAllergyReaction(reaction.getAllergyReactionId());</b>
+<b class="fc">&nbsp;			if (!reaction.hasSameValues(rc)) {</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets an allergy reaction with a given id
+&nbsp;	 * 
+&nbsp;	 * @param allergyReactionId the allergy reaction id
+&nbsp;	 * @return the allergy reaction with a matching id
+&nbsp;	 */
+&nbsp;	public AllergyReaction getAllergyReaction(Integer allergyReactionId) {
+<b class="fc">&nbsp;		for (AllergyReaction reaction : reactions) {</b>
+<b class="fc">&nbsp;			if (OpenmrsUtil.nullSafeEquals(reaction.getAllergyReactionId(), allergyReactionId)) {</b>
+<b class="fc">&nbsp;				return reaction;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Copies all property values, apart from the id and uuid,
+&nbsp;	 * from the given allergy into this object
+&nbsp;	 * 
+&nbsp;	 * @param allergy the allergy whose property values to copy
+&nbsp;	 * @throws InvocationTargetException
+&nbsp;	 * @throws IllegalAccessException
+&nbsp;	 */
+&nbsp;	public void copy(Allergy allergy) {
+<b class="fc">&nbsp;		setAllergyId(null);</b>
+<b class="fc">&nbsp;		setUuid(UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;		setPatient(allergy.getPatient());</b>
+<b class="fc">&nbsp;		setAllergen(allergy.getAllergen());</b>
+<b class="fc">&nbsp;		setSeverity(allergy.getSeverity());</b>
+<b class="fc">&nbsp;		setComment(allergy.getComment());</b>
+<b class="fc">&nbsp;		setReactions(new ArrayList&lt;&gt;());</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (AllergyReaction reaction : allergy.getReactions()) {</b>
+<b class="fc">&nbsp;			reactions.add(reaction);</b>
+<b class="fc">&nbsp;			reaction.setAllergyReactionId(null);</b>
+<b class="fc">&nbsp;			reaction.setUuid(UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    private List&lt;Concept&gt; getReactionConcepts(){
+<b class="fc">&nbsp;        List&lt;Concept&gt; reactionConcepts = new ArrayList&lt;&gt;(getReactions().size());</b>
+<b class="fc">&nbsp;        for (AllergyReaction ar : getReactions()) {</b>
+<b class="fc">&nbsp;            reactionConcepts.add(ar.getReaction());</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return reactionConcepts;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;	 * @return Returns the reactionNonCoded
+&nbsp;	 */
+&nbsp;	public String getReactionNonCoded() {
+<b class="fc">&nbsp;		for (AllergyReaction reaction : reactions) {</b>
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(reaction.getReactionNonCoded())) {</b>
+<b class="fc">&nbsp;				return reaction.getReactionNonCoded();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the reaction with a given concept
+&nbsp;	 * 
+&nbsp;	 * @param concept the concept
+&nbsp;	 * @return the reaction if any exists
+&nbsp;	 */
+&nbsp;	public AllergyReaction getReaction(Concept concept) {
+<b class="nc">&nbsp;		for (AllergyReaction reaction : reactions) {</b>
+<b class="nc">&nbsp;			if (reaction.getReaction().equals(concept)) {</b>
+<b class="nc">&nbsp;				return reaction;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if we have the same allergen as that in the given allergy
+&nbsp;	 * 
+&nbsp;	 * @param allergy the given allergy whose allergen to check
+&nbsp;	 * @return true if the same, else false
+&nbsp;	 */
+&nbsp;	public boolean hasSameAllergen(Allergy allergy) {
+<b class="fc">&nbsp;		if (allergen == null || allergy.getAllergen() == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return allergen.isSameAllergen(allergy.getAllergen());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property getter for encounter
+&nbsp;	 * 
+&nbsp;	 * @return encounter - the associated encounter
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter() {
+<b class="nc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property setter for encounter
+&nbsp;	 *  
+&nbsp;	 * @param encounter - the encounter to set
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,188 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > EventListeners</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: EventListeners (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventListeners</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    43,5%
+  </span>
+  <span class="absValue">
+    (10/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Holds all OpenMRS event listeners
+&nbsp; */
+&nbsp;public class EventListeners {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(EventListeners.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static List&lt;GlobalPropertyListener&gt; globalPropertyListeners = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public EventListeners() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;GlobalPropertyListener&gt; getGlobalPropertyListeners() {
+<b class="fc">&nbsp;		return globalPropertyListeners;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This setter acts more like an &quot;appender&quot;.  If the list already has elements, calling this method
+&nbsp;	 * will &lt;b&gt;add to&lt;/b&gt; the list of listeners instead of replacing it.
+&nbsp;	 *
+&nbsp;	 * @param globalPropertyListeners
+&nbsp;	 */
+&nbsp;	public void setGlobalPropertyListeners(List&lt;GlobalPropertyListener&gt; globalPropertyListeners) {
+<b class="fc">&nbsp;		if (globalPropertyListeners == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;			for (GlobalPropertyListener gpl : globalPropertyListeners) {</b>
+<b class="nc">&nbsp;				if (sb.length() &gt; 0) {</b>
+<b class="nc">&nbsp;					sb.append(&quot;, &quot;);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				sb.append(gpl.getClass().getName());</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			log.debug(&quot;GlobalPropertyListeners set to: &quot; + sb);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (EventListeners.globalPropertyListeners == null) {</b>
+<b class="fc">&nbsp;			EventListeners.globalPropertyListeners = globalPropertyListeners;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			for (GlobalPropertyListener gpl : globalPropertyListeners) {</b>
+<b class="nc">&nbsp;				if (!EventListeners.globalPropertyListeners.contains(gpl)) {</b>
+<b class="nc">&nbsp;					EventListeners.globalPropertyListeners.add(gpl);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method called by spring to reset the static list of event
+&nbsp;	 * listeners.&lt;br&gt;
+&nbsp;	 * Without this, the event listener list continues to grow with every Spring
+&nbsp;	 * restart. (and is a memory leak)
+&nbsp;	 *
+&nbsp;	 * @see &quot;applicationContext-service.xml&quot;
+&nbsp;	 * @param nullList
+&nbsp;	 *            if true, nulls the list instead of just clearing it
+&nbsp;	 */
+&nbsp;	public void setGlobalPropertyListenersToEmpty(boolean nullList) {
+<b class="fc">&nbsp;		if (nullList) {</b>
+<b class="nc">&nbsp;			EventListeners.globalPropertyListeners = null;</b>
+<b class="fc">&nbsp;		} else if (EventListeners.globalPropertyListeners != null) {</b>
+<b class="nc">&nbsp;			EventListeners.globalPropertyListeners.clear();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,386 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CohortServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: CohortServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CohortServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (24/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,8%
+  </span>
+  <span class="absValue">
+    (67/73)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import static org.openmrs.util.DateUtil.truncateToSeconds;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.CohortMembership;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.CohortService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.CohortDAO;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * API functions related to Cohorts
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class CohortServiceImpl extends BaseOpenmrsService implements CohortService {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(CohortServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	private CohortDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#setCohortDAO(org.openmrs.api.db.CohortDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCohortDAO(CohortDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#saveCohort(org.openmrs.Cohort)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Cohort saveCohort(Cohort cohort) throws APIException {
+<b class="fc">&nbsp;		if (cohort.getCohortId() == null) {</b>
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.ADD_COHORTS);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.EDIT_COHORTS);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (cohort.getName() == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Cohort.save.nameRequired&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (cohort.getDescription() == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Cohort.save.descriptionRequired&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (log.isInfoEnabled()) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Saving cohort &quot; + cohort);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveCohort(cohort);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getCohort(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Cohort getCohort(Integer id) {
+<b class="fc">&nbsp;		return dao.getCohort(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#voidCohort(org.openmrs.Cohort, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Cohort voidCohort(Cohort cohort, String reason) {
+&nbsp;		// other setters done by the save handlers
+<b class="fc">&nbsp;		return Context.getCohortService().saveCohort(cohort);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getCohortByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Cohort getCohortByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getCohortByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getCohortMembershipByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public CohortMembership getCohortMembershipByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getCohortMembershipByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#addPatientToCohort(org.openmrs.Cohort,
+&nbsp;	 *      org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Cohort addPatientToCohort(Cohort cohort, Patient patient) {
+<b class="fc">&nbsp;		if (!cohort.contains(patient.getPatientId())) {</b>
+<b class="fc">&nbsp;			CohortMembership cohortMembership = new CohortMembership(patient.getPatientId());</b>
+<b class="fc">&nbsp;			cohort.addMembership(cohortMembership);</b>
+<b class="fc">&nbsp;			Context.getCohortService().saveCohort(cohort);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return cohort;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#removePatientFromCohort(org.openmrs.Cohort,
+&nbsp;	 *      org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Cohort removePatientFromCohort(Cohort cohort, Patient patient) {
+<b class="fc">&nbsp;		List&lt;CohortMembership&gt; memberships = getCohortMemberships(patient.getPatientId(), null, false);</b>
+<b class="fc">&nbsp;		List&lt;CohortMembership&gt; toVoid = memberships.stream()</b>
+<b class="fc">&nbsp;				.filter(m -&gt; m.getCohort().equals(cohort))</b>
+<b class="fc">&nbsp;				.collect(Collectors.toList());</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (CohortMembership membership : toVoid) {</b>
+<b class="fc">&nbsp;			Context.getCohortService().voidCohortMembership(membership, &quot;removePatientFromCohort&quot;);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return cohort;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Cohort&gt; getCohortsContainingPatient(Patient patient) {
+<b class="nc">&nbsp;		return getCohortsContainingPatientId(patient.getPatientId());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Cohort&gt; getCohortsContainingPatientId(Integer patientId) {
+<b class="fc">&nbsp;		return dao.getCohortsContainingPatientId(patientId, false, new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getCohorts(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Cohort&gt; getCohorts(String nameFragment) throws APIException {
+<b class="fc">&nbsp;		return dao.getCohorts(nameFragment);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getAllCohorts()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Cohort&gt; getAllCohorts() throws APIException {
+<b class="fc">&nbsp;		return Context.getCohortService().getAllCohorts(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getAllCohorts(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Cohort&gt; getAllCohorts(boolean includeVoided) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllCohorts(includeVoided);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getCohortByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Cohort getCohortByName(String name) throws APIException {
+<b class="fc">&nbsp;		return dao.getCohort(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#getCohort(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Cohort getCohort(String name) throws APIException {
+<b class="nc">&nbsp;		return getCohortByName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#purgeCohort(org.openmrs.Cohort)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Cohort purgeCohort(Cohort cohort) throws APIException {
+<b class="fc">&nbsp;		return dao.deleteCohort(cohort);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CohortService#purgeCohortMembership(CohortMembership)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeCohortMembership(CohortMembership cohortMembership) throws APIException {
+<b class="fc">&nbsp;		Cohort cohort = cohortMembership.getCohort();</b>
+<b class="fc">&nbsp;		boolean removed = cohort.removeMembership(cohortMembership);</b>
+<b class="fc">&nbsp;		if (removed) {</b>
+<b class="fc">&nbsp;			Context.getCohortService().saveCohort(cohort);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CohortService#voidCohortMembership(CohortMembership, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public CohortMembership voidCohortMembership(CohortMembership cohortMembership, String reason) {
+<b class="fc">&nbsp;		Context.getCohortService().saveCohort(cohortMembership.getCohort());</b>
+<b class="fc">&nbsp;		return cohortMembership;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CohortService#endCohortMembership(CohortMembership, Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public CohortMembership endCohortMembership(CohortMembership cohortMembership, Date onDate) {
+<b class="fc">&nbsp;		cohortMembership.setEndDate(onDate == null ? new Date() : onDate);</b>
+<b class="fc">&nbsp;		Context.getCohortService().saveCohort(cohortMembership.getCohort());</b>
+<b class="fc">&nbsp;		return cohortMembership;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#notifyPatientVoided(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void notifyPatientVoided(Patient patient) throws APIException {
+<b class="fc">&nbsp;		List&lt;CohortMembership&gt; memberships = Context.getCohortService()</b>
+<b class="fc">&nbsp;				.getCohortMemberships(patient.getPatientId(), null, false);</b>
+<b class="fc">&nbsp;		memberships.forEach(m -&gt; {</b>
+<b class="fc">&nbsp;			m.setVoided(patient.getVoided());</b>
+<b class="fc">&nbsp;			m.setDateVoided(patient.getDateVoided());</b>
+<b class="fc">&nbsp;			m.setVoidedBy(patient.getVoidedBy());</b>
+<b class="fc">&nbsp;			m.setVoidReason(patient.getVoidReason());</b>
+<b class="fc">&nbsp;			dao.saveCohortMembership(m);</b>
+&nbsp;		});
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.CohortService#notifyPatientUnvoided(Patient, User, Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void notifyPatientUnvoided(Patient patient, User originallyVoidedBy, Date originalDateVoided) throws APIException {
+<b class="fc">&nbsp;		List&lt;CohortMembership&gt; memberships = getCohortMemberships(patient.getPatientId(), null, true);</b>
+<b class="fc">&nbsp;		List&lt;CohortMembership&gt; toUnvoid = memberships.stream().filter(</b>
+<b class="fc">&nbsp;						m -&gt; m.getVoided()</b>
+<b class="fc">&nbsp;								&amp;&amp; m.getVoidedBy().equals(originallyVoidedBy)</b>
+<b class="fc">&nbsp;								&amp;&amp; OpenmrsUtil.compare(</b>
+<b class="fc">&nbsp;										truncateToSeconds(m.getDateVoided()),</b>
+<b class="fc">&nbsp;										truncateToSeconds(originalDateVoided)) == 0)</b>
+<b class="fc">&nbsp;				.collect(Collectors.toList());</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (CohortMembership member : toUnvoid) {</b>
+<b class="fc">&nbsp;			member.setVoided(false);</b>
+<b class="fc">&nbsp;			member.setDateVoided(null);</b>
+<b class="fc">&nbsp;			member.setVoidedBy(null);</b>
+<b class="fc">&nbsp;			member.setVoidReason(null);</b>
+<b class="fc">&nbsp;			dao.saveCohortMembership(member);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public List&lt;CohortMembership&gt; getCohortMemberships(Integer patientId, Date activeOnDate, boolean includeVoided) {
+<b class="fc">&nbsp;		if (patientId == null) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;patientId is required&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getCohortMemberships(patientId, activeOnDate, includeVoided);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

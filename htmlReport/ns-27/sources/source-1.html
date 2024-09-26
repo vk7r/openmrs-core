@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MailMessageSender</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification.mail</a>
+</div>
+
+<h1>Coverage Summary for Class: MailMessageSender (org.openmrs.notification.mail)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MailMessageSender</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,9%
+  </span>
+  <span class="absValue">
+    (27/41)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification.mail;
+&nbsp;
+&nbsp;import javax.mail.Session;
+&nbsp;import javax.mail.Transport;
+&nbsp;import javax.mail.internet.InternetAddress;
+&nbsp;import javax.mail.internet.MimeBodyPart;
+&nbsp;import javax.mail.internet.MimeMessage;
+&nbsp;import javax.mail.internet.MimeMultipart;
+&nbsp;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.notification.Message;
+&nbsp;import org.openmrs.notification.MessageException;
+&nbsp;import org.openmrs.notification.MessageSender;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;import java.util.Properties;
+&nbsp;
+&nbsp;public class MailMessageSender implements MessageSender {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MailMessageSender.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * JavaMail session
+&nbsp;	 */
+&nbsp;	private Session session;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default public constructor.
+&nbsp;	 */
+<b class="nc">&nbsp;	public MailMessageSender() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Public constructor.
+&nbsp;	 *
+&nbsp;	 * @param session
+&nbsp;	 */
+<b class="fc">&nbsp;	public MailMessageSender(Session session) {</b>
+<b class="fc">&nbsp;		this.session = session;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set javamail session.
+&nbsp;	 *
+&nbsp;	 * @param session
+&nbsp;	 */
+&nbsp;	public void setMailSession(Session session) {
+<b class="nc">&nbsp;		this.session = session;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send the message.
+&nbsp;	 *
+&nbsp;	 * @param message the message to be sent
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void send(Message message) throws MessageException {
+&nbsp;		try {
+<b class="fc">&nbsp;			MimeMessage mimeMessage = createMimeMessage(message);</b>
+<b class="fc">&nbsp;			Transport.send(mimeMessage);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			log.error(&quot;failed to send message&quot;, e);</b>
+&nbsp;			
+&nbsp;			// catch mail-specific exception and re-throw it as app-specific exception
+<b class="fc">&nbsp;			throw new MessageException(e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts the message object to a mime message in order to prepare it to be sent.
+&nbsp;	 *
+&nbsp;	 * @param message
+&nbsp;	 * @return MimeMessage
+&nbsp;	 */
+&nbsp;	public MimeMessage createMimeMessage(Message message) throws Exception {
+&nbsp;		
+<b class="fc">&nbsp;		if (message.getRecipients() == null) {</b>
+<b class="nc">&nbsp;			throw new MessageException(&quot;Message must contain at least one recipient&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Properties mailProperties = Context.getMailProperties();</b>
+&nbsp;		
+&nbsp;		// set the content-type to the default if it isn&#39;t defined in Message
+<b class="fc">&nbsp;		if (!StringUtils.hasText(message.getContentType())) {</b>
+<b class="fc">&nbsp;			String contentType = mailProperties.getProperty(&quot;mail.default_content_type&quot;, &quot;text/plain&quot;);</b>
+<b class="fc">&nbsp;			message.setContentType(contentType);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		MimeMessage mimeMessage = new MimeMessage(session);</b>
+&nbsp;		
+<b class="fc">&nbsp;		String sender = message.getSender();</b>
+<b class="fc">&nbsp;		if (!StringUtils.hasText(sender)) {</b>
+<b class="fc">&nbsp;			sender = mailProperties.getProperty(&quot;mail.from&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (StringUtils.hasText(sender)) {</b>
+<b class="fc">&nbsp;			InternetAddress senderAddress = new InternetAddress(sender);</b>
+<b class="fc">&nbsp;			mimeMessage.setFrom(senderAddress);</b>
+<b class="fc">&nbsp;			mimeMessage.setSender(senderAddress);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		mimeMessage.setRecipients(javax.mail.Message.RecipientType.TO,</b>
+<b class="fc">&nbsp;		    InternetAddress.parse(message.getRecipients(), false));</b>
+<b class="fc">&nbsp;		mimeMessage.setSubject(message.getSubject());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!message.hasAttachment()) {</b>
+<b class="fc">&nbsp;			mimeMessage.setContent(message.getContent(), message.getContentType());</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			mimeMessage.setContent(createMultipart(message));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return mimeMessage;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a MimeMultipart, so that we can have an attachment.
+&nbsp;	 *
+&nbsp;	 * @param message
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private MimeMultipart createMultipart(Message message) throws Exception {
+<b class="nc">&nbsp;		MimeMultipart toReturn = new MimeMultipart();</b>
+&nbsp;		
+<b class="nc">&nbsp;		MimeBodyPart textContent = new MimeBodyPart();</b>
+<b class="nc">&nbsp;		textContent.setContent(message.getContent(), message.getContentType());</b>
+&nbsp;		
+<b class="nc">&nbsp;		MimeBodyPart attachment = new MimeBodyPart();</b>
+<b class="nc">&nbsp;		attachment.setContent(message.getAttachment(), message.getAttachmentContentType());</b>
+<b class="nc">&nbsp;		attachment.setFileName(message.getAttachmentFileName());</b>
+&nbsp;		
+<b class="nc">&nbsp;		toReturn.addBodyPart(textContent);</b>
+<b class="nc">&nbsp;		toReturn.addBodyPart(attachment);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return toReturn;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

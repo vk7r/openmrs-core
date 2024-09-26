@@ -1,0 +1,1088 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Encounter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Encounter (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Encounter</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,9%
+  </span>
+  <span class="absValue">
+    (53/61)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (208/224)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Encounter$HibernateProxy$gTvvMGTB</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    86,9%
+  </span>
+  <span class="absValue">
+    (53/61)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (208/224)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.ArrayDeque;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Deque;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import javax.persistence.Access;
+&nbsp;import javax.persistence.AccessType;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.OrderBy;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;import org.hibernate.annotations.BatchSize;
+&nbsp;import org.hibernate.annotations.Cascade;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.annotation.AllowDirectAccess;
+&nbsp;import org.openmrs.annotation.DisableHandlers;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.handler.VoidHandler;
+&nbsp;
+&nbsp;/**
+&nbsp; * An Encounter represents one visit or interaction of a patient with a healthcare worker. Every
+&nbsp; * encounter can have 0 to n Observations associated with it Every encounter can have 0 to n Orders
+&nbsp; * associated with it The patientId attribute should be equal to patient.patientId and is only
+&nbsp; * included this second time for performance increases on bulk calls.
+&nbsp; *
+&nbsp; * @see Obs
+&nbsp; * @see Order
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;encounter&quot;)
+&nbsp;@BatchSize(size = 25)
+&nbsp;@Audited
+&nbsp;public class Encounter extends BaseChangeableOpenmrsData {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 2L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@Id
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	@Column(name = &quot;encounter_id&quot;)
+&nbsp;	private Integer encounterId;
+&nbsp;	
+&nbsp;	@Column(name = &quot;encounter_datetime&quot;, nullable = false, length = 19)
+&nbsp;	private Date encounterDatetime;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;patient_id&quot;)
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;location_id&quot;)
+&nbsp;	private Location location;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;form_id&quot;)
+&nbsp;	private Form form;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;encounter_type&quot;)
+&nbsp;	private EncounterType encounterType;
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;encounter&quot;)
+&nbsp;	private Set&lt;Order&gt; orders;
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;encounter&quot;)
+&nbsp;	private Set&lt;Diagnosis&gt; diagnoses;
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;encounter&quot;)
+&nbsp;	private Set&lt;Condition&gt; conditions;
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;encounter&quot;)
+&nbsp;	@Access(AccessType.FIELD)
+&nbsp;	@OrderBy(&quot;concept_id&quot;)
+&nbsp;	@BatchSize(size = 25)
+&nbsp;	@AllowDirectAccess
+&nbsp;	private Set&lt;Obs&gt; obs;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+&nbsp;	@JoinColumn(name = &quot;visit_id&quot;)
+&nbsp;	private Visit visit;
+&nbsp;	
+<b class="fc">&nbsp;	@OneToMany(mappedBy = &quot;encounter&quot;, cascade = CascadeType.ALL)</b>
+&nbsp;	@OrderBy(&quot;provider_id&quot;)
+&nbsp;	@DisableHandlers(handlerTypes = { VoidHandler.class })
+&nbsp;	private Set&lt;EncounterProvider&gt; encounterProviders = new LinkedHashSet&lt;&gt;();
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;encounter&quot;)
+&nbsp;	private Set&lt;Allergy&gt; allergies;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Encounter() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounterId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set encounter id
+&nbsp;	 */
+<b class="fc">&nbsp;	public Encounter(Integer encounterId) {</b>
+<b class="fc">&nbsp;		this.encounterId = encounterId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the encounterDatetime.
+&nbsp;	 */
+&nbsp;	public Date getEncounterDatetime() {
+<b class="fc">&nbsp;		return encounterDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounterDatetime The encounterDatetime to set.
+&nbsp;	 */
+&nbsp;	public void setEncounterDatetime(Date encounterDatetime) {
+<b class="fc">&nbsp;		this.encounterDatetime = encounterDatetime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the encounterId.
+&nbsp;	 */
+&nbsp;	public Integer getEncounterId() {
+<b class="fc">&nbsp;		return encounterId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounterId The encounterId to set.
+&nbsp;	 */
+&nbsp;	public void setEncounterId(Integer encounterId) {
+<b class="nc">&nbsp;		this.encounterId = encounterId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the encounterType.
+&nbsp;	 */
+&nbsp;	public EncounterType getEncounterType() {
+<b class="fc">&nbsp;		return encounterType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounterType The encounterType to set.
+&nbsp;	 */
+&nbsp;	public void setEncounterType(EncounterType encounterType) {
+<b class="fc">&nbsp;		this.encounterType = encounterType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the location.
+&nbsp;	 */
+&nbsp;	public Location getLocation() {
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param location The location to set.
+&nbsp;	 */
+&nbsp;	public void setLocation(Location location) {
+<b class="fc">&nbsp;		this.location = location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns a Set&amp;lt;Obs&amp;gt; of all non-voided, non-obsGroup children Obs of this
+&nbsp;	 *         Encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null with null obs set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only get child obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get child obs if child also on encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get both child and parent obs after removing child from parent grouping
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs with two levels of hierarchy
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs with three levels of hierarchy
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided obs with three layers of hierarchy
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getObs() {
+<b class="fc">&nbsp;		Set&lt;Obs&gt; ret = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (this.obs != null) {</b>
+<b class="fc">&nbsp;			for (Obs o : this.obs) {</b>
+<b class="fc">&nbsp;				ret.addAll(getObsLeaves(o));</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to recursively get all leaf obs of this encounter. This method goes down
+&nbsp;	 * into each obs and adds all non-grouping obs to the return list
+&nbsp;	 *
+&nbsp;	 * @param obsParent current obs to loop over
+&nbsp;	 * @return list of leaf obs
+&nbsp;	 */
+&nbsp;	private List&lt;Obs&gt; getObsLeaves(Obs obsParent) {
+<b class="fc">&nbsp;		List&lt;Obs&gt; leaves = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (obsParent.hasGroupMembers()) {</b>
+<b class="fc">&nbsp;			for (Obs child : obsParent.getGroupMembers()) {</b>
+<b class="fc">&nbsp;				if (!child.getVoided()) {</b>
+<b class="fc">&nbsp;					if (!child.isObsGrouping()) {</b>
+<b class="fc">&nbsp;						leaves.add(child);</b>
+&nbsp;					} else {
+&nbsp;						// recurse if this is a grouping obs
+<b class="fc">&nbsp;						leaves.addAll(getObsLeaves(child));</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		} else if (!obsParent.getVoided()) {</b>
+<b class="fc">&nbsp;			leaves.add(obsParent);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return leaves;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Convenience method to recursively get all leaf obs for a given parent obs.
+&nbsp;	 * @param obsParent indicates the parent Obs
+&nbsp;	 * @param includedVoided indicates whether or not to include voided Obs
+&nbsp;	 * @return a Set of all leaves Obs including the parent Obs
+&nbsp;	 * @since 2.2.1
+&nbsp;	 */
+&nbsp;	private Set&lt;Obs&gt; getFlattenedObsLeaves(Obs obsParent, boolean includedVoided) {
+<b class="fc">&nbsp;		Set&lt;Obs&gt; leaves = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (includedVoided || (!obsParent.getVoided())) {</b>
+<b class="fc">&nbsp;			leaves.add(obsParent);</b>
+<b class="fc">&nbsp;			if (obsParent.hasGroupMembers()) {</b>
+<b class="fc">&nbsp;				for (Obs child : obsParent.getGroupMembers(includedVoided)) {</b>
+<b class="fc">&nbsp;					leaves.addAll(getFlattenedObsLeaves(child, includedVoided));</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return leaves;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns all Obs where Obs.encounterId = Encounter.encounterId In practice, this method should
+&nbsp;	 * not be used very often...
+&nbsp;	 *
+&nbsp;	 * @param includeVoided specifies whether or not to include voided Obs
+&nbsp;	 * @return Returns the all Obs.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null with null obs set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get both parent and child obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get both parent and child with child directly on encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get both child and parent obs after removing child from parent grouping
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getAllObs(boolean includeVoided) {
+<b class="fc">&nbsp;		if (includeVoided &amp;&amp; obs != null) {</b>
+<b class="fc">&nbsp;			return obs;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;Obs&gt; ret = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (this.obs != null) {</b>
+<b class="fc">&nbsp;			ret = this.obs.stream().filter(o -&gt; includeVoided || !o.getVoided()).collect(Collectors.toSet());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to call {@link #getAllObs(boolean)} with a false parameter
+&nbsp;	 *
+&nbsp;	 * @return all non-voided obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided obs
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getAllObs() {
+<b class="fc">&nbsp;		return getAllObs(false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns all encounter obs as a flatten list(Set) of obs.
+&nbsp;	 * @param includeVoided indicates whether or not to include voided obs
+&nbsp;	 * @return a Set of all encounter&#39; Obs
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getAllFlattenedObs(boolean includeVoided) {
+&nbsp;
+<b class="fc">&nbsp;		Set&lt;Obs&gt; ret = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (this.obs != null) {</b>
+<b class="fc">&nbsp;			for (Obs o : this.obs) {</b>
+<b class="fc">&nbsp;				if (includeVoided || (!o.getVoided())) {</b>
+<b class="fc">&nbsp;					ret.addAll(getFlattenedObsLeaves(o, includeVoided));</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a Set&amp;lt;Obs&amp;gt; of all root-level Obs of an Encounter, including obsGroups
+&nbsp;	 *
+&nbsp;	 * @param includeVoided specifies whether or not to include voided Obs
+&nbsp;	 * @return Returns all obs at top level -- will not be null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null with null obs set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only get parents obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return the grouped top level obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get both child and parent obs after removing child from parent grouping
+&nbsp;	 */
+&nbsp;	public Set&lt;Obs&gt; getObsAtTopLevel(boolean includeVoided) {
+&nbsp;		
+<b class="fc">&nbsp;		return getAllObs(includeVoided).stream().filter(o -&gt; o.getObsGroup() == null)</b>
+<b class="fc">&nbsp;		        .collect(Collectors.toCollection(LinkedHashSet::new));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param obs The obs to set.
+&nbsp;	 */
+&nbsp;	public void setObs(Set&lt;Obs&gt; obs) {
+<b class="fc">&nbsp;		this.obs = obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given Obs to the list of obs for this Encounter.
+&nbsp;	 *
+&nbsp;	 * @param observation the Obs to add to this encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add obs with null values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set encounter attribute on obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add obs to non null initial obs set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add encounter attrs to obs if attributes are null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add encounter attrs to obs groupMembers if attributes are null
+&nbsp;	 */
+&nbsp;	public void addObs(Obs observation) {
+<b class="fc">&nbsp;		if (obs == null) {</b>
+<b class="fc">&nbsp;			obs = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (observation != null) {</b>
+<b class="fc">&nbsp;			obs.add(observation);</b>
+&nbsp;			
+&nbsp;			//Propagate some attributes to the obs and any groupMembers
+&nbsp;			
+&nbsp;			// a Deque is a two-ended queue, that lets us add to the end, and fetch from the beginning
+<b class="fc">&nbsp;			Deque&lt;Obs&gt; obsToUpdate = new ArrayDeque&lt;&gt;();</b>
+<b class="fc">&nbsp;			obsToUpdate.add(observation);</b>
+&nbsp;			
+&nbsp;			//prevent infinite recursion if an obs is its own group member
+<b class="fc">&nbsp;			Set&lt;Obs&gt; seenIt = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;			
+<b class="fc">&nbsp;			while (!obsToUpdate.isEmpty()) {</b>
+<b class="fc">&nbsp;				Obs o = obsToUpdate.removeFirst();</b>
+&nbsp;				
+&nbsp;				//has this obs already been processed?
+<b class="fc">&nbsp;				if (o == null || seenIt.contains(o)) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				seenIt.add(o);</b>
+&nbsp;				
+<b class="fc">&nbsp;				o.setEncounter(this);</b>
+&nbsp;				
+&nbsp;				//if the attribute was already set, preserve it
+&nbsp;				//if not, inherit the values from the encounter
+<b class="fc">&nbsp;				if (o.getObsDatetime() == null) {</b>
+<b class="fc">&nbsp;					o.setObsDatetime(getEncounterDatetime());</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (o.getPerson() == null) {</b>
+<b class="fc">&nbsp;					o.setPerson(getPatient());</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (o.getLocation() == null) {</b>
+<b class="fc">&nbsp;					o.setLocation(getLocation());</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				//propagate attributes to  all group members as well
+<b class="fc">&nbsp;				if (o.getGroupMembers(true) != null) {</b>
+<b class="fc">&nbsp;					obsToUpdate.addAll(o.getGroupMembers());</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given observation from the list of obs for this Encounter
+&nbsp;	 *
+&nbsp;	 * @param observation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove obs successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw error when removing null obs from empty set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw error when removing null obs from non empty set
+&nbsp;	 */
+&nbsp;	public void removeObs(Obs observation) {
+<b class="fc">&nbsp;		if (obs != null) {</b>
+<b class="fc">&nbsp;			obs.remove(observation);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the orders
+&nbsp;	 */
+&nbsp;	public Set&lt;Order&gt; getOrders() {
+<b class="fc">&nbsp;		if (orders == null) {</b>
+<b class="fc">&nbsp;			orders = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return orders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orders The orders to set.
+&nbsp;	 */
+&nbsp;	public void setOrders(Set&lt;Order&gt; orders) {
+<b class="fc">&nbsp;		this.orders = orders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given Order to the list of orders for this Encounter
+&nbsp;	 *
+&nbsp;	 * @param order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add order with null values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null obs passed to add order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set encounter attribute
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add order to non null initial order set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add order to encounter when adding order to set returned from getOrders
+&nbsp;	 */
+&nbsp;	public void addOrder(Order order) {
+<b class="fc">&nbsp;		if (order != null) {</b>
+<b class="fc">&nbsp;			order.setEncounter(this);</b>
+<b class="fc">&nbsp;			getOrders().add(order);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given order from the list of orders for this Encounter
+&nbsp;	 *
+&nbsp;	 * @param order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove order from encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when removing null order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when removing non existent order
+&nbsp;	 */
+&nbsp;	public void removeOrder(Order order) {
+<b class="fc">&nbsp;		if (orders != null) {</b>
+<b class="fc">&nbsp;			orders.remove(order);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the patient.
+&nbsp;	 */
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patient The patient to set.
+&nbsp;	 */
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the set of diagnoses
+&nbsp;	 * 
+&nbsp;	 * @return diagnoses - the set of diagnoses.
+&nbsp;	 * @since 2.2
+&nbsp;	 */
+&nbsp;	public Set&lt;Diagnosis&gt; getDiagnoses() {
+<b class="fc">&nbsp;		if (diagnoses == null) {</b>
+<b class="fc">&nbsp;			diagnoses = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return diagnoses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets a set of diagnoses for the current Encounter
+&nbsp;	 * 
+&nbsp;	 * @param diagnoses the set of Diagnosis to set.
+&nbsp;	 * @since 2.2
+&nbsp;	 */
+&nbsp;	public void setDiagnoses(Set&lt;Diagnosis&gt; diagnoses) {
+<b class="fc">&nbsp;		this.diagnoses = diagnoses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property getter for the encounter&#39;s non-voided conditions.
+&nbsp;	 * 
+&nbsp;	 * @return all non-voided conditions
+&nbsp;	 * @since 2.4.0, 2.3.1
+&nbsp;	 */
+&nbsp;	public Set&lt;Condition&gt; getConditions() {
+<b class="fc">&nbsp;		return getConditions(false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns all conditions where &#39;Condition.encounterId = Encounter.encounterId&#39;.
+&nbsp;	 *
+&nbsp;	 * @param includeVoided - Specifies whether or not to include voided conditions.
+&nbsp;	 * @return The set of conditions, or an empty set if there are no conditions to return.
+&nbsp;	 * @since 2.3.3, 2.4.0, 2.5.0
+&nbsp;	 */
+&nbsp;	public Set&lt;Condition&gt; getConditions(boolean includeVoided) {
+<b class="fc">&nbsp;		return Optional.ofNullable(conditions).orElse(new LinkedHashSet&lt;&gt;())</b>
+<b class="fc">&nbsp;			.stream().filter(c -&gt; includeVoided || !c.getVoided()).collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Basic property setter for conditions
+&nbsp;	 *  
+&nbsp;	 * @param conditions - set of conditions
+&nbsp;	 * @since 2.4.0, 2.3.1
+&nbsp;	 */
+&nbsp;	public void setConditions(Set&lt;Condition&gt; conditions) {
+<b class="nc">&nbsp;		this.conditions = conditions;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Add the given condition to the set of conditions for this encounter.
+&nbsp;	 *
+&nbsp;	 * @param condition - the condition to add
+&nbsp;	 */
+&nbsp;	public void addCondition(Condition condition) {
+<b class="fc">&nbsp;		if (conditions == null) {</b>
+<b class="fc">&nbsp;			conditions = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (condition != null) {</b>
+<b class="fc">&nbsp;			condition.setEncounter(this);</b>
+<b class="fc">&nbsp;			conditions.add(condition);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Remove the given condition from the set of conditions for this encounter.
+&nbsp;	 * In practise the condition is not removed but rather voided.
+&nbsp;	 *
+&nbsp;	 * @param condition - the condition to remove
+&nbsp;	 */
+&nbsp;	public void removeCondition(Condition condition) {
+<b class="fc">&nbsp;		Optional.ofNullable(conditions).orElse(new LinkedHashSet&lt;&gt;()).stream().filter(c -&gt; !c.getVoided() &amp;&amp; c.equals(condition)).forEach(c -&gt; {</b>
+<b class="fc">&nbsp;			c.setVoided(true);</b>
+<b class="fc">&nbsp;			c.setDateVoided(new Date());</b>
+<b class="fc">&nbsp;			c.setVoidReason(&quot;Voided by the API&quot;);</b>
+<b class="fc">&nbsp;			c.setVoidedBy(Context.getAuthenticatedUser());</b>
+&nbsp;		});
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property accessor for encounterProviders. The convenience methods getProvidersByRoles
+&nbsp;	 * and getProvidersByRole are the preferred methods for getting providers. This getter is
+&nbsp;	 * provided as a convenience for treating this like a DTO
+&nbsp;	 *
+&nbsp;	 * @return list of all existing providers on this encounter
+&nbsp;	 * @see #getProvidersByRole(EncounterRole)
+&nbsp;	 * @see #getProvidersByRoles()
+&nbsp;	 * @since 1.9.1
+&nbsp;	 */
+&nbsp;	public Set&lt;EncounterProvider&gt; getEncounterProviders() {
+<b class="fc">&nbsp;		return encounterProviders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property setter for encounterProviders. The convenience methods addProvider,
+&nbsp;	 * removeProvider, and setProvider are the preferred methods for adding/removing providers. This
+&nbsp;	 * setter is provided as a convenience for treating this like a DTO
+&nbsp;	 *
+&nbsp;	 * @param encounterProviders the list of EncounterProvider objects to set. Overwrites list as
+&nbsp;	 *            normal setter is inclined to do
+&nbsp;	 * @see #addProvider(EncounterRole, Provider)
+&nbsp;	 * @see #removeProvider(EncounterRole, Provider)
+&nbsp;	 * @see #setProvider(EncounterRole, Provider)
+&nbsp;	 * @since 1.9.1
+&nbsp;	 */
+&nbsp;	public void setEncounterProviders(Set&lt;EncounterProvider&gt; encounterProviders) {
+<b class="nc">&nbsp;		this.encounterProviders = encounterProviders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns only the non-voided encounter providers for this encounter. If you want &lt;u&gt;all&lt;/u&gt;
+&nbsp;	 * encounter providers, use {@link #getEncounterProviders()}
+&nbsp;	 *
+&nbsp;	 * @return list of non-voided encounter providers for this encounter
+&nbsp;	 * @see #getEncounterProviders()
+&nbsp;	 */
+&nbsp;	public Set&lt;EncounterProvider&gt; getActiveEncounterProviders() {
+<b class="nc">&nbsp;		Set&lt;EncounterProvider&gt; activeProviders = new LinkedHashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		Set&lt;EncounterProvider&gt; providers = getEncounterProviders();</b>
+<b class="nc">&nbsp;		if (providers != null &amp;&amp; !providers.isEmpty()) {</b>
+<b class="nc">&nbsp;			activeProviders = providers.stream().filter(p -&gt; !p.getVoided()).collect(Collectors.toSet());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return activeProviders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the form.
+&nbsp;	 */
+&nbsp;	public Form getForm() {
+<b class="fc">&nbsp;		return form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param form The form to set.
+&nbsp;	 */
+&nbsp;	public void setForm(Form form) {
+<b class="fc">&nbsp;		this.form = form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with empty object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		String ret = &quot;&quot;;</b>
+<b class="fc">&nbsp;		ret += encounterId == null ? &quot;(no ID) &quot; : encounterId.toString() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += this.getEncounterDatetime() == null ? &quot;(no Date) &quot; : this.getEncounterDatetime().toString() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += this.getEncounterType() == null ? &quot;(no Type) &quot; : this.getEncounterType().getName() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += this.getLocation() == null ? &quot;(no Location) &quot; : this.getLocation().getName() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += this.getPatient() == null ? &quot;(no Patient) &quot; : this.getPatient().getPatientId().toString() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += this.getForm() == null ? &quot;(no Form) &quot; : this.getForm().getName() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += &quot;num Obs: &quot; + this.getObsAtTopLevel(false) + &quot; &quot;;</b>
+<b class="fc">&nbsp;		ret += &quot;num Orders: &quot; + this.getOrders().size() + &quot; &quot;;</b>
+<b class="fc">&nbsp;		return &quot;Encounter: [&quot; + ret + &quot;]&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getEncounterId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setEncounterId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the visit.
+&nbsp;	 *
+&nbsp;	 * @return the visit.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Visit getVisit() {
+<b class="fc">&nbsp;		return visit;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the visit
+&nbsp;	 *
+&nbsp;	 * @param visit the visit to set.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setVisit(Visit visit) {
+<b class="fc">&nbsp;		this.visit = visit;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all unvoided providers, grouped by role.
+&nbsp;	 *
+&nbsp;	 * @return map of unvoided providers keyed by roles
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty map if no unvoided providers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all roles and unvoided providers
+&nbsp;	 */
+&nbsp;	public Map&lt;EncounterRole, Set&lt;Provider&gt;&gt; getProvidersByRoles() {
+<b class="fc">&nbsp;		return getProvidersByRoles(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all providers, grouped by role.
+&nbsp;	 *
+&nbsp;	 * @param includeVoided set to true to include voided providers, else set to false
+&nbsp;	 * @return map of providers keyed by roles
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty map if no providers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all roles and providers
+&nbsp;	 */
+&nbsp;	public Map&lt;EncounterRole, Set&lt;Provider&gt;&gt; getProvidersByRoles(boolean includeVoided) {
+&nbsp;		
+<b class="fc">&nbsp;		return encounterProviders</b>
+<b class="fc">&nbsp;		        .stream()</b>
+<b class="fc">&nbsp;		        .filter(ep -&gt; includeVoided || !ep.getVoided())</b>
+<b class="fc">&nbsp;		        .collect(</b>
+<b class="fc">&nbsp;		            Collectors.groupingBy(EncounterProvider::getEncounterRole,</b>
+<b class="fc">&nbsp;		                Collectors.mapping(EncounterProvider::getProvider, Collectors.toSet())));</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets unvoided providers who had the given role in this encounter.
+&nbsp;	 *
+&nbsp;	 * @param role
+&nbsp;	 * @return unvoided providers or empty set if none was found
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unvoided providers for role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty set for no role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty set for null role
+&nbsp;	 */
+&nbsp;	public Set&lt;Provider&gt; getProvidersByRole(EncounterRole role) {
+<b class="fc">&nbsp;		return getProvidersByRole(role, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets providers who had the given role in this encounter.
+&nbsp;	 *
+&nbsp;	 * @param role
+&nbsp;	 * @param includeVoided set to true to include voided providers, else set to false
+&nbsp;	 * @return providers or empty set if none was found
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return providers for role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty set for no role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty set for null role
+&nbsp;	 */
+&nbsp;	public Set&lt;Provider&gt; getProvidersByRole(EncounterRole role, boolean includeVoided) {
+&nbsp;		
+<b class="fc">&nbsp;		return encounterProviders.stream()</b>
+<b class="fc">&nbsp;		        .filter(ep -&gt; ep.getEncounterRole().equals(role) &amp;&amp; (includeVoided || !ep.getVoided()))</b>
+<b class="fc">&nbsp;		        .map(EncounterProvider::getProvider).collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a new provider for the encounter, with the given role.
+&nbsp;	 *
+&nbsp;	 * @param role
+&nbsp;	 * @param provider
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add provider for new role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add second provider for role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not add same provider twice for role
+&nbsp;	 */
+&nbsp;	public void addProvider(EncounterRole role, Provider provider) {
+&nbsp;		// first, make sure the provider isn&#39;t already there
+<b class="fc">&nbsp;		for (EncounterProvider ep : encounterProviders) {</b>
+<b class="fc">&nbsp;			if (ep.getEncounterRole().equals(role) &amp;&amp; ep.getProvider().equals(provider) &amp;&amp; !ep.getVoided()) {</b>
+&nbsp;				return;
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		EncounterProvider encounterProvider = new EncounterProvider();</b>
+<b class="fc">&nbsp;		encounterProvider.setEncounter(this);</b>
+<b class="fc">&nbsp;		encounterProvider.setEncounterRole(role);</b>
+<b class="fc">&nbsp;		encounterProvider.setProvider(provider);</b>
+<b class="fc">&nbsp;		encounterProvider.setDateCreated(new Date());</b>
+<b class="fc">&nbsp;		encounterProvider.setCreator(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		encounterProviders.add(encounterProvider);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the provider for the given role.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If the encounter already had any providers for the given role, those are removed.
+&nbsp;	 *
+&nbsp;	 * @param role
+&nbsp;	 * @param provider
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set provider for new role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; clear providers and set provider for role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void existing EncounterProvider
+&nbsp;	 */
+&nbsp;	public void setProvider(EncounterRole role, Provider provider) {
+<b class="fc">&nbsp;		boolean hasProvider = false;</b>
+<b class="fc">&nbsp;		for (EncounterProvider encounterProvider : encounterProviders) {</b>
+<b class="fc">&nbsp;			if (encounterProvider.getEncounterRole().equals(role)) {</b>
+<b class="fc">&nbsp;				if (!encounterProvider.getProvider().equals(provider)) {</b>
+<b class="fc">&nbsp;					encounterProvider.setVoided(true);</b>
+<b class="fc">&nbsp;					encounterProvider.setDateVoided(new Date());</b>
+<b class="fc">&nbsp;					encounterProvider.setVoidedBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;				} else if (!encounterProvider.getVoided()) {</b>
+<b class="fc">&nbsp;					hasProvider = true;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!hasProvider) {</b>
+<b class="fc">&nbsp;			addProvider(role, provider);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes the provider for a given role.
+&nbsp;	 *
+&nbsp;	 * @param role the role.
+&nbsp;	 * @param provider the provider.
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void existing EncounterProvider
+&nbsp;	 */
+&nbsp;	public void removeProvider(EncounterRole role, Provider provider) {
+<b class="fc">&nbsp;		for (EncounterProvider encounterProvider : encounterProviders) {</b>
+<b class="fc">&nbsp;			if (encounterProvider.getEncounterRole().equals(role) &amp;&amp; encounterProvider.getProvider().equals(provider)</b>
+<b class="fc">&nbsp;			        &amp;&amp; !encounterProvider.getVoided()) {</b>
+<b class="fc">&nbsp;				encounterProvider.setVoided(true);</b>
+<b class="fc">&nbsp;				encounterProvider.setDateVoided(new Date());</b>
+<b class="fc">&nbsp;				encounterProvider.setVoidedBy(Context.getAuthenticatedUser());</b>
+&nbsp;				return;
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Copied encounter will not have visit field copied.
+&nbsp;	 *
+&nbsp;	 * @param patient the Patient that will be assign to copied Encounter
+&nbsp;	 * @return copied encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy all Encounter data except visit and assign copied Encounter to given Patient
+&nbsp;	 */
+&nbsp;	public Encounter copyAndAssignToAnotherPatient(Patient patient) {
+<b class="fc">&nbsp;		Encounter target = new Encounter();</b>
+&nbsp;		
+<b class="fc">&nbsp;		target.setChangedBy(getChangedBy());</b>
+<b class="fc">&nbsp;		target.setCreator(getCreator());</b>
+<b class="fc">&nbsp;		target.setDateChanged(getDateChanged());</b>
+<b class="fc">&nbsp;		target.setDateCreated(getDateCreated());</b>
+<b class="fc">&nbsp;		target.setDateVoided(getDateVoided());</b>
+<b class="fc">&nbsp;		target.setVoided(getVoided());</b>
+<b class="fc">&nbsp;		target.setVoidedBy(getVoidedBy());</b>
+<b class="fc">&nbsp;		target.setVoidReason(getVoidReason());</b>
+&nbsp;		
+&nbsp;		// Encounter specific data
+<b class="fc">&nbsp;		target.setEncounterDatetime(getEncounterDatetime());</b>
+<b class="fc">&nbsp;		target.setEncounterType(getEncounterType());</b>
+<b class="fc">&nbsp;		target.setForm(getForm());</b>
+<b class="fc">&nbsp;		target.setLocation(getLocation());</b>
+<b class="fc">&nbsp;		target.setPatient(patient);</b>
+&nbsp;		
+&nbsp;		//encounter providers
+<b class="fc">&nbsp;		for (EncounterProvider encounterProvider : getEncounterProviders()) {</b>
+<b class="fc">&nbsp;			EncounterProvider encounterProviderCopy = encounterProvider.copy();</b>
+<b class="fc">&nbsp;			encounterProviderCopy.setEncounter(target);</b>
+<b class="fc">&nbsp;			target.getEncounterProviders().add(encounterProviderCopy);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		Context.getEncounterService().saveEncounter(target);</b>
+&nbsp;		
+&nbsp;		//obs
+<b class="fc">&nbsp;		for (Obs obs : getAllObs()) {</b>
+<b class="fc">&nbsp;			Obs obsCopy = Obs.newInstance(obs);</b>
+<b class="fc">&nbsp;			obsCopy.setEncounter(target);</b>
+<b class="fc">&nbsp;			obsCopy.setPerson(patient);</b>
+<b class="fc">&nbsp;			target.addObs(obsCopy);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes in a list of orders and pulls out the orderGroups within them
+&nbsp;	 *
+&nbsp;	 * @since 1.12
+&nbsp;	 * @return list of orderGroups
+&nbsp;	 */
+&nbsp;	public List&lt;OrderGroup&gt; getOrderGroups() {
+<b class="fc">&nbsp;		Map&lt;String, OrderGroup&gt; orderGroups = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (Order order : orders) {</b>
+<b class="fc">&nbsp;			if (order.getOrderGroup() != null) {</b>
+<b class="fc">&nbsp;				orderGroups.computeIfAbsent(order.getOrderGroup().getUuid(), k -&gt; order.getOrderGroup());</b>
+<b class="fc">&nbsp;				order.getOrderGroup().addOrder(order, null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return new ArrayList&lt;&gt;(orderGroups.values());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes in a list of orders and filters out the orders which have orderGroups
+&nbsp;	 * 
+&nbsp;	 * @since 1.12
+&nbsp;	 * @return list of orders not having orderGroups
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getOrdersWithoutOrderGroups() {
+<b class="fc">&nbsp;		return orders.stream().filter(o -&gt; o.getOrderGroup() == null).collect(Collectors.toList());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if encounter has a particular diagnosis
+&nbsp;	 *
+&nbsp;	 * @since 2.2
+&nbsp;	 * @param diagnosis the diagnosis to check if it belongs to this given encounter
+&nbsp;	 * @return true if this encounter has the given diagnosis, else false
+&nbsp;	 */
+&nbsp;	public Boolean hasDiagnosis(Diagnosis diagnosis) {
+<b class="fc">&nbsp;		for (Diagnosis diagnosis1 : getDiagnoses()) {</b>
+<b class="fc">&nbsp;			if (diagnosis.equals(diagnosis1)) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property getter for the encounter&#39;s non-voided allergies.
+&nbsp;	 * 
+&nbsp;	 * @return all non-voided allergies
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public Set&lt;Allergy&gt; getAllergies() {
+<b class="fc">&nbsp;		return getAllergies(false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns all allergies where &#39;Allergy.encounterId = Encounter.encounterId&#39;.
+&nbsp;	 *
+&nbsp;	 * @param includeVoided - Specifies whether or not to include voided allergies.
+&nbsp;	 * @return The set of allergies, or an empty set if there are no allergies to return.
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public Set&lt;Allergy&gt; getAllergies(boolean includeVoided) {
+<b class="fc">&nbsp;		return Optional.ofNullable(allergies).orElse(new LinkedHashSet&lt;&gt;())</b>
+<b class="fc">&nbsp;			.stream().filter(c -&gt; includeVoided || !c.getVoided()).collect(Collectors.toSet());</b>
+&nbsp;	}
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Basic property setter for allergies
+&nbsp;	 *  
+&nbsp;	 * @param allergies - set of allergies
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public void setAllergies(Set&lt;Allergy&gt; allergies) {
+<b class="nc">&nbsp;		this.allergies = allergies;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Add the given allergy to the set of allergies for this encounter.
+&nbsp;	 *
+&nbsp;	 * @param allergy - the allergy to add
+&nbsp;	 */
+&nbsp;	public void addAllergy(Allergy allergy) {
+<b class="fc">&nbsp;		if (allergies == null) {</b>
+<b class="fc">&nbsp;			allergies = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (allergy != null) {</b>
+<b class="fc">&nbsp;			allergy.setEncounter(this);</b>
+<b class="fc">&nbsp;			allergies.add(allergy);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Remove the given allergy from the set of allergies for this encounter.
+&nbsp;	 * In practice the allergy is not removed but rather voided.
+&nbsp;	 *
+&nbsp;	 * @param allergy - the allergy to remove
+&nbsp;	 */
+&nbsp;	public void removeAllergy(Allergy allergy) {
+<b class="nc">&nbsp;		Optional.ofNullable(allergies).orElse(new LinkedHashSet&lt;&gt;()).stream().filter(c -&gt; !c.getVoided() &amp;&amp; c.equals(allergy)).forEach(c -&gt; {</b>
+<b class="nc">&nbsp;			c.setVoided(true);</b>
+<b class="nc">&nbsp;			c.setDateVoided(new Date());</b>
+<b class="nc">&nbsp;			c.setVoidReason(&quot;Voided by the API&quot;);</b>
+<b class="nc">&nbsp;			c.setVoidedBy(Context.getAuthenticatedUser());</b>
+&nbsp;		});
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

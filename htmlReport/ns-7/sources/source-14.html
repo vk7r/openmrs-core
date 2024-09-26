@@ -1,0 +1,366 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProgramWorkflowDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: ProgramWorkflowDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ProgramWorkflowDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import org.openmrs.ProgramAttributeType;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptStateConversion;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.PatientProgramAttribute;
+&nbsp;import org.openmrs.PatientState;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.ProgramWorkflowState;
+&nbsp;
+&nbsp;/**
+&nbsp; * Program- and PatientProgram- and ConceptStateConversion-related database functions
+&nbsp; * 
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public interface ProgramWorkflowDAO {
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PROGRAM
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves a Program to the database
+&nbsp;	 * 
+&nbsp;	 * @param program - The {@link Program} to save
+&nbsp;	 * @return The saved {@link Program}
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Program saveProgram(Program program) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a {@link Program} from the database by primary key programId
+&nbsp;	 * 
+&nbsp;	 * @param programId - The primary key programId to use to retrieve a {@link Program}
+&nbsp;	 * @return Program - The {@link Program} matching the passed programId
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Program getProgram(Integer programId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all programs
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to include retired programs
+&nbsp;	 * @return List&amp;lt;Program&amp;gt; all existing programs, including retired based on the input parameter
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Program&gt; getAllPrograms(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns programs that match the given string. A null list will never be returned. An empty
+&nbsp;	 * list will be returned if there are no programs matching this &lt;code&gt;nameFragment&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param nameFragment is the string used to search for programs
+&nbsp;	 * @return List&amp;lt;Program&amp;gt; - list of Programs whose name matches the input parameter
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Program&gt; findPrograms(String nameFragment) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a program from the database (not reversible) This method delegates to
+&nbsp;	 * #purgeProgram(program, boolean) method
+&nbsp;	 * 
+&nbsp;	 * @param program the Program to clean out of the database.
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteProgram(Program program) throws DAOException;
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PATIENT PROGRAM
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save patientProgram to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram is the PatientProgram to be saved to the database
+&nbsp;	 * @return PatientProgram - the saved PatientProgram
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public PatientProgram savePatientProgram(PatientProgram patientProgram) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a PatientProgram given that PatientPrograms primary key &lt;code&gt;patientProgramId&lt;/code&gt;
+&nbsp;	 * A null value is returned if no PatientProgram exists with this patientProgramId.
+&nbsp;	 * 
+&nbsp;	 * @param id integer primary key of the PatientProgram to find
+&nbsp;	 * @return PatientProgram object that has patientProgram.patientProgramId =
+&nbsp;	 *         &lt;code&gt;patientProgramId&lt;/code&gt; passed in.
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public PatientProgram getPatientProgram(Integer id);
+&nbsp;	
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Cohort cohort, Collection&lt;Program&gt; programs);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns PatientPrograms that match the input parameters. If an input parameter is set to
+&nbsp;	 * null, the parameter will not be used. Calling this method will all null parameters will
+&nbsp;	 * return all PatientPrograms in the database A null list will never be returned. An empty list
+&nbsp;	 * will be returned if there are no programs matching the input criteria
+&nbsp;	 * 
+&nbsp;	 * @param patient - if supplied all PatientPrograms returned will be for this Patient
+&nbsp;	 * @param program - if supplied all PatientPrograms returned will be for this Program
+&nbsp;	 * @param minEnrollmentDate - if supplied will limit PatientPrograms to those with enrollments
+&nbsp;	 *            on or after this Date
+&nbsp;	 * @param maxEnrollmentDate - if supplied will limit PatientPrograms to those with enrollments
+&nbsp;	 *            on or before this Date
+&nbsp;	 * @param minCompletionDate - if supplied will limit PatientPrograms to those completed on or
+&nbsp;	 *            after this Date OR not yet completed
+&nbsp;	 * @param maxCompletionDate - if supplied will limit PatientPrograms to those completed on or
+&nbsp;	 *            before this Date
+&nbsp;	 * @param includeVoided - boolean, if true will return voided PatientPrograms as well. If false,
+&nbsp;	 *            will not return voided PatientPrograms
+&nbsp;	 * @return List&amp;lt;PatientProgram&amp;gt; of PatientPrograms that match the passed input parameters
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Patient patient, Program program, Date minEnrollmentDate,
+&nbsp;	        Date maxEnrollmentDate, Date minCompletionDate, Date maxCompletionDate, boolean includeVoided)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a patientProgram from the database (not reversible) This method delegates
+&nbsp;	 * to #purgePatientProgram(patientProgram, boolean) method
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram the PatientProgram to clean out of the database.
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deletePatientProgram(PatientProgram patientProgram) throws DAOException;
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// CONCEPT STATE CONVERSION
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save ConceptStateConversion to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param csc The ConceptStateConversion to save
+&nbsp;	 * @return The saved ConceptStateConversion
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public ConceptStateConversion saveConceptStateConversion(ConceptStateConversion csc) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all conceptStateConversions
+&nbsp;	 * 
+&nbsp;	 * @return List&amp;lt;ConceptStateConversion&amp;gt; of all ConceptStateConversions that exist
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;ConceptStateConversion&gt; getAllConceptStateConversions() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a conceptStateConversion given that conceptStateConversions primary key
+&nbsp;	 * &lt;code&gt;conceptStateConversionId&lt;/code&gt; A null value is returned if no conceptStateConversion
+&nbsp;	 * exists with this conceptStateConversionId.
+&nbsp;	 * 
+&nbsp;	 * @param id integer primary key of the conceptStateConversion to find
+&nbsp;	 * @return ConceptStateConversion object that has
+&nbsp;	 *         conceptStateConversion.conceptStateConversionId =
+&nbsp;	 *         &lt;code&gt;conceptStateConversionId&lt;/code&gt; passed in.
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public ConceptStateConversion getConceptStateConversion(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a conceptStateConversion from the database (not reversible)
+&nbsp;	 * 
+&nbsp;	 * @param csc the ConceptStateConversion to clean out of the database.
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteConceptStateConversion(ConceptStateConversion csc);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the ConceptStateConversion that matches the passed &lt;code&gt;ProgramWorkflow&lt;/code&gt; and
+&nbsp;	 * &lt;code&gt;Concept&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param workflow the ProgramWorkflow to check
+&nbsp;	 * @param trigger the Concept to check
+&nbsp;	 * @return ConceptStateConversion that matches the passed &lt;code&gt;ProgramWorkflow&lt;/code&gt; and
+&nbsp;	 *         &lt;code&gt;Concept&lt;/code&gt;
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public ConceptStateConversion getConceptStateConversion(ProgramWorkflow workflow, Concept trigger);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return concept state conversion or null
+&nbsp;	 */
+&nbsp;	public ConceptStateConversion getConceptStateConversionByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return patient program or null
+&nbsp;	 */
+&nbsp;	public PatientProgram getPatientProgramByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return program or null
+&nbsp;	 */
+&nbsp;	public Program getProgramByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the Programs from the dB which have the given name.
+&nbsp;	 * @param name the name of the Programs to retrieve.
+&nbsp;	 * @param includeRetired whether to include retired programs or not
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return an empty list when there is no program in the dB with given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only and exactly the programs with the given name
+&nbsp;	 * @return all Programs with the given name.
+&nbsp;	 */
+&nbsp;	public List&lt;Program&gt; getProgramsByName(String name, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a {@code ProgramWorkflowState} from the database by its primary key.
+&nbsp;	 * 
+&nbsp;	 * @param stateId the primary key used to retrieve program workflow state
+&nbsp;	 * @return the program workflow state matching given id or null if not found
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getState(Integer stateId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return program workflow state or null
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getStateByUuid(String uuid);
+&nbsp;	
+&nbsp;	public PatientState getPatientStateByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a {@code ProgramWorkflow} from the database by its primary key.
+&nbsp;	 * 
+&nbsp;	 * @param workflowId the primary key used to retrieve program workflow
+&nbsp;	 * @return the program workflow matching given id or null if not found
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getWorkflow(Integer workflowId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return program workflow or null
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getWorkflowByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of Programs that are using a particular concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept - The Concept being used.
+&nbsp;	 * @return - A List of Programs
+&nbsp;	 */
+&nbsp;	public List&lt;Program&gt; getProgramsByConcept(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of ProgramWorkflows that are using a particular concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept - The Concept being used.
+&nbsp;	 * @return - A List of ProgramWorkflows
+&nbsp;	 */
+&nbsp;	public List&lt;ProgramWorkflow&gt; getProgramWorkflowsByConcept(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of ProgramWorkflowStates that are using a particular concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept - The Concept being used.
+&nbsp;	 * @return - A List of ProgramWorkflowStates
+&nbsp;	 */
+&nbsp;	public List&lt;ProgramWorkflowState&gt; getProgramWorkflowStatesByConcept(Concept concept);
+&nbsp;        public List&lt;ProgramAttributeType&gt; getAllProgramAttributeTypes();
+&nbsp;
+&nbsp;        public ProgramAttributeType getProgramAttributeType(Integer var1);
+&nbsp;
+&nbsp;        public ProgramAttributeType getProgramAttributeTypeByUuid(String var1);
+&nbsp;
+&nbsp;        public ProgramAttributeType saveProgramAttributeType(ProgramAttributeType var1);
+&nbsp;
+&nbsp;        public PatientProgramAttribute getPatientProgramAttributeByUuid(String var1);
+&nbsp;
+&nbsp;        public void purgeProgramAttributeType(ProgramAttributeType var1);
+&nbsp;
+&nbsp;        public List&lt;PatientProgram&gt; getPatientProgramByAttributeNameAndValue(String attributeName, String attributeValue);
+&nbsp;
+&nbsp;        public Map&lt;Object, Object&gt; getPatientProgramAttributeByAttributeName(List&lt;Integer&gt; patientIds, String attributeName);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

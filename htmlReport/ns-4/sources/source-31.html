@@ -1,0 +1,633 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProgramWorkflowService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: ProgramWorkflowService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ProgramWorkflowService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import org.openmrs.ProgramAttributeType;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptStateConversion;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.PatientProgramAttribute;
+&nbsp;import org.openmrs.PatientState;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.ProgramWorkflowState;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.ProgramWorkflowDAO;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to management of Programs, ProgramWorkflows, ProgramWorkflowStates,
+&nbsp; * PatientPrograms, PatientStates, and ConceptStateConversions Use:&lt;br&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; *   Program program = new Program();
+&nbsp; *   program.set___(___);
+&nbsp; *   ...etc
+&nbsp; *   Context.getProgramWorkflowService().saveProgram(program);
+&nbsp; * &lt;/pre&gt;
+&nbsp; */
+&nbsp;public interface ProgramWorkflowService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Setter for the ProgramWorkflow DataAccessObject (DAO). The DAO is used for saving and
+&nbsp;	 * retrieving from the database
+&nbsp;	 * 
+&nbsp;	 * @param dao - The DAO for this service
+&nbsp;	 */
+&nbsp;	public void setProgramWorkflowDAO(ProgramWorkflowDAO dao);
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PROGRAM
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save &lt;code&gt;program&lt;/code&gt; to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param program is the Program to be saved to the database
+&nbsp;	 * @return The Program that was saved
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create program workflows
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save program successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save workflows associated with program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save states associated with program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update detached program
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public Program saveProgram(Program program) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a program given that programs primary key &lt;code&gt;programId&lt;/code&gt; A null value is
+&nbsp;	 * returned if no program exists with this programId.
+&nbsp;	 * 
+&nbsp;	 * @param programId integer primary key of the program to find
+&nbsp;	 * @return Program object that has program.programId = &lt;code&gt;programId&lt;/code&gt; passed in.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return program matching the given programId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when programId does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public Program getProgram(Integer programId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a program given the program&#39;s exact &lt;code&gt;name&lt;/code&gt; A null value is returned if
+&nbsp;	 * there is no program with this name
+&nbsp;	 * 
+&nbsp;	 * @param name the exact name of the program to match on
+&nbsp;	 * @return Program matching the &lt;code&gt;name&lt;/code&gt; to Program.name
+&nbsp;	 * @throws APIException
+&nbsp;	 * @throws ProgramNameDuplicatedException when there are more than one program in the dB with
+&nbsp;	 *             the given name.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return program when name matches
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when program does not exist with given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when two programs found with same name
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public Program getProgramByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all programs, includes retired programs. This method delegates to the
+&nbsp;	 * #getAllPrograms(boolean) method
+&nbsp;	 * 
+&nbsp;	 * @return List&amp;lt;Program&amp;gt; of all existing programs, including retired programs
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public List&lt;Program&gt; getAllPrograms() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all programs
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to include retired programs
+&nbsp;	 * @return List&amp;lt;Program&amp;gt; all existing programs, including retired based on the input parameter
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all programs including retired when includeRetired equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all programs excluding retired when includeRetired equals false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public List&lt;Program&gt; getAllPrograms(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns programs that match the given string. A null list will never be returned. An empty
+&nbsp;	 * list will be returned if there are no programs matching this &lt;code&gt;nameFragment&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param nameFragment is the string used to search for programs
+&nbsp;	 * @return List&amp;lt;Program&amp;gt; - list of Programs whose name matches the input parameter
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all programs with partial name match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all programs when exact name match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when name does not match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return a null list
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return programs when nameFragment matches beginning of program name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return programs when nameFragment matches ending of program name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return programs when nameFragment matches middle of program name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return programs when nameFragment matches entire program name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return programs ordered by name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when nameFragment does not match any
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public List&lt;Program&gt; getPrograms(String nameFragment) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a program from the database (not reversible) This method delegates to
+&nbsp;	 * #purgeProgram(program, boolean) method
+&nbsp;	 * 
+&nbsp;	 * @param program the Program to clean out of the database.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete program successfully
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public void purgeProgram(Program program) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a program from the database (not reversible)
+&nbsp;	 * 
+&nbsp;	 * @param cascade &lt;code&gt;true&lt;/code&gt; to delete related content
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete program successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not delete child associations when cascade equals false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException when given cascade equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; purge program with patients enrolled
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public void purgeProgram(Program program, boolean cascade) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires the given program
+&nbsp;	 * 
+&nbsp;	 * @param program Program to be retired
+&nbsp;	 * @param reason String for retiring the program
+&nbsp;	 * @return the Program which has been retired
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire program successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire workflows associated with given program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire states associated with given program
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public Program retireProgram(Program program, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretires the given program
+&nbsp;	 * 
+&nbsp;	 * @param program Program to be unretired
+&nbsp;	 * @return the Program which has been unretired
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire program successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire workflows associated with given program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire states associated with given program
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public Program unretireProgram(Program program) throws APIException;
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PATIENT PROGRAM 
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a program by its uuid. There should be only one of these in the database. If multiple are
+&nbsp;	 * found, an error is thrown.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the universally unique identifier
+&nbsp;	 * @return the program which matches the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return program with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when multiple programs with same uuid are found
+&nbsp;	 */
+&nbsp;	public Program getProgramByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a program state by its uuid. There should be only one of these in the database. If
+&nbsp;	 * multiple are found, an error is thrown.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the universally unique identifier
+&nbsp;	 * @return the program which matches the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return program state with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when multiple program states with same uuid are found
+&nbsp;	 */
+&nbsp;	public PatientState getPatientStateByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save patientProgram to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram is the PatientProgram to be saved to the database
+&nbsp;	 * @return PatientProgram - the saved PatientProgram
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update patient program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save patient program successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient program with assigned patient program id
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_PATIENT_PROGRAMS, PrivilegeConstants.EDIT_PATIENT_PROGRAMS })
+&nbsp;	public PatientProgram savePatientProgram(PatientProgram patientProgram) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a PatientProgram given that PatientPrograms primary key &lt;code&gt;patientProgramId&lt;/code&gt;
+&nbsp;	 * A null value is returned if no PatientProgram exists with this patientProgramId.
+&nbsp;	 * 
+&nbsp;	 * @param patientProgramId integer primary key of the PatientProgram to find
+&nbsp;	 * @return PatientProgram object that has patientProgram.patientProgramId =
+&nbsp;	 *         &lt;code&gt;patientProgramId&lt;/code&gt; passed in.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient program with given patientProgramId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient program with given identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if program does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_PROGRAMS })
+&nbsp;	public PatientProgram getPatientProgram(Integer patientProgramId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns PatientPrograms that match the input parameters. If an input parameter is set to
+&nbsp;	 * null, the parameter will not be used. Calling this method will all null parameters will
+&nbsp;	 * return all PatientPrograms in the database A null list will never be returned. An empty list
+&nbsp;	 * will be returned if there are no programs matching the input criteria
+&nbsp;	 * 
+&nbsp;	 * @param patient if supplied all PatientPrograms returned will be for this Patient
+&nbsp;	 * @param program if supplied all PatientPrograms returned will be for this Program
+&nbsp;	 * @param minEnrollmentDate if supplied will limit PatientPrograms to those with enrollments on
+&nbsp;	 *            or after this Date
+&nbsp;	 * @param maxEnrollmentDate if supplied will limit PatientPrograms to those with enrollments on
+&nbsp;	 *            or before this Date
+&nbsp;	 * @param minCompletionDate if supplied will limit PatientPrograms to those completed on or
+&nbsp;	 *            after this Date OR not yet completed
+&nbsp;	 * @param maxCompletionDate if supplied will limit PatientPrograms to those completed on or
+&nbsp;	 *            before this Date
+&nbsp;	 * @param includeVoided if true, will also include voided PatientPrograms
+&nbsp;	 * @return List&amp;lt;PatientProgram&amp;gt; of PatientPrograms that match the passed input parameters
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs for given patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs for given program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with dateEnrolled on or before minEnrollmentDate
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with dateEnrolled on or after maxEnrollmentDate
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with dateCompleted on or before minCompletionDate
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with dateCompleted on or after maxCompletionDate
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with dateCompleted
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs not yet completed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return voided patient programs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all patient programs when all parameters are null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when matches not found
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_PROGRAMS })
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Patient patient, Program program, Date minEnrollmentDate,
+&nbsp;	        Date maxEnrollmentDate, Date minCompletionDate, Date maxCompletionDate, boolean includeVoided)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a patientProgram from the database (not reversible) This method delegates
+&nbsp;	 * to #purgePatientProgram(patientProgram, boolean) method
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram the PatientProgram to clean out of the database.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete patient program from database without cascade
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PATIENT_PROGRAMS })
+&nbsp;	public void purgePatientProgram(PatientProgram patientProgram) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a patientProgram from the database (not reversible)
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram the PatientProgram to clean out of the database.
+&nbsp;	 * @param cascade &lt;code&gt;true&lt;/code&gt; to delete related content
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete patient program from database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cascade delete patient program states when cascade equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not cascade delete patient program states when cascade equals false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PATIENT_PROGRAMS })
+&nbsp;	public void purgePatientProgram(PatientProgram patientProgram, boolean cascade) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids the given patientProgram
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram patientProgram to be voided
+&nbsp;	 * @param reason is the reason why the patientProgram is being voided
+&nbsp;	 * @return the voided PatientProgram
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void patient program when reason is valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when reason is empty
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_PATIENT_PROGRAMS })
+&nbsp;	public PatientProgram voidPatientProgram(PatientProgram patientProgram, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unvoids the given patientProgram
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram patientProgram to be un-voided
+&nbsp;	 * @return the voided PatientProgram
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void patient program when reason is valid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_PATIENT_PROGRAMS })
+&nbsp;	public PatientProgram unvoidPatientProgram(PatientProgram patientProgram) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all possible outcome concepts for a program. Will return all concept answers
+&nbsp;	 * {@link org.openmrs.Concept#getAnswers()} if they exist, then all concept set members
+&nbsp;	 * {@link org.openmrs.Concept#getSetMembers()} if they exist, then empty List.
+&nbsp;	 * 
+&nbsp;	 * @param programId
+&nbsp;	 * @return outcome concepts or empty List if none exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public List&lt;Concept&gt; getPossibleOutcomes(Integer programId);
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// CONCEPT STATE CONVERSION
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get {@code ProgramWorkflow} by internal identifier.
+&nbsp;	 * 
+&nbsp;	 * @param workflowId the primary key of the workflow to find, null not ok
+&nbsp;	 * @return the program workflow matching given id or null if not found
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getWorkflow(Integer workflowId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get ProgramWorkflow by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return program work flow or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getWorkflowByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save ConceptStateConversion to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param conceptStateConversion - The ConceptStateConversion to save
+&nbsp;	 * @return ConceptStateConversion - The saved ConceptStateConversion
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save state conversion
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_PATIENT_PROGRAMS, PrivilegeConstants.EDIT_PATIENT_PROGRAMS })
+&nbsp;	public ConceptStateConversion saveConceptStateConversion(ConceptStateConversion conceptStateConversion)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a conceptStateConversion given that conceptStateConversions primary key
+&nbsp;	 * &lt;code&gt;conceptStateConversionId&lt;/code&gt; A null value is returned if no conceptStateConversion
+&nbsp;	 * exists with this conceptStateConversionId.
+&nbsp;	 * 
+&nbsp;	 * @param conceptStateConversionId integer primary key of the conceptStateConversion to find
+&nbsp;	 * @return ConceptStateConversion object that has
+&nbsp;	 *         conceptStateConversion.conceptStateConversionId =
+&nbsp;	 *         &lt;code&gt;conceptStateConversionId&lt;/code&gt; passed in.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept state conversion for given identifier
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public ConceptStateConversion getConceptStateConversion(Integer conceptStateConversionId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all conceptStateConversions
+&nbsp;	 * 
+&nbsp;	 * @return List&amp;lt;ConceptStateConversion&amp;gt; of all ConceptStateConversions that exist
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all concept state conversions
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROGRAMS })
+&nbsp;	public List&lt;ConceptStateConversion&gt; getAllConceptStateConversions() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a conceptStateConversion from the database (not reversible) This method
+&nbsp;	 * delegates to #purgeConceptStateConversion(conceptStateConversion, boolean) method
+&nbsp;	 * 
+&nbsp;	 * @param conceptStateConversion the ConceptStateConversion to clean out of the database.
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public void purgeConceptStateConversion(ConceptStateConversion conceptStateConversion) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a conceptStateConversion from the database (not reversible)
+&nbsp;	 * 
+&nbsp;	 * @param conceptStateConversion the ConceptStateConversion to clean out of the database.
+&nbsp;	 * @param cascade &lt;code&gt;true&lt;/code&gt; to delete related content
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cascade delete given concept state conversion when given cascade is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not cascade delete given concept state conversion when given cascade is false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROGRAMS })
+&nbsp;	public void purgeConceptStateConversion(ConceptStateConversion conceptStateConversion, boolean cascade)
+&nbsp;	        throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Retrieves the ConceptStateConversion that matches the passed &lt;code&gt;ProgramWorkflow&lt;/code&gt; and
+&nbsp;	 * &lt;code&gt;Concept&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param workflow - the ProgramWorkflow to check
+&nbsp;	 * @param trigger - the Concept to check
+&nbsp;	 * @return ConceptStateConversion that matches the passed &lt;code&gt;ProgramWorkflow&lt;/code&gt; and
+&nbsp;	 *         &lt;code&gt;Concept&lt;/code&gt;
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept state conversion for given workflow and trigger
+&nbsp;	 */
+&nbsp;	public ConceptStateConversion getConceptStateConversion(ProgramWorkflow workflow, Concept trigger) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get {@code ProgramWorkflowState} by internal identifier.
+&nbsp;	 * 
+&nbsp;	 * @param stateId the primary key of the state to find, null not ok
+&nbsp;	 * @return the program workflow state matching given id or null if not found
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getState(Integer stateId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a state by its uuid. There should be only one of these in the database. If multiple are
+&nbsp;	 * found, an error is thrown.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the universally unique identifier
+&nbsp;	 * @return the program workflow state which matches the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a state with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when multiple states with same uuid are found
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getStateByUuid(String uuid);
+&nbsp;					
+&nbsp;	/**
+&nbsp;	 * Get a patient program by its uuid. There should be only one of these in the database. If
+&nbsp;	 * multiple are found, an error is thrown.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the universally unique identifier
+&nbsp;	 * @return the patient program which matches the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a patient program with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when multiple patient programs with same uuid are found
+&nbsp;	 */
+&nbsp;	public PatientProgram getPatientProgramByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * 
+&nbsp;	 * @param cohort
+&nbsp;	 * @param programs
+&nbsp;	 * @return List&amp;lt;PatientProgram&amp;gt; for all Patients in the given Cohort that are in the given
+&nbsp;	 *         programs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with patients in given cohort and programs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with patients in given cohort
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient programs with programs in given programs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when there is no match for given cohort and programs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null when there is no match for given cohort and program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw NullPointerException when given cohort and programs are null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when given cohort is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when given program is empty
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_PROGRAMS })
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Cohort cohort, Collection&lt;Program&gt; programs);
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Returns a list of Programs that are using a particular concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept - The Concept being used.
+&nbsp;	 * @return - A List of Programs
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_PROGRAMS })
+&nbsp;	public List&lt;Program&gt; getProgramsByConcept(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of ProgramWorkflows that are using a particular concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept - The Concept being used.
+&nbsp;	 * @return - A List of ProgramWorkflows
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_PROGRAMS })
+&nbsp;	public List&lt;ProgramWorkflow&gt; getProgramWorkflowsByConcept(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of ProgramWorkflowStates that are using a particular concept.
+&nbsp;	 * 
+&nbsp;	 * @param concept - The Concept being used.
+&nbsp;	 * @return - A List of ProgramWorkflowStates
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_PROGRAMS })
+&nbsp;	public List&lt;ProgramWorkflowState&gt; getProgramWorkflowStatesByConcept(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a concept state conversion by its uuid. There should be only one of these in the
+&nbsp;	 * database. If multiple are found, an error is thrown.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the universally unique identifier
+&nbsp;	 * @return the concept state conversion which matches the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a program state with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when multiple program states with same uuid are found
+&nbsp;	 */
+&nbsp;	public ConceptStateConversion getConceptStateConversionByUuid(String uuid);
+&nbsp;
+&nbsp;        @Transactional(readOnly = true)
+&nbsp;        @Authorized({&quot;Get Patient Program Attribute Types&quot;})
+&nbsp;        public List&lt;ProgramAttributeType&gt; getAllProgramAttributeTypes();
+&nbsp;
+&nbsp;        @Transactional(readOnly = true)
+&nbsp;        @Authorized({&quot;Get Patient Program Attribute Types&quot;})
+&nbsp;        public ProgramAttributeType getProgramAttributeType(Integer var1);
+&nbsp;
+&nbsp;        @Transactional(readOnly = true)
+&nbsp;        @Authorized({&quot;Get Patient Program Attribute Types&quot;})
+&nbsp;        public ProgramAttributeType getProgramAttributeTypeByUuid(String var1);
+&nbsp;
+&nbsp;        @Authorized({&quot;Manage Patient Program Attribute Types&quot;})
+&nbsp;        public ProgramAttributeType saveProgramAttributeType(ProgramAttributeType var1);
+&nbsp;
+&nbsp;        @Authorized({&quot;Purge Patient Program Attribute Types&quot;})
+&nbsp;        public void purgeProgramAttributeType(ProgramAttributeType var1);
+&nbsp;
+&nbsp;        @Transactional(readOnly = true)
+&nbsp;        @Authorized({&quot;Get Patient Programs&quot;})
+&nbsp;        public PatientProgramAttribute getPatientProgramAttributeByUuid(String var1);
+&nbsp;
+&nbsp;        public Map&lt;Object, Object&gt; getPatientProgramAttributeByAttributeName(List&lt;Integer&gt; patients, String attributeName);
+&nbsp;
+&nbsp;        @Transactional(readOnly = true)
+&nbsp;        @Authorized({&quot;Get Patient Programs&quot;})
+&nbsp;        public List&lt;PatientProgram&gt; getPatientProgramByAttributeNameAndValue(String attributeName, String attributeValue);       
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,742 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProgramWorkflowServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ProgramWorkflowServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProgramWorkflowServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,3%
+  </span>
+  <span class="absValue">
+    (44/51)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,6%
+  </span>
+  <span class="absValue">
+    (138/165)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptAnswer;
+&nbsp;import org.openmrs.ConceptStateConversion;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.PatientProgramAttribute;
+&nbsp;import org.openmrs.PatientState;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramAttributeType;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.ProgramWorkflowState;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.ProgramNameDuplicatedException;
+&nbsp;import org.openmrs.api.ProgramWorkflowService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.ProgramWorkflowDAO;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default implementation of the ProgramWorkflow-related services class. This method should not be
+&nbsp; * invoked by itself. Spring injection is used to inject this implementation into the
+&nbsp; * ServiceContext. Which implementation is injected is determined by the spring application context
+&nbsp; * file: /metadata/api/spring/applicationContext.xml
+&nbsp; *
+&nbsp; * @see org.openmrs.api.ProgramWorkflowService
+&nbsp; */
+&nbsp;@Transactional
+&nbsp;public class ProgramWorkflowServiceImpl extends BaseOpenmrsService implements ProgramWorkflowService {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ProgramWorkflowServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	protected ProgramWorkflowDAO dao;
+&nbsp;        
+<b class="fc">&nbsp;	public ProgramWorkflowServiceImpl() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#setProgramWorkflowDAO(org.openmrs.api.db.ProgramWorkflowDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setProgramWorkflowDAO(ProgramWorkflowDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PROGRAM
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#saveProgram(org.openmrs.Program)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Program saveProgram(Program program) throws APIException {
+&nbsp;		// Program
+<b class="fc">&nbsp;		if (program.getConcept() == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Program.concept.required&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (ProgramWorkflow workflow : program.getAllWorkflows()) {</b>
+<b class="fc">&nbsp;			if (workflow.getConcept() == null) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;ProgramWorkflow.concept.required&quot;, (Object[]) null);</b>
+&nbsp;			}			
+<b class="fc">&nbsp;			ensureProgramIsSet(workflow, program);						</b>
+<b class="fc">&nbsp;			for (ProgramWorkflowState state : workflow.getStates()) {</b>
+<b class="fc">&nbsp;				if (state.getConcept() == null || state.getInitial() == null || state.getTerminal() == null) {</b>
+<b class="fc">&nbsp;					throw new APIException(&quot;ProgramWorkflowState.requires&quot;, (Object[]) null);</b>
+&nbsp;				}				
+&nbsp;
+<b class="fc">&nbsp;				ensureProgramWorkflowIsSet(state, workflow);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return dao.saveProgram(program);</b>
+&nbsp;	}
+&nbsp;	 
+&nbsp;	private void ensureProgramIsSet(ProgramWorkflow workflow, Program program) {		
+<b class="fc">&nbsp;		if (workflow.getProgram() == null) {</b>
+<b class="nc">&nbsp;			workflow.setProgram(program);</b>
+<b class="fc">&nbsp;		} else if (!workflow.getProgram().equals(program)) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Program.error.contains.ProgramWorkflow&quot;, new Object[] { workflow.getProgram() });</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void ensureProgramWorkflowIsSet(ProgramWorkflowState state, ProgramWorkflow workflow) {
+<b class="fc">&nbsp;		if (state.getProgramWorkflow() == null) {</b>
+<b class="nc">&nbsp;			state.setProgramWorkflow(workflow);</b>
+<b class="fc">&nbsp;		} else if (!state.getProgramWorkflow().equals(workflow)) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;ProgramWorkflow.error.contains.state&quot;, new Object[] { workflow.getProgram() });</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgram(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Program getProgram(Integer id) {
+<b class="fc">&nbsp;		return dao.getProgram(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgram(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Program getProgram(String name) {
+<b class="nc">&nbsp;		return Context.getProgramWorkflowService().getProgramByName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgram(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Program getProgramByName(String name) throws APIException {
+<b class="fc">&nbsp;		List&lt;Program&gt; programs = dao.getProgramsByName(name, false);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (programs.isEmpty()) {</b>
+<b class="fc">&nbsp;			programs = dao.getProgramsByName(name, true);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//Must be unique not retired or unique retired
+<b class="fc">&nbsp;		if (programs.size() &gt; 1) {</b>
+<b class="fc">&nbsp;			throw new ProgramNameDuplicatedException(name);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return programs.isEmpty() ? null : programs.get(0);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getAllPrograms()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Program&gt; getAllPrograms() throws APIException {
+<b class="fc">&nbsp;		return Context.getProgramWorkflowService().getAllPrograms(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getAllPrograms(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Program&gt; getAllPrograms(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllPrograms(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getPrograms(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Program&gt; getPrograms(String nameFragment) throws APIException {
+<b class="fc">&nbsp;		return dao.findPrograms(nameFragment);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#purgeProgram(org.openmrs.Program)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeProgram(Program program) throws APIException {
+<b class="fc">&nbsp;		Context.getProgramWorkflowService().purgeProgram(program, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#purgeProgram(org.openmrs.Program, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeProgram(Program program, boolean cascade) throws APIException {
+<b class="fc">&nbsp;		if (cascade &amp;&amp; !program.getAllWorkflows().isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Program.cascade.purging.not.implemented&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		for (PatientProgram patientProgram : Context.getProgramWorkflowService().getPatientPrograms(null, program, null,</b>
+&nbsp;		    null, null, null, true)) {
+<b class="fc">&nbsp;			purgePatientProgram(patientProgram);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		dao.deleteProgram(program);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#retireProgram(org.openmrs.Program, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Program retireProgram(Program program, String reason) throws APIException {
+&nbsp;		//program.setRetired(true); - Note the BaseRetireHandler aspect is already setting the retired flag and reason
+<b class="fc">&nbsp;		for (ProgramWorkflow workflow : program.getWorkflows()) {</b>
+<b class="fc">&nbsp;			workflow.setRetired(true);</b>
+<b class="fc">&nbsp;			for (ProgramWorkflowState state : workflow.getStates()) {</b>
+<b class="fc">&nbsp;				state.setRetired(true);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return saveProgram(program);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#unretireProgram(org.openmrs.Program)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Program unretireProgram(Program program) throws APIException {
+<b class="fc">&nbsp;		Date lastModifiedDate = program.getDateChanged();</b>
+<b class="fc">&nbsp;		program.setRetired(false);</b>
+<b class="fc">&nbsp;		for (ProgramWorkflow workflow : program.getAllWorkflows()) {</b>
+<b class="nc">&nbsp;			if (lastModifiedDate != null &amp;&amp; lastModifiedDate.equals(workflow.getDateChanged())) {</b>
+<b class="nc">&nbsp;				workflow.setRetired(false);</b>
+<b class="nc">&nbsp;				for (ProgramWorkflowState state : workflow.getStates()) {</b>
+<b class="nc">&nbsp;					if (lastModifiedDate.equals(state.getDateChanged())) {</b>
+<b class="nc">&nbsp;						state.setRetired(false);</b>
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return saveProgram(program);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PATIENT PROGRAM 
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#savePatientProgram(org.openmrs.PatientProgram)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientProgram savePatientProgram(PatientProgram patientProgram) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patientProgram.getPatient() == null || patientProgram.getProgram() == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;PatientProgram.requires&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Patient State
+<b class="fc">&nbsp;		for (PatientState state : patientProgram.getStates()) {</b>
+<b class="fc">&nbsp;			if (state.getState() == null) {</b>
+<b class="nc">&nbsp;				throw new APIException(&quot;PatientState.requires&quot;, (Object[]) null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (state.getPatientProgram() == null) {</b>
+<b class="fc">&nbsp;				state.setPatientProgram(patientProgram);</b>
+<b class="fc">&nbsp;			} else if (!state.getPatientProgram().equals(patientProgram)) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;PatientProgram.already.assigned&quot;, new Object[] { state.getPatientProgram() });</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (patientProgram.getVoided() || state.getVoided()) {</b>
+<b class="fc">&nbsp;				state.setVoided(true);</b>
+<b class="fc">&nbsp;				if (state.getVoidReason() == null &amp;&amp; patientProgram.getVoidReason() != null) {</b>
+<b class="fc">&nbsp;					state.setVoidReason(patientProgram.getVoidReason());</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		// Makes sure that the end dates of most recent states in each workflow
+&nbsp;		// and the program end date are consistent
+<b class="fc">&nbsp;		if (patientProgram.getDateCompleted() != null) {</b>
+<b class="fc">&nbsp;			for (PatientState state : patientProgram.getMostRecentStateInEachWorkflow()) {</b>
+&nbsp;				// The EndDate of active states only should be updated
+<b class="fc">&nbsp;				if (state.getEndDate() == null) {</b>
+<b class="fc">&nbsp;					state.setEndDate(patientProgram.getDateCompleted());</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return dao.savePatientProgram(patientProgram);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getPatientProgram(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientProgram getPatientProgram(Integer patientProgramId) {
+<b class="fc">&nbsp;		return dao.getPatientProgram(patientProgramId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getPatientPrograms(Patient, Program, Date, Date,
+&nbsp;	 *      Date, Date, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Patient patient, Program program, Date minEnrollmentDate,
+&nbsp;	        Date maxEnrollmentDate, Date minCompletionDate, Date maxCompletionDate, boolean includeVoided)
+&nbsp;	                throws APIException {
+<b class="fc">&nbsp;		return dao.getPatientPrograms(patient, program, minEnrollmentDate, maxEnrollmentDate, minCompletionDate,</b>
+&nbsp;		    maxCompletionDate, includeVoided);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getPatientPrograms(Cohort, Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Cohort cohort, Collection&lt;Program&gt; programs) {
+<b class="nc">&nbsp;		if (cohort.getMemberIds().isEmpty()) {</b>
+<b class="nc">&nbsp;			return dao.getPatientPrograms(null, programs);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return dao.getPatientPrograms(cohort, programs);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#purgePatientProgram(org.openmrs.PatientProgram)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePatientProgram(PatientProgram patientProgram) throws APIException {
+<b class="fc">&nbsp;		Context.getProgramWorkflowService().purgePatientProgram(patientProgram, false);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#purgePatientProgram(org.openmrs.PatientProgram,
+&nbsp;	 *      boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePatientProgram(PatientProgram patientProgram, boolean cascade) throws APIException {
+<b class="fc">&nbsp;		if (cascade &amp;&amp; !patientProgram.getStates().isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;PatientProgram.cascade.purging.not.implemented&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		dao.deletePatientProgram(patientProgram);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#voidPatientProgram(org.openmrs.PatientProgram,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientProgram voidPatientProgram(PatientProgram patientProgram, String reason) {
+<b class="fc">&nbsp;		patientProgram.setVoided(true);</b>
+<b class="fc">&nbsp;		patientProgram.setVoidReason(reason);</b>
+<b class="fc">&nbsp;		return Context.getProgramWorkflowService().savePatientProgram(patientProgram); // The savePatientProgram method handles all of the voiding defaults and cascades</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#voidPatientProgram(org.openmrs.PatientProgram,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientProgram unvoidPatientProgram(PatientProgram patientProgram) {
+<b class="fc">&nbsp;		Date voidDate = patientProgram.getDateVoided();</b>
+<b class="fc">&nbsp;		patientProgram.setVoided(false);</b>
+<b class="fc">&nbsp;		for (PatientState state : patientProgram.getStates()) {</b>
+<b class="fc">&nbsp;			if (voidDate != null &amp;&amp; voidDate.equals(state.getDateVoided())) {</b>
+<b class="nc">&nbsp;				state.setVoided(false);</b>
+<b class="nc">&nbsp;				state.setVoidedBy(null);</b>
+<b class="nc">&nbsp;				state.setDateVoided(null);</b>
+<b class="nc">&nbsp;				state.setVoidReason(null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return Context.getProgramWorkflowService().savePatientProgram(patientProgram); // The savePatientProgram method handles all of the unvoiding defaults</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getPossibleOutcomes(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getPossibleOutcomes(Integer programId) {
+<b class="fc">&nbsp;		List&lt;Concept&gt; possibleOutcomes = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		Program program = Context.getProgramWorkflowService().getProgram(programId);</b>
+<b class="fc">&nbsp;		if (program == null) {</b>
+<b class="fc">&nbsp;			return possibleOutcomes;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Concept outcomesConcept = program.getOutcomesConcept();</b>
+<b class="fc">&nbsp;		if (outcomesConcept == null) {</b>
+<b class="fc">&nbsp;			return possibleOutcomes;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!outcomesConcept.getAnswers().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (ConceptAnswer conceptAnswer : outcomesConcept.getAnswers()) {</b>
+<b class="fc">&nbsp;				possibleOutcomes.add(conceptAnswer.getAnswerConcept());</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			return possibleOutcomes;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!outcomesConcept.getSetMembers().isEmpty()) {</b>
+<b class="fc">&nbsp;			return outcomesConcept.getSetMembers();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return possibleOutcomes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// CONCEPT STATE CONVERSION 
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#saveConceptStateConversion(org.openmrs.ConceptStateConversion)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptStateConversion saveConceptStateConversion(ConceptStateConversion csc) throws APIException {
+<b class="fc">&nbsp;		if (csc.getConcept() == null || csc.getProgramWorkflow() == null || csc.getProgramWorkflowState() == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;ConceptStateConversion.requires&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.saveConceptStateConversion(csc);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getConceptStateConversion(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptStateConversion getConceptStateConversion(Integer id) {
+<b class="fc">&nbsp;		return dao.getConceptStateConversion(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getAllConceptStateConversions()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptStateConversion&gt; getAllConceptStateConversions() throws APIException {
+<b class="fc">&nbsp;		return dao.getAllConceptStateConversions();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#purgeConceptStateConversion(org.openmrs.ConceptStateConversion)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptStateConversion(ConceptStateConversion conceptStateConversion) throws APIException {
+<b class="nc">&nbsp;		Context.getProgramWorkflowService().purgeConceptStateConversion(conceptStateConversion, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#purgeConceptStateConversion(org.openmrs.ConceptStateConversion,
+&nbsp;	 *      boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptStateConversion(ConceptStateConversion conceptStateConversion, boolean cascade)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		dao.deleteConceptStateConversion(conceptStateConversion);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#triggerStateConversion(org.openmrs.Patient,
+&nbsp;	 *      org.openmrs.Concept, java.util.Date)
+&nbsp;	 */
+&nbsp;	public void triggerStateConversion(Patient patient, Concept trigger, Date dateConverted) {
+&nbsp;		
+&nbsp;		// Check input parameters
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;convert.state.invalid.patient&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (trigger == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;convert.state.patient.without.valid.trigger&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (dateConverted == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;convert.state.invalid.date&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (PatientProgram patientProgram : getPatientPrograms(patient, null, null, null, null, null, false)) {</b>
+&nbsp;			//skip past patient programs that already completed
+<b class="fc">&nbsp;			if (patientProgram.getDateCompleted() == null) {</b>
+<b class="fc">&nbsp;				Set&lt;ProgramWorkflow&gt; workflows = patientProgram.getProgram().getWorkflows();</b>
+<b class="fc">&nbsp;				for (ProgramWorkflow workflow : workflows) {</b>
+&nbsp;					// (getWorkflows() is only returning over nonretired workflows)
+<b class="fc">&nbsp;					PatientState patientState = patientProgram.getCurrentState(workflow);</b>
+&nbsp;					
+&nbsp;					// #1080 cannot exit patient from care  
+&nbsp;					// Should allow a transition from a null state to a terminal state
+&nbsp;					// Or we should require a user to ALWAYS add an initial workflow/state when a patient is added to a program
+<b class="fc">&nbsp;					ProgramWorkflowState currentState = (patientState != null) ? patientState.getState() : null;</b>
+<b class="fc">&nbsp;					ProgramWorkflowState transitionState = workflow.getState(trigger);</b>
+&nbsp;					
+<b class="fc">&nbsp;					log.debug(&quot;Transitioning from current state [&quot; + currentState + &quot;]&quot;);</b>
+<b class="fc">&nbsp;					log.debug(&quot;|---&gt; Transitioning to final state [&quot; + transitionState + &quot;]&quot;);</b>
+&nbsp;					
+<b class="fc">&nbsp;					if (transitionState != null &amp;&amp; workflow.isLegalTransition(currentState, transitionState)) {</b>
+<b class="fc">&nbsp;						patientProgram.transitionToState(transitionState, dateConverted);</b>
+<b class="fc">&nbsp;						log.debug(&quot;State Conversion Triggered: patientProgram=&quot; + patientProgram + &quot; transition from &quot;</b>
+&nbsp;						        + currentState + &quot; to &quot; + transitionState + &quot; on &quot; + dateConverted);
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// #1068 - Exiting a patient from care causes &quot;not-null property references
+&nbsp;				// a null or transient value: org.openmrs.PatientState.dateCreated&quot;. Explicitly
+&nbsp;				// calling the savePatientProgram() method will populate the metadata properties.
+&nbsp;				// 
+&nbsp;				// #1067 - We should explicitly save the patient program rather than let 
+&nbsp;				// Hibernate do so when it flushes the session.
+<b class="fc">&nbsp;				Context.getProgramWorkflowService().savePatientProgram(patientProgram);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getConceptStateConversion(org.openmrs.ProgramWorkflow,
+&nbsp;	 *      org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptStateConversion getConceptStateConversion(ProgramWorkflow workflow, Concept trigger) {
+<b class="nc">&nbsp;		return dao.getConceptStateConversion(workflow, trigger);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgramsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Program&gt; getProgramsByConcept(Concept concept) {
+<b class="fc">&nbsp;		return dao.getProgramsByConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgramWorkflowsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ProgramWorkflow&gt; getProgramWorkflowsByConcept(Concept concept) {
+<b class="fc">&nbsp;		return dao.getProgramWorkflowsByConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgramWorkflowStatesByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ProgramWorkflowState&gt; getProgramWorkflowStatesByConcept(Concept concept) {
+<b class="fc">&nbsp;		return dao.getProgramWorkflowStatesByConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getConceptStateConversionByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptStateConversion getConceptStateConversionByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptStateConversionByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getPatientProgramByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientProgram getPatientProgramByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getPatientProgramByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getProgramByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Program getProgramByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getProgramByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getWorkflow(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProgramWorkflowState getState(Integer stateId) {
+<b class="fc">&nbsp;		return dao.getState(stateId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getStateByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProgramWorkflowState getStateByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getStateByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientState getPatientStateByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getPatientStateByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getWorkflow(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProgramWorkflow getWorkflow(Integer workflowId) {
+<b class="fc">&nbsp;		return dao.getWorkflow(workflowId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProgramWorkflowService#getWorkflowByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProgramWorkflow getWorkflowByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getWorkflowByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;        
+&nbsp;        @Override
+&nbsp;        public List&lt;ProgramAttributeType&gt; getAllProgramAttributeTypes() {
+<b class="fc">&nbsp;            return dao.getAllProgramAttributeTypes();</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public ProgramAttributeType getProgramAttributeType(Integer id) {
+<b class="fc">&nbsp;            return dao.getProgramAttributeType(id);</b>
+&nbsp;        }
+&nbsp;        
+&nbsp;        @Override
+&nbsp;        public ProgramAttributeType getProgramAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;            return dao.getProgramAttributeTypeByUuid(uuid);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public ProgramAttributeType saveProgramAttributeType(ProgramAttributeType type) {
+<b class="fc">&nbsp;            return dao.saveProgramAttributeType(type);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public void purgeProgramAttributeType(ProgramAttributeType type) {
+<b class="fc">&nbsp;            dao.purgeProgramAttributeType(type);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public PatientProgramAttribute getPatientProgramAttributeByUuid(String uuid) {
+<b class="nc">&nbsp;            return dao.getPatientProgramAttributeByUuid(uuid);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public Map&lt;Object, Object&gt; getPatientProgramAttributeByAttributeName(List&lt;Integer&gt; patients, String attributeName){
+<b class="nc">&nbsp;            return dao.getPatientProgramAttributeByAttributeName(patients, attributeName);</b>
+&nbsp;        }
+&nbsp;        @Override
+&nbsp;        public List&lt;PatientProgram&gt; getPatientProgramByAttributeNameAndValue(String attributeName, String attributeValue) {
+<b class="nc">&nbsp;            return dao.getPatientProgramByAttributeNameAndValue(attributeName, attributeValue);</b>
+&nbsp;        }	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

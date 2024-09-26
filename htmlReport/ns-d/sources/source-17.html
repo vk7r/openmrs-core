@@ -1,0 +1,524 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VisitServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: VisitServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VisitServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (37/37)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95%
+  </span>
+  <span class="absValue">
+    (76/80)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.ArrayUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.VisitAttribute;
+&nbsp;import org.openmrs.VisitAttributeType;
+&nbsp;import org.openmrs.VisitType;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.VisitService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.VisitDAO;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;import org.openmrs.parameter.VisitSearchCriteria;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.openmrs.validator.ValidateUtil;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default implementation of the {@link VisitService}. This class should not be used on its own. The
+&nbsp; * current OpenMRS implementation should be fetched from the Context.
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class VisitServiceImpl extends BaseOpenmrsService implements VisitService {</b>
+&nbsp;	
+&nbsp;	private VisitDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Method used to inject the visit data access object.
+&nbsp;	 *
+&nbsp;	 * @param dao the visit data access object.
+&nbsp;	 */
+&nbsp;	public void setVisitDAO(VisitDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public VisitDAO getVisitDAO() {
+<b class="fc">&nbsp;		return dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getAllVisitTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;VisitType&gt; getAllVisitTypes() {
+<b class="fc">&nbsp;		return getVisitDAO().getAllVisitTypes();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getAllVisitTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;VisitType&gt; getAllVisitTypes(boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getAllVisitTypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public VisitType getVisitType(Integer visitTypeId) {
+<b class="fc">&nbsp;		return getVisitDAO().getVisitType(visitTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public VisitType getVisitTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return getVisitDAO().getVisitTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitTypes(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;VisitType&gt; getVisitTypes(String fuzzySearchPhrase) {
+<b class="fc">&nbsp;		return getVisitDAO().getVisitTypes(fuzzySearchPhrase);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#saveVisitType(org.openmrs.VisitType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public VisitType saveVisitType(VisitType visitType) throws APIException {
+<b class="fc">&nbsp;		ValidateUtil.validate(visitType);</b>
+<b class="fc">&nbsp;		return getVisitDAO().saveVisitType(visitType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#retireVisitType(org.openmrs.VisitType, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public VisitType retireVisitType(VisitType visitType, String reason) {
+<b class="fc">&nbsp;		return Context.getVisitService().saveVisitType(visitType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#unretireVisitType(org.openmrs.VisitType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public VisitType unretireVisitType(VisitType visitType) {
+<b class="fc">&nbsp;		return Context.getVisitService().saveVisitType(visitType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#purgeVisitType(org.openmrs.VisitType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeVisitType(VisitType visitType) {
+<b class="fc">&nbsp;		getVisitDAO().purgeVisitType(visitType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getAllVisits()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Visit&gt; getAllVisits() throws APIException {
+<b class="fc">&nbsp;		return dao.getVisits(null, null, null, null, null, null, null, null, null, true, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisit(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Visit getVisit(Integer visitId) throws APIException {
+<b class="fc">&nbsp;		return dao.getVisit(visitId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Visit getVisitByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getVisitByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#saveVisit(org.openmrs.Visit)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Visit saveVisit(Visit visit) throws APIException {
+<b class="fc">&nbsp;		if (visit.getVisitId() == null) {</b>
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.ADD_VISITS);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.EDIT_VISITS);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		CustomDatatypeUtil.saveAttributesIfNecessary(visit);</b>
+<b class="fc">&nbsp;		return dao.saveVisit(visit);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#endVisit(org.openmrs.Visit, java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Visit endVisit(Visit visit, Date stopDate) {
+<b class="fc">&nbsp;		if (stopDate == null) {</b>
+<b class="fc">&nbsp;			stopDate = new Date();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		visit.setStopDatetime(stopDate);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getVisitService().saveVisit(visit);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#voidVisit(org.openmrs.Visit, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Visit voidVisit(Visit visit, String reason) throws APIException {
+<b class="fc">&nbsp;		return dao.saveVisit(visit);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#unvoidVisit(org.openmrs.Visit)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Visit unvoidVisit(Visit visit) throws APIException {
+<b class="fc">&nbsp;		return Context.getVisitService().saveVisit(visit);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#purgeVisit(org.openmrs.Visit)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeVisit(Visit visit) throws APIException {
+<b class="fc">&nbsp;		if (visit.getVisitId() == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		if (!Context.getEncounterService().getEncountersByVisit(visit, true).isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Visit.purge.inUse&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		dao.deleteVisit(visit);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisits(Collection, Collection, Collection, Collection, Date, Date, Date, Date, Map, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Visit&gt; getVisits(Collection&lt;VisitType&gt; visitTypes, Collection&lt;Patient&gt; patients,
+&nbsp;	        Collection&lt;Location&gt; locations, Collection&lt;Concept&gt; indications, Date minStartDatetime, Date maxStartDatetime,
+&nbsp;	        Date minEndDatetime, Date maxEndDatetime, Map&lt;VisitAttributeType, Object&gt; attributeValues,
+&nbsp;	        boolean includeInactive, boolean includeVoided) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		Map&lt;VisitAttributeType, String&gt; serializedAttributeValues = CustomDatatypeUtil.getValueReferences(attributeValues);</b>
+<b class="fc">&nbsp;		return dao.getVisits(visitTypes, patients, locations, indications, minStartDatetime, maxStartDatetime,</b>
+&nbsp;		    minEndDatetime, maxEndDatetime, serializedAttributeValues, includeInactive, includeVoided);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisits(VisitSearchCriteria)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Visit&gt; getVisits(VisitSearchCriteria visitSearchCriteria) throws APIException {
+<b class="fc">&nbsp;		return dao.getVisits(visitSearchCriteria);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitsByPatient(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Visit&gt; getVisitsByPatient(Patient patient) throws APIException {
+&nbsp;		//Don&#39;t bother to hit the database
+<b class="fc">&nbsp;		if (patient == null || patient.getId() == null) {</b>
+<b class="fc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getVisitService().getVisits(null, Collections.singletonList(patient), null, null, null, null, null,</b>
+&nbsp;		    null, null, true, false);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getActiveVisitsByPatient(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Visit&gt; getActiveVisitsByPatient(Patient patient) throws APIException {
+<b class="fc">&nbsp;		return Context.getVisitService().getVisitsByPatient(patient, false, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitsByPatient(org.openmrs.Patient, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Visit&gt; getVisitsByPatient(Patient patient, boolean includeInactive, boolean includeVoided)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		if (patient == null || patient.getId() == null) {</b>
+<b class="fc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getVisits(null, Collections.singletonList(patient), null, null, null, null, null, null, null,</b>
+&nbsp;		    includeInactive, includeVoided);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getAllVisitAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;VisitAttributeType&gt; getAllVisitAttributeTypes() {
+<b class="fc">&nbsp;		return dao.getAllVisitAttributeTypes();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitAttributeType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public VisitAttributeType getVisitAttributeType(Integer id) {
+<b class="fc">&nbsp;		return dao.getVisitAttributeType(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitAttributeTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public VisitAttributeType getVisitAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getVisitAttributeTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#saveVisitAttributeType(org.openmrs.VisitAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public VisitAttributeType saveVisitAttributeType(VisitAttributeType visitAttributeType) {
+<b class="fc">&nbsp;		return dao.saveVisitAttributeType(visitAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#retireVisitAttributeType(org.openmrs.VisitAttributeType,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public VisitAttributeType retireVisitAttributeType(VisitAttributeType visitAttributeType, String reason) {
+<b class="fc">&nbsp;		return dao.saveVisitAttributeType(visitAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#unretireVisitAttributeType(org.openmrs.VisitAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public VisitAttributeType unretireVisitAttributeType(VisitAttributeType visitAttributeType) {
+<b class="fc">&nbsp;		return Context.getVisitService().saveVisitAttributeType(visitAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#purgeVisitAttributeType(org.openmrs.VisitAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeVisitAttributeType(VisitAttributeType visitAttributeType) {
+<b class="fc">&nbsp;		dao.deleteVisitAttributeType(visitAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitAttributeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public VisitAttribute getVisitAttributeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getVisitAttributeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#stopVisits(Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void stopVisits(Date maximumStartDate) {
+&nbsp;		
+<b class="fc">&nbsp;		final List&lt;VisitType&gt; visitTypesToStop = getVisitTypesToStop();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (maximumStartDate == null) {</b>
+<b class="fc">&nbsp;			maximumStartDate = new Date();</b>
+&nbsp;		}
+&nbsp;			
+<b class="fc">&nbsp;		if (visitTypesToStop.isEmpty()) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		int counter = 0;</b>
+<b class="fc">&nbsp;		Date stopDate = new Date();</b>
+<b class="fc">&nbsp;		Visit nextVisit = dao.getNextVisit(null, visitTypesToStop, maximumStartDate);</b>
+<b class="fc">&nbsp;		while (nextVisit != null) {</b>
+<b class="fc">&nbsp;			nextVisit.setStopDatetime(stopDate);</b>
+<b class="fc">&nbsp;			dao.saveVisit(nextVisit);</b>
+<b class="fc">&nbsp;			if (counter++ &gt; 50) {</b>
+&nbsp;				//ensure changes are persisted to DB before reclaiming memory
+<b class="nc">&nbsp;				Context.flushSession();</b>
+<b class="nc">&nbsp;				Context.clearSession();</b>
+<b class="nc">&nbsp;				counter = 0;</b>
+&nbsp;			}
+&nbsp;					
+<b class="fc">&nbsp;		nextVisit = dao.getNextVisit(nextVisit, visitTypesToStop, maximumStartDate);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;VisitType&gt; getVisitTypesToStop() {
+<b class="fc">&nbsp;		String gpValue = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GP_VISIT_TYPES_TO_AUTO_CLOSE);</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(gpValue)) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			String[] visitTypeNames = getVisitTypeNamesFromGlobalPropertyValue(gpValue);</b>
+<b class="fc">&nbsp;			return getVisitTypesFromVisitTypeNames(visitTypeNames);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private String[] getVisitTypeNamesFromGlobalPropertyValue(String commaSeparatedNames) {
+<b class="fc">&nbsp;		String[] result = StringUtils.split(commaSeparatedNames.trim(), &quot;,&quot;);</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; result.length; i++) {</b>
+<b class="fc">&nbsp;			String currName = result[i];</b>
+<b class="fc">&nbsp;			result[i] = currName.trim().toLowerCase();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;VisitType&gt; getVisitTypesFromVisitTypeNames(String[] visitTypeNames) {
+<b class="fc">&nbsp;		List&lt;VisitType&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (VisitType visitType : Context.getVisitService().getAllVisitTypes()) {</b>
+<b class="fc">&nbsp;			if (ArrayUtils.contains(visitTypeNames, visitType.getName().toLowerCase())) {</b>
+<b class="fc">&nbsp;				result.add(visitType);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

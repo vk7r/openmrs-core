@@ -1,0 +1,1125 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Order</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Order (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Order</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,3%
+  </span>
+  <span class="absValue">
+    (70/75)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,5%
+  </span>
+  <span class="absValue">
+    (164/170)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Order$Action</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Order$FulfillerStatus</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Order$HibernateProxy$nHoiENL1</td>
+  </tr>
+  <tr>
+    <td class="name">Order$Urgency</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    93,8%
+  </span>
+  <span class="absValue">
+    (76/81)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,8%
+  </span>
+  <span class="absValue">
+    (180/186)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.db.hibernate.HibernateUtil;
+&nbsp;import org.openmrs.order.OrderUtil;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * Encapsulates information about the clinical action of a provider requesting something for a
+&nbsp; * patient e.g requesting a test to be performed, prescribing a medication, requesting the patient
+&nbsp; * to enroll on a specific diet etc. There is the notion of effective dates, these are used to
+&nbsp; * determine the span of an order&#39;s schedule i.e its effective start and stop dates therefore dates
+&nbsp; * should be interpreted as follows: The effective start of the schedule is the scheduledDate if
+&nbsp; * urgency is set to ON_SCHEDULED_DATE otherwise it is the dateActivated; the effective end date is
+&nbsp; * dateStopped, if it is null then it is the autoExpireDate. For DrugOrders, if the autoExpireDate
+&nbsp; * is not specified then it will be calculated and set by the API based on the duration and
+&nbsp; * frequency, note that frequency is only used in case duration is specified as a recurring interval
+&nbsp; * e.g. 3 times.
+&nbsp; * 
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Order extends BaseCustomizableData&lt;OrderAttribute&gt; implements FormRecordable {
+&nbsp;
+&nbsp;	public static final long serialVersionUID = 4334343L;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.9.2, 1.10
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum Urgency {</b>
+<b class="fc">&nbsp;		ROUTINE,</b>
+<b class="fc">&nbsp;		STAT,</b>
+<b class="fc">&nbsp;		ON_SCHEDULED_DATE</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum Action {</b>
+<b class="fc">&nbsp;		NEW,</b>
+<b class="fc">&nbsp;		REVISE,</b>
+<b class="fc">&nbsp;		DISCONTINUE,</b>
+<b class="fc">&nbsp;		RENEW</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Valid values for the status of an order that is received from a filler
+&nbsp;	 * @since 2.2.0
+&nbsp;	 * @since 2.6.1 added ON_HOLD &amp; DECLINED
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum FulfillerStatus {</b>
+<b class="fc">&nbsp;		RECEIVED,</b>
+<b class="fc">&nbsp;		IN_PROGRESS,</b>
+<b class="fc">&nbsp;		EXCEPTION,</b>
+<b class="fc">&nbsp;		ON_HOLD,</b>
+<b class="fc">&nbsp;		DECLINED,</b>
+<b class="fc">&nbsp;		COMPLETED</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Integer orderId;
+&nbsp;	
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	private OrderType orderType;
+&nbsp;	
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	private String instructions;
+&nbsp;	
+&nbsp;	private Date dateActivated;
+&nbsp;	
+&nbsp;	private Date autoExpireDate;
+&nbsp;	
+&nbsp;	private Encounter encounter;
+&nbsp;	
+&nbsp;	private Provider orderer;
+&nbsp;	
+&nbsp;	private Date dateStopped;
+&nbsp;	
+&nbsp;	private Concept orderReason;
+&nbsp;	
+&nbsp;	private String accessionNumber;
+&nbsp;	
+&nbsp;	private String orderReasonNonCoded;
+&nbsp;	
+<b class="fc">&nbsp;	private Urgency urgency = Urgency.ROUTINE;</b>
+&nbsp;	
+&nbsp;	private String orderNumber;
+&nbsp;	
+&nbsp;	private String commentToFulfiller;
+&nbsp;	
+&nbsp;	private CareSetting careSetting;
+&nbsp;	
+&nbsp;	private Date scheduledDate;
+&nbsp;	
+&nbsp;	private String formNamespaceAndPath;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allows the orders if ordered as an orderGroup, to maintain a sequence of how members are
+&nbsp;	 * added in the group ex - for two orders of isoniazid and ampicillin, the sequence of 1 and 2
+&nbsp;	 * needed to be maintained
+&nbsp;	 */
+&nbsp;	private Double sortWeight;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allows orders to be linked to a previous order - e.g., an order discontinue ampicillin linked
+&nbsp;	 * to the original ampicillin order (the D/C gets its own order number)
+&nbsp;	 */
+&nbsp;	private Order previousOrder;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Represents the action being taken on an order.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.Order.Action
+&nbsp;	 */
+<b class="fc">&nbsp;	private Action action = Action.NEW;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * {@link org.openmrs.OrderGroup}
+&nbsp;	 */
+&nbsp;	private OrderGroup orderGroup;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Represents the status of an order received from a fulfiller 
+&nbsp;	 * @see FulfillerStatus
+&nbsp;	 */
+&nbsp;	private FulfillerStatus fulfillerStatus;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Represents the comment that goes along with with fulfiller status
+&nbsp;	 */	
+&nbsp;	private String fulfillerComment;
+&nbsp;
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Order() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public Order(Integer orderId) {</b>
+<b class="fc">&nbsp;		this.orderId = orderId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Performs a shallow copy of this Order. Does NOT copy orderId.
+&nbsp;	 * 
+&nbsp;	 * @return a shallow copy of this Order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy all fields
+&nbsp;	 */
+&nbsp;	public Order copy() {
+<b class="fc">&nbsp;		return copyHelper(new Order());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The purpose of this method is to allow subclasses of Order to delegate a portion of their
+&nbsp;	 * copy() method back to the superclass, in case the base class implementation changes.
+&nbsp;	 * 
+&nbsp;	 * @param target an Order that will have the state of &lt;code&gt;this&lt;/code&gt; copied into it
+&nbsp;	 * @return Returns the Order that was passed in, with state copied into it
+&nbsp;	 */
+&nbsp;	protected Order copyHelper(Order target) {
+<b class="fc">&nbsp;		target.setPatient(getPatient());</b>
+<b class="fc">&nbsp;		target.setOrderType(getOrderType());</b>
+<b class="fc">&nbsp;		target.setConcept(getConcept());</b>
+<b class="fc">&nbsp;		target.setInstructions(getInstructions());</b>
+<b class="fc">&nbsp;		target.setDateActivated(getDateActivated());</b>
+<b class="fc">&nbsp;		target.setAutoExpireDate(getAutoExpireDate());</b>
+<b class="fc">&nbsp;		target.setEncounter(getEncounter());</b>
+<b class="fc">&nbsp;		target.setOrderer(getOrderer());</b>
+<b class="fc">&nbsp;		target.setCreator(getCreator());</b>
+<b class="fc">&nbsp;		target.setDateCreated(getDateCreated());</b>
+<b class="fc">&nbsp;		target.dateStopped = getDateStopped();</b>
+<b class="fc">&nbsp;		target.setOrderReason(getOrderReason());</b>
+<b class="fc">&nbsp;		target.setOrderReasonNonCoded(getOrderReasonNonCoded());</b>
+<b class="fc">&nbsp;		target.setAccessionNumber(getAccessionNumber());</b>
+<b class="fc">&nbsp;		target.setVoided(getVoided());</b>
+<b class="fc">&nbsp;		target.setVoidedBy(getVoidedBy());</b>
+<b class="fc">&nbsp;		target.setDateVoided(getDateVoided());</b>
+<b class="fc">&nbsp;		target.setVoidReason(getVoidReason());</b>
+<b class="fc">&nbsp;		target.setUrgency(getUrgency());</b>
+<b class="fc">&nbsp;		target.setCommentToFulfiller(getCommentToFulfiller());</b>
+<b class="fc">&nbsp;		target.previousOrder = getPreviousOrder();</b>
+<b class="fc">&nbsp;		target.action = getAction();</b>
+<b class="fc">&nbsp;		target.orderNumber = getOrderNumber();</b>
+<b class="fc">&nbsp;		target.setCareSetting(getCareSetting());</b>
+<b class="fc">&nbsp;		target.setChangedBy(getChangedBy());</b>
+<b class="fc">&nbsp;		target.setDateChanged(getDateChanged());</b>
+<b class="fc">&nbsp;		target.setScheduledDate(getScheduledDate());</b>
+<b class="fc">&nbsp;		target.setOrderGroup(getOrderGroup());</b>
+<b class="fc">&nbsp;		target.setSortWeight(getSortWeight());</b>
+<b class="fc">&nbsp;		target.setFulfillerComment(getFulfillerComment());</b>
+<b class="fc">&nbsp;		target.setFulfillerStatus(getFulfillerStatus());</b>
+<b class="fc">&nbsp;		target.setFormNamespaceAndPath(getFormNamespaceAndPath());</b>
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the autoExpireDate.
+&nbsp;	 */
+&nbsp;	public Date getAutoExpireDate() {
+<b class="fc">&nbsp;		return autoExpireDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param autoExpireDate The autoExpireDate to set.
+&nbsp;	 */
+&nbsp;	public void setAutoExpireDate(Date autoExpireDate) {
+<b class="fc">&nbsp;		this.autoExpireDate = autoExpireDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the concept.
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept The concept to set.
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the scheduledDate
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Date getScheduledDate() {
+<b class="fc">&nbsp;		return scheduledDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param scheduledDate the date to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setScheduledDate(Date scheduledDate) {
+<b class="fc">&nbsp;		this.scheduledDate = scheduledDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateStopped.
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Date getDateStopped() {
+<b class="fc">&nbsp;		return dateStopped;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the orderReason.
+&nbsp;	 */
+&nbsp;	public Concept getOrderReason() {
+<b class="fc">&nbsp;		return orderReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orderReason The orderReason to set.
+&nbsp;	 */
+&nbsp;	public void setOrderReason(Concept orderReason) {
+<b class="fc">&nbsp;		this.orderReason = orderReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the encounter.
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounter The encounter to set.
+&nbsp;	 */
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the instructions.
+&nbsp;	 */
+&nbsp;	public String getInstructions() {
+<b class="fc">&nbsp;		return instructions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param instructions The instructions to set.
+&nbsp;	 */
+&nbsp;	public void setInstructions(String instructions) {
+<b class="fc">&nbsp;		this.instructions = instructions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the accessionNumber.
+&nbsp;	 */
+&nbsp;	public String getAccessionNumber() {
+<b class="fc">&nbsp;		return accessionNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param accessionNumber The accessionNumber to set.
+&nbsp;	 */
+&nbsp;	public void setAccessionNumber(String accessionNumber) {
+<b class="fc">&nbsp;		this.accessionNumber = accessionNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the orderer.
+&nbsp;	 */
+&nbsp;	public Provider getOrderer() {
+<b class="fc">&nbsp;		return orderer;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orderer The orderer to set.
+&nbsp;	 */
+&nbsp;	public void setOrderer(Provider orderer) {
+<b class="fc">&nbsp;		this.orderer = orderer;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the orderId.
+&nbsp;	 */
+&nbsp;	public Integer getOrderId() {
+<b class="fc">&nbsp;		return orderId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orderId The orderId to set.
+&nbsp;	 */
+&nbsp;	public void setOrderId(Integer orderId) {
+<b class="fc">&nbsp;		this.orderId = orderId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateActivated.
+&nbsp;	 */
+&nbsp;	public Date getDateActivated() {
+<b class="fc">&nbsp;		return dateActivated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateActivated The dateActivated to set.
+&nbsp;	 */
+&nbsp;	public void setDateActivated(Date dateActivated) {
+<b class="fc">&nbsp;		this.dateActivated = dateActivated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the orderReasonNonCoded.
+&nbsp;	 */
+&nbsp;	public String getOrderReasonNonCoded() {
+<b class="fc">&nbsp;		return orderReasonNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orderReasonNonCoded The orderReasonNonCoded to set.
+&nbsp;	 */
+&nbsp;	public void setOrderReasonNonCoded(String orderReasonNonCoded) {
+<b class="fc">&nbsp;		this.orderReasonNonCoded = orderReasonNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the commentToFulfiller
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public String getCommentToFulfiller() {
+<b class="fc">&nbsp;		return commentToFulfiller;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param commentToFulfiller The commentToFulfiller to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setCommentToFulfiller(String commentToFulfiller) {
+<b class="fc">&nbsp;		this.commentToFulfiller = commentToFulfiller;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order is activated as of the current date
+&nbsp;	 * 
+&nbsp;	 * @return boolean indicating whether the order was activated before or on the current date
+&nbsp;	 * @since 2.0
+&nbsp;	 * @see #isActivated(java.util.Date)
+&nbsp;	 */
+&nbsp;	public boolean isActivated() {
+<b class="nc">&nbsp;		return isActivated(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order is activated as of the specified date
+&nbsp;	 * 
+&nbsp;	 * @param checkDate - the date on which to check order. if null, will use current date
+&nbsp;	 * @return boolean indicating whether the order was activated before or on the check date
+&nbsp;	 * @since 2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if an order was activated on the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if an order was activated before the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if dateActivated is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for an order activated after the check date
+&nbsp;	 */
+&nbsp;	public boolean isActivated(Date checkDate) {
+<b class="fc">&nbsp;		if (dateActivated == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (checkDate == null) {</b>
+<b class="nc">&nbsp;			checkDate = new Date();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return OpenmrsUtil.compare(dateActivated, checkDate) &lt;= 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order was active as of the current date
+&nbsp;	 * 
+&nbsp;	 * @since 1.10.1
+&nbsp;	 * @return boolean indicating whether the order was active on the check date
+&nbsp;	 */
+&nbsp;	public boolean isActive() {
+<b class="fc">&nbsp;		return isActive(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order is active as of the specified date
+&nbsp;	 * 
+&nbsp;	 * @param aCheckDate - the date on which to check order. if null, will use current date
+&nbsp;	 * @return boolean indicating whether the order was active on the check date
+&nbsp;	 * @since 1.10.1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if an order expired on the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if an order was discontinued on the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if an order was activated on the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if an order was activated on the check date but scheduled for the future
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a voided order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a discontinued order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for an expired order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for an order activated after the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a discontinuation order
+&nbsp;	 */
+&nbsp;	public boolean isActive(Date aCheckDate) {
+<b class="fc">&nbsp;		if (getVoided() || action == Action.DISCONTINUE) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Date checkDate = aCheckDate == null ? new Date() : aCheckDate;</b>
+<b class="fc">&nbsp;		return isActivated(checkDate) &amp;&amp; !isDiscontinued(checkDate) &amp;&amp; !isExpired(checkDate);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if order is started as of the current date
+&nbsp;	 * 
+&nbsp;	 * @return boolean indicating whether the order is started as of the current date
+&nbsp;	 * @since 1.10.1
+&nbsp;	 * @see #isStarted(java.util.Date)
+&nbsp;	 */
+&nbsp;	public boolean isStarted() {
+<b class="fc">&nbsp;		return isStarted(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order is started as of the specified date, returns
+&nbsp;	 * true only if the order has been activated. In case of scheduled orders, the scheduledDate
+&nbsp;	 * becomes the effective start date that gets used to determined if it is started.
+&nbsp;	 * 
+&nbsp;	 * @param aCheckDate - the date on which to check order. if null, will use current date
+&nbsp;	 * @return boolean indicating whether the order is started as of the check date
+&nbsp;	 * @since 1.10.1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a voided order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if dateActivated is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the order is not yet activated as of the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the order was scheduled to start after the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the order was scheduled to start on the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the order was scheduled to start before the check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the order is started and not scheduled
+&nbsp;	 */
+&nbsp;	public boolean isStarted(Date aCheckDate) {
+<b class="fc">&nbsp;		if (getVoided()) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getEffectiveStartDate() == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Date checkDate = aCheckDate == null ? new Date() : aCheckDate;</b>
+<b class="fc">&nbsp;		return !checkDate.before(getEffectiveStartDate());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order is discontinued as of the specified date
+&nbsp;	 * 
+&nbsp;	 * @param aCheckDate - the date on which to check order. if null, will use current date
+&nbsp;	 * @return boolean indicating whether the order was discontinued on the input date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a voided order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if date stopped and auto expire date are both null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if auto expire date is null and date stopped is equal to check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if auto expire date is null and date stopped is after check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if dateActivated is after check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if auto expire date is null and date stopped is before check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if date stopped is after auto expire date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if check date is after date stopped but before auto expire date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if check date is after both date stopped auto expire date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the order is scheduled for the future and activated on check date but
+&nbsp;	 *         the check date is after date stopped
+&nbsp;	 */
+&nbsp;	public boolean isDiscontinued(Date aCheckDate) {
+<b class="fc">&nbsp;		if (dateStopped != null &amp;&amp; autoExpireDate != null &amp;&amp; dateStopped.after(autoExpireDate)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Order.error.invalidDateStoppedAndAutoExpireDate&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getVoided()) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Date checkDate = aCheckDate == null ? new Date() : aCheckDate;</b>
+<b class="fc">&nbsp;		if (!isActivated(checkDate) || dateStopped == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return checkDate.after(dateStopped);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if the order is expired as of the specified date
+&nbsp;	 * 
+&nbsp;	 * @return boolean indicating whether the order is expired at the current time
+&nbsp;	 * @since 1.10.1
+&nbsp;	 */
+&nbsp;	public boolean isExpired() {
+<b class="nc">&nbsp;		return isExpired(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to determine if order was expired at a given time
+&nbsp;	 * 
+&nbsp;	 * @param aCheckDate - the date on which to check order. if null, will use current date
+&nbsp;	 * @return boolean indicating whether the order was expired on the input date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a voided order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if date stopped and auto expire date are both null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if date stopped is null and auto expire date is equal to check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if date stopped is null and auto expire date is after check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if check date is after both date stopped auto expire date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if dateActivated is after check date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if check date is after date stopped but before auto expire date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if date stopped is after auto expire date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if date stopped is null and auto expire date is before check date
+&nbsp;	 * @since 1.10.1
+&nbsp;	 */
+&nbsp;	public boolean isExpired(Date aCheckDate) {
+<b class="fc">&nbsp;		if (dateStopped != null &amp;&amp; autoExpireDate != null &amp;&amp; dateStopped.after(autoExpireDate)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Order.error.invalidDateStoppedAndAutoExpireDate&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getVoided()) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Date checkDate = aCheckDate == null ? new Date() : aCheckDate;</b>
+<b class="fc">&nbsp;		if (!isActivated(checkDate)) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (isDiscontinued(checkDate) || autoExpireDate == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return checkDate.after(autoExpireDate);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/*
+&nbsp;	 * orderForm:jsp: &lt;spring:bind path=&quot;order.discontinued&quot; /&gt; results in a call to
+&nbsp;	 * isDiscontinued() which doesn&#39;t give access to the discontinued property so renamed it to
+&nbsp;	 * isDiscontinuedRightNow which results in a call to getDiscontinued.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public boolean isDiscontinuedRightNow() {
+<b class="fc">&nbsp;		return isDiscontinued(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getOrderId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		String prefix = Action.DISCONTINUE == getAction() ? &quot;DC &quot; : &quot;&quot;;</b>
+<b class="fc">&nbsp;		return prefix + &quot;Order. orderId: &quot; + orderId + &quot; patient: &quot; + patient + &quot; concept: &quot; + concept + &quot; care setting: &quot;</b>
+&nbsp;		        + careSetting;
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setOrderId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the urgency
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public Urgency getUrgency() {
+<b class="fc">&nbsp;		return urgency;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param urgency the urgency to set
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public void setUrgency(Urgency urgency) {
+<b class="fc">&nbsp;		this.urgency = urgency;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the orderNumber
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public String getOrderNumber() {
+<b class="fc">&nbsp;		return orderNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the previous related order.
+&nbsp;	 * 
+&nbsp;	 * @since 1.10
+&nbsp;	 * @return the previous order.
+&nbsp;	 */
+&nbsp;	public Order getPreviousOrder() {
+<b class="fc">&nbsp;		return HibernateUtil.getRealObjectFromProxy(previousOrder);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the previous order.
+&nbsp;	 * 
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param previousOrder the previous order to set.
+&nbsp;	 */
+&nbsp;	public void setPreviousOrder(Order previousOrder) {
+<b class="fc">&nbsp;		this.previousOrder = previousOrder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the action
+&nbsp;	 * 
+&nbsp;	 * @return the action
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Action getAction() {
+<b class="fc">&nbsp;		return action;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the ation
+&nbsp;	 * 
+&nbsp;	 * @param action the action to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setAction(Action action) {
+<b class="fc">&nbsp;		this.action = action;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the careSetting
+&nbsp;	 * 
+&nbsp;	 * @return the action
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public CareSetting getCareSetting() {
+<b class="fc">&nbsp;		return careSetting;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the careSetting
+&nbsp;	 * 
+&nbsp;	 * @param careSetting the action to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setCareSetting(CareSetting careSetting) {
+<b class="fc">&nbsp;		this.careSetting = careSetting;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the {@link org.openmrs.OrderType}
+&nbsp;	 * 
+&nbsp;	 * @return the {@link org.openmrs.OrderType}
+&nbsp;	 */
+&nbsp;	public OrderType getOrderType() {
+<b class="fc">&nbsp;		return orderType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the {@link org.openmrs.OrderType}
+&nbsp;	 * 
+&nbsp;	 * @param orderType the {@link org.openmrs.OrderType}
+&nbsp;	 */
+&nbsp;	public void setOrderType(OrderType orderType) {
+<b class="fc">&nbsp;		this.orderType = orderType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a discontinuation order for this order, sets the previousOrder and action fields,
+&nbsp;	 * note that the discontinuation order needs to be saved for the discontinuation to take effect
+&nbsp;	 * 
+&nbsp;	 * @return the newly created order
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set all the relevant fields
+&nbsp;	 */
+&nbsp;	public Order cloneForDiscontinuing() {
+<b class="fc">&nbsp;		Order newOrder = new Order();</b>
+<b class="fc">&nbsp;		newOrder.setCareSetting(getCareSetting());</b>
+<b class="fc">&nbsp;		newOrder.setConcept(getConcept());</b>
+<b class="fc">&nbsp;		newOrder.setAction(Action.DISCONTINUE);</b>
+<b class="fc">&nbsp;		newOrder.setPreviousOrder(this);</b>
+<b class="fc">&nbsp;		newOrder.setPatient(getPatient());</b>
+<b class="fc">&nbsp;		newOrder.setOrderType(getOrderType());</b>
+&nbsp;		
+<b class="fc">&nbsp;		return newOrder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates an order for revision from this order, sets the previousOrder and action field.
+&nbsp;	 * 
+&nbsp;	 * @return the newly created order
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set all the relevant fields
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the relevant fields for a DC order
+&nbsp;	 */
+&nbsp;	public Order cloneForRevision() {
+<b class="fc">&nbsp;		return cloneForRevisionHelper(new Order());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The purpose of this method is to allow subclasses of Order to delegate a portion of their
+&nbsp;	 * cloneForRevision() method back to the superclass, in case the base class implementation
+&nbsp;	 * changes.
+&nbsp;	 * 
+&nbsp;	 * @param target an Order that will have the state of &lt;code&gt;this&lt;/code&gt; copied into it
+&nbsp;	 * @return Returns the Order that was passed in, with state copied into it
+&nbsp;	 */
+&nbsp;	protected Order cloneForRevisionHelper(Order target) {
+<b class="fc">&nbsp;		if (getAction() == Action.DISCONTINUE) {</b>
+<b class="fc">&nbsp;			target.setAction(Action.DISCONTINUE);</b>
+<b class="fc">&nbsp;			target.setPreviousOrder(getPreviousOrder());</b>
+<b class="fc">&nbsp;			target.setDateActivated(getDateActivated());</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			target.setAction(Action.REVISE);</b>
+<b class="fc">&nbsp;			target.setPreviousOrder(this);</b>
+<b class="fc">&nbsp;			target.setAutoExpireDate(getAutoExpireDate());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		target.setCareSetting(getCareSetting());</b>
+<b class="fc">&nbsp;		target.setConcept(getConcept());</b>
+<b class="fc">&nbsp;		target.setPatient(getPatient());</b>
+<b class="fc">&nbsp;		target.setOrderType(getOrderType());</b>
+<b class="fc">&nbsp;		target.setScheduledDate(getScheduledDate());</b>
+<b class="fc">&nbsp;		target.setInstructions(getInstructions());</b>
+<b class="fc">&nbsp;		target.setUrgency(getUrgency());</b>
+<b class="fc">&nbsp;		target.setCommentToFulfiller(getCommentToFulfiller());</b>
+<b class="fc">&nbsp;		target.setOrderReason(getOrderReason());</b>
+<b class="fc">&nbsp;		target.setOrderReasonNonCoded(getOrderReasonNonCoded());</b>
+<b class="fc">&nbsp;		target.setOrderGroup(getOrderGroup());</b>
+<b class="fc">&nbsp;		target.setSortWeight(getSortWeight());</b>
+<b class="fc">&nbsp;		target.setFulfillerStatus(getFulfillerStatus());</b>
+<b class="fc">&nbsp;		target.setFulfillerComment(getFulfillerComment());</b>
+<b class="fc">&nbsp;		target.setFormNamespaceAndPath(getFormNamespaceAndPath());</b>
+&nbsp;		
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether this order&#39;s orderType matches or is a sub type of the specified one
+&nbsp;	 * 
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param orderType the orderType to match on
+&nbsp;	 * @return true if the type of the order matches or is a sub type of the other order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; true if it is the same or is a subtype
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; false if it neither the same nor a subtype
+&nbsp;	 */
+&nbsp;	public boolean isType(OrderType orderType) {
+<b class="fc">&nbsp;		return OrderUtil.isType(orderType, this.orderType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether orderable of this order is same as other order
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.DrugOrder for overridden behaviour
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param otherOrder the other order to match on
+&nbsp;	 * @return true if the concept of the orders match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the concept of the orders do not match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if other order is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the orders have the same concept
+&nbsp;	 */
+&nbsp;	public boolean hasSameOrderableAs(Order otherOrder) {
+<b class="fc">&nbsp;		if (otherOrder == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return OpenmrsUtil.nullSafeEquals(this.getConcept(), otherOrder.getConcept());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A convenience method to return start of the schedule for order.
+&nbsp;	 * 
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return scheduledDate if Urgency is Scheduled
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return dateActivated if Urgency is not Scheduled
+&nbsp;	 */
+&nbsp;	public Date getEffectiveStartDate() {
+<b class="fc">&nbsp;		return this.urgency == Urgency.ON_SCHEDULED_DATE ? this.getScheduledDate() : this.getDateActivated();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A convenience method to return end of the schedule for order.
+&nbsp;	 * 
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return dateStopped if dateStopped is not null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return autoExpireDate if dateStopped is null
+&nbsp;	 */
+&nbsp;	public Date getEffectiveStopDate() {
+<b class="fc">&nbsp;		return this.getDateStopped() != null ? this.getDateStopped() : this.getAutoExpireDate();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.12 {@link org.openmrs.OrderGroup}
+&nbsp;	 * @returns the OrderGroup
+&nbsp;	 */
+&nbsp;	public OrderGroup getOrderGroup() {
+<b class="fc">&nbsp;		return orderGroup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the OrderGroup for that order. If the order is ordered independently, it does not set an
+&nbsp;	 * orderGroup for it. If the order is ordered as an orderGroup, then sets a link to the
+&nbsp;	 * OrderGroup for that particular order.
+&nbsp;	 * 
+&nbsp;	 * @since 1.12
+&nbsp;	 * @param orderGroup
+&nbsp;	 */
+&nbsp;	public void setOrderGroup(OrderGroup orderGroup) {
+<b class="fc">&nbsp;		this.orderGroup = orderGroup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the sortWeight for an order if it is ordered as an OrderGroup.
+&nbsp;	 * 
+&nbsp;	 * @since 1.12
+&nbsp;	 * @return the sortWeight
+&nbsp;	 */
+&nbsp;	public Double getSortWeight() {
+<b class="fc">&nbsp;		return sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the sortWeight for an order if it is ordered as an OrderGroup. &lt;tt&gt;sortWeight&lt;/tt&gt; is
+&nbsp;	 * used internally by the API to manage the sequencing of orders when grouped. This value may be
+&nbsp;	 * changed by the API as needed for that purpose. Instead of setting this internal value
+&nbsp;	 * directly please use {@link OrderGroup#addOrder(Order, Integer)}.
+&nbsp;	 * 
+&nbsp;	 * @see OrderGroup#addOrder(Order, Integer)
+&nbsp;	 * @since 1.12
+&nbsp;	 * @param sortWeight
+&nbsp;	 */
+&nbsp;	public void setSortWeight(Double sortWeight) {
+<b class="fc">&nbsp;		this.sortWeight = sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the current status that was received from a fulfiller for this order. It can either be RECEIVED, IN_PROGRESS,
+&nbsp;	 * EXCEPTION or COMPLETED.  
+&nbsp;	 * 
+&nbsp;	 * @since 2.2.0
+&nbsp;	 * @return the status that was received from a fulfiller
+&nbsp;	 */
+&nbsp;	public FulfillerStatus getFulfillerStatus() {
+<b class="fc">&nbsp;		return fulfillerStatus;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the status of this order according to the value that was received from a fulfiller. 
+&nbsp;	 * 
+&nbsp;	 * @param fulfillerStatus the status that was received from a fulfiller. 
+&nbsp;	 * @since 2.2.0
+&nbsp;	*/
+&nbsp;	public void setFulfillerStatus(FulfillerStatus fulfillerStatus) {
+<b class="fc">&nbsp;		this.fulfillerStatus = fulfillerStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the comment received from the fulfiller regarding this order.
+&nbsp;	 * 
+&nbsp;	 * @since 2.2.0
+&nbsp;	 * @return the comment of the fulfiller  
+&nbsp;	 */
+&nbsp;	public String getFulfillerComment() {
+<b class="fc">&nbsp;		return fulfillerComment;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the comment received from the fulfiller for this order.
+&nbsp;	 * 
+&nbsp;	 * @param fulfillerComment the comment received from the fulfiller
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public void setFulfillerComment(String fulfillerComment) {
+<b class="fc">&nbsp;		this.fulfillerComment = fulfillerComment;		</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the formNamespaceAndPath.
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public String getFormNamespaceAndPath() {
+<b class="fc">&nbsp;		return formNamespaceAndPath;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the form namespace and path
+&nbsp;	 * 
+&nbsp;	 * @param formNamespaceAndPath the form namespace and path to set
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public void setFormNamespaceAndPath(String formNamespaceAndPath) {
+<b class="fc">&nbsp;		this.formNamespaceAndPath = formNamespaceAndPath;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String getFormFieldNamespace() {
+<b class="nc">&nbsp;		return BaseFormRecordableOpenmrsData.getFormFieldNamespace(formNamespaceAndPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String getFormFieldPath() {
+<b class="nc">&nbsp;		return BaseFormRecordableOpenmrsData.getFormFieldPath(formNamespaceAndPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setFormField(String namespace, String formFieldPath) {
+<b class="fc">&nbsp;		formNamespaceAndPath = BaseFormRecordableOpenmrsData.getFormNamespaceAndPath(namespace, formFieldPath);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

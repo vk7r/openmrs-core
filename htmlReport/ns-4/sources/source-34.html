@@ -1,0 +1,712 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: FormService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">FormService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Field;
+&nbsp;import org.openmrs.FieldAnswer;
+&nbsp;import org.openmrs.FieldType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.FormField;
+&nbsp;import org.openmrs.FormResource;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * This service contains methods relating to Form, FormField, and Field. Methods relating to
+&nbsp; * FieldType are in AdministrationService
+&nbsp; */
+&nbsp;public interface FormService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create or update the given Form in the database
+&nbsp;	 * 
+&nbsp;	 * @param form the Form to save
+&nbsp;	 * @return the Form that was saved
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save given form successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing form
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to save an existing form while forms are locked
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to save a new form while forms are locked
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public Form saveForm(Form form) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get form by internal form identifier
+&nbsp;	 * 
+&nbsp;	 * @param formId internal identifier
+&nbsp;	 * @return requested form
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no form exists with given formId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the requested form
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public Form getForm(Integer formId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get form by exact name match. If there are multiple forms with this name, then this returns
+&nbsp;	 * the one with the highest version (sorted alphabetically)
+&nbsp;	 * 
+&nbsp;	 * @param name exact name of the form to fetch
+&nbsp;	 * @return requested form
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no form has the exact form name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public Form getForm(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Form by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return form or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public Form getFormByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get form by exact name &amp;amp; version match. If version is null, then this method behaves like
+&nbsp;	 * {@link #getForm(String)}
+&nbsp;	 * 
+&nbsp;	 * @param name exact name of the form to fetch
+&nbsp;	 * @param version exact version of the form to fetch
+&nbsp;	 * @return requested form
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the specific version of the form with the given name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public Form getForm(String name, String version) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all Forms, including retired ones.
+&nbsp;	 * 
+&nbsp;	 * @return all Forms, including retired ones
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all forms including retired
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Form&gt; getAllForms() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all forms, possibly including retired ones
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to return retired forms
+&nbsp;	 * @return all forms, possibly including retired ones
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return retired forms if includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return retired forms if includeRetired is false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Form&gt; getAllForms(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all forms with name similar to the given name. (The precise fuzzy matching algorithm is
+&nbsp;	 * not specified.)
+&nbsp;	 * 
+&nbsp;	 * @param fuzzyName approximate name to match
+&nbsp;	 * @param onlyLatestVersion whether or not to return only the latest version of each form (by
+&nbsp;	 *            name)
+&nbsp;	 * @return forms with names similar to fuzzyName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match forms with partial match on name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return one form per name if onlyLatestVersion is true
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Form&gt; getForms(String fuzzyName, boolean onlyLatestVersion);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all forms that match all the (nullable) criteria
+&nbsp;	 * 
+&nbsp;	 * @param partialNameSearch partial search of name
+&nbsp;	 * @param published whether the form is published
+&nbsp;	 * @param encounterTypes whether the form has any of these encounter types
+&nbsp;	 * @param retired whether the form is retired
+&nbsp;	 * @param containingAnyFormField includes forms that contain any of the specified FormFields
+&nbsp;	 * @param containingAllFormFields includes forms that contain all of the specified FormFields
+&nbsp;	 * @param fields whether the form has any of these fields. If a field is used more than once on
+&nbsp;	 *            a form, that form is returning more than once in this list
+&nbsp;	 * @return All forms that match the criteria
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get multiple of the same form by field
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return duplicate form when given fields included in form multiple times
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return published forms when given published equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return both published and unpublished when given published is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match to forms with fuzzy partialNameSearch
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return forms with encounterType in given encounterTypes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unretired forms when retired equals false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return retired forms when retired equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all forms including retired and unretired when retired is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return forms containing all form fields in containingAllFormFields
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return forms that have any matching formFields in containingAnyFormField
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Form&gt; getForms(String partialNameSearch, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Same as
+&nbsp;	 * {@link #getForms(String, Boolean, Collection, Boolean, Collection, Collection, Collection)}
+&nbsp;	 * except that it returns an integer that is the size of the list that would be returned
+&nbsp;	 * 
+&nbsp;	 * @see #getForms(String, Boolean, Collection, Boolean, Collection, Collection, Collection)
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public Integer getFormCount(String partialNameSearch, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all published forms (not including retired ones)
+&nbsp;	 * 
+&nbsp;	 * @return all published non-retired forms
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return published forms that are not retired
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Form&gt; getPublishedForms() throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Audit form, consolidate similar fields
+&nbsp;	 * 
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should merge fields with similar attributes
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public int mergeDuplicateFields() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Duplicate this form and form_fields associated with this form
+&nbsp;	 * 
+&nbsp;	 * @param form
+&nbsp;	 * @return New duplicated form
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; clear changed details and update creation details
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; give a new uuid to the duplicated form
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy resources for old form to new form
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to duplicate a form while forms are locked
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public Form duplicateForm(Form form) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires the Form, leaving it in the database, but removing it from data entry screens
+&nbsp;	 * 
+&nbsp;	 * @param form the Form to retire
+&nbsp;	 * @param reason the retiredReason to set
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the retired bit before saving
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void retireForm(Form form, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretires a Form that had previous been retired.
+&nbsp;	 * 
+&nbsp;	 * @param form the Form to revive
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unset the retired bit before saving
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void unretireForm(Form form) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a Form from the database. This is not reversible. It will fail if this form
+&nbsp;	 * has already been used to create Encounters
+&nbsp;	 * 
+&nbsp;	 * @param form
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given form successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete form resources for deleted form
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to delete a form while forms are locked
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void purgeForm(Form form) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a Form from the database. This is not reversible. !! WARNING: Calling this
+&nbsp;	 * method with cascade=true can be very destructive !!
+&nbsp;	 * 
+&nbsp;	 * @param form
+&nbsp;	 * @param cascade whether or not to cascade delete all dependent objects (including encounters!)
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if cascade is true
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void purgeForm(Form form, boolean cascade) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get all field types in the database including the retired ones
+&nbsp;	 * 
+&nbsp;	 * @return list of all field types
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; also get retired field types
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FIELD_TYPES)
+&nbsp;	public List&lt;FieldType&gt; getAllFieldTypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all field types in the database with or without retired ones
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired true/false whether to include the retired field types
+&nbsp;	 * @return list of all field types
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all field types including retired when includeRetired equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all field types excluding retired when includeRetired equals false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FIELD_TYPES)
+&nbsp;	public List&lt;FieldType&gt; getAllFieldTypes(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get fieldType by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param fieldTypeId Integer id of FieldType to get
+&nbsp;	 * @return fieldType with given internal identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no field type matching given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FIELD_TYPES)
+&nbsp;	public FieldType getFieldType(Integer fieldTypeId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get FieldType by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return field type or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	public FieldType getFieldTypeByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get FieldType by its name
+&nbsp;	 * @since 1.11
+&nbsp;	 * @param name
+&nbsp;	 * @return field type or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given name
+&nbsp;	 */
+&nbsp;	public FieldType getFieldTypeByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all forms that contain the given concept as a field in their schema. (includes
+&nbsp;	 * retired forms)
+&nbsp;	 * 
+&nbsp;	 * @param concept the concept to search for in forms
+&nbsp;	 * @return forms containing the specified concept in their schema
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get forms with field matching given concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all forms for concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Form&gt; getFormsContainingConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all FormFields in the database
+&nbsp;	 * 
+&nbsp;	 * @return all FormFields in the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all form fields including retired
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;FormField&gt; getAllFormFields() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all Fields whose names are similar to or contain the given phrase. (The exact similarity
+&nbsp;	 * algorithm is unspecified.) (includes retired fields)
+&nbsp;	 * 
+&nbsp;	 * @param fuzzySearchPhrase
+&nbsp;	 * @return Fields with names similar to or containing the given phrase
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with name matching fuzzySearchPhrase at beginning
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with name matching fuzzySearchPhrase at middle
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with name matching fuzzySearchPhrase at end
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return fields in alphabetical order by name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Field&gt; getFields(String fuzzySearchPhrase) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds all Fields that point to the given concept, including retired ones.
+&nbsp;	 * 
+&nbsp;	 * @param concept the concept to search for in the Field table
+&nbsp;	 * @return fields that point to the given concept
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with concept matching given concept
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Field&gt; getFieldsByConcept(Concept concept) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches all Fields in the database, including retired ones
+&nbsp;	 * 
+&nbsp;	 * @return all Fields
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all fields including retired
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Field&gt; getAllFields() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches all Fields in the database, possibly including retired ones
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to include retired Fields
+&nbsp;	 * @return all Fields
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all fields including retired when includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all fields excluding retired when includeRetired is false
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Field&gt; getAllFields(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all Fields that match these (nullable) criteria
+&nbsp;	 * 
+&nbsp;	 * @param forms on any of these Forms
+&nbsp;	 * @param fieldTypes having any of these FieldTypes
+&nbsp;	 * @param concepts for any of these Concepts
+&nbsp;	 * @param tableNames for any of these table names
+&nbsp;	 * @param attributeNames for any of these attribute names
+&nbsp;	 * @param selectMultiple whether to return only select-multi fields
+&nbsp;	 * @param containsAllAnswers fields with all the following answers
+&nbsp;	 * @param containsAnyAnswer fields with any of the following answers
+&nbsp;	 * @param retired only retired/unretired fields
+&nbsp;	 * @return all Fields matching the given criteria
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with form in given forms
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with type in given fieldTypes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with concept in given concepts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with tableName in given tableNames
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with attributeName in given attributeNames
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get fields with selectMultiple equals true when given selectMultiple equals true
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public List&lt;Field&gt; getFields(Collection&lt;Form&gt; forms, Collection&lt;FieldType&gt; fieldTypes, Collection&lt;Concept&gt; concepts,
+&nbsp;	        Collection&lt;String&gt; tableNames, Collection&lt;String&gt; attributeNames, Boolean selectMultiple,
+&nbsp;	        Collection&lt;FieldAnswer&gt; containsAllAnswers, Collection&lt;FieldAnswer&gt; containsAnyAnswer, Boolean retired)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a Field by internal database id
+&nbsp;	 * 
+&nbsp;	 * @param fieldId the id of the Field to fetch
+&nbsp;	 * @return the Field with the given id
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no field exists with given fieldId
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public Field getField(Integer fieldId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Field by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return field or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	public Field getFieldByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get FieldAnswer by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return field answer or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	public FieldAnswer getFieldAnswerByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given Field
+&nbsp;	 * 
+&nbsp;	 * @param field the Field to save
+&nbsp;	 * @return the Field that was saved
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save given field successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing field
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public Field saveField(Field field) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a Field from the database. Not reversible.
+&nbsp;	 * 
+&nbsp;	 * @param field the Field to purge
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given field successfully
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void purgeField(Field field) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a Field from the database. Not reversible. !! WARNING: calling this with
+&nbsp;	 * cascade=true can be very destructive !!
+&nbsp;	 * 
+&nbsp;	 * @param field the Field to purge
+&nbsp;	 * @param cascade whether to cascade delete all FormFields pointing to this field
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if cascade is true
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void purgeField(Field field, boolean cascade) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a FormField by internal database id
+&nbsp;	 * 
+&nbsp;	 * @param formFieldId the internal id to search on
+&nbsp;	 * @return the FormField with the given id
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no formField exists with given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public FormField getFormField(Integer formFieldId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get FormField by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return form field or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	public FormField getFormFieldByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the FormField defined for this form/concept combination while discounting any form
+&nbsp;	 * field found in the &lt;code&gt;ignoreFormFields&lt;/code&gt; collection This method was added when
+&nbsp;	 * needing to relate observations to form fields during a display. The use case would be that
+&nbsp;	 * you know a Concept for a obs, which was defined on a form (via a formField). You can relate
+&nbsp;	 * the formFields to Concepts easily enough, but if a Form reuses a Concept in two separate
+&nbsp;	 * FormFields you don&#39;t want to only associate that first formField with that concept. So, keep
+&nbsp;	 * a running list of formFields you&#39;ve seen and pass them back in here to rule them out.
+&nbsp;	 * 
+&nbsp;	 * @param form Form that this concept was found on
+&nbsp;	 * @param concept Concept (question) on this form that is being requested
+&nbsp;	 * @param ignoreFormFields FormFields to ignore (aka already seen formfields)
+&nbsp;	 * @param force if true and there are zero matches because all formFields were ignored (because
+&nbsp;	 *            of ignoreFormFields) than the first result is returned
+&nbsp;	 * @return Formfield for this concept on this form
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get form fields by form and concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null ignoreFormFields argument
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; simply return null for nonexistent concepts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; simply return null for nonexistent forms
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; ignore formFields passed to ignoreFormFields
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_FORMS)
+&nbsp;	public FormField getFormField(Form form, Concept concept, Collection&lt;FormField&gt; ignoreFormFields, boolean force)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given FormField
+&nbsp;	 * 
+&nbsp;	 * @param formField the FormField to save
+&nbsp;	 * @return the formField that was just saved
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; propagate save to the Field property on the given FormField
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save given formField successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; inject form fields from serializable complex obs handlers
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public FormField saveFormField(FormField formField) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes the given FormField from the database. This is not reversible
+&nbsp;	 * 
+&nbsp;	 * @param formField the FormField to purge
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given form field successfully
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public void purgeFormField(FormField formField) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires field
+&nbsp;	 * 
+&nbsp;	 * @param field the Field to retire
+&nbsp;	 * @return the Field that was retired
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the retired bit before saving
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public Field retireField(Field field) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretires field
+&nbsp;	 * 
+&nbsp;	 * @param field the Field to unretire
+&nbsp;	 * @return the Field that was unretired
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unset the retired bit before saving
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FORMS)
+&nbsp;	public Field unretireField(Field field) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves the given field type to the database
+&nbsp;	 * 
+&nbsp;	 * @param fieldType the field type to save
+&nbsp;	 * @return the saved field type
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new field type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update existing field type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_FIELD_TYPES)
+&nbsp;	public FieldType saveFieldType(FieldType fieldType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes the given field type from the database. This should not be done. It is preferred to
+&nbsp;	 * just retired this field type with #retireFieldType(FieldType)
+&nbsp;	 * 
+&nbsp;	 * @param fieldType the field type to purge
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given field type successfully
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_FIELD_TYPES)
+&nbsp;	public void purgeFieldType(FieldType fieldType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds a FormResource by its id
+&nbsp;	 * 
+&nbsp;	 * @param formResourceId the id of the resource
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find a saved FormResource
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no FormResource found
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource getFormResource(Integer formResourceId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds a FormResource by its uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the uuid of the resource
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource getFormResourceByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds a FormResource based on a given Form and name
+&nbsp;	 * 
+&nbsp;	 * @param form the Form that the resource belongs to
+&nbsp;	 * @param name the name of the resource
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource getFormResource(Form form, String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds all FormResources tied to a given form
+&nbsp;	 * 
+&nbsp;	 * @param form
+&nbsp;	 * @return the resources attached to the form
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Collection&lt;FormResource&gt; getFormResourcesForForm(Form form) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves or updates the given form resource
+&nbsp;	 * 
+&nbsp;	 * @param formResource the resource to be saved
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; persist a FormResource
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; overwrite an existing resource with same name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be able to save an XSLT
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource saveFormResource(FormResource formResource) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purges a form resource
+&nbsp;	 * 
+&nbsp;	 * @param formResource the resource to be purged
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete a form resource
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void purgeFormResource(FormResource formResource) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the forms are locked, and if they are throws an exception when saving or deleting a form
+&nbsp;	 * 
+&nbsp;	 * @throws FormsLockedException
+&nbsp;	 */
+&nbsp;	public void checkIfFormsAreLocked() throws FormsLockedException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,376 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">PatientDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Allergies;
+&nbsp;import org.openmrs.Allergy;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.api.PatientService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Database methods for the PatientService
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.api.PatientService
+&nbsp; */
+&nbsp;public interface PatientDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#savePatient(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	public Patient savePatient(Patient patient) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatient(Integer)
+&nbsp;	 */
+&nbsp;	public Patient getPatient(Integer patientId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete patient from database. This &lt;b&gt;should not be called&lt;/b&gt; except for testing and
+&nbsp;	 * administration purposes. Use the void method instead
+&nbsp;	 * 
+&nbsp;	 * @param patient patient to be deleted
+&nbsp;	 * @see org.openmrs.api.PatientService#deletePatient(org.openmrs.Patient)
+&nbsp;	 * @see org.openmrs.api.PatientService#voidPatient(Patient, String)
+&nbsp;	 */
+&nbsp;	public void deletePatient(Patient patient) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllPatients(boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;Patient&gt; getAllPatients(boolean includeVoided) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatients(String, Integer, Integer)
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients by empty query _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients by null query _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by given name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by middle name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by family name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by family2 name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by whole name _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by non-existing single name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by non-existing name parts _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by mix of existing and non-existing name parts _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by voided name _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by short given name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by short middle name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by short family name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by short family2 name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by whole name made up of short names _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patients by multiple short name parts _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by non-existing single short name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by non-existing short name parts _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by mix of existing and non-existing short name parts _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by voided short name _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patient by identifier _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by non-existing identifier _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patient by voided identifier _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get no patient by non-existing attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get no patient by non-searchable attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get no patient by voided attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get one patient by attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get one patient by random case attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients by searching for non-voided and voided attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get multiple patients by single attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients by multiple attributes _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find eleven out of eleven patients _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find the first four out of eleven patients _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find the next four out of eleven patients _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find the remaining three out of eleven patients _ signature no 2
+&nbsp;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find patients with null as start _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find patients with negative start _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find patients with null as length _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients by zero length _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients by negative length _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find patients with excessive length _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return distinct patient list _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not match voided patients _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patients with match mode start _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get patients with match mode anywhere _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients with match mode start _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get patients with match mode anywhere _ signature no 2
+&nbsp;	 *
+&nbsp;	 */
+&nbsp;	public List&lt;Patient&gt; getPatients(String query, Integer start, Integer length) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatients(String, boolean, Integer, Integer)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get voided person when voided true is passed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get no voided person when voided false is passed
+&nbsp;	 */
+&nbsp;	public List&lt;Patient&gt; getPatients(String query, boolean includeVoided, Integer start, Integer length) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getPatients(String, String, List, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	public List&lt;Patient&gt; getPatients(String name, List&lt;PatientIdentifierType&gt; identifierTypes,
+&nbsp;		boolean matchIdentifierExactly, Integer start, Integer length) throws DAOException;
+&nbsp;	
+&nbsp;	
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifiers(java.lang.String, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.lang.Boolean)
+&nbsp;	 *      
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all matching non voided patient identifiers if is preferred is set to null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all matching non voided patient identifiers if is preferred is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all matching non voided patient identifiers if is preferred is set to false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patient identifiers belong to given patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patient identifiers belong to given patients
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifiers that equals given identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch patient identifiers that partially matches given identifier  
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided patient identifiers 
+&nbsp;	 */
+&nbsp;	public List&lt;PatientIdentifier&gt; getPatientIdentifiers(String identifier,
+&nbsp;	        List&lt;PatientIdentifierType&gt; patientIdentifierTypes, List&lt;Location&gt; locations, List&lt;Patient&gt; patients,
+&nbsp;	        Boolean isPreferred) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#savePatientIdentifierType(org.openmrs.PatientIdentifierType)
+&nbsp;	 */
+&nbsp;	public PatientIdentifierType savePatientIdentifierType(PatientIdentifierType patientIdentifierType) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null when includeRetired is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return retired when includeRetired is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null when includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all when includeRetired is true
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllPatientIdentifierTypes(boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;PatientIdentifierType&gt; getAllPatientIdentifierTypes(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifierTypes(java.lang.String,
+&nbsp;	 *      java.lang.String, java.lang.Boolean, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;PatientIdentifierType&gt; getPatientIdentifierTypes(String name, String format, Boolean required,
+&nbsp;	        Boolean hasCheckDigit) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifierType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	public PatientIdentifierType getPatientIdentifierType(Integer patientIdentifierTypeId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#purgePatientIdentifierType(org.openmrs.PatientIdentifierType)
+&nbsp;	 */
+&nbsp;	public void deletePatientIdentifierType(PatientIdentifierType patientIdentifierType) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getDuplicatePatientsByAttributes(java.util.List)
+&nbsp;	 */
+&nbsp;	public List&lt;Patient&gt; getDuplicatePatientsByAttributes(List&lt;String&gt; attributes) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#isIdentifierInUseByAnotherPatient(PatientIdentifier)
+&nbsp;	 */
+&nbsp;	public boolean isIdentifierInUseByAnotherPatient(PatientIdentifier patientIdentifier);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return patient or null
+&nbsp;	 */
+&nbsp;	public Patient getPatientByUuid(String uuid);
+&nbsp;	
+&nbsp;	public PatientIdentifier getPatientIdentifierByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return patient identifier type or null
+&nbsp;	 */
+&nbsp;	public PatientIdentifierType getPatientIdentifierTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifier(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	public PatientIdentifier getPatientIdentifier(Integer patientIdentifierId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#savePatientIdentifier(org.openmrs.PatientIdentifier)
+&nbsp;	 */
+&nbsp;	public PatientIdentifier savePatientIdentifier(PatientIdentifier patientIdentifier);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#purgePatientIdentifier(org.openmrs.PatientIdentifier)
+&nbsp;	 */
+&nbsp;	public void deletePatientIdentifier(PatientIdentifier patientIdentifier) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getCountOfPatients(String)
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count zero patients when query is empty _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count zero patients when query is null _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count zero patients for non-matching query _ signature no 2
+&nbsp;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not count voided patients _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count single patient _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count multiple patients _ signature no 2
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count patients by name _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count patients by identifier _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; count patients by searchable attribute _ signature no 2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; obey attribute match mode
+&nbsp;	 */
+&nbsp;	public Long getCountOfPatients(String query);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getCountOfPatients(String, boolean)
+&nbsp;	 */
+&nbsp;	public Long getCountOfPatients(String query, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a list of allergies that a patient has
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient
+&nbsp;	 * @return the allergy list
+&nbsp;	 */
+&nbsp;	public List&lt;Allergy&gt; getAllergies(Patient patient);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a patient&#39;s allergy status
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient
+&nbsp;	 * @return the allergy status
+&nbsp;	 */
+&nbsp;	public String getAllergyStatus(Patient patient);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves patient allergies to the database.
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient
+&nbsp;	 * @param allergies the allergies
+&nbsp;	 * @return the saved allergies
+&nbsp;	 */
+&nbsp;	public Allergies saveAllergies(Patient patient, Allergies allergies);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a allergy matching the given allergyId
+&nbsp;	 * 
+&nbsp;	 * @param allergyId of allergy to return
+&nbsp;	 * @return the allergy matching the given allergyId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return allergy given valid allergyId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given allergyId
+&nbsp;	 */
+&nbsp;	public Allergy getAllergy(Integer allergyId);
+&nbsp;	
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a allergy matching the given uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid of allergy to return
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the allergy matching the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return allergy given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	public Allergy getAllergyByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves an allergy to the database
+&nbsp;	 * 
+&nbsp;	 * @param allergy the allergy to save
+&nbsp;	 * @return the saved allergy
+&nbsp;	 */
+&nbsp;	public Allergy saveAllergy(Allergy allergy);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a List of Patient Identifiers associated to a program 
+&nbsp;	 * @param patientProgram the program that matches the patientIdentifier
+&nbsp;	 * @return patient identifier or null
+&nbsp;	 */
+&nbsp;	public List getPatientIdentifierByProgram(PatientProgram patientProgram);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

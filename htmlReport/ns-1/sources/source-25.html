@@ -1,0 +1,266 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptReferenceTermMap</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptReferenceTermMap (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptReferenceTermMap</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (21/28)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptReferenceTermMap$HibernateProxy$spPdh9l0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (21/28)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * The concept Reference Term map object represents a mapping between two Concept Reference Terms. A
+&nbsp; * concept reference term can have 0 to N concept reference term mappings to any or all Concept
+&nbsp; * Reference Terms
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptReferenceTermMap extends BaseConceptMap {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	private Integer conceptReferenceTermMapId;
+&nbsp;	
+&nbsp;	private ConceptReferenceTerm termA;
+&nbsp;	
+&nbsp;	private ConceptReferenceTerm termB;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptReferenceTermMap() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with concept reference term map id */
+<b class="fc">&nbsp;	public ConceptReferenceTermMap(Integer conceptReferenceTermMapId) {</b>
+<b class="fc">&nbsp;		this.conceptReferenceTermMapId = conceptReferenceTermMapId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor that takes the term to be mapped to and the type of the map
+&nbsp;	 *
+&nbsp;	 * @param termB the other concept reference term to map to
+&nbsp;	 * @param conceptMapType the concept map type for this concept reference term map
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptReferenceTermMap(ConceptReferenceTerm termB, ConceptMapType conceptMapType) {</b>
+<b class="fc">&nbsp;		this.termB = termB;</b>
+<b class="fc">&nbsp;		setConceptMapType(conceptMapType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptReferenceTermMapId
+&nbsp;	 */
+&nbsp;	public Integer getConceptReferenceTermMapId() {
+<b class="fc">&nbsp;		return conceptReferenceTermMapId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptReferenceTermMapId the conceptReferenceTermMapId to set
+&nbsp;	 */
+&nbsp;	public void setConceptReferenceTermMapId(Integer conceptReferenceTermMapId) {
+<b class="fc">&nbsp;		this.conceptReferenceTermMapId = conceptReferenceTermMapId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the termA
+&nbsp;	 */
+&nbsp;	public ConceptReferenceTerm getTermA() {
+<b class="fc">&nbsp;		return termA;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param termA the termA to set
+&nbsp;	 */
+&nbsp;	public void setTermA(ConceptReferenceTerm termA) {
+<b class="fc">&nbsp;		this.termA = termA;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the termB
+&nbsp;	 */
+&nbsp;	public ConceptReferenceTerm getTermB() {
+<b class="fc">&nbsp;		return termB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param termB the termB to set
+&nbsp;	 */
+&nbsp;	public void setTermB(ConceptReferenceTerm termB) {
+<b class="fc">&nbsp;		this.termB = termB;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getConceptReferenceTermMapId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptReferenceTermMapId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object obj) {
+<b class="fc">&nbsp;		if (!(obj instanceof ConceptReferenceTermMap)) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		ConceptReferenceTermMap rhs = (ConceptReferenceTermMap) obj;</b>
+<b class="fc">&nbsp;		if (this.conceptReferenceTermMapId != null &amp;&amp; rhs.conceptReferenceTermMapId != null) {</b>
+<b class="fc">&nbsp;			return this.conceptReferenceTermMapId.equals(rhs.conceptReferenceTermMapId);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return this == obj;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#hashCode()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		if (this.conceptReferenceTermMapId == null) {</b>
+<b class="fc">&nbsp;			return super.hashCode();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		int hash = 3;</b>
+<b class="fc">&nbsp;		hash = hash + 31 * this.conceptReferenceTermMapId;</b>
+<b class="fc">&nbsp;		return hash;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		if (conceptReferenceTermMapId == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return conceptReferenceTermMapId.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

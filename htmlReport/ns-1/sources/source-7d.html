@@ -1,0 +1,129 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormRecordable</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: FormRecordable (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">FormRecordable</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; * 
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines the methods to make a bridge between an OpenMrsObject and is position in the form.
+&nbsp; *
+&nbsp; * @since  2.4.0
+&nbsp; */
+&nbsp;public interface FormRecordable {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the namespace for the form field that was used to capture the obs details in the form
+&nbsp;	 *
+&nbsp;	 * @return the namespace
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the namespace for a form field that has no path
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the correct namespace for a form field with a path
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if the namespace is not specified
+&nbsp;	 */
+&nbsp;	String getFormFieldNamespace();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the path for the form field that was used to capture the obs details in the form
+&nbsp;	 *
+&nbsp;	 * @return the the form field path
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the path for a form field that has no namespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the correct path for a form field with a namespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if the path is not specified
+&nbsp;	 */
+&nbsp;	String getFormFieldPath();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the namespace and path of the form field that was used to capture the obs details in the
+&nbsp;	 * form.&lt;br&gt;
+&nbsp;	 * &lt;b&gt;Note:&lt;/b&gt; Namespace and formFieldPath together must not exceed 254 characters in length,
+&nbsp;	 * form applications can subtract the length of their namespace from 254 to determine the
+&nbsp;	 * maximum length they can use for a form field path.
+&nbsp;	 *
+&nbsp;	 * @param namespace     the namespace of the form field
+&nbsp;	 * @param formFieldPath the path of the form field
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the underlying formNamespaceAndPath in the correct pattern
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a namepace containing the separator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a path containing the separator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a namepace and path combination longer than the max length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not mark the obs as dirty when the value has not been changed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark the obs as dirty when the value has been changed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark the obs as dirty when the value is changed from a null to a non null value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; mark the obs as dirty when the value is changed from a non null to a null value
+&nbsp;	 */
+&nbsp;	void setFormField(String namespace, String formFieldPath);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

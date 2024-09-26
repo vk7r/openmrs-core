@@ -1,0 +1,409 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProviderServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ProviderServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProviderServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (30/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (35/35)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Provider;
+&nbsp;import org.openmrs.ProviderAttribute;
+&nbsp;import org.openmrs.ProviderAttributeType;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.ProviderService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.ProviderDAO;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default implementation of the {@link ProviderService}. This class should not be used on its own.
+&nbsp; * The current OpenMRS implementation should be fetched from the Context.
+&nbsp; * 
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class ProviderServiceImpl extends BaseOpenmrsService implements ProviderService {</b>
+&nbsp;	
+&nbsp;	private ProviderDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the data access object for Concepts. The dao is used for saving and getting concepts
+&nbsp;	 * to/from the database
+&nbsp;	 * 
+&nbsp;	 * @param dao The data access object to use
+&nbsp;	 */
+&nbsp;	public void setProviderDAO(ProviderDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getAllProviders()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Provider&gt; getAllProviders() {
+<b class="fc">&nbsp;		return Context.getProviderService().getAllProviders(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getAllProviders(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Provider&gt; getAllProviders(boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getAllProviders(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#retireProvider(org.openmrs.Provider, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void retireProvider(Provider provider, String reason) {
+<b class="fc">&nbsp;		dao.saveProvider(provider);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#unretireProvider(org.openmrs.Provider)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Provider unretireProvider(Provider provider) {
+<b class="fc">&nbsp;		return Context.getProviderService().saveProvider(provider);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#purgeProvider(org.openmrs.Provider)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeProvider(Provider provider) {
+<b class="fc">&nbsp;		dao.deleteProvider(provider);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProvider(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Provider getProvider(Integer providerId) {
+<b class="fc">&nbsp;		return dao.getProvider(providerId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#saveProvider(org.openmrs.Provider)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Provider saveProvider(Provider provider) {
+<b class="fc">&nbsp;		CustomDatatypeUtil.saveAttributesIfNecessary(provider);</b>
+<b class="fc">&nbsp;		return dao.saveProvider(provider);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Provider getProviderByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getProviderByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProvidersByPerson(org.openmrs.Person, boolean )
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Collection&lt;Provider&gt; getProvidersByPerson(Person person, boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getProvidersByPerson(person, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProvidersByPerson(org.openmrs.Person)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Collection&lt;Provider&gt; getProvidersByPerson(Person person) {
+<b class="fc">&nbsp;		if (person == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;Person must not be null&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return Context.getProviderService().getProvidersByPerson(person, true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getCountOfProviders(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getCountOfProviders(String query) {
+<b class="fc">&nbsp;		return Context.getProviderService().getCountOfProviders(query, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getCountOfProviders(java.lang.String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getCountOfProviders(String query, boolean includeRetired) {
+<b class="fc">&nbsp;		return OpenmrsUtil.convertToInteger(dao.getCountOfProviders(query, includeRetired));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviders(String, Integer, Integer, java.util.Map,
+&nbsp;	 *      boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Provider&gt; getProviders(String query, Integer start, Integer length,
+&nbsp;	        Map&lt;ProviderAttributeType, Object&gt; attributeValues, boolean includeRetired) {
+<b class="fc">&nbsp;		Map&lt;ProviderAttributeType, String&gt; serializedAttributeValues = CustomDatatypeUtil</b>
+<b class="fc">&nbsp;		        .getValueReferences(attributeValues);</b>
+<b class="fc">&nbsp;		return dao.getProviders(query, serializedAttributeValues, start, length, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviders(String, Integer, Integer, java.util.Map)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Provider&gt; getProviders(String query, Integer start, Integer length,
+&nbsp;	        Map&lt;ProviderAttributeType, Object&gt; attributeValues) {
+<b class="fc">&nbsp;		return Context.getProviderService().getProviders(query, start, length, attributeValues, true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getAllProviderAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ProviderAttributeType&gt; getAllProviderAttributeTypes() {
+<b class="fc">&nbsp;		return dao.getAllProviderAttributeTypes(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getAllProviderAttributeTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ProviderAttributeType&gt; getAllProviderAttributeTypes(boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getAllProviderAttributeTypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderAttributeType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProviderAttributeType getProviderAttributeType(Integer providerAttributeTypeId) {
+<b class="fc">&nbsp;		return dao.getProviderAttributeType(providerAttributeTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderAttributeTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProviderAttributeType getProviderAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getProviderAttributeTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderAttributeTypeByName(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProviderAttributeType getProviderAttributeTypeByName(String name) {
+<b class="fc">&nbsp;		return dao.getProviderAttributeTypeByName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderAttribute(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProviderAttribute getProviderAttribute(Integer providerAttributeID) {
+<b class="fc">&nbsp;		return dao.getProviderAttribute(providerAttributeID);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ProviderAttribute getProviderAttributeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getProviderAttributeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#saveProviderAttributeType(org.openmrs.ProviderAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProviderAttributeType saveProviderAttributeType(ProviderAttributeType providerAttributeType) {
+<b class="fc">&nbsp;		return dao.saveProviderAttributeType(providerAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#retireProviderAttributeType(org.openmrs.ProviderAttributeType,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProviderAttributeType retireProviderAttributeType(ProviderAttributeType providerAttributeType, String reason) {
+<b class="fc">&nbsp;		return Context.getProviderService().saveProviderAttributeType(providerAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#unretireProviderAttributeType(org.openmrs.ProviderAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProviderAttributeType unretireProviderAttributeType(ProviderAttributeType providerAttributeType) {
+<b class="fc">&nbsp;		return Context.getProviderService().saveProviderAttributeType(providerAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#purgeProviderAttributeType(org.openmrs.ProviderAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeProviderAttributeType(ProviderAttributeType providerAttributeType) {
+<b class="fc">&nbsp;		dao.deleteProviderAttributeType(providerAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#isProviderIdentifierUnique(Provider)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public boolean isProviderIdentifierUnique(Provider provider) throws APIException {
+<b class="fc">&nbsp;		return dao.isProviderIdentifierUnique(provider);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getProviderByIdentifier(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Provider getProviderByIdentifier(String identifier) {
+<b class="fc">&nbsp;		return dao.getProviderByIdentifier(identifier);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ProviderService#getUnknownProvider()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Provider getUnknownProvider() {
+<b class="fc">&nbsp;		return getProviderByUuid(Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GP_UNKNOWN_PROVIDER_UUID));
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

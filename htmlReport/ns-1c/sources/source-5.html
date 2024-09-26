@@ -1,0 +1,472 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LogicCriteria</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicCriteria (org.openmrs.logic)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LogicCriteria</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.logic.op.And;
+&nbsp;import org.openmrs.logic.op.AsOf;
+&nbsp;import org.openmrs.logic.op.Average;
+&nbsp;import org.openmrs.logic.op.Count;
+&nbsp;import org.openmrs.logic.op.Distinct;
+&nbsp;import org.openmrs.logic.op.First;
+&nbsp;import org.openmrs.logic.op.GreaterThan;
+&nbsp;import org.openmrs.logic.op.GreaterThanEquals;
+&nbsp;import org.openmrs.logic.op.In;
+&nbsp;import org.openmrs.logic.op.Last;
+&nbsp;import org.openmrs.logic.op.LessThan;
+&nbsp;import org.openmrs.logic.op.LessThanEquals;
+&nbsp;import org.openmrs.logic.op.Operand;
+&nbsp;import org.openmrs.logic.op.Operator;
+&nbsp;import org.openmrs.logic.op.Or;
+&nbsp;import org.openmrs.logic.op.TransformOperator;
+&nbsp;import org.openmrs.logic.op.Within;
+&nbsp;
+&nbsp;/**
+&nbsp; * Used to create a hierarchical representation of a criteria (e.g., similar to a parse tree).
+&nbsp; * Criteria can be generated through a series of method calls; each method call returns another
+&nbsp; * criteria object containing the prior criteria and the newly added criteria. This class has two
+&nbsp; * purposes:
+&nbsp; * &lt;ol&gt;
+&nbsp; * &lt;li&gt;provide a mechanism for building criteria&lt;/li&gt;
+&nbsp; * &lt;li&gt;provide a structure that can be passed to the DAO level for analysis &amp;amp; execution&lt;/li&gt;
+&nbsp; * &lt;/ol&gt;
+&nbsp; * In its simplest form, a criteria is equivalent to a token &amp;mdash; e.g., the following two methods
+&nbsp; * should return the same result:
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;&lt;code&gt;LogicService.eval(myPatient, &quot;CD4 COUNT&quot;);&lt;/code&gt;&lt;/li&gt;
+&nbsp; * &lt;li&gt;&lt;code&gt;LogicService.eval(myPatient, new LogicCriteria(&quot;CD4 COUNT&quot;));&lt;/code&gt;&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * However, when criteria or restrictions need to be placed on the token, then a LogicCriteria can
+&nbsp; * be used to define these restrictions, e.g.
+&nbsp; * &lt;code&gt;new LogicCriteriaImpl(&quot;CD4 COUNT&quot;).lt(200).within(Duration.months(6))&lt;/code&gt;
+&nbsp; */
+&nbsp;public interface LogicCriteria {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a new LogicExpression using the &lt;code&gt;operand&lt;/code&gt; and &lt;code&gt;operator&lt;/code&gt; and
+&nbsp;	 * then append them to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param operator one of the Operator object to be appended to the current LogicCriteria
+&nbsp;	 * @param operand one of the Operand object
+&nbsp;	 * @return a new LogicCriteria containing the existing and new LogicExpression
+&nbsp;	 */
+&nbsp;	public LogicCriteria appendExpression(Operator operator, Operand operand);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#appendExpression(Operator, Operand)
+&nbsp;	 */
+&nbsp;	public LogicCriteria appendExpression(Operator operator, String operand);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#appendExpression(Operator, Operand)
+&nbsp;	 */
+&nbsp;	public LogicCriteria appendExpression(Operator operator, double operand);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Apply a transformation operator to a logic expression
+&nbsp;	 * 
+&nbsp;	 * @param operator type of the {@link TransformOperator}
+&nbsp;	 * @return new logic criteria containing the {@link TransformOperator}
+&nbsp;	 */
+&nbsp;	public LogicCriteria applyTransform(Operator operator);
+&nbsp;	
+&nbsp;	// --Logic Operators joining criteria
+&nbsp;	/**
+&nbsp;	 * Append a LogicCriteria with another LogicCriteria using an operator
+&nbsp;	 * 
+&nbsp;	 * @param operator one type of {@link Operator}
+&nbsp;	 * @param logicCriteria {@link LogicCriteria} to be appended
+&nbsp;	 * @return new {@link LogicCriteria} containing existing and the new {@link LogicCriteria}
+&nbsp;	 */
+&nbsp;	public LogicCriteria appendCriteria(Operator operator, LogicCriteria logicCriteria);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Append the LogicCriteria using the {@link And} operator
+&nbsp;	 * 
+&nbsp;	 * @param logicCriteria LogicCriteria to be appended
+&nbsp;	 * @return LogicCriteria that is the combination of existing and the new LogicCriteria
+&nbsp;	 * @see And
+&nbsp;	 */
+&nbsp;	public LogicCriteria and(LogicCriteria logicCriteria);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Append the LogicCriteria using the {@link Or} operator
+&nbsp;	 * 
+&nbsp;	 * @param logicCriteria LogicCriteria to be appended
+&nbsp;	 * @return LogicCriteria that is the combination of existing and the new LogicCriteria
+&nbsp;	 * @see Or
+&nbsp;	 */
+&nbsp;	public LogicCriteria or(LogicCriteria logicCriteria);
+&nbsp;	
+&nbsp;	public LogicCriteria not();
+&nbsp;	
+&nbsp;	//--Transform Operators
+&nbsp;	/**
+&nbsp;	 * Apply the {@link Count} operator to the LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @return LogicCriteria with count applied
+&nbsp;	 * @see Count
+&nbsp;	 */
+&nbsp;	public LogicCriteria count();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Apply the {@link Average} operator to the LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @return LogicCriteria with Average applied
+&nbsp;	 * @see Average
+&nbsp;	 */
+&nbsp;	public LogicCriteria average();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Apply the {@link Last} operator to the LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @return LogicCriteria with Last applied
+&nbsp;	 * @see Last
+&nbsp;	 */
+&nbsp;	public LogicCriteria last();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#last()
+&nbsp;	 */
+&nbsp;	public LogicCriteria last(Integer numResults);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Apply the {@link First} operator to the LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @return LogicCriteria with First applied
+&nbsp;	 * @see First
+&nbsp;	 */
+&nbsp;	public LogicCriteria first();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#first()
+&nbsp;	 */
+&nbsp;	public LogicCriteria first(Integer numResults);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#first()
+&nbsp;	 */
+&nbsp;	public LogicCriteria first(String sortComponent);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#first()
+&nbsp;	 */
+&nbsp;	public LogicCriteria first(Integer numResults, String sortComponent);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Apply the {@link Distinct} operator to the LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @return LogicCriteria with Distinct operator in it
+&nbsp;	 * @see org.openmrs.logic.op.Distinct
+&nbsp;	 */
+&nbsp;	public LogicCriteria distinct();
+&nbsp;	
+&nbsp;	public LogicCriteria exists();
+&nbsp;	
+&nbsp;	public LogicCriteria notExists();
+&nbsp;	
+&nbsp;	//--Comparison Operators
+&nbsp;	/**
+&nbsp;	 * Add a {@link AsOf} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the AsOf operator
+&nbsp;	 * @return LogicCriteria with AsOf expression
+&nbsp;	 * @see AsOf
+&nbsp;	 */
+&nbsp;	public LogicCriteria asOf(Date value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link org.openmrs.logic.op.Before} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the Before operator
+&nbsp;	 * @return LogicCriteria with Before expression
+&nbsp;	 * @see org.openmrs.logic.op.Before
+&nbsp;	 */
+&nbsp;	public LogicCriteria before(Date value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link In} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the In operator
+&nbsp;	 * @return LogicCriteria with In expression
+&nbsp;	 * @see In
+&nbsp;	 */
+&nbsp;	public LogicCriteria after(Date value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link org.openmrs.logic.op.After} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the After operator
+&nbsp;	 * @return LogicCriteria with After expression
+&nbsp;	 * @see org.openmrs.logic.op.After
+&nbsp;	 */
+&nbsp;	public LogicCriteria in(Collection&lt;?&gt; value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#contains(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria contains(Operand value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#contains(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria contains(int value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#contains(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria contains(float value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#contains(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria contains(double value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link org.openmrs.logic.op.Contains} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the Contains operator
+&nbsp;	 * @return LogicCriteria with Contains expression
+&nbsp;	 * @see org.openmrs.logic.op.Contains
+&nbsp;	 */
+&nbsp;	public LogicCriteria contains(String value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#equalTo(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria equalTo(Operand value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#equalTo(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria equalTo(int value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#equalTo(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria equalTo(float value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#equalTo(String)
+&nbsp;	 */
+&nbsp;	public LogicCriteria equalTo(double value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link org.openmrs.logic.op.Equals} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the Equals operator
+&nbsp;	 * @return LogicCriteria with Equals expression
+&nbsp;	 * @see org.openmrs.logic.op.Equals
+&nbsp;	 */
+&nbsp;	public LogicCriteria equalTo(String value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#gte(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria gte(Operand value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#gte(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria gte(int value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#gte(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria gte(float value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link GreaterThanEquals} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the GreaterThanEquals operator
+&nbsp;	 * @return LogicCriteria with GreaterThanEquals expression
+&nbsp;	 * @see GreaterThanEquals
+&nbsp;	 */
+&nbsp;	public LogicCriteria gte(double value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#gt(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria gt(Operand value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#gt(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria gt(int value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#gt(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria gt(float value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link GreaterThan} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the GreaterThan operator
+&nbsp;	 * @return LogicCriteria with GreaterThan expression
+&nbsp;	 * @see GreaterThan
+&nbsp;	 */
+&nbsp;	public LogicCriteria gt(double value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#lt(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria lt(Operand value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#lt(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria lt(int value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#lt(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria lt(float value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link LessThan} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the LessThan operator
+&nbsp;	 * @return LogicCriteria with LessThan expression
+&nbsp;	 * @see LessThan
+&nbsp;	 */
+&nbsp;	public LogicCriteria lt(double value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#lte(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria lte(Operand value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#lte(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria lte(int value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LogicCriteria#lte(double)
+&nbsp;	 */
+&nbsp;	public LogicCriteria lte(float value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a {@link LessThanEquals} expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param value the operand for the LessThanEquals operator
+&nbsp;	 * @return LogicCriteria with LessThanEquals expression
+&nbsp;	 * @see LessThanEquals
+&nbsp;	 */
+&nbsp;	public LogicCriteria lte(double value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add a duration expression to the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @param duration the {@link Duration} object
+&nbsp;	 * @return LogicCriteria containing duration expression
+&nbsp;	 * @see Within
+&nbsp;	 */
+&nbsp;	public LogicCriteria within(Duration duration);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return logic parameters
+&nbsp;	 */
+&nbsp;	public Map&lt;String, Object&gt; getLogicParameters();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param logicParameters
+&nbsp;	 */
+&nbsp;	public void setLogicParameters(Map&lt;String, Object&gt; logicParameters);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Method to get the root token of the current LogicCriteria. &lt;code&gt;
+&nbsp;	 * logicService.parseString(&quot;&#39;CD4 COUNT&#39;&quot;).getRootToken().equals(&quot;CD4 COUNT&quot;);
+&nbsp;	 * &lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @return the root token of the LogicCriteria
+&nbsp;	 */
+&nbsp;	public String getRootToken();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Method to get the LogicExpression backing the current LogicCriteria
+&nbsp;	 * 
+&nbsp;	 * @return the LogicExpression of the current LogicCriteria
+&nbsp;	 */
+&nbsp;	public LogicExpression getExpression();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

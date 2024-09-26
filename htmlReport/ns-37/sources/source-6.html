@@ -1,0 +1,232 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CreateCodedOrderFrequencyForDrugOrderFrequencyChangeset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: CreateCodedOrderFrequencyForDrugOrderFrequencyChangeset (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CreateCodedOrderFrequencyForDrugOrderFrequencyChangeset</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,2%
+  </span>
+  <span class="absValue">
+    (39/48)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.sql.Date;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.util.DatabaseUtil;
+&nbsp;import org.openmrs.util.UpgradeUtil;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+<b class="fc">&nbsp;public class CreateCodedOrderFrequencyForDrugOrderFrequencyChangeset implements CustomTaskChange {</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="fc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			Set&lt;String&gt; uniqueFrequencies = DatabaseUtil.getUniqueNonNullColumnValues(&quot;frequency_text&quot;, &quot;drug_order&quot;,</b>
+<b class="fc">&nbsp;			    String.class, connection.getUnderlyingConnection());</b>
+<b class="fc">&nbsp;			insertUniqueFrequencies(connection, uniqueFrequencies);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void insertUniqueFrequencies(JdbcConnection connection, Set&lt;String&gt; uniqueFrequencies)
+&nbsp;	        throws CustomChangeException, SQLException, DatabaseException {
+<b class="fc">&nbsp;		PreparedStatement insertOrderFrequencyStatement = null;</b>
+<b class="fc">&nbsp;		Boolean autoCommit = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			autoCommit = connection.getAutoCommit();</b>
+<b class="fc">&nbsp;			connection.setAutoCommit(false);</b>
+<b class="fc">&nbsp;			insertOrderFrequencyStatement = connection.prepareStatement(&quot;insert into order_frequency &quot;</b>
+&nbsp;			        + &quot;(concept_id, creator, date_created, retired, uuid) values (?, ?, ?, ?, ?)&quot;);
+&nbsp;			
+<b class="fc">&nbsp;			Date date = new Date(new java.util.Date().getTime());</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (String frequency : uniqueFrequencies) {</b>
+<b class="fc">&nbsp;				if (StringUtils.isBlank(frequency)) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				Integer conceptIdForFrequency = UpgradeUtil.getConceptIdForUnits(frequency);</b>
+<b class="fc">&nbsp;				if (conceptIdForFrequency == null) {</b>
+<b class="nc">&nbsp;					throw new CustomChangeException(&quot;No concept mapping found for frequency: &quot; + frequency);</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				Integer orderFrequencyId = UpgradeUtil.getOrderFrequencyIdForConceptId(connection.getUnderlyingConnection(),</b>
+&nbsp;				    conceptIdForFrequency);
+<b class="fc">&nbsp;				if (orderFrequencyId != null) {</b>
+&nbsp;					//a single concept is mapped to more than one text or there is an order frequency already
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				//Generating UUID for order frequency. Generated UUIDs will be the same if concepts UUIDs are the same.
+<b class="fc">&nbsp;				String uuid = UpgradeUtil.getConceptUuid(connection.getUnderlyingConnection(), conceptIdForFrequency);</b>
+<b class="fc">&nbsp;				uuid += &quot;-6925ebb0-7c69-11e3-baa7-0800200c9a66&quot;; //Adding random value for order frequency</b>
+<b class="fc">&nbsp;				uuid = UUID.nameUUIDFromBytes(uuid.getBytes(StandardCharsets.UTF_8)).toString();</b>
+&nbsp;				
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.setInt(1, conceptIdForFrequency);</b>
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.setInt(2, 1);</b>
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.setDate(3, date);</b>
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.setBoolean(4, false);</b>
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.setString(5, uuid);</b>
+&nbsp;				
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.executeUpdate();</b>
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.clearParameters();</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			connection.commit();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			handleError(connection, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (autoCommit != null) {</b>
+<b class="fc">&nbsp;				connection.setAutoCommit(autoCommit);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (insertOrderFrequencyStatement != null) {</b>
+<b class="fc">&nbsp;				insertOrderFrequencyStatement.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void handleError(JdbcConnection connection, Exception e) throws DatabaseException, CustomChangeException {
+<b class="nc">&nbsp;		connection.rollback();</b>
+<b class="nc">&nbsp;		throw new CustomChangeException(e);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="fc">&nbsp;		return &quot;Finished creating coded order frequencies for drug order frequencies&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor resourceAccessor) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

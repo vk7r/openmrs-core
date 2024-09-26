@@ -1,0 +1,282 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateOrderSetDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateOrderSetDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateOrderSetDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (32/32)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.OrderSet;
+&nbsp;import org.openmrs.OrderSetAttribute;
+&nbsp;import org.openmrs.OrderSetAttributeType;
+&nbsp;import org.openmrs.OrderSetMember;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.OrderSetDAO;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class should not be used directly. This is just a common implementation of the OrderSetDAO that
+&nbsp; * is used by the OrderSetService. This class is injected by spring into the desired OrderSetService
+&nbsp; * class. This injection is determined by the xml mappings and elements in the spring application
+&nbsp; * context: /metadata/api/spring/applicationContext.xml.&lt;br/&gt;
+&nbsp; * &lt;br/&gt;
+&nbsp; * The OrderSetService should be used for all Order related database manipulation.
+&nbsp; *
+&nbsp; * @see org.openmrs.api.OrderSetService
+&nbsp; * @see org.openmrs.api.db.OrderSetDAO
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;public class HibernateOrderSetDAO implements OrderSetDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+<b class="fc">&nbsp;	public HibernateOrderSetDAO() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#save(OrderSet)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSet save(OrderSet orderSet) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		session.saveOrUpdate(orderSet);</b>
+<b class="fc">&nbsp;		return orderSet;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSets(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;OrderSet&gt; getOrderSets(boolean includeRetired) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;OrderSet&gt; cq = cb.createQuery(OrderSet.class);</b>
+<b class="fc">&nbsp;		Root&lt;OrderSet&gt; root = cq.from(OrderSet.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetById(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSet getOrderSetById(Integer orderSetId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(OrderSet.class, orderSetId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetByUniqueUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSet getOrderSetByUniqueUuid(String orderSetUuid) throws DAOException {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, OrderSet.class, orderSetUuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetMemberByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSetMember getOrderSetMemberByUuid(String uuid) throws DAOException {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, OrderSetMember.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getAllOrderSetAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;OrderSetAttributeType&gt; getAllOrderSetAttributeTypes() {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;OrderSetAttributeType&gt; cq = cb.createQuery(OrderSetAttributeType.class);</b>
+<b class="fc">&nbsp;		cq.from(OrderSetAttributeType.class);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetAttributeType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSetAttributeType getOrderSetAttributeType(Integer id) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(OrderSetAttributeType.class, id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetAttributeTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSetAttributeType getOrderSetAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, OrderSetAttributeType.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#saveOrderSetAttributeType(org.openmrs.OrderSetAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSetAttributeType saveOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(orderSetAttributeType);</b>
+<b class="fc">&nbsp;		return orderSetAttributeType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#deleteOrderSetAttributeType(org.openmrs.OrderSetAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(orderSetAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetAttributeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSetAttribute getOrderSetAttributeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, OrderSetAttribute.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OrderSetDAO#getOrderSetAttributeTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OrderSetAttributeType getOrderSetAttributeTypeByName(String name) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;OrderSetAttributeType&gt; cq = cb.createQuery(OrderSetAttributeType.class);</b>
+<b class="fc">&nbsp;		Root&lt;OrderSetAttributeType&gt; root = cq.from(OrderSetAttributeType.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), name));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

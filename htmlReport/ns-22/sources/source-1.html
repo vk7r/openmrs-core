@@ -1,0 +1,489 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MigrationHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.migration</a>
+</div>
+
+<h1>Coverage Summary for Class: MigrationHelper (org.openmrs.migration)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MigrationHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/192)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.migration;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Random;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import javax.xml.parsers.ParserConfigurationException;
+&nbsp;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.PatientState;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.ProgramWorkflowState;
+&nbsp;import org.openmrs.Relationship;
+&nbsp;import org.openmrs.RelationshipType;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.LocationService;
+&nbsp;import org.openmrs.api.PatientService;
+&nbsp;import org.openmrs.api.PersonService;
+&nbsp;import org.openmrs.api.ProgramWorkflowService;
+&nbsp;import org.openmrs.api.UserService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;import org.xml.sax.SAXException;
+&nbsp;
+&nbsp;/**
+&nbsp; * The MigrationHelper will be removed from openmrs-core. If you need the code migrate it to your code base.
+&nbsp; * 
+&nbsp; * @deprecated since 2.2.0
+&nbsp; */
+&nbsp;@Deprecated
+&nbsp;public class MigrationHelper {
+&nbsp;
+&nbsp;	private MigrationHelper() {
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static final String DATE_TIME_PATTERN = &quot;yyyy-MM-dd HH:mm:ss&quot;;
+&nbsp;
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MigrationHelper.class);</b>
+&nbsp;	
+<b class="nc">&nbsp;	static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @deprecated since 2.2.0 migrate the method to your code base if needed
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static Date parseDate(String s) throws ParseException {
+<b class="nc">&nbsp;		if (s == null || s.length() == 0) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			if (s.length() == 10) {</b>
+<b class="nc">&nbsp;				s += &quot; 00:00:00&quot;;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			DateFormat df = new SimpleDateFormat(DATE_TIME_PATTERN);</b>
+<b class="nc">&nbsp;			return df.parse(s);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @deprecated since 2.2.0 migrate the method to your code base if needed
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static Document parseXml(String xml) throws ParserConfigurationException {
+<b class="nc">&nbsp;		DocumentBuilder builder = factory.newDocumentBuilder();</b>
+&nbsp;		try {
+&nbsp;			// Disable resolution of external entities. See TRUNK-3942 
+<b class="nc">&nbsp;			builder.setEntityResolver((publicId, systemId) -&gt; new InputSource(new StringReader(&quot;&quot;)));</b>
+&nbsp;			
+<b class="nc">&nbsp;			return builder.parse(new InputSource(new StringReader(xml)));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException | SAXException ex) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static void findNodesNamed(Node node, String lookForName, Collection&lt;Node&gt; ret) {
+<b class="nc">&nbsp;		if (node.getNodeName().equals(lookForName)) {</b>
+<b class="nc">&nbsp;			ret.add(node);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			NodeList list = node.getChildNodes();</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; list.getLength(); ++i) {</b>
+<b class="nc">&nbsp;				findNodesNamed(list.item(i), lookForName, ret);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes XML like: &amp;lt;something&amp;gt; &amp;lt;user date_changed=&quot;2001-03-06 08:46:53.0&quot;
+&nbsp;	 * date_created=&quot;2001-03-06 08:46:53.0&quot; username=&quot;hamish@mit.edu&quot; first_name=&quot;Hamish&quot;
+&nbsp;	 * last_name=&quot;Fraser&quot; user_id=&quot;2001&quot;/&amp;gt; &amp;lt;/something&amp;gt; Returns the number of users added
+&nbsp;	 * 
+&nbsp;	 * @deprecated since 2.2.0 migrate the method to your code base if needed
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static int importUsers(Document document) throws ParseException {
+<b class="nc">&nbsp;		int ret = 0;</b>
+<b class="nc">&nbsp;		Random rand = new Random();</b>
+<b class="nc">&nbsp;		UserService us = Context.getUserService();</b>
+&nbsp;		
+<b class="nc">&nbsp;		List&lt;Node&gt; toAdd = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		findNodesNamed(document, &quot;user&quot;, toAdd);</b>
+<b class="nc">&nbsp;		for (Node node : toAdd) {</b>
+<b class="nc">&nbsp;			Element e = (Element) node;</b>
+<b class="nc">&nbsp;			String username = e.getAttribute(&quot;username&quot;);</b>
+<b class="nc">&nbsp;			if (username == null || username.length() == 0) {</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;each &lt;user /&gt; element must define a user_name attribute&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (us.getUserByUsername(username) != null) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			User user = new User();</b>
+<b class="nc">&nbsp;			user.setPerson(new Person());</b>
+<b class="nc">&nbsp;			PersonName pn = new PersonName(e.getAttribute(&quot;first_name&quot;), &quot;&quot;, e.getAttribute(&quot;last_name&quot;));</b>
+<b class="nc">&nbsp;			user.addName(pn);</b>
+<b class="nc">&nbsp;			user.setUsername(username);</b>
+<b class="nc">&nbsp;			user.setDateCreated(parseDate(e.getAttribute(&quot;date_created&quot;)));</b>
+<b class="nc">&nbsp;			user.setDateChanged(parseDate(e.getAttribute(&quot;date_changed&quot;)));</b>
+&nbsp;			
+&nbsp;			// Generate a temporary password: 8-12 random characters
+&nbsp;			String pass;
+&nbsp;			{
+<b class="nc">&nbsp;				int length = rand.nextInt(4) + 8;</b>
+<b class="nc">&nbsp;				char[] password = new char[length];</b>
+<b class="nc">&nbsp;				for (int x = 0; x &lt; length; x++) {</b>
+<b class="nc">&nbsp;					int randDecimalAsciiVal = rand.nextInt(93) + 33;</b>
+<b class="nc">&nbsp;					password[x] = (char) randDecimalAsciiVal;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				pass = new String(password);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			us.createUser(user, pass);</b>
+<b class="nc">&nbsp;			++ret;</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes XML like: &amp;lt;something&amp;gt; &amp;lt;location name=&quot;Cerca-la-Source&quot;/&amp;gt; &amp;lt;/something&amp;gt; returns the
+&nbsp;	 * number of locations added
+&nbsp;	 * 
+&nbsp;	 * @deprecated since 2.2.0 migrate the method to your code base if needed
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static int importLocations(Document document) {
+<b class="nc">&nbsp;		int ret = 0;</b>
+<b class="nc">&nbsp;		LocationService ls = Context.getLocationService();</b>
+<b class="nc">&nbsp;		List&lt;Node&gt; toAdd = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		findNodesNamed(document, &quot;location&quot;, toAdd);</b>
+<b class="nc">&nbsp;		for (Node node : toAdd) {</b>
+<b class="nc">&nbsp;			Element e = (Element) node;</b>
+<b class="nc">&nbsp;			String name = e.getAttribute(&quot;name&quot;);</b>
+<b class="nc">&nbsp;			if (name == null || name.length() == 0) {</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;each &lt;location /&gt; element must define a name attribute&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (ls.getLocation(name) != null) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			Location location = new Location();</b>
+<b class="nc">&nbsp;			location.setName(name);</b>
+&nbsp;			
+<b class="nc">&nbsp;			ls.saveLocation(location);</b>
+<b class="nc">&nbsp;			++ret;</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes a list of Strings of the format RELATIONSHIP:&amp;lt;user last name&amp;gt;,&amp;lt;user first
+&nbsp;	 * name&amp;gt;,&amp;lt;relationship type name&amp;gt;,&amp;lt;patient identifier type name&amp;gt;,&amp;lt;identifier&amp;gt; so if user hfraser
+&nbsp;	 * if the cardiologist of the patient with patient_id 8039 in PIH&#39;s old emr, then:
+&nbsp;	 * RELATIONSHIP:hfraser,Cardiologist,HIV-EMRV1,8039 (the &quot;RELATIONSHIP:&quot; is not actually
+&nbsp;	 * necessary. Anything before and including the first : will be dropped If autoCreateUsers is
+&nbsp;	 * true, and no user exists with the given username, one will be created. If autoAddRole is
+&nbsp;	 * true, then whenever a user is auto-created, if a role exists with the same name as
+&nbsp;	 * relationshipType.name, then the user will be added to that role
+&nbsp;	 * 
+&nbsp;	 * @deprecated since 2.2.0 migrate the method to your code base if needed
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static int importRelationships(Collection&lt;String&gt; relationships, boolean autoCreateUsers, boolean autoAddRole) {
+<b class="nc">&nbsp;		PatientService ps = Context.getPatientService();</b>
+<b class="nc">&nbsp;		UserService us = Context.getUserService();</b>
+<b class="nc">&nbsp;		PersonService personService = Context.getPersonService();</b>
+<b class="nc">&nbsp;		List&lt;Relationship&gt; relsToAdd = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		Random rand = new Random();</b>
+<b class="nc">&nbsp;		for (String s : relationships) {</b>
+<b class="nc">&nbsp;			if (s.contains(&quot;:&quot;)) {</b>
+<b class="nc">&nbsp;				s = s.substring(s.indexOf(&quot;:&quot;) + 1);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			String[] ss = s.split(&quot;,&quot;);</b>
+<b class="nc">&nbsp;			if (ss.length &lt; 5) {</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;The line &#39;&quot; + s + &quot;&#39; is in the wrong format&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			String userLastName = ss[0];</b>
+<b class="nc">&nbsp;			String userFirstName = ss[1];</b>
+<b class="nc">&nbsp;			String username = (userFirstName + userLastName).replaceAll(&quot; &quot;, &quot;&quot;);</b>
+<b class="nc">&nbsp;			String relationshipType = ss[2];</b>
+<b class="nc">&nbsp;			String identifierType = ss[3];</b>
+<b class="nc">&nbsp;			String identifier = ss[4];</b>
+<b class="nc">&nbsp;			User user = null;</b>
+&nbsp;			{ // first try looking for non-voided users
+<b class="nc">&nbsp;				List&lt;User&gt; users = us.getUsersByName(userFirstName, userLastName, false);</b>
+<b class="nc">&nbsp;				if (users.size() == 1) {</b>
+<b class="nc">&nbsp;					user = users.get(0);</b>
+<b class="nc">&nbsp;				} else if (users.size() &gt; 1) {</b>
+<b class="nc">&nbsp;					throw new IllegalArgumentException(&quot;Found &quot; + users.size() + &quot; users named &#39;&quot; + userLastName + &quot;, &quot;</b>
+&nbsp;					        + userFirstName + &quot;&#39;&quot;);
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (user == null) {</b>
+&nbsp;				// next try looking for voided users
+<b class="nc">&nbsp;				List&lt;User&gt; users = us.getUsersByName(userFirstName, userLastName, false);</b>
+<b class="nc">&nbsp;				if (users.size() == 1) {</b>
+<b class="nc">&nbsp;					user = users.get(0);</b>
+<b class="nc">&nbsp;				} else if (users.size() &gt; 1) {</b>
+<b class="nc">&nbsp;					throw new IllegalArgumentException(&quot;Found &quot; + users.size() + &quot; voided users named &#39;&quot; + userLastName</b>
+&nbsp;					        + &quot;, &quot; + userFirstName + &quot;&#39;&quot;);
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (user == null &amp;&amp; autoCreateUsers) {</b>
+<b class="nc">&nbsp;				user = new User();</b>
+<b class="nc">&nbsp;				user.setPerson(new Person());</b>
+<b class="nc">&nbsp;				PersonName pn = new PersonName(userFirstName, &quot;&quot;, userLastName);</b>
+<b class="nc">&nbsp;				user.addName(pn);</b>
+<b class="nc">&nbsp;				user.setUsername(username);</b>
+&nbsp;				// Generate a temporary password: 8-12 random characters
+&nbsp;				String pass;
+&nbsp;				{
+<b class="nc">&nbsp;					int length = rand.nextInt(4) + 8;</b>
+<b class="nc">&nbsp;					char[] password = new char[length];</b>
+<b class="nc">&nbsp;					for (int x = 0; x &lt; length; x++) {</b>
+<b class="nc">&nbsp;						int randDecimalAsciiVal = rand.nextInt(93) + 33;</b>
+<b class="nc">&nbsp;						password[x] = (char) randDecimalAsciiVal;</b>
+&nbsp;					}
+<b class="nc">&nbsp;					pass = new String(password);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (autoAddRole) {</b>
+<b class="nc">&nbsp;					Role role = us.getRole(relationshipType);</b>
+<b class="nc">&nbsp;					if (role != null) {</b>
+<b class="nc">&nbsp;						user.addRole(role);</b>
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				us.createUser(user, pass);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (user == null) {</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Can&#39;t find user &#39;&quot; + userLastName + &quot;, &quot; + userFirstName + &quot;&#39;&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			Person person = personService.getPerson(user.getUserId());</b>
+&nbsp;			
+<b class="nc">&nbsp;			RelationshipType relationship = personService.getRelationshipTypeByName(relationshipType);</b>
+<b class="nc">&nbsp;			PatientIdentifierType pit = ps.getPatientIdentifierTypeByName(identifierType);</b>
+<b class="nc">&nbsp;			List&lt;PatientIdentifier&gt; found = ps.getPatientIdentifiers(identifier, Collections.singletonList(pit), null, null,</b>
+&nbsp;			    null);
+<b class="nc">&nbsp;			if (found.size() != 1) {</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Found &quot; + found.size() + &quot; patients with identifier &#39;&quot; + identifier</b>
+&nbsp;				        + &quot;&#39; of type &quot; + identifierType);
+&nbsp;			}
+<b class="nc">&nbsp;			Person relative = personService.getPerson(found.get(0).getPatient().getPatientId());</b>
+<b class="nc">&nbsp;			Relationship rel = new Relationship();</b>
+<b class="nc">&nbsp;			rel.setPersonA(person);</b>
+<b class="nc">&nbsp;			rel.setRelationshipType(relationship);</b>
+<b class="nc">&nbsp;			rel.setPersonB(relative);</b>
+<b class="nc">&nbsp;			relsToAdd.add(rel);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		int addedSoFar = 0;</b>
+<b class="nc">&nbsp;		for (Relationship rel : relsToAdd) {</b>
+<b class="nc">&nbsp;			personService.saveRelationship(rel);</b>
+<b class="nc">&nbsp;			++addedSoFar;</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return addedSoFar;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @deprecated since 2.2.0 migrate the method to your code base if needed
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static int importProgramsAndStatuses(List&lt;String&gt; programWorkflow) throws ParseException {
+<b class="nc">&nbsp;		ProgramWorkflowService pws = Context.getProgramWorkflowService();</b>
+<b class="nc">&nbsp;		PatientService ps = Context.getPatientService();</b>
+<b class="nc">&nbsp;		List&lt;PatientProgram&gt; patientPrograms = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		Map&lt;String, PatientProgram&gt; knownPatientPrograms = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		Map&lt;String, Program&gt; programsByName = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (Program program : pws.getAllPrograms()) {</b>
+<b class="nc">&nbsp;			programsByName.put(program.getConcept().getName(Context.getLocale(), false).getName(), program);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		for (String s : programWorkflow) {</b>
+&nbsp;			// ENROLLMENT:HIVEMR-V1,9266,IMB HIV PROGRAM,2005-08-25,
+<b class="nc">&nbsp;			log.debug(s);</b>
+<b class="nc">&nbsp;			if (s.startsWith(&quot;ENROLLMENT:&quot;)) {</b>
+<b class="nc">&nbsp;				s = s.substring(s.indexOf(&quot;:&quot;) + 1);</b>
+<b class="nc">&nbsp;				String[] temp = s.split(&quot;,&quot;);</b>
+<b class="nc">&nbsp;				PatientIdentifierType pit = ps.getPatientIdentifierTypeByName(temp[0]);</b>
+<b class="nc">&nbsp;				String identifier = temp[1];</b>
+<b class="nc">&nbsp;				List&lt;PatientIdentifier&gt; pis = ps.getPatientIdentifiers(identifier, Collections.singletonList(pit), null,</b>
+&nbsp;				    null, null);
+<b class="nc">&nbsp;				if (pis.size() != 1) {</b>
+<b class="nc">&nbsp;					throw new IllegalArgumentException(&quot;Found &quot; + pis.size() + &quot; instances of identifier &quot; + identifier</b>
+&nbsp;					        + &quot; of type &quot; + pit);
+&nbsp;				}
+<b class="nc">&nbsp;				Patient p = pis.get(0).getPatient();</b>
+<b class="nc">&nbsp;				Program program = programsByName.get(temp[2]);</b>
+<b class="nc">&nbsp;				if (program == null) {</b>
+<b class="nc">&nbsp;					throw new RuntimeException(&quot;Couldn&#39;t find program \&quot;&quot; + temp[2] + &quot;\&quot; in &quot; + programsByName);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				Date enrollmentDate = temp.length &lt; 4 ? null : parseDate(temp[3]);</b>
+<b class="nc">&nbsp;				Date completionDate = temp.length &lt; 5 ? null : parseDate(temp[4]);</b>
+<b class="nc">&nbsp;				PatientProgram pp = new PatientProgram();</b>
+<b class="nc">&nbsp;				pp.setPatient(p);</b>
+<b class="nc">&nbsp;				pp.setProgram(program);</b>
+<b class="nc">&nbsp;				pp.setDateEnrolled(enrollmentDate);</b>
+<b class="nc">&nbsp;				pp.setDateCompleted(completionDate);</b>
+<b class="nc">&nbsp;				patientPrograms.add(pp);</b>
+<b class="nc">&nbsp;				knownPatientPrograms.put(temp[0] + &quot;,&quot; + temp[1] + &quot;,&quot; + temp[2], pp); // &quot;HIVEMR-V1,9266,IMB HIV PROGRAM&quot;</b>
+<b class="nc">&nbsp;			} else if (s.startsWith(&quot;STATUS:&quot;)) {</b>
+&nbsp;				// STATUS:HIVEMR-V1,9266,IMB HIV PROGRAM,TREATMENT STATUS,ACTIVE,2005-08-25,,
+<b class="nc">&nbsp;				s = s.substring(s.indexOf(&quot;:&quot;) + 1);</b>
+<b class="nc">&nbsp;				String[] temp = s.split(&quot;,&quot;);</b>
+<b class="nc">&nbsp;				Program program = programsByName.get(temp[2]);</b>
+<b class="nc">&nbsp;				if (program == null) {</b>
+<b class="nc">&nbsp;					throw new RuntimeException(&quot;Couldn&#39;t find program \&quot;&quot; + temp[2] + &quot;\&quot; in &quot; + programsByName);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				ProgramWorkflow wf = program.getWorkflowByName(temp[3]);</b>
+<b class="nc">&nbsp;				if (wf == null) {</b>
+<b class="nc">&nbsp;					throw new RuntimeException(&quot;Couldn&#39;t find workflow \&quot;&quot; + temp[3] + &quot;\&quot; for program &quot; + program + &quot; (in &quot;</b>
+<b class="nc">&nbsp;					        + program.getAllWorkflows() + &quot;)&quot;);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				ProgramWorkflowState st = wf.getStateByName(temp[4]);</b>
+<b class="nc">&nbsp;				if (st == null) {</b>
+<b class="nc">&nbsp;					throw new RuntimeException(&quot;Couldn&#39;t find state \&quot;&quot; + temp[4] + &quot;\&quot; for workflow &quot; + wf + &quot; (in &quot;</b>
+<b class="nc">&nbsp;					        + wf.getStates() + &quot;)&quot;);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				Date startDate = temp.length &lt; 6 ? null : parseDate(temp[5]);</b>
+<b class="nc">&nbsp;				Date endDate = temp.length &lt; 7 ? null : parseDate(temp[6]);</b>
+<b class="nc">&nbsp;				PatientState state = new PatientState();</b>
+<b class="nc">&nbsp;				PatientProgram pp = knownPatientPrograms.get(temp[0] + &quot;,&quot; + temp[1] + &quot;,&quot; + temp[2]);</b>
+<b class="nc">&nbsp;				state.setPatientProgram(pp);</b>
+<b class="nc">&nbsp;				state.setState(st);</b>
+<b class="nc">&nbsp;				state.setStartDate(startDate);</b>
+<b class="nc">&nbsp;				state.setEndDate(endDate);</b>
+<b class="nc">&nbsp;				pp.getStates().add(state);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		int numAdded = 0;</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (PatientProgram pp : knownPatientPrograms.values()) {</b>
+<b class="nc">&nbsp;			pws.savePatientProgram(pp);</b>
+<b class="nc">&nbsp;			++numAdded;</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return numAdded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

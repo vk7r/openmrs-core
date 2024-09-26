@@ -1,0 +1,146 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MutableMessageSource</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.messagesource</a>
+</div>
+
+<h1>Coverage Summary for Class: MutableMessageSource (org.openmrs.messagesource)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MutableMessageSource</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.messagesource;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;import org.springframework.context.HierarchicalMessageSource;
+&nbsp;import org.springframework.context.MessageSource;
+&nbsp;
+&nbsp;/**
+&nbsp; * Extended MessageSource interface, which provides more information about the available messages
+&nbsp; * and can be changed.
+&nbsp; */
+&nbsp;public interface MutableMessageSource extends MessageSource, HierarchicalMessageSource {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the locales for which messages are available from this source.
+&nbsp;	 * 
+&nbsp;	 * @return available message locales
+&nbsp;	 */
+&nbsp;	public Collection&lt;Locale&gt; getLocales();
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Gets all of the available messages, packaged as PresentationMessages.
+&nbsp;	 * 
+&nbsp;	 * @return collection of presentation messages
+&nbsp;	 */
+&nbsp;	public Collection&lt;PresentationMessage&gt; getPresentations();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets alll the available messages in a particular locale, packaged as PresentationMessages.
+&nbsp;	 * 
+&nbsp;	 * @param locale locale for which to get the messages
+&nbsp;	 * @return collection of PresentationMessages in the locale
+&nbsp;	 */
+&nbsp;	public Collection&lt;PresentationMessage&gt; getPresentationsInLocale(Locale locale);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a presentation message to the source. This operation should overwrite any existing
+&nbsp;	 * message which conflicts (has the same code and locale).
+&nbsp;	 * 
+&nbsp;	 * @param message message to add to the source
+&nbsp;	 */
+&nbsp;	public void addPresentation(PresentationMessage message);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the PresentationMessage for a particular locale.
+&nbsp;	 * 
+&nbsp;	 * @param key textual key for the message
+&nbsp;	 * @param forLocale locale for which to get the message
+&nbsp;	 * @return corresponding PresentationMessage, or null if not available
+&nbsp;	 */
+&nbsp;	public PresentationMessage getPresentation(String key, Locale forLocale);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a presentation message from the source.
+&nbsp;	 * 
+&nbsp;	 * @param message the message to remove
+&nbsp;	 */
+&nbsp;	public void removePresentation(PresentationMessage message);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Merge messages from another source into this source.
+&nbsp;	 * 
+&nbsp;	 * @param fromSource message source from which messages should be merge
+&nbsp;	 * @param overwrite whether to overwrite existing messages
+&nbsp;	 */
+&nbsp;	public void merge(MutableMessageSource fromSource, boolean overwrite);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

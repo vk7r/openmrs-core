@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VelocityMessagePreparator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification.mail.velocity</a>
+</div>
+
+<h1>Coverage Summary for Class: VelocityMessagePreparator (org.openmrs.notification.mail.velocity)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VelocityMessagePreparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    34,6%
+  </span>
+  <span class="absValue">
+    (9/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification.mail.velocity;
+&nbsp;
+&nbsp;import java.io.StringWriter;
+&nbsp;import java.util.Properties;
+&nbsp;
+&nbsp;import org.apache.velocity.VelocityContext;
+&nbsp;import org.apache.velocity.app.VelocityEngine;
+&nbsp;import org.apache.velocity.runtime.log.Log4JLogChute;
+&nbsp;import org.openmrs.notification.Message;
+&nbsp;import org.openmrs.notification.MessageException;
+&nbsp;import org.openmrs.notification.MessagePreparator;
+&nbsp;import org.openmrs.notification.Template;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;public class VelocityMessagePreparator implements MessagePreparator {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Logger
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(VelocityMessagePreparator.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Velocity template engine
+&nbsp;	 */
+&nbsp;	private VelocityEngine engine;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Public constructor TODO: needs better error handling
+&nbsp;	 * 
+&nbsp;	 * @throws MessageException
+&nbsp;	 */
+<b class="fc">&nbsp;	public VelocityMessagePreparator() throws MessageException {</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			engine = new VelocityEngine();</b>
+<b class="fc">&nbsp;			Properties props = new Properties();</b>
+<b class="fc">&nbsp;			props.put(&quot;runtime.log.logsystem.class&quot;, Log4JLogChute.class.getName());</b>
+<b class="fc">&nbsp;			props.put(&quot;runtime.log.logsystem.log4j.category&quot;, &quot;velocity&quot;);</b>
+<b class="fc">&nbsp;			props.put(&quot;runtime.log.logsystem.log4j.logger&quot;, &quot;velocity&quot;);</b>
+<b class="fc">&nbsp;			engine.init(props);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Failed to create velocity engine &quot; + e.getMessage(), e);</b>
+<b class="nc">&nbsp;			throw new MessageException(e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// TODO: need better error handling
+&nbsp;	@Override
+&nbsp;	public Message prepare(Template template) throws MessageException {
+&nbsp;		
+<b class="nc">&nbsp;		VelocityContext context = new VelocityContext(template.getData());</b>
+<b class="nc">&nbsp;		StringWriter writer = new StringWriter();</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			engine.evaluate(context, writer, &quot;template&quot;, // I have no idea what this is used for</b>
+<b class="nc">&nbsp;			    template.getTemplate());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+&nbsp;			// need better error handling
+<b class="nc">&nbsp;			log.error(&quot;Failed to prepare message using template &quot; + e.getMessage(), e);</b>
+<b class="nc">&nbsp;			throw new MessageException(e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// Prepare the message
+<b class="nc">&nbsp;		Message message = new Message();</b>
+<b class="nc">&nbsp;		message.setSubject(template.getSubject());</b>
+<b class="nc">&nbsp;		message.setRecipients(template.getRecipients());</b>
+<b class="nc">&nbsp;		message.setSender(template.getSender());</b>
+<b class="nc">&nbsp;		message.setContent(writer.toString());</b>
+&nbsp;		
+<b class="nc">&nbsp;		return message;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

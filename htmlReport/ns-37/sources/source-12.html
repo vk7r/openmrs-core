@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MigrateDrugOrderUnitsToCodedDoseUnitsChangeset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: MigrateDrugOrderUnitsToCodedDoseUnitsChangeset (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MigrateDrugOrderUnitsToCodedDoseUnitsChangeset</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,4%
+  </span>
+  <span class="absValue">
+    (37/46)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Types;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.util.DatabaseUtil;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.UpgradeUtil;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+<b class="fc">&nbsp;public class MigrateDrugOrderUnitsToCodedDoseUnitsChangeset implements CustomTaskChange {</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="fc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			Set&lt;String&gt; uniqueUnits = DatabaseUtil.getUniqueNonNullColumnValues(&quot;units&quot;, &quot;drug_order&quot;, String.class,</b>
+<b class="fc">&nbsp;			    connection.getUnderlyingConnection());</b>
+<b class="fc">&nbsp;			migrateUnitsToCodedValue(connection, uniqueUnits);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void migrateUnitsToCodedValue(JdbcConnection connection, Set&lt;String&gt; uniqueUnits) throws CustomChangeException,
+&nbsp;	        SQLException, DatabaseException {
+<b class="fc">&nbsp;		PreparedStatement updateDrugOrderStatement = null;</b>
+<b class="fc">&nbsp;		Boolean autoCommit = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			autoCommit = connection.getAutoCommit();</b>
+<b class="fc">&nbsp;			connection.setAutoCommit(false);</b>
+&nbsp;			
+<b class="fc">&nbsp;			updateDrugOrderStatement = connection.prepareStatement(&quot;update drug_order set dose_units = ? where units = ?&quot;);</b>
+&nbsp;			
+<b class="fc">&nbsp;			updateDrugOrderStatement.setNull(1, Types.INTEGER);</b>
+<b class="fc">&nbsp;			updateDrugOrderStatement.setNull(2, Types.VARCHAR);</b>
+<b class="fc">&nbsp;			updateDrugOrderStatement.executeUpdate();</b>
+<b class="fc">&nbsp;			updateDrugOrderStatement.clearParameters();</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (String unit : uniqueUnits) {</b>
+<b class="fc">&nbsp;				if (StringUtils.isBlank(unit)) {</b>
+<b class="fc">&nbsp;					updateDrugOrderStatement.setNull(1, Types.INTEGER);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					Integer conceptIdForUnit = UpgradeUtil.getConceptIdForUnits(unit);</b>
+<b class="fc">&nbsp;					if (conceptIdForUnit == null) {</b>
+<b class="nc">&nbsp;						throw new CustomChangeException(&quot;No concept mapping found for unit: &quot; + unit);</b>
+&nbsp;					}
+<b class="fc">&nbsp;					String dosingUnitsConceptSetUuid = UpgradeUtil.getGlobalProperty(connection.getUnderlyingConnection(),</b>
+&nbsp;					    OpenmrsConstants.GP_DRUG_DOSING_UNITS_CONCEPT_UUID);
+<b class="fc">&nbsp;					List&lt;Integer&gt; dosingUnitsconceptIds = UpgradeUtil.getMemberSetIds(connection.getUnderlyingConnection(),</b>
+&nbsp;					    dosingUnitsConceptSetUuid);
+<b class="fc">&nbsp;					if (!dosingUnitsconceptIds.contains(conceptIdForUnit)) {</b>
+<b class="nc">&nbsp;						throw new CustomChangeException(&quot;Dosing unit &#39;&quot; + unit</b>
+&nbsp;						        + &quot;&#39; is not among valid concepts defined in global property &quot;
+&nbsp;						        + OpenmrsConstants.GP_DRUG_DOSING_UNITS_CONCEPT_UUID);
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					updateDrugOrderStatement.setInt(1, conceptIdForUnit);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				updateDrugOrderStatement.setString(2, unit);</b>
+<b class="fc">&nbsp;				updateDrugOrderStatement.executeUpdate();</b>
+<b class="fc">&nbsp;				updateDrugOrderStatement.clearParameters();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			connection.commit();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			handleError(connection, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (autoCommit != null) {</b>
+<b class="fc">&nbsp;				connection.setAutoCommit(autoCommit);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (updateDrugOrderStatement != null) {</b>
+<b class="fc">&nbsp;				updateDrugOrderStatement.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void handleError(JdbcConnection connection, Exception e) throws DatabaseException, CustomChangeException {
+<b class="nc">&nbsp;		connection.rollback();</b>
+<b class="nc">&nbsp;		throw new CustomChangeException(e);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="fc">&nbsp;		return &quot;Finished migrating drug order units to coded dose units&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor resourceAccessor) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

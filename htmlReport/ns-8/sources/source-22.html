@@ -1,0 +1,258 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ImmutableEntityInterceptor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: ImmutableEntityInterceptor (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImmutableEntityInterceptor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (4/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,1%
+  </span>
+  <span class="absValue">
+    (30/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.lang3.ArrayUtils;
+&nbsp;import org.hibernate.EmptyInterceptor;
+&nbsp;import org.hibernate.type.Type;
+&nbsp;import org.openmrs.Retireable;
+&nbsp;import org.openmrs.Voidable;
+&nbsp;import org.openmrs.api.UnchangeableObjectException;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Superclass for all Interceptors that would like to ensure that changes to immutable entities of
+&nbsp; * specific types don&#39;t get persisted to the database, more granularity of the immutable properties
+&nbsp; * is also supported so as to allow editing some properties while not for others
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * &lt;b&gt;NOTE:&lt;/b&gt; Subclasses MUST not make any changes to the persistent object because they get 
+&nbsp; * called last, if they make any changes other interceptors would never know about them.
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @since 1.10
+&nbsp; */
+<b class="fc">&nbsp;public abstract class ImmutableEntityInterceptor extends EmptyInterceptor {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ImmutableEntityInterceptor.class);</b>
+&nbsp;	
+&nbsp;	// This thread local enables storing additional mutable properties to allow for a given thread
+<b class="fc">&nbsp;	private final ThreadLocal&lt;String[]&gt; additionalMutableProperties = new ThreadLocal&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the class handled by the interceptor
+&nbsp;	 */
+&nbsp;	protected abstract Class&lt;?&gt; getSupportedType();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Subclasses can override this to return fields that are allowed to be edited, returning null
+&nbsp;	 * or an empty array implies the entity is immutable
+&nbsp;	 *
+&nbsp;	 * @return an array of properties
+&nbsp;	 */
+&nbsp;	protected String[] getMutablePropertyNames() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Subclasses can override this to specify whether voided or retired items are mutable
+&nbsp;	 * 
+&nbsp;	 * @return true if voided or retired objects are mutable otherwise false means they are
+&nbsp;	 *         immutable
+&nbsp;	 */
+&nbsp;	protected boolean ignoreVoidedOrRetiredObjects() {
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.hibernate.EmptyInterceptor#onFlushDirty(Object, java.io.Serializable, Object[],
+&nbsp;	 *      Object[], String[], org.hibernate.type.Type[])
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if an entity has a changed property
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if an entity has changes for an allowed mutable property
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if the edited object is voided or retired and ignore is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the edited object is voided or retired and ignore is set to false
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
+&nbsp;	                            String[] propertyNames, Type[] types) {
+&nbsp;		
+<b class="fc">&nbsp;		if (getSupportedType().isAssignableFrom(entity.getClass())) {</b>
+<b class="fc">&nbsp;			List&lt;String&gt; changedProperties = null;</b>
+<b class="fc">&nbsp;			for (int i = 0; i &lt; propertyNames.length; i++) {</b>
+<b class="fc">&nbsp;				String property = propertyNames[i];</b>
+<b class="fc">&nbsp;				if (isMutableProperty(property)) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				boolean isVoidedOrRetired = false;</b>
+<b class="fc">&nbsp;				if (Voidable.class.isAssignableFrom(entity.getClass())) {</b>
+<b class="fc">&nbsp;					isVoidedOrRetired = ((Voidable) entity).getVoided();</b>
+<b class="nc">&nbsp;				} else if (Retireable.class.isAssignableFrom(entity.getClass())) {</b>
+<b class="nc">&nbsp;					isVoidedOrRetired = ((Retireable) entity).getRetired();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (isVoidedOrRetired &amp;&amp; ignoreVoidedOrRetiredObjects()) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				Object previousValue = (previousState != null) ? previousState[i] : null;</b>
+<b class="fc">&nbsp;				Object currentValue = (currentState != null) ? currentState[i] : null;</b>
+<b class="fc">&nbsp;				if (!OpenmrsUtil.nullSafeEquals(currentValue, previousValue)) {</b>
+<b class="fc">&nbsp;					if (changedProperties == null) {</b>
+<b class="fc">&nbsp;						changedProperties = new ArrayList&lt;&gt;();</b>
+&nbsp;					}
+<b class="fc">&nbsp;					changedProperties.add(property);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;			if (CollectionUtils.isNotEmpty(changedProperties)) {</b>
+<b class="fc">&nbsp;				log.debug(&quot;The following fields cannot be changed for {} : {}&quot;, getSupportedType(), changedProperties);</b>
+&nbsp;				
+<b class="fc">&nbsp;				throw new UnchangeableObjectException(&quot;editing.fields.not.allowed&quot;, new Object[] { changedProperties,</b>
+<b class="fc">&nbsp;				        getSupportedType().getSimpleName() });</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return true if the given property is allowed to be mutable
+&nbsp;	 */
+&nbsp;	private boolean isMutableProperty(String property) {
+<b class="fc">&nbsp;		if (ArrayUtils.contains(getMutablePropertyNames(), property)) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		String[] threadMutable = additionalMutableProperties.get();</b>
+<b class="fc">&nbsp;		if (threadMutable != null &amp;&amp; ArrayUtils.contains(threadMutable, property)) {</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *  This allows code that is attempting to save immutable entities to bypass standard validation by allowing
+&nbsp;	 *  additional properties to be considered mutable for the duration of the thread.
+&nbsp;	 *  Note that the caller should ensure that {@link #removeMutablePropertiesForThread} is invoked when the operation is done
+&nbsp;	 *  
+&nbsp;	 * @param properties any additional properties that one wishes to make mutable for a given thread
+&nbsp;	 */
+&nbsp;	public void addMutablePropertiesForThread(String... properties) {
+<b class="nc">&nbsp;		additionalMutableProperties.set(properties);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * If any additional properties were added for a given thread by invoking {@link #addMutablePropertiesForThread}, 
+&nbsp;	 * this removes them.  NOTE, any usage of {@link #addMutablePropertiesForThread} should typically be followed by
+&nbsp;	 * an invocation of this method in a finally block
+&nbsp;	 */
+&nbsp;	public void removeMutablePropertiesForThread() {
+<b class="nc">&nbsp;		additionalMutableProperties.remove();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

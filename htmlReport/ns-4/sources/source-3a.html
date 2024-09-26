@@ -1,0 +1,160 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SerializationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: SerializationService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SerializationService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.serialization.OpenmrsSerializer;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods for retrieving registered Serializer instances, and for
+&nbsp; * persisting/retrieving/deleting objects using serialization
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;public interface SerializationService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the default serializer configured for the system. This enables a user to serialize
+&nbsp;	 * objects without needing to know the underlying serialization implementation class.
+&nbsp;	 * 
+&nbsp;	 * @return {@link OpenmrsSerializer} the default configured serializer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a serializer
+&nbsp;	 */
+&nbsp;	public OpenmrsSerializer getDefaultSerializer();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the serializer that matches the passed class, or null if no such serializer exists.
+&nbsp;	 * 
+&nbsp;	 * @param serializationClass - the serialization class to retrieve
+&nbsp;	 * @return {@link OpenmrsSerializer} that matches the passed class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a serializer of the given class
+&nbsp;	 */
+&nbsp;	public OpenmrsSerializer getSerializer(Class&lt;? extends OpenmrsSerializer&gt; serializationClass);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Serialize the passed object into an identifying string that can be retrieved later using the
+&nbsp;	 * passed {@link OpenmrsSerializer} class
+&nbsp;	 * 
+&nbsp;	 * @param o - the object to serialize
+&nbsp;	 * @param clazz - the {@link OpenmrsSerializer} class to use for serialization
+&nbsp;	 * @return String representing this object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; Serialize And Deserialize Correctly
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; Serialize And Deserialize Hibernate Objects Correctly
+&nbsp;	 */
+&nbsp;	public String serialize(Object o, Class&lt;? extends OpenmrsSerializer&gt; clazz) throws SerializationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deserialize the given string into a full object using the given {@link OpenmrsSerializer}
+&nbsp;	 * class
+&nbsp;	 * 
+&nbsp;	 * @param serializedObject - String to deserialize into an Object
+&nbsp;	 * @param objectClass - The class to deserialize the Object into
+&nbsp;	 * @param serializerClass - The {@link OpenmrsSerializer} class to use to perform the
+&nbsp;	 *            deserialization
+&nbsp;	 * @return hydrated object of the appropriate type
+&nbsp;	 */
+&nbsp;	@Logging(ignoredArgumentIndexes = { 0 })
+&nbsp;    @Authorized
+&nbsp;	public &lt;T&gt; T deserialize(String serializedObject, Class&lt;? extends T&gt; objectClass,
+&nbsp;	        Class&lt;? extends OpenmrsSerializer&gt; serializerClass) throws SerializationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the list of OpenmrsSerializers that have been registered with this service. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Modules are able to add more serializers by adding this in their moduleApplicationContext.
+&nbsp;	 * e.g.:
+&nbsp;	 * 
+&nbsp;	 * &lt;pre&gt;
+&nbsp;	 * 	&amp;lt;bean parent=&quot;serializationServiceTarget&quot;&amp;gt;
+&nbsp;	 * 		&amp;lt;property name=&quot;serializers&quot;&amp;gt;
+&nbsp;	 * 		&amp;lt;list&amp;gt;
+&nbsp;	 * 			&amp;lt;ref bean=&quot;xstreamSerializer&quot;/&amp;gt;
+&nbsp;	 * 		&amp;lt;/list&amp;gt;
+&nbsp;	 * 		&amp;lt;/property&amp;gt;
+&nbsp;	 *  &amp;lt;/bean&amp;gt;
+&nbsp;	 *  &amp;lt;bean id=&quot;xstreamSerializer&quot; class=&quot;org.openmrs.module.serialization.xstream.XStreamSerializer&quot;/&amp;gt;
+&nbsp;	 * &lt;/pre&gt;
+&nbsp;	 * 
+&nbsp;	 * @return list of serializers currently loaded in openmrs
+&nbsp;	 */
+&nbsp;	public List&lt;? extends OpenmrsSerializer&gt; getSerializers();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

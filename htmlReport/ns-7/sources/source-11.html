@@ -1,0 +1,328 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > EncounterDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: EncounterDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">EncounterDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.EncounterRole;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.api.EncounterService;
+&nbsp;import org.openmrs.parameter.EncounterSearchCriteria;
+&nbsp;
+&nbsp;/**
+&nbsp; * Encounter-related database functions
+&nbsp; */
+&nbsp;public interface EncounterDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves an encounter
+&nbsp;	 * 
+&nbsp;	 * @param encounter to be saved
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Encounter saveEncounter(Encounter encounter) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge an encounter from database.
+&nbsp;	 * 
+&nbsp;	 * @param encounter encounter object to be purged
+&nbsp;	 */
+&nbsp;	public void deleteEncounter(Encounter encounter) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get encounter by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param encounterId encounter id
+&nbsp;	 * @return encounter with given internal identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter(Integer encounterId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patientId
+&nbsp;	 * @return all encounters for the given patient identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Encounter&gt; getEncountersByPatientId(Integer patientId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.EncounterService#getEncounters(org.openmrs.parameter.EncounterSearchCriteria)
+&nbsp;	 */
+&nbsp;	public List&lt;Encounter&gt; getEncounters(EncounterSearchCriteria encounterSearchCriteria);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save an Encounter Type
+&nbsp;	 * 
+&nbsp;	 * @param encounterType
+&nbsp;	 */
+&nbsp;	public EncounterType saveEncounterType(EncounterType encounterType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge encounter type from database.
+&nbsp;	 * 
+&nbsp;	 * @param encounterType
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteEncounterType(EncounterType encounterType) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get encounterType by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param encounterTypeId Internal Integer identifier for an EncounterType
+&nbsp;	 * @return EncounterType with given internal identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public EncounterType getEncounterType(Integer encounterTypeId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get encounterType by name
+&nbsp;	 * 
+&nbsp;	 * @param name String representation of an encounterType
+&nbsp;	 * @return EncounterType
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public EncounterType getEncounterType(String name) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all encounter types
+&nbsp;	 * 
+&nbsp;	 * @return encounter types list
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;EncounterType&gt; getAllEncounterTypes(Boolean includeVoided) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find Encounter Types matching the given name. Search string is case insensitive, so that
+&nbsp;	 * &quot;NaMe&quot;.equals(&quot;name&quot;) is true.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return all EncounterTypes that match
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;EncounterType&gt; findEncounterTypes(String name) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the value of encounterDatetime currently saved in the database for the given encounter,
+&nbsp;	 * bypassing any caches. This is used prior to saving an encounter so that we can change the obs
+&nbsp;	 * if need be
+&nbsp;	 * 
+&nbsp;	 * @param encounter the Encounter go the the encounterDatetime of
+&nbsp;	 * @return the encounterDatetime currently in the database for this encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get saved encounter datetime from database
+&nbsp;	 */
+&nbsp;	public Date getSavedEncounterDatetime(Encounter encounter);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find {@link Encounter} matching a uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return {@link Encounter}
+&nbsp;	 */
+&nbsp;	public Encounter getEncounterByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find {@link EncounterType} matching a uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return {@link EncounterType}
+&nbsp;	 */
+&nbsp;	public EncounterType getEncounterTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a list of {@link Encounter} by Patient name or identifier based on batch settings
+&nbsp;	 * 
+&nbsp;	 * @param query patient name or identifier
+&nbsp;	 * @param patientId the patient id
+&nbsp;	 * @param start beginning index for the batch
+&nbsp;	 * @param length number of encounters to return in the batch
+&nbsp;	 * @param includeVoided Specifies whether voided encounters should be included
+&nbsp;	 * @return list of {@link Encounter} based on batch settings
+&nbsp;	 * @see EncounterService#getEncounters(String, Integer, Integer, boolean)
+&nbsp;	 */
+&nbsp;	List&lt;Encounter&gt; getEncounters(String query, Integer patientId, Integer start, Integer length, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the location of the encounter
+&nbsp;	 * 
+&nbsp;	 * @param encounter to be retrieved from the database
+&nbsp;	 * @return {@link Location}
+&nbsp;	 */
+&nbsp;	public Location getSavedEncounterLocation(Encounter encounter);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see EncounterService#getAllEncounters(Cohort)
+&nbsp;	 */
+&nbsp;	public Map&lt;Integer, List&lt;Encounter&gt;&gt; getAllEncounters(Cohort patients);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the number of encounters matching a patient name or patient identifier
+&nbsp;	 * 
+&nbsp;	 * @param query patient name or identifier
+&nbsp;	 * @param patientId the patient id
+&nbsp;	 * @param includeVoided Specifies whether voided encounters should be included
+&nbsp;	 * @return the number of encounters matching the given search phrase
+&nbsp;	 * @see EncounterService#getCountOfEncounters(String, boolean)
+&nbsp;	 */
+&nbsp;	public Long getCountOfEncounters(String query, Integer patientId, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see EncounterService#getEncountersByVisit(Visit, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;Encounter&gt; getEncountersByVisit(Visit visit, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves an encounter role
+&nbsp;	 * 
+&nbsp;	 * @param encounterRole role to be saved
+&nbsp;	 * @throws org.openmrs.api.db.DAOException
+&nbsp;	 */
+&nbsp;	public EncounterRole saveEncounterRole(EncounterRole encounterRole) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge an encounter role from database.
+&nbsp;	 * 
+&nbsp;	 * @param encounterRole encounter role object to be purged
+&nbsp;	 */
+&nbsp;	public void deleteEncounterRole(EncounterRole encounterRole) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get encounter role by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param encounterRoleId encounter role id
+&nbsp;	 * @return encounter role with given internal identifier
+&nbsp;	 * @throws org.openmrs.api.db.DAOException
+&nbsp;	 */
+&nbsp;	public EncounterRole getEncounterRole(Integer encounterRoleId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find {@link org.openmrs.EncounterRole} matching a uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return {@link org.openmrs.EncounterRole}
+&nbsp;	 */
+&nbsp;	public EncounterRole getEncounterRoleByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all encounter roles and optionally specify whether to include retired encountered roles
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired include retired
+&nbsp;	 * @return enconter roles
+&nbsp;	 * @throws org.openmrs.api.db.DAOException
+&nbsp;	 * @see org.openmrs.api.EncounterService#getAllEncounterRoles(boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;EncounterRole&gt; getAllEncounterRoles(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.EncounterService#getEncounterRoleByName(String name)
+&nbsp;	 */
+&nbsp;	public EncounterRole getEncounterRoleByName(String name) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see EncounterService#getEncountersNotAssignedToAnyVisit(Patient)
+&nbsp;	 */
+&nbsp;	public List&lt;Encounter&gt; getEncountersNotAssignedToAnyVisit(Patient patient) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.EncounterService#getEncountersByVisitsAndPatient(org.openmrs.Patient, boolean, java.lang.String, java.lang.Integer, java.lang.Integer)
+&nbsp;	 */
+&nbsp;	List&lt;Encounter&gt; getEncountersByVisitsAndPatient(Patient patient, boolean includeVoided, String query, Integer start,
+&nbsp;	        Integer length);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see EncounterService#getEncountersByVisitsAndPatientCount(Patient, boolean, String)
+&nbsp;	 */
+&nbsp;	Integer getEncountersByVisitsAndPatientCount(Patient patient, boolean includeVoided, String query);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get encounter roles by name
+&nbsp;	 * 
+&nbsp;	 * @param name encounter role name
+&nbsp;	 * @return encounter roles
+&nbsp;	 * @throws org.openmrs.api.db.DAOException
+&nbsp;	 * @see org.openmrs.api.EncounterService#getEncounterRolesByName(String name)
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public List&lt;EncounterRole&gt; getEncounterRolesByName(String name) throws DAOException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

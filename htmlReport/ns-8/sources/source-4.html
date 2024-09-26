@@ -1,0 +1,1223 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DbSession</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: DbSession (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DbSession</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/87)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/89)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.sql.Connection;
+&nbsp;
+&nbsp;import org.hibernate.CacheMode;
+&nbsp;import org.hibernate.Criteria;
+&nbsp;import org.hibernate.Filter;
+&nbsp;import org.hibernate.FlushMode;
+&nbsp;import org.hibernate.HibernateException;
+&nbsp;import org.hibernate.IdentifierLoadAccess;
+&nbsp;import org.hibernate.LobHelper;
+&nbsp;import org.hibernate.LockMode;
+&nbsp;import org.hibernate.LockOptions;
+&nbsp;import org.hibernate.NaturalIdLoadAccess;
+&nbsp;import org.hibernate.Query;
+&nbsp;import org.hibernate.ReplicationMode;
+&nbsp;import org.hibernate.SQLQuery;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.Session.LockRequest;
+&nbsp;import org.hibernate.SessionEventListener;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.hibernate.SharedSessionBuilder;
+&nbsp;import org.hibernate.SimpleNaturalIdLoadAccess;
+&nbsp;import org.hibernate.Transaction;
+&nbsp;import org.hibernate.TransientObjectException;
+&nbsp;import org.hibernate.TypeHelper;
+&nbsp;import org.hibernate.UnknownProfileException;
+&nbsp;import org.hibernate.jdbc.ReturningWork;
+&nbsp;import org.hibernate.jdbc.Work;
+&nbsp;import org.hibernate.procedure.ProcedureCall;
+&nbsp;import org.hibernate.stat.SessionStatistics;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class has been created to provide backwards compatibility for modules, which need to support
+&nbsp; * OpenMRS 1.12 and before. It is because org.hibernate.classic.Session has been removed in
+&nbsp; * Hibernate 4 (used in OpenMRS 1.12) and sessionFactory.getCurrentSession() has been changed to
+&nbsp; * return org.hibernate.Session. It wraps SessionFactory so that any calls to getCurrentSession()
+&nbsp; * are directed to the correct Session class.
+&nbsp; * 
+&nbsp; * @since 1.12, 1.11.3, 1.10.2, 1.9.9
+&nbsp; */
+&nbsp;public class DbSession {
+&nbsp;	
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+<b class="nc">&nbsp;	public DbSession(SessionFactory sessionFactory) {</b>
+<b class="nc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Session getSession() {
+<b class="nc">&nbsp;		return sessionFactory.getCurrentSession();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtain the tenant identifier associated with this session.
+&nbsp;	 *
+&nbsp;	 * @return The tenant identifier associated with this session, or {@code null}
+&nbsp;	 */
+&nbsp;	public String getTenantIdentifier() {
+<b class="nc">&nbsp;		return getSession().getTenantIdentifier();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Begin a unit of work and return the associated {@link Transaction} object. If a new
+&nbsp;	 * underlying transaction is required, begin the transaction. Otherwise continue the new work in
+&nbsp;	 * the context of the existing underlying transaction.
+&nbsp;	 *
+&nbsp;	 * @return a Transaction instance
+&nbsp;	 * @see #getTransaction
+&nbsp;	 */
+&nbsp;	public Transaction beginTransaction() {
+<b class="nc">&nbsp;		return getSession().beginTransaction();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the {@link Transaction} instance associated with this session. The concrete type of the
+&nbsp;	 * returned {@link Transaction} object is determined by the
+&nbsp;	 * {@code hibernate.transaction_factory} property.
+&nbsp;	 *
+&nbsp;	 * @return a Transaction instance
+&nbsp;	 */
+&nbsp;	public Transaction getTransaction() {
+<b class="nc">&nbsp;		return getSession().getTransaction();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a {@link Query} instance for the named query string defined in the metadata.
+&nbsp;	 *
+&nbsp;	 * @param queryName the name of a query defined externally
+&nbsp;	 * @return The query instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public Query getNamedQuery(String queryName) {
+<b class="nc">&nbsp;		return getSession().getNamedQuery(queryName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a {@link Query} instance for the given HQL query string.
+&nbsp;	 *
+&nbsp;	 * @param queryString The HQL query
+&nbsp;	 * @return The query instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public Query createQuery(String queryString) {
+<b class="nc">&nbsp;		return getSession().createQuery(queryString);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a {@link SQLQuery} instance for the given SQL query string.
+&nbsp;	 *
+&nbsp;	 * @param queryString The SQL query
+&nbsp;	 * @return The query instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public SQLQuery createSQLQuery(String queryString) {
+<b class="nc">&nbsp;		return getSession().createSQLQuery(queryString);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a ProcedureCall based on a named template
+&nbsp;	 *
+&nbsp;	 * @param name The name given to the template
+&nbsp;	 * @return The ProcedureCall
+&nbsp;	 * @see javax.persistence.NamedStoredProcedureQuery
+&nbsp;	 */
+&nbsp;	public ProcedureCall getNamedProcedureCall(String name) {
+<b class="nc">&nbsp;		return getSession().getNamedProcedureCall(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a call to a stored procedure.
+&nbsp;	 *
+&nbsp;	 * @param procedureName The name of the procedure.
+&nbsp;	 * @return The representation of the procedure call.
+&nbsp;	 */
+&nbsp;	public ProcedureCall createStoredProcedureCall(String procedureName) {
+<b class="nc">&nbsp;		return getSession().createStoredProcedureCall(procedureName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a call to a stored procedure with specific result set entity mappings. Each class
+&nbsp;	 * named is considered a &quot;root return&quot;.
+&nbsp;	 *
+&nbsp;	 * @param procedureName The name of the procedure.
+&nbsp;	 * @param resultClasses The entity(s) to map the result on to.
+&nbsp;	 * @return The representation of the procedure call.
+&nbsp;	 */
+&nbsp;	public ProcedureCall createStoredProcedureCall(String procedureName, Class... resultClasses) {
+<b class="nc">&nbsp;		return getSession().createStoredProcedureCall(procedureName, resultClasses);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a call to a stored procedure with specific result set entity mappings.
+&nbsp;	 *
+&nbsp;	 * @param procedureName The name of the procedure.
+&nbsp;	 * @param resultSetMappings The explicit result set mapping(s) to use for mapping the results
+&nbsp;	 * @return The representation of the procedure call.
+&nbsp;	 */
+&nbsp;	public ProcedureCall createStoredProcedureCall(String procedureName, String... resultSetMappings) {
+<b class="nc">&nbsp;		return getSession().createStoredProcedureCall(procedureName, resultSetMappings);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create {@link Criteria} instance for the given class (entity or subclasses/implementors).
+&nbsp;	 *
+&nbsp;	 * @param persistentClass The class, which is an entity, or has entity subclasses/implementors
+&nbsp;	 * @return The criteria instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public Criteria createCriteria(Class persistentClass) {
+<b class="nc">&nbsp;		return getSession().createCriteria(persistentClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create {@link Criteria} instance for the given class (entity or subclasses/implementors),
+&nbsp;	 * using a specific alias.
+&nbsp;	 *
+&nbsp;	 * @param persistentClass The class, which is an entity, or has entity subclasses/implementors
+&nbsp;	 * @param alias The alias to use
+&nbsp;	 * @return The criteria instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public Criteria createCriteria(Class persistentClass, String alias) {
+<b class="nc">&nbsp;		return getSession().createCriteria(persistentClass, alias);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create {@link Criteria} instance for the given entity name.
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name @return The criteria instance for manipulation and
+&nbsp;	 *            execution
+&nbsp;	 */
+&nbsp;	public Criteria createCriteria(String entityName) {
+<b class="nc">&nbsp;		return getSession().createCriteria(entityName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create {@link Criteria} instance for the given entity name, using a specific alias.
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param alias The alias to use
+&nbsp;	 * @return The criteria instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public Criteria createCriteria(String entityName, String alias) {
+<b class="nc">&nbsp;		return getSession().createCriteria(entityName, alias);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtain a {@link Session} builder with the ability to grab certain information from this
+&nbsp;	 * session.
+&nbsp;	 *
+&nbsp;	 * @return The session builder
+&nbsp;	 */
+&nbsp;	public SharedSessionBuilder sessionWithOptions() {
+<b class="nc">&nbsp;		return getSession().sessionWithOptions();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Force this session to flush. Must be called at the end of a unit of work, before committing
+&nbsp;	 * the transaction and closing the session (depending on {@link #setFlushMode(FlushMode)},
+&nbsp;	 * {@link Transaction#commit()} calls this method).
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * &lt;i&gt;Flushing&lt;/i&gt; is the process of synchronizing the underlying persistent store with
+&nbsp;	 * persistable state held in memory.
+&nbsp;	 *
+&nbsp;	 * @throws HibernateException Indicates problems flushing the session or talking to the
+&nbsp;	 *             database.
+&nbsp;	 */
+&nbsp;	public void flush() throws HibernateException {
+<b class="nc">&nbsp;		getSession().flush();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the flush mode for this session.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The flush mode determines the points at which the session is flushed. &lt;i&gt;Flushing&lt;/i&gt; is the
+&nbsp;	 * process of synchronizing the underlying persistent store with persistable state held in
+&nbsp;	 * memory.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * For a logically &quot;read only&quot; session, it is reasonable to set the session&#39;s flush mode to
+&nbsp;	 * {@link FlushMode#MANUAL} at the start of the session (in order to achieve some extra
+&nbsp;	 * performance).
+&nbsp;	 *
+&nbsp;	 * @param flushMode the new flush mode
+&nbsp;	 * @see FlushMode
+&nbsp;	 */
+&nbsp;	public void setFlushMode(FlushMode flushMode) {
+<b class="nc">&nbsp;		getSession().setHibernateFlushMode(flushMode);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the current flush mode for this session.
+&nbsp;	 *
+&nbsp;	 * @return The flush mode
+&nbsp;	 */
+&nbsp;	public FlushMode getFlushMode() {
+<b class="nc">&nbsp;		return getSession().getHibernateFlushMode();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the cache mode.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Cache mode determines the manner in which this session can interact with the second level
+&nbsp;	 * cache.
+&nbsp;	 *
+&nbsp;	 * @param cacheMode The new cache mode.
+&nbsp;	 */
+&nbsp;	public void setCacheMode(CacheMode cacheMode) {
+<b class="nc">&nbsp;		getSession().setCacheMode(cacheMode);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the current cache mode.
+&nbsp;	 *
+&nbsp;	 * @return The current cache mode.
+&nbsp;	 */
+&nbsp;	public CacheMode getCacheMode() {
+<b class="nc">&nbsp;		return getSession().getCacheMode();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the session factory which created this session.
+&nbsp;	 *
+&nbsp;	 * @return The session factory.
+&nbsp;	 * @see SessionFactory
+&nbsp;	 */
+&nbsp;	public SessionFactory getSessionFactory() {
+<b class="nc">&nbsp;		return getSession().getSessionFactory();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * End the session by releasing the JDBC connection and cleaning up. It is not strictly
+&nbsp;	 * necessary to close the session but you must at least {@link #disconnect()} it.
+&nbsp;	 *
+&nbsp;	 * @return the connection provided by the application or null.
+&nbsp;	 * @throws HibernateException Indicates problems cleaning up.
+&nbsp;	 */
+&nbsp;	public Connection close() throws HibernateException {
+<b class="nc">&nbsp;		getSession().close();</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Cancel the execution of the current query.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This is the sole method on session which may be safely called from another thread.
+&nbsp;	 *
+&nbsp;	 * @throws HibernateException There was a problem canceling the query
+&nbsp;	 */
+&nbsp;	public void cancelQuery() throws HibernateException {
+<b class="nc">&nbsp;		getSession().cancelQuery();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if the session is still open.
+&nbsp;	 *
+&nbsp;	 * @return boolean
+&nbsp;	 */
+&nbsp;	public boolean isOpen() {
+<b class="nc">&nbsp;		return getSession().isOpen();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if the session is currently connected.
+&nbsp;	 *
+&nbsp;	 * @return boolean
+&nbsp;	 */
+&nbsp;	public boolean isConnected() {
+<b class="nc">&nbsp;		return getSession().isConnected();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Does this session contain any changes which must be synchronized with the database? In other
+&nbsp;	 * words, would any DML operations be executed if we flushed this session?
+&nbsp;	 *
+&nbsp;	 * @return True if the session contains pending changes; false otherwise.
+&nbsp;	 * @throws HibernateException could not perform dirtying checking
+&nbsp;	 */
+&nbsp;	public boolean isDirty() throws HibernateException {
+<b class="nc">&nbsp;		return getSession().isDirty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Will entities and proxies that are loaded into this session be made read-only by default? To
+&nbsp;	 * determine the read-only/modifiable setting for a particular entity or proxy:
+&nbsp;	 * 
+&nbsp;	 * @see Session#isReadOnly(Object)
+&nbsp;	 * @return true, loaded entities/proxies will be made read-only by default; false, loaded
+&nbsp;	 *         entities/proxies will be made modifiable by default.
+&nbsp;	 */
+&nbsp;	public boolean isDefaultReadOnly() {
+<b class="nc">&nbsp;		return getSession().isDefaultReadOnly();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Change the default for entities and proxies loaded into this session from modifiable to
+&nbsp;	 * read-only mode, or from modifiable to read-only mode. Read-only entities are not
+&nbsp;	 * dirty-checked and snapshots of persistent state are not maintained. Read-only entities can be
+&nbsp;	 * modified, but changes are not persisted. When a proxy is initialized, the loaded entity will
+&nbsp;	 * have the same read-only/modifiable setting as the uninitialized proxy has, regardless of the
+&nbsp;	 * session&#39;s current setting. To change the read-only/modifiable setting for a particular entity
+&nbsp;	 * or proxy that is already in this session:
+&nbsp;	 * 
+&nbsp;	 * @see Session#setReadOnly(Object,boolean) To override this session&#39;s read-only/modifiable
+&nbsp;	 *      setting for entities and proxies loaded by a Query:
+&nbsp;	 * @see Query#setReadOnly(boolean)
+&nbsp;	 * @param readOnly true, the default for loaded entities/proxies is read-only; false, the
+&nbsp;	 *            default for loaded entities/proxies is modifiable
+&nbsp;	 */
+&nbsp;	public void setDefaultReadOnly(boolean readOnly) {
+<b class="nc">&nbsp;		getSession().setDefaultReadOnly(readOnly);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the identifier value of the given entity as associated with this session. An exception
+&nbsp;	 * is thrown if the given entity instance is transient or detached in relation to this session.
+&nbsp;	 *
+&nbsp;	 * @param object a persistent instance
+&nbsp;	 * @return the identifier
+&nbsp;	 * @throws TransientObjectException if the instance is transient or associated with a different
+&nbsp;	 *             session
+&nbsp;	 */
+&nbsp;	public Serializable getIdentifier(Object object) {
+<b class="nc">&nbsp;		return getSession().getIdentifier(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if this instance is associated with this &lt;tt&gt;Session&lt;/tt&gt;.
+&nbsp;	 *
+&nbsp;	 * @param object an instance of a persistent class
+&nbsp;	 * @return true if the given instance is associated with this &lt;tt&gt;Session&lt;/tt&gt;
+&nbsp;	 */
+&nbsp;	public boolean contains(Object object) {
+<b class="nc">&nbsp;		return getSession().contains(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove this instance from the session cache. Changes to the instance will not be synchronized
+&nbsp;	 * with the database. This operation cascades to associated instances if the association is
+&nbsp;	 * mapped with &lt;tt&gt;cascade=&quot;evict&quot;&lt;/tt&gt;.
+&nbsp;	 *
+&nbsp;	 * @param object The entity to evict
+&nbsp;	 * @throws NullPointerException if the passed object is {@code null}
+&nbsp;	 * @throws IllegalArgumentException if the passed object is not defined as an entity
+&nbsp;	 */
+&nbsp;	public void evict(Object object) {
+<b class="nc">&nbsp;		getSession().evict(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, obtaining
+&nbsp;	 * the specified lock mode, assuming the instance exists.
+&nbsp;	 *
+&nbsp;	 * @param theClass a persistent class
+&nbsp;	 * @param id a valid identifier of an existing persistent instance of the class
+&nbsp;	 * @param lockOptions contains the lock level
+&nbsp;	 * @return the persistent instance or proxy
+&nbsp;	 */
+&nbsp;	public Object load(Class theClass, Serializable id, LockOptions lockOptions) {
+<b class="nc">&nbsp;		return getSession().load(theClass, id, lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, obtaining
+&nbsp;	 * the specified lock mode, assuming the instance exists.
+&nbsp;	 *
+&nbsp;	 * @param entityName a persistent class
+&nbsp;	 * @param id a valid identifier of an existing persistent instance of the class
+&nbsp;	 * @param lockOptions contains the lock level
+&nbsp;	 * @return the persistent instance or proxy
+&nbsp;	 */
+&nbsp;	public Object load(String entityName, Serializable id, LockOptions lockOptions) {
+<b class="nc">&nbsp;		return getSession().load(entityName, id, lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, assuming
+&nbsp;	 * that the instance exists. This method might return a proxied instance that is initialized
+&nbsp;	 * on-demand, when a non-identifier method is accessed. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * You should not use this method to determine if an instance exists (use &lt;tt&gt;get()&lt;/tt&gt;
+&nbsp;	 * instead). Use this only to retrieve an instance that you assume exists, where non-existence
+&nbsp;	 * would be an actual error.
+&nbsp;	 *
+&nbsp;	 * @param theClass a persistent class
+&nbsp;	 * @param id a valid identifier of an existing persistent instance of the class
+&nbsp;	 * @return the persistent instance or proxy
+&nbsp;	 */
+&nbsp;	public Object load(Class theClass, Serializable id) {
+<b class="nc">&nbsp;		return getSession().load(theClass, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, assuming
+&nbsp;	 * that the instance exists. This method might return a proxied instance that is initialized
+&nbsp;	 * on-demand, when a non-identifier method is accessed. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * You should not use this method to determine if an instance exists (use &lt;tt&gt;get()&lt;/tt&gt;
+&nbsp;	 * instead). Use this only to retrieve an instance that you assume exists, where non-existence
+&nbsp;	 * would be an actual error.
+&nbsp;	 *
+&nbsp;	 * @param entityName a persistent class
+&nbsp;	 * @param id a valid identifier of an existing persistent instance of the class
+&nbsp;	 * @return the persistent instance or proxy
+&nbsp;	 */
+&nbsp;	public Object load(String entityName, Serializable id) {
+<b class="nc">&nbsp;		return getSession().load(entityName, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Read the persistent state associated with the given identifier into the given transient
+&nbsp;	 * instance.
+&nbsp;	 *
+&nbsp;	 * @param object an &quot;empty&quot; instance of the persistent class
+&nbsp;	 * @param id a valid identifier of an existing persistent instance of the class
+&nbsp;	 */
+&nbsp;	public void load(Object object, Serializable id) {
+<b class="nc">&nbsp;		getSession().load(object, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Persist the state of the given detached instance, reusing the current identifier value. This
+&nbsp;	 * operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;replicate&quot;}
+&nbsp;	 *
+&nbsp;	 * @param object a detached instance of a persistent class
+&nbsp;	 * @param replicationMode The replication mode to use
+&nbsp;	 */
+&nbsp;	public void replicate(Object object, ReplicationMode replicationMode) {
+<b class="nc">&nbsp;		getSession().replicate(object, replicationMode);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Persist the state of the given detached instance, reusing the current identifier value. This
+&nbsp;	 * operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;replicate&quot;}
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param object a detached instance of a persistent class
+&nbsp;	 * @param replicationMode The replication mode to use
+&nbsp;	 */
+&nbsp;	public void replicate(String entityName, Object object, ReplicationMode replicationMode) {
+<b class="nc">&nbsp;		getSession().replicate(entityName, object, replicationMode);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Persist the given transient instance, first assigning a generated identifier. (Or using the
+&nbsp;	 * current value of the identifier property if the &lt;tt&gt;assigned&lt;/tt&gt; generator is used.) This
+&nbsp;	 * operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;save-update&quot;}
+&nbsp;	 *
+&nbsp;	 * @param object a transient instance of a persistent class
+&nbsp;	 * @return the generated identifier
+&nbsp;	 */
+&nbsp;	public Serializable save(Object object) {
+<b class="nc">&nbsp;		return getSession().save(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Persist the given transient instance, first assigning a generated identifier. (Or using the
+&nbsp;	 * current value of the identifier property if the &lt;tt&gt;assigned&lt;/tt&gt; generator is used.) This
+&nbsp;	 * operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;save-update&quot;}
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param object a transient instance of a persistent class
+&nbsp;	 * @return the generated identifier
+&nbsp;	 */
+&nbsp;	public Serializable save(String entityName, Object object) {
+<b class="nc">&nbsp;		return getSession().save(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Either {@link #save(Object)} or {@link #update(Object)} the given instance, depending upon
+&nbsp;	 * resolution of the unsaved-value checks (see the manual for discussion of unsaved-value
+&nbsp;	 * checking).
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;save-update&quot;}
+&nbsp;	 *
+&nbsp;	 * @param object a transient or detached instance containing new or updated state
+&nbsp;	 * @see Session#save(java.lang.Object)
+&nbsp;	 * @see Session#update(Object object)
+&nbsp;	 */
+&nbsp;	public void saveOrUpdate(Object object) {
+<b class="nc">&nbsp;		getSession().saveOrUpdate(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Either {@link #save(String, Object)} or {@link #update(String, Object)} the given instance,
+&nbsp;	 * depending upon resolution of the unsaved-value checks (see the manual for discussion of
+&nbsp;	 * unsaved-value checking).
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;save-update&quot;}
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param object a transient or detached instance containing new or updated state
+&nbsp;	 * @see Session#save(String,Object)
+&nbsp;	 * @see Session#update(String,Object)
+&nbsp;	 */
+&nbsp;	public void saveOrUpdate(String entityName, Object object) {
+<b class="nc">&nbsp;		getSession().saveOrUpdate(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update the persistent instance with the identifier of the given detached instance. If there
+&nbsp;	 * is a persistent instance with the same identifier, an exception is thrown. This operation
+&nbsp;	 * cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;save-update&quot;}
+&nbsp;	 *
+&nbsp;	 * @param object a detached instance containing updated state
+&nbsp;	 */
+&nbsp;	public void update(Object object) {
+<b class="nc">&nbsp;		getSession().update(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update the persistent instance with the identifier of the given detached instance. If there
+&nbsp;	 * is a persistent instance with the same identifier, an exception is thrown. This operation
+&nbsp;	 * cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;save-update&quot;}
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param object a detached instance containing updated state
+&nbsp;	 */
+&nbsp;	public void update(String entityName, Object object) {
+<b class="nc">&nbsp;		getSession().update(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Copy the state of the given object onto the persistent object with the same identifier. If
+&nbsp;	 * there is no persistent instance currently associated with the session, it will be loaded.
+&nbsp;	 * Return the persistent instance. If the given instance is unsaved, save a copy of and return
+&nbsp;	 * it as a newly persistent instance. The given instance does not become associated with the
+&nbsp;	 * session. This operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;merge&quot;}
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The semantics of this method are defined by JSR-220.
+&nbsp;	 *
+&nbsp;	 * @param object a detached instance with state to be copied
+&nbsp;	 * @return an updated persistent instance
+&nbsp;	 */
+&nbsp;	public Object merge(Object object) {
+<b class="nc">&nbsp;		return getSession().merge(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Copy the state of the given object onto the persistent object with the same identifier. If
+&nbsp;	 * there is no persistent instance currently associated with the session, it will be loaded.
+&nbsp;	 * Return the persistent instance. If the given instance is unsaved, save a copy of and return
+&nbsp;	 * it as a newly persistent instance. The given instance does not become associated with the
+&nbsp;	 * session. This operation cascades to associated instances if the association is mapped with
+&nbsp;	 * {@code cascade=&quot;merge&quot;}
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The semantics of this method are defined by JSR-220.
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param object a detached instance with state to be copied
+&nbsp;	 * @return an updated persistent instance
+&nbsp;	 */
+&nbsp;	public Object merge(String entityName, Object object) {
+<b class="nc">&nbsp;		return getSession().merge(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Make a transient instance persistent. This operation cascades to associated instances if the
+&nbsp;	 * association is mapped with {@code cascade=&quot;persist&quot;}
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The semantics of this method are defined by JSR-220.
+&nbsp;	 *
+&nbsp;	 * @param object a transient instance to be made persistent
+&nbsp;	 */
+&nbsp;	public void persist(Object object) {
+<b class="nc">&nbsp;		getSession().persist(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Make a transient instance persistent. This operation cascades to associated instances if the
+&nbsp;	 * association is mapped with {@code cascade=&quot;persist&quot;}
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The semantics of this method are defined by JSR-220.
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name
+&nbsp;	 * @param object a transient instance to be made persistent
+&nbsp;	 */
+&nbsp;	public void persist(String entityName, Object object) {
+<b class="nc">&nbsp;		getSession().persist(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove a persistent instance from the datastore. The argument may be an instance associated
+&nbsp;	 * with the receiving &lt;tt&gt;Session&lt;/tt&gt; or a transient instance with an identifier associated
+&nbsp;	 * with existing persistent state. This operation cascades to associated instances if the
+&nbsp;	 * association is mapped with {@code cascade=&quot;delete&quot;}
+&nbsp;	 *
+&nbsp;	 * @param object the instance to be removed
+&nbsp;	 */
+&nbsp;	public void delete(Object object) {
+<b class="nc">&nbsp;		getSession().delete(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove a persistent instance from the datastore. The &lt;b&gt;object&lt;/b&gt; argument may be an
+&nbsp;	 * instance associated with the receiving &lt;tt&gt;Session&lt;/tt&gt; or a transient instance with an
+&nbsp;	 * identifier associated with existing persistent state. This operation cascades to associated
+&nbsp;	 * instances if the association is mapped with {@code cascade=&quot;delete&quot;}
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name for the instance to be removed.
+&nbsp;	 * @param object the instance to be removed
+&nbsp;	 */
+&nbsp;	public void delete(String entityName, Object object) {
+<b class="nc">&nbsp;		getSession().delete(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Build a LockRequest that specifies the LockMode, pessimistic lock timeout and lock scope.
+&nbsp;	 * timeout and scope is ignored for optimistic locking. After building the LockRequest, call
+&nbsp;	 * LockRequest.lock to perform the requested locking.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Example usage:
+&nbsp;	 * {@code session.buildLockRequest().setLockMode(LockMode.PESSIMISTIC_WRITE).setTimeOut(60000).lock(entity);}
+&nbsp;	 *
+&nbsp;	 * @param lockOptions contains the lock level
+&nbsp;	 * @return a lockRequest that can be used to lock the passed object.
+&nbsp;	 */
+&nbsp;	public LockRequest buildLockRequest(LockOptions lockOptions) {
+<b class="nc">&nbsp;		return getSession().buildLockRequest(lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Re-read the state of the given instance from the underlying database. It is inadvisable to
+&nbsp;	 * use this to implement long-running sessions that span many business tasks. This method is,
+&nbsp;	 * however, useful in certain special circumstances. For example
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;where a database trigger alters the object state upon insert or update
+&nbsp;	 * &lt;li&gt;after executing direct SQL (eg. a mass update) in the same session
+&nbsp;	 * &lt;li&gt;after inserting a &lt;tt&gt;Blob&lt;/tt&gt; or &lt;tt&gt;Clob&lt;/tt&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 *
+&nbsp;	 * @param object a persistent or detached instance
+&nbsp;	 */
+&nbsp;	public void refresh(Object object) {
+<b class="nc">&nbsp;		getSession().refresh(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Re-read the state of the given instance from the underlying database. It is inadvisable to
+&nbsp;	 * use this to implement long-running sessions that span many business tasks. This method is,
+&nbsp;	 * however, useful in certain special circumstances. For example
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;where a database trigger alters the object state upon insert or update
+&nbsp;	 * &lt;li&gt;after executing direct SQL (eg. a mass update) in the same session
+&nbsp;	 * &lt;li&gt;after inserting a &lt;tt&gt;Blob&lt;/tt&gt; or &lt;tt&gt;Clob&lt;/tt&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 *
+&nbsp;	 * @param entityName a persistent class
+&nbsp;	 * @param object a persistent or detached instance
+&nbsp;	 */
+&nbsp;	public void refresh(String entityName, Object object) {
+<b class="nc">&nbsp;		getSession().refresh(entityName, object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Re-read the state of the given instance from the underlying database, with the given
+&nbsp;	 * &lt;tt&gt;LockMode&lt;/tt&gt;. It is inadvisable to use this to implement long-running sessions that span
+&nbsp;	 * many business tasks. This method is, however, useful in certain special circumstances.
+&nbsp;	 *
+&nbsp;	 * @param object a persistent or detached instance
+&nbsp;	 * @param lockOptions contains the lock mode to use
+&nbsp;	 */
+&nbsp;	public void refresh(Object object, LockOptions lockOptions) {
+<b class="nc">&nbsp;		getSession().refresh(object, lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Re-read the state of the given instance from the underlying database, with the given
+&nbsp;	 * &lt;tt&gt;LockMode&lt;/tt&gt;. It is inadvisable to use this to implement long-running sessions that span
+&nbsp;	 * many business tasks. This method is, however, useful in certain special circumstances.
+&nbsp;	 *
+&nbsp;	 * @param entityName a persistent class
+&nbsp;	 * @param object a persistent or detached instance
+&nbsp;	 * @param lockOptions contains the lock mode to use
+&nbsp;	 */
+&nbsp;	public void refresh(String entityName, Object object, LockOptions lockOptions) {
+<b class="nc">&nbsp;		getSession().refresh(entityName, object, lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determine the current lock mode of the given object.
+&nbsp;	 *
+&nbsp;	 * @param object a persistent instance
+&nbsp;	 * @return the current lock mode
+&nbsp;	 */
+&nbsp;	public LockMode getCurrentLockMode(Object object) {
+<b class="nc">&nbsp;		return getSession().getCurrentLockMode(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a {@link Query} instance for the given collection and filter string. Contains an
+&nbsp;	 * implicit {@code FROM} element named {@code this} which refers to the defined table for the
+&nbsp;	 * collection elements, as well as an implicit {@code WHERE} restriction for this particular
+&nbsp;	 * collection instance&#39;s key value.
+&nbsp;	 *
+&nbsp;	 * @param collection a persistent collection
+&nbsp;	 * @param queryString a Hibernate query fragment.
+&nbsp;	 * @return The query instance for manipulation and execution
+&nbsp;	 */
+&nbsp;	public Query createFilter(Object collection, String queryString) {
+<b class="nc">&nbsp;		return getSession().createFilter(collection, queryString);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely clear the session. Evict all loaded instances and cancel all pending saves,
+&nbsp;	 * updates and deletions. Do not close open iterators or instances of &lt;tt&gt;ScrollableResults&lt;/tt&gt;
+&nbsp;	 * .
+&nbsp;	 */
+&nbsp;	public void clear() {
+<b class="nc">&nbsp;		getSession().clear();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, or null
+&nbsp;	 * if there is no such persistent instance. (If the instance is already associated with the
+&nbsp;	 * session, return that instance. This method never returns an uninitialized instance.)
+&nbsp;	 *
+&nbsp;	 * @param clazz a persistent class
+&nbsp;	 * @param id an identifier
+&nbsp;	 * @return a persistent instance or null
+&nbsp;	 */
+&nbsp;	public Object get(Class clazz, Serializable id) {
+<b class="nc">&nbsp;		return getSession().get(clazz, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, or null
+&nbsp;	 * if there is no such persistent instance. (If the instance is already associated with the
+&nbsp;	 * session, return that instance. This method never returns an uninitialized instance.) Obtain
+&nbsp;	 * the specified lock mode if the instance exists.
+&nbsp;	 *
+&nbsp;	 * @param clazz a persistent class
+&nbsp;	 * @param id an identifier
+&nbsp;	 * @param lockOptions the lock mode
+&nbsp;	 * @return a persistent instance or null
+&nbsp;	 */
+&nbsp;	public Object get(Class clazz, Serializable id, LockOptions lockOptions) {
+<b class="nc">&nbsp;		return getSession().get(clazz, id, lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given named entity with the given identifier, or null
+&nbsp;	 * if there is no such persistent instance. (If the instance is already associated with the
+&nbsp;	 * session, return that instance. This method never returns an uninitialized instance.)
+&nbsp;	 *
+&nbsp;	 * @param entityName the entity name
+&nbsp;	 * @param id an identifier
+&nbsp;	 * @return a persistent instance or null
+&nbsp;	 */
+&nbsp;	public Object get(String entityName, Serializable id) {
+<b class="nc">&nbsp;		return getSession().get(entityName, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the persistent instance of the given entity class with the given identifier, or null
+&nbsp;	 * if there is no such persistent instance. (If the instance is already associated with the
+&nbsp;	 * session, return that instance. This method never returns an uninitialized instance.) Obtain
+&nbsp;	 * the specified lock mode if the instance exists.
+&nbsp;	 *
+&nbsp;	 * @param entityName the entity name
+&nbsp;	 * @param id an identifier
+&nbsp;	 * @param lockOptions contains the lock mode
+&nbsp;	 * @return a persistent instance or null
+&nbsp;	 */
+&nbsp;	public Object get(String entityName, Serializable id, LockOptions lockOptions) {
+<b class="nc">&nbsp;		return getSession().get(entityName, id, lockOptions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the entity name for a persistent entity.
+&nbsp;	 * 
+&nbsp;	 * @param object a persistent entity
+&nbsp;	 * @return the entity name
+&nbsp;	 */
+&nbsp;	public String getEntityName(Object object) {
+<b class="nc">&nbsp;		return getSession().getEntityName(object);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create an {@link IdentifierLoadAccess} instance to retrieve the specified entity type by
+&nbsp;	 * primary key.
+&nbsp;	 * 
+&nbsp;	 * @param entityName The entity name of the entity type to be retrieved
+&nbsp;	 * @return load delegate for loading the specified entity type by primary key
+&nbsp;	 * @throws HibernateException If the specified entity name cannot be resolved as an entity name
+&nbsp;	 */
+&nbsp;	public IdentifierLoadAccess byId(String entityName) {
+<b class="nc">&nbsp;		return getSession().byId(entityName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create an {@link IdentifierLoadAccess} instance to retrieve the specified entity by primary
+&nbsp;	 * key.
+&nbsp;	 *
+&nbsp;	 * @param entityClass The entity type to be retrieved
+&nbsp;	 * @return load delegate for loading the specified entity type by primary key
+&nbsp;	 * @throws HibernateException If the specified Class cannot be resolved as a mapped entity
+&nbsp;	 */
+&nbsp;	public IdentifierLoadAccess byId(Class entityClass) {
+<b class="nc">&nbsp;		return getSession().byId(entityClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create an {@link NaturalIdLoadAccess} instance to retrieve the specified entity by its
+&nbsp;	 * natural id.
+&nbsp;	 * 
+&nbsp;	 * @param entityName The entity name of the entity type to be retrieved
+&nbsp;	 * @return load delegate for loading the specified entity type by natural id
+&nbsp;	 * @throws HibernateException If the specified entity name cannot be resolved as an entity name
+&nbsp;	 */
+&nbsp;	public NaturalIdLoadAccess byNaturalId(String entityName) {
+<b class="nc">&nbsp;		return getSession().byNaturalId(entityName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create an {@link NaturalIdLoadAccess} instance to retrieve the specified entity by its
+&nbsp;	 * natural id.
+&nbsp;	 * 
+&nbsp;	 * @param entityClass The entity type to be retrieved
+&nbsp;	 * @return load delegate for loading the specified entity type by natural id
+&nbsp;	 * @throws HibernateException If the specified Class cannot be resolved as a mapped entity
+&nbsp;	 */
+&nbsp;	public NaturalIdLoadAccess byNaturalId(Class entityClass) {
+<b class="nc">&nbsp;		return getSession().byNaturalId(entityClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create an {@link SimpleNaturalIdLoadAccess} instance to retrieve the specified entity by its
+&nbsp;	 * natural id.
+&nbsp;	 *
+&nbsp;	 * @param entityName The entity name of the entity type to be retrieved
+&nbsp;	 * @return load delegate for loading the specified entity type by natural id
+&nbsp;	 * @throws HibernateException If the specified entityClass cannot be resolved as a mapped
+&nbsp;	 *             entity, or if the entity does not define a natural-id or if its natural-id is
+&nbsp;	 *             made up of multiple attributes.
+&nbsp;	 */
+&nbsp;	public SimpleNaturalIdLoadAccess bySimpleNaturalId(String entityName) {
+<b class="nc">&nbsp;		return getSession().bySimpleNaturalId(entityName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create an {@link SimpleNaturalIdLoadAccess} instance to retrieve the specified entity by its
+&nbsp;	 * simple (single attribute) natural id.
+&nbsp;	 *
+&nbsp;	 * @param entityClass The entity type to be retrieved
+&nbsp;	 * @return load delegate for loading the specified entity type by natural id
+&nbsp;	 * @throws HibernateException If the specified entityClass cannot be resolved as a mapped
+&nbsp;	 *             entity, or if the entity does not define a natural-id or if its natural-id is
+&nbsp;	 *             made up of multiple attributes.
+&nbsp;	 */
+&nbsp;	public SimpleNaturalIdLoadAccess bySimpleNaturalId(Class entityClass) {
+<b class="nc">&nbsp;		return getSession().bySimpleNaturalId(entityClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Enable the named filter for this current session.
+&nbsp;	 *
+&nbsp;	 * @param filterName The name of the filter to be enabled.
+&nbsp;	 * @return The Filter instance representing the enabled filter.
+&nbsp;	 */
+&nbsp;	public Filter enableFilter(String filterName) {
+<b class="nc">&nbsp;		return getSession().enableFilter(filterName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieve a currently enabled filter by name.
+&nbsp;	 *
+&nbsp;	 * @param filterName The name of the filter to be retrieved.
+&nbsp;	 * @return The Filter instance representing the enabled filter.
+&nbsp;	 */
+&nbsp;	public Filter getEnabledFilter(String filterName) {
+<b class="nc">&nbsp;		return getSession().getEnabledFilter(filterName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Disable the named filter for the current session.
+&nbsp;	 *
+&nbsp;	 * @param filterName The name of the filter to be disabled.
+&nbsp;	 */
+&nbsp;	public void disableFilter(String filterName) {
+<b class="nc">&nbsp;		getSession().disableFilter(filterName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the statistics for this session.
+&nbsp;	 *
+&nbsp;	 * @return The session statistics being collected for this session
+&nbsp;	 */
+&nbsp;	public SessionStatistics getStatistics() {
+<b class="nc">&nbsp;		return getSession().getStatistics();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Is the specified entity or proxy read-only? To get the default read-only/modifiable setting
+&nbsp;	 * used for entities and proxies that are loaded into the session:
+&nbsp;	 * 
+&nbsp;	 * @see org.hibernate.Session#isDefaultReadOnly()
+&nbsp;	 * @param entityOrProxy an entity or HibernateProxy
+&nbsp;	 * @return {@code true} if the entity or proxy is read-only, {@code false} if the entity or
+&nbsp;	 *         proxy is modifiable.
+&nbsp;	 */
+&nbsp;	public boolean isReadOnly(Object entityOrProxy) {
+<b class="nc">&nbsp;		return getSession().isReadOnly(entityOrProxy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set an unmodified persistent object to read-only mode, or a read-only object to modifiable
+&nbsp;	 * mode. In read-only mode, no snapshot is maintained, the instance is never dirty checked, and
+&nbsp;	 * changes are not persisted. If the entity or proxy already has the specified
+&nbsp;	 * read-only/modifiable setting, then this method does nothing. To set the default
+&nbsp;	 * read-only/modifiable setting used for entities and proxies that are loaded into the session:
+&nbsp;	 * 
+&nbsp;	 * @see org.hibernate.Session#setDefaultReadOnly(boolean) To override this session&#39;s
+&nbsp;	 *      read-only/modifiable setting for entities and proxies loaded by a Query:
+&nbsp;	 * @see Query#setReadOnly(boolean)
+&nbsp;	 * @param entityOrProxy an entity or HibernateProxy
+&nbsp;	 * @param readOnly {@code true} if the entity or proxy should be made read-only; {@code false}
+&nbsp;	 *            if the entity or proxy should be made modifiable
+&nbsp;	 */
+&nbsp;	public void setReadOnly(Object entityOrProxy, boolean readOnly) {
+<b class="nc">&nbsp;		getSession().setReadOnly(entityOrProxy, readOnly);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Controller for allowing users to perform JDBC related work using the Connection managed by
+&nbsp;	 * this Session.
+&nbsp;	 *
+&nbsp;	 * @param work The work to be performed.
+&nbsp;	 * @throws HibernateException Generally indicates wrapped {@link java.sql.SQLException}
+&nbsp;	 */
+&nbsp;	public void doWork(Work work) throws HibernateException {
+<b class="nc">&nbsp;		getSession().doWork(work);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Controller for allowing users to perform JDBC related work using the Connection managed by
+&nbsp;	 * this Session. After execution returns the result of the {@link ReturningWork#execute} call.
+&nbsp;	 *
+&nbsp;	 * @param work The work to be performed.
+&nbsp;	 * @param &lt;T&gt; The type of the result returned from the work
+&nbsp;	 * @return the result from calling {@link ReturningWork#execute}.
+&nbsp;	 * @throws HibernateException Generally indicates wrapped {@link java.sql.SQLException}
+&nbsp;	 */
+&nbsp;	public &lt;T&gt; T doReturningWork(ReturningWork&lt;T&gt; work) throws HibernateException {
+<b class="nc">&nbsp;		return getSession().doReturningWork(work);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Disconnect the session from its underlying JDBC connection. This is intended for use in cases
+&nbsp;	 * where the application has supplied the JDBC connection to the session and which require
+&nbsp;	 * long-sessions (aka, conversations).
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is considered an error to call this method on a session which was not opened by supplying
+&nbsp;	 * the JDBC connection and an exception will be thrown.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * For non-user-supplied scenarios, normal transaction management already handles disconnection
+&nbsp;	 * and reconnection automatically.
+&nbsp;	 *
+&nbsp;	 * @return the application-supplied connection or {@code null}
+&nbsp;	 * @see #reconnect(Connection)
+&nbsp;	 */
+&nbsp;	Connection disconnect() {
+<b class="nc">&nbsp;		return getSession().disconnect();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reconnect to the given JDBC connection.
+&nbsp;	 *
+&nbsp;	 * @param connection a JDBC connection
+&nbsp;	 * @see #disconnect()
+&nbsp;	 */
+&nbsp;	void reconnect(Connection connection) {
+<b class="nc">&nbsp;		getSession().reconnect(connection);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Is a particular fetch profile enabled on this session?
+&nbsp;	 *
+&nbsp;	 * @param name The name of the profile to be checked.
+&nbsp;	 * @return True if fetch profile is enabled; false if not.
+&nbsp;	 * @throws UnknownProfileException Indicates that the given name does not match any known
+&nbsp;	 *             profile names
+&nbsp;	 * @see org.hibernate.engine.profile.FetchProfile for discussion of this feature
+&nbsp;	 */
+&nbsp;	public boolean isFetchProfileEnabled(String name) throws UnknownProfileException {
+<b class="nc">&nbsp;		return getSession().isFetchProfileEnabled(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Enable a particular fetch profile on this session. No-op if requested profile is already
+&nbsp;	 * enabled.
+&nbsp;	 *
+&nbsp;	 * @param name The name of the fetch profile to be enabled.
+&nbsp;	 * @throws UnknownProfileException Indicates that the given name does not match any known
+&nbsp;	 *             profile names
+&nbsp;	 * @see org.hibernate.engine.profile.FetchProfile for discussion of this feature
+&nbsp;	 */
+&nbsp;	public void enableFetchProfile(String name) throws UnknownProfileException {
+<b class="nc">&nbsp;		getSession().enableFetchProfile(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Disable a particular fetch profile on this session. No-op if requested profile is already
+&nbsp;	 * disabled.
+&nbsp;	 *
+&nbsp;	 * @param name The name of the fetch profile to be disabled.
+&nbsp;	 * @throws UnknownProfileException Indicates that the given name does not match any known
+&nbsp;	 *             profile names
+&nbsp;	 * @see org.hibernate.engine.profile.FetchProfile for discussion of this feature
+&nbsp;	 */
+&nbsp;	public void disableFetchProfile(String name) throws UnknownProfileException {
+<b class="nc">&nbsp;		getSession().disableFetchProfile(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience access to the {@link TypeHelper} associated with this session&#39;s
+&nbsp;	 * {@link SessionFactory}.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Equivalent to calling {@link #getSessionFactory()}.{@link SessionFactory#getTypeHelper
+&nbsp;	 * getTypeHelper()}
+&nbsp;	 *
+&nbsp;	 * @return The {@link TypeHelper} associated with this session&#39;s {@link SessionFactory}
+&nbsp;	 */
+&nbsp;	public TypeHelper getTypeHelper() {
+<b class="nc">&nbsp;		return getSession().getTypeHelper();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieve this session&#39;s helper/delegate for creating LOB instances.
+&nbsp;	 *
+&nbsp;	 * @return This session&#39;s LOB helper
+&nbsp;	 */
+&nbsp;	public LobHelper getLobHelper() {
+<b class="nc">&nbsp;		return getSession().getLobHelper();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add one or more listeners to the Session
+&nbsp;	 *
+&nbsp;	 * @param listeners The listener(s) to add
+&nbsp;	 */
+&nbsp;	public void addEventListeners(SessionEventListener... listeners) {
+<b class="nc">&nbsp;		getSession().addEventListeners(listeners);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

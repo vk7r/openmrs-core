@@ -1,0 +1,198 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsProfileExcludeFilter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.annotation</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsProfileExcludeFilter (org.openmrs.annotation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsProfileExcludeFilter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,7%
+  </span>
+  <span class="absValue">
+    (26/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.annotation;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.module.Module;
+&nbsp;import org.openmrs.module.ModuleFactory;
+&nbsp;import org.openmrs.module.ModuleUtil;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.springframework.core.type.classreading.MetadataReader;
+&nbsp;import org.springframework.core.type.classreading.MetadataReaderFactory;
+&nbsp;import org.springframework.core.type.filter.TypeFilter;
+&nbsp;
+&nbsp;/**
+&nbsp; * Prevents creating a bean if profile is not matched. It returns true if a bean should not be created.
+&nbsp; */
+<b class="fc">&nbsp;public class OpenmrsProfileExcludeFilter implements TypeFilter {</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param metadataReader
+&nbsp;	 * @param metadataReaderFactory
+&nbsp;	 * @return whether this filter matches
+&nbsp;	 * @throws IOException
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include bean for openmrs from 1_6 to 1_7
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include bean for openmrs 1_10 and later
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include bean for openmrs 1_8 and later if module missing
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include bean for openmrs 1_8 and later
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+<b class="fc">&nbsp;		Map&lt;String, Object&gt; openmrsProfileAttributes = metadataReader.getAnnotationMetadata().getAnnotationAttributes(</b>
+&nbsp;				&quot;org.openmrs.annotation.OpenmrsProfile&quot;);
+<b class="fc">&nbsp;		if (openmrsProfileAttributes != null) {</b>
+<b class="fc">&nbsp;			return !matchOpenmrsProfileAttributes(openmrsProfileAttributes);</b>
+&nbsp;		} else {
+&nbsp;			//do not exclude
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean matchOpenmrsProfileAttributes(Map&lt;String, Object&gt; openmrsProfile) {
+<b class="fc">&nbsp;		Object openmrsPlatformVersion = openmrsProfile.get(&quot;openmrsPlatformVersion&quot;);</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank((String) openmrsPlatformVersion)) {</b>
+&nbsp;			//Left for backwards compatibility
+<b class="fc">&nbsp;			openmrsPlatformVersion = openmrsProfile.get(&quot;openmrsVersion&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank((String) openmrsPlatformVersion)</b>
+<b class="fc">&nbsp;				&amp;&amp; !ModuleUtil.matchRequiredVersions(OpenmrsConstants.OPENMRS_VERSION_SHORT, (String) openmrsPlatformVersion)) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		String[] modules = (String[]) openmrsProfile.get(&quot;modules&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (String moduleAndVersion : modules) {</b>
+<b class="fc">&nbsp;			if (&quot;!&quot;.equals(moduleAndVersion.substring(0, 1))) {</b>
+<b class="fc">&nbsp;				if (ModuleFactory.isModuleStarted(moduleAndVersion.substring(1))) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			else {
+<b class="fc">&nbsp;				String[] splitModuleAndVersion = moduleAndVersion.split(&quot;:&quot;);</b>
+<b class="fc">&nbsp;				String moduleId = splitModuleAndVersion[0];</b>
+<b class="fc">&nbsp;				String moduleVersion = splitModuleAndVersion[1];</b>
+&nbsp;
+<b class="fc">&nbsp;				boolean moduleMatched = false;</b>
+<b class="fc">&nbsp;				for (Module module : ModuleFactory.getStartedModules()) {</b>
+<b class="fc">&nbsp;					if (module.getModuleId().equals(moduleId)</b>
+<b class="nc">&nbsp;							&amp;&amp; ModuleUtil.matchRequiredVersions(module.getVersion(), moduleVersion)) {</b>
+<b class="nc">&nbsp;						moduleMatched = true;</b>
+<b class="nc">&nbsp;						break;</b>
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;
+<b class="fc">&nbsp;				if (!moduleMatched) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

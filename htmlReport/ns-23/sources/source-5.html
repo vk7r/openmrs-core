@@ -1,0 +1,171 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MandatoryModuleException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: MandatoryModuleException (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MandatoryModuleException</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,9%
+  </span>
+  <span class="absValue">
+    (3/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * This error is thrown when OpenMRS is started but a module marked as &#39;mandatory&#39; but was unable to
+&nbsp; * start. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This error is also thrown when trying to stop a module that is marked as mandatory.
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context#startup(java.util.Properties)
+&nbsp; * @see ModuleUtil#getMandatoryModules()
+&nbsp; */
+&nbsp;public class MandatoryModuleException extends ModuleMustStartException {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 236472655L;
+&nbsp;	
+&nbsp;	private String moduleId;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor is used when a user tries to stop a mandatory module.
+&nbsp;	 * 
+&nbsp;	 * @param moduleId the module id that is trying to be stopped
+&nbsp;	 */
+&nbsp;	public MandatoryModuleException(String moduleId) {
+<b class="nc">&nbsp;		this(moduleId, &quot;&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor is used when a user tries to stop a mandatory module.
+&nbsp;	 * 
+&nbsp;	 * @param moduleId the module id that is trying to be stopped
+&nbsp;	 * @param extraErrorMessage extra data to provide in the error&#39;s message
+&nbsp;	 */
+&nbsp;	public MandatoryModuleException(String moduleId, String extraErrorMessage) {
+<b class="nc">&nbsp;		super(&quot;The &quot; + moduleId + &quot; module is marked as &#39;mandatory&#39; and so cannot be stopped or unloaded. &quot;</b>
+&nbsp;		        + extraErrorMessage);
+<b class="nc">&nbsp;		this.moduleId = moduleId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param moduleIds list of module ids that are mandatory and didn&#39;t start
+&nbsp;	 */
+&nbsp;	public MandatoryModuleException(List&lt;String&gt; moduleIds) {
+<b class="fc">&nbsp;		super(&quot;The following modules are marked as &#39;mandatory&#39; but were unable to start: &quot;</b>
+<b class="fc">&nbsp;		        + String.join(&quot;,&quot;, moduleIds));</b>
+<b class="fc">&nbsp;		this.moduleId = String.join(&quot;,&quot;, moduleIds);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The id (or ids) of the module that is mandatory
+&nbsp;	 * 
+&nbsp;	 * @return the module id (or ids) that caused this exception
+&nbsp;	 */
+&nbsp;	public String getModuleId() {
+<b class="nc">&nbsp;		return moduleId;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

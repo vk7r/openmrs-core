@@ -1,0 +1,140 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Logging</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.annotation</a>
+</div>
+
+<h1>Coverage Summary for Class: Logging (org.openmrs.annotation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Logging</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.annotation;
+&nbsp;
+&nbsp;import java.lang.annotation.Documented;
+&nbsp;import java.lang.annotation.ElementType;
+&nbsp;import java.lang.annotation.Inherited;
+&nbsp;import java.lang.annotation.Retention;
+&nbsp;import java.lang.annotation.RetentionPolicy;
+&nbsp;import java.lang.annotation.Target;
+&nbsp;
+&nbsp;/**
+&nbsp; * Annotation used to provide a few extra options to the API logging advice. This annotation is only
+&nbsp; * needed if a specific method needs some extra information (like if you want to limit the output of
+&nbsp; * this method when being logged because of size concerns or security concerns).&lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * To use, simply place the annotation before a method declaration in its interface:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; *    &amp;#064;Logging(ignoreAllArgumentValues=true)
+&nbsp; *    public SomeString setSomeLargeString(String aVeryLargeString);
+&nbsp; *    
+&nbsp; *    &amp;#064;Logging(ignoreAllArgumentValues=true)
+&nbsp; *    public User saveUser(User userToSave, String password);
+&nbsp; *    
+&nbsp; *    &amp;#064;Logging(ignoredArgumentIndexes={1})
+&nbsp; *    public User saveUser(User userToSave, String password);
+&nbsp; *  &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.aop.LoggingAdvice
+&nbsp; */
+&nbsp;@Target( { ElementType.METHOD, ElementType.TYPE })
+&nbsp;@Retention(RetentionPolicy.RUNTIME)
+&nbsp;@Inherited
+&nbsp;@Documented
+&nbsp;public @interface Logging {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If set to true, suppress any automatic OpenMRS logging of this method (E.g. you will no
+&nbsp;	 * longer see &quot;In method XyzService.saveXyz...&quot;.) Defaults to false.
+&nbsp;	 * 
+&nbsp;	 * @return boolean true/false to suppress OpenMRS&#39;s automatic logging of this method
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	public boolean ignore() default false;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If set to true, the annotated method will not print out the contents of the arguments every
+&nbsp;	 * time this method is accessed and logged. Defaults to false
+&nbsp;	 * 
+&nbsp;	 * @return boolean true/false to ignore the argument content when logging
+&nbsp;	 */
+&nbsp;	public boolean ignoreAllArgumentValues() default false;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This list should set the argument indexes that should not be printed. This is useful if one
+&nbsp;	 * of the arguments/parameters is more sensitive than others. Note: This parameter does not need
+&nbsp;	 * defined if the &lt;code&gt;Logging&lt;/code&gt; annotation has set {@link #ignoreAllArgumentValues()} to
+&nbsp;	 * true
+&nbsp;	 * 
+&nbsp;	 * @return list of argument indexes to ignore. (first argument is 0, second is 1, etc)
+&nbsp;	 */
+&nbsp;	public int[] ignoredArgumentIndexes() default {};
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

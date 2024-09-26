@@ -1,0 +1,464 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VisitService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: VisitService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">VisitService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.VisitAttribute;
+&nbsp;import org.openmrs.VisitAttributeType;
+&nbsp;import org.openmrs.VisitType;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.parameter.VisitSearchCriteria;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * This service contains methods relating to visits.
+&nbsp; * 
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;public interface VisitService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all visit types.
+&nbsp;	 * 
+&nbsp;	 * @return a list of visit type objects.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all visit types
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_VISIT_TYPES })
+&nbsp;	List&lt;VisitType&gt; getAllVisitTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all visit types based on includeRetired flag
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return List of all visit types
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all visit types based on include retired flag.
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_VISIT_TYPES })
+&nbsp;	public List&lt;VisitType&gt; getAllVisitTypes(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a visit type by its visit type id.
+&nbsp;	 * 
+&nbsp;	 * @param visitTypeId the visit type id.
+&nbsp;	 * @return the visit type object found with the given id, else null.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get correct visit type
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_VISIT_TYPES })
+&nbsp;	VisitType getVisitType(Integer visitTypeId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a visit type by its UUID.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the visit type UUID.
+&nbsp;	 * @return the visit type object found with the given uuid, else null.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get correct visit type
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_VISIT_TYPES })
+&nbsp;	VisitType getVisitTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all visit types whose names are similar to or contain the given search phrase.
+&nbsp;	 * 
+&nbsp;	 * @param fuzzySearchPhrase the search phrase to use.
+&nbsp;	 * @return a list of all visit types with names similar to or containing the given phrase
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get correct visit types
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_VISIT_TYPES })
+&nbsp;	List&lt;VisitType&gt; getVisitTypes(String fuzzySearchPhrase);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given visit type in the database.
+&nbsp;	 * 
+&nbsp;	 * @param visitType the visit type to create or update.
+&nbsp;	 * @return the created or updated visit type.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save new visit type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save edited visit type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when name is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when name is empty string
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_VISIT_TYPES })
+&nbsp;	VisitType saveVisitType(VisitType visitType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires a given visit type.
+&nbsp;	 * 
+&nbsp;	 * @param visitType the visit type to retire.
+&nbsp;	 * @param reason the reason why the visit type is retired.
+&nbsp;	 * @return the visit type that has been retired.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire given visit type
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_VISIT_TYPES })
+&nbsp;	VisitType retireVisitType(VisitType visitType, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretires a visit type.
+&nbsp;	 * 
+&nbsp;	 * @param visitType the visit type to unretire.
+&nbsp;	 * @return the unretired visit type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire given visit type
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_VISIT_TYPES })
+&nbsp;	VisitType unretireVisitType(VisitType visitType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a visit type from the database. This is not reversible.
+&nbsp;	 * 
+&nbsp;	 * @param visitType the visit type to delete from the database.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given visit type
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_VISIT_TYPES })
+&nbsp;	void purgeVisitType(VisitType visitType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all unvoided visits in the database.
+&nbsp;	 * 
+&nbsp;	 * @return a list of visit objects.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all unvoided visits
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public List&lt;Visit&gt; getAllVisits() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a visit by its visit id.
+&nbsp;	 * 
+&nbsp;	 * @param visitId the visit id.
+&nbsp;	 * @return the visit object found with the given id, else null.
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public Visit getVisit(Integer visitId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a visit by its UUID.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the visit UUID.
+&nbsp;	 * @return the visit object found with the given uuid, else null.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a visit matching the specified uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public Visit getVisitByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given visit in the database.
+&nbsp;	 * 
+&nbsp;	 * @param visit the visit to create or update.
+&nbsp;	 * @return the created or updated visit.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add a new visit to the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing visit in the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if validation errors are found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if no validation errors are found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be able to add an attribute to a visit
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void an attribute if max occurs is 1 and same attribute type already exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a visit though changedBy and dateCreated are not set for VisitAttribute
+&nbsp;	 *         explicitly
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should save new visit with encounters successfully
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_VISITS, PrivilegeConstants.EDIT_VISITS })
+&nbsp;	public Visit saveVisit(Visit visit) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the stopDate of a given visit.
+&nbsp;	 * 
+&nbsp;	 * @param visit the visit whose stopDate is to be set
+&nbsp;	 * @param stopDate the date and time the visit is ending. if null, current date is used
+&nbsp;	 * @return the visit that was ended
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the stopDateTime of visit
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set stopdatetime as current date if stopdate is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if no validation errors are found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if validation errors are found
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_VISITS })
+&nbsp;	public Visit endVisit(Visit visit, Date stopDate) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids the given visit.
+&nbsp;	 * 
+&nbsp;	 * @param visit the visit to void.
+&nbsp;	 * @param reason the reason why the visit is voided
+&nbsp;	 * @return the visit that has been voided
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void the visit and set the voidReason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void encounters with visit
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_VISITS)
+&nbsp;	public Visit voidVisit(Visit visit, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unvoids the given visit.
+&nbsp;	 * 
+&nbsp;	 * @param visit the visit to unvoid
+&nbsp;	 * @return the unvoided visit
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid the visit and unset all the void related fields
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid encounters voided with visit
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_VISITS)
+&nbsp;	public Visit unvoidVisit(Visit visit) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely erases a visit from the database. This is not reversible.
+&nbsp;	 * 
+&nbsp;	 * @param visit the visit to delete from the database.
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; erase the visit from the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the visit has encounters associated to it
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_VISITS)
+&nbsp;	public void purgeVisit(Visit visit) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the visits matching the specified arguments
+&nbsp;	 * 
+&nbsp;	 * @param visitTypes a list of visit types to match against
+&nbsp;	 * @param locations a list of locations to match against
+&nbsp;	 * @param indications a list of indication concepts to match against
+&nbsp;	 * @param minStartDatetime the minimum visit start date to match against
+&nbsp;	 * @param maxStartDatetime the maximum visit start date to match against
+&nbsp;	 * @param minEndDatetime the minimum visit end date to match against
+&nbsp;	 * @param maxEndDatetime the maximum visit end date to match against
+&nbsp;	 * @param includeInactive if false, the min/maxEndDatetime parameters are ignored and only open
+&nbsp;	 *            visits are returned
+&nbsp;	 * @param includeVoided specifies if voided visits should also be returned
+&nbsp;	 * @return a list of visits
+&nbsp;	 * @see #getActiveVisitsByPatient(Patient)
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits by visit type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits by patients
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits by locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits by indications
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits started between the given start dates
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits ended between the given end dates
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get visits that are still open even if minStartDatetime is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all visits if includeVoided is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all visits with given attribute values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not find any visits if none have given attribute values
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public List&lt;Visit&gt; getVisits(Collection&lt;VisitType&gt; visitTypes, Collection&lt;Patient&gt; patients,
+&nbsp;	        Collection&lt;Location&gt; locations, Collection&lt;Concept&gt; indications, Date minStartDatetime, Date maxStartDatetime,
+&nbsp;	        Date minEndDatetime, Date maxEndDatetime, Map&lt;VisitAttributeType, Object&gt; attributeValues,
+&nbsp;	        boolean includeInactive, boolean includeVoided) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the visits matching the specified search criteria
+&nbsp;	 * 
+&nbsp; 	 * @param visitSearchCriteria
+&nbsp;	 * @return
+&nbsp;	 * @throws APIException
+&nbsp;	 * 
+&nbsp;	 * @since 2.6.8
+&nbsp;	 * @since 2.7.0
+&nbsp;	 */	
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public List&lt;Visit&gt; getVisits(VisitSearchCriteria visitSearchCriteria) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all unvoided visits for the specified patient
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient whose visits to get
+&nbsp;	 * @return a list of visits
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all unvoided visits for the specified patient
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public List&lt;Visit&gt; getVisitsByPatient(Patient patient) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that delegates to getVisitsByPatient(patient, false, false)
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient whose visits to get
+&nbsp;	 * @return a list of visits
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public List&lt;Visit&gt; getActiveVisitsByPatient(Patient patient) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all visits for the specified patient
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient whose visits to get
+&nbsp;	 * @param includeInactive
+&nbsp;	 * @param includeVoided
+&nbsp;	 * @return a list of visits
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all active unvoided visits for the specified patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all unvoided visits for the specified patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all active visits for the specified patient
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	public List&lt;Visit&gt; getVisitsByPatient(Patient patient, boolean includeInactive, boolean includeVoided)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all {@link VisitAttributeType}s
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all visit attribute types including retired ones
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	List&lt;VisitAttributeType&gt; getAllVisitAttributeTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param id
+&nbsp;	 * @return the {@link VisitAttributeType} with the given internal id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the visit attribute type with the given id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no visit attribute type exists with the given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	VisitAttributeType getVisitAttributeType(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the {@link VisitAttributeType} with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the visit attribute type with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no visit attribute type exists with the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	VisitAttributeType getVisitAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given visit attribute type in the database
+&nbsp;	 * 
+&nbsp;	 * @param visitAttributeType
+&nbsp;	 * @return the VisitAttributeType created/saved
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a new visit attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; edit an existing visit attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	VisitAttributeType saveVisitAttributeType(VisitAttributeType visitAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires the given visit attribute type in the database
+&nbsp;	 * 
+&nbsp;	 * @param visitAttributeType
+&nbsp;	 * @return the visitAttribute retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire a visit attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	VisitAttributeType retireVisitAttributeType(VisitAttributeType visitAttributeType, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Restores a visit attribute type that was previous retired in the database
+&nbsp;	 * 
+&nbsp;	 * @param visitAttributeType
+&nbsp;	 * @return the VisitAttributeType unretired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire a retired visit attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	VisitAttributeType unretireVisitAttributeType(VisitAttributeType visitAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a visit attribute type from the database
+&nbsp;	 * 
+&nbsp;	 * @param visitAttributeType
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; completely remove a visit attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_VISIT_ATTRIBUTE_TYPES)
+&nbsp;	void purgeVisitAttributeType(VisitAttributeType visitAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the {@link VisitAttribute} with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the visit attribute with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no visit attribute has the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_VISITS)
+&nbsp;	VisitAttribute getVisitAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Stops all active visits started before or on the specified date which match any of the visit
+&nbsp;	 * types specified by the {@link OpenmrsConstants#GP_VISIT_TYPES_TO_AUTO_CLOSE} global property.
+&nbsp;	 * If startDatetime is null, the default will be end of the current day.
+&nbsp;	 * 
+&nbsp;	 * @param maximumStartDate Visits started on or before this date time value will get stopped
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; close all unvoided active visit matching the specified visit types
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_VISITS)
+&nbsp;	public void stopVisits(Date maximumStartDate);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

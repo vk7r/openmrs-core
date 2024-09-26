@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AllergyValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: AllergyValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AllergyValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,2%
+  </span>
+  <span class="absValue">
+    (25/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.math.NumberUtils;
+&nbsp;import org.openmrs.Allergen;
+&nbsp;import org.openmrs.Allergies;
+&nbsp;import org.openmrs.Allergy;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.PatientService;
+&nbsp;import org.openmrs.messagesource.MessageSourceService;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;@Component(&quot;allergyValidator&quot;)
+&nbsp;@Handler(supports = { Allergy.class }, order = 50)
+<b class="fc">&nbsp;public class AllergyValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private MessageSourceService messageSourceService;
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private PatientService patientService;
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; clazz) {
+<b class="fc">&nbsp;		return Allergy.class.isAssignableFrom(clazz);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see Validator#validate(Object, org.springframework.validation.Errors)
+&nbsp;	 * @param target
+&nbsp;	 * @param errors
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail for a null value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if patient is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail id allergenType is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if allergen is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if codedAllergen is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if nonCodedAllergen is null and allergen is set to other non coded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a duplicate allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a duplicate non coded allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass for a valid allergy
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject numeric values and symbols on reactionNonCoded
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object target, Errors errors) {
+&nbsp;		
+<b class="fc">&nbsp;		if (target == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;Allergy should not be null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;patient&quot;, &quot;allergyapi.patient.required&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Allergy allergy = (Allergy) target;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (allergy.getReactionNonCoded() != null) {</b>
+<b class="fc">&nbsp;			if (NumberUtils.isParsable(allergy.getReactionNonCoded())) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;reactionNonCoded&quot;, &quot;error.allergyapi.allergy.ReactionNonCoded.cannotBeNumeric&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		if (allergy.getAllergen() == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;allergen&quot;, &quot;allergyapi.allergen.required&quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			Allergen allergen = allergy.getAllergen();</b>
+<b class="fc">&nbsp;			if (allergen.getAllergenType() == null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;allergen&quot;, &quot;allergyapi.allergenType.required&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (allergen.getCodedAllergen() == null &amp;&amp; StringUtils.isBlank(allergen.getNonCodedAllergen())) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;allergen&quot;, &quot;allergyapi.allergen.codedOrNonCodedAllergen.required&quot;);</b>
+<b class="fc">&nbsp;			} else if (!allergen.isCoded() &amp;&amp; StringUtils.isBlank(allergen.getNonCodedAllergen())) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;allergen&quot;, &quot;allergyapi.allergen.nonCodedAllergen.required&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (allergy.getAllergyId() == null &amp;&amp; allergy.getPatient() != null) {</b>
+<b class="fc">&nbsp;				Allergies existingAllergies = patientService.getAllergies(allergy.getPatient());</b>
+<b class="fc">&nbsp;				if (existingAllergies.containsAllergen(allergy)) {</b>
+<b class="fc">&nbsp;					String key = &quot;ui.i18n.Concept.name.&quot; + allergen.getCodedAllergen().getUuid();</b>
+<b class="fc">&nbsp;					String name = messageSourceService.getMessage(key);</b>
+<b class="fc">&nbsp;					if (key.equals(name)) {</b>
+<b class="nc">&nbsp;						name = allergen.toString();</b>
+&nbsp;					}
+<b class="fc">&nbsp;					errors.rejectValue(&quot;allergen&quot;, &quot;allergyapi.message.duplicateAllergen&quot;, new Object[] { name }, null);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

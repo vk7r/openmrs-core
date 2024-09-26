@@ -1,0 +1,398 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptProposal</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptProposal (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptProposal</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (28/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,6%
+  </span>
+  <span class="absValue">
+    (29/36)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptProposal$HibernateProxy$po8HXDBt</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (28/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,6%
+  </span>
+  <span class="absValue">
+    (29/36)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * A ConceptProposal is a temporary holder for concept that should be in the system. When defining
+&nbsp; * an observation, a user can &quot;propose&quot; a new concept if one isn&#39;t found already. The proposal is a
+&nbsp; * simple text entry that will be reviewed later. When a proposal is (edited and) accepted, the
+&nbsp; * encounter that prompted this proposal is updated with a new observation pointing at the new (or
+&nbsp; * edited) concept.
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptProposal extends BaseOpenmrsObject {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 57344L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private Integer conceptProposalId;
+&nbsp;	
+&nbsp;	private Encounter encounter;
+&nbsp;	
+&nbsp;	private Concept obsConcept;
+&nbsp;	
+&nbsp;	private Obs obs;
+&nbsp;	
+&nbsp;	private Concept mappedConcept;
+&nbsp;	
+&nbsp;	private String originalText;
+&nbsp;	
+&nbsp;	private String finalText;
+&nbsp;	
+&nbsp;	private String state;
+&nbsp;	
+&nbsp;	private String comments;
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;	
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptProposal() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="nc">&nbsp;	public ConceptProposal(Integer conceptProposalId) {</b>
+<b class="nc">&nbsp;		this.conceptProposalId = conceptProposalId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the changedBy.
+&nbsp;	 */
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param changedBy The changedBy to set.
+&nbsp;	 */
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptProposalId.
+&nbsp;	 */
+&nbsp;	public Integer getConceptProposalId() {
+<b class="fc">&nbsp;		return conceptProposalId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptProposalId The conceptProposalId to set.
+&nbsp;	 */
+&nbsp;	public void setConceptProposalId(Integer conceptProposalId) {
+<b class="fc">&nbsp;		this.conceptProposalId = conceptProposalId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateChanged.
+&nbsp;	 */
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged The dateChanged to set.
+&nbsp;	 */
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the originalText.
+&nbsp;	 */
+&nbsp;	public String getOriginalText() {
+<b class="fc">&nbsp;		return originalText;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param originalText The originalText to set.
+&nbsp;	 */
+&nbsp;	public void setOriginalText(String originalText) {
+<b class="fc">&nbsp;		this.originalText = originalText;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the final text.
+&nbsp;	 */
+&nbsp;	public String getFinalText() {
+<b class="fc">&nbsp;		return finalText;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param t The final text to set.
+&nbsp;	 */
+&nbsp;	public void setFinalText(String t) {
+<b class="fc">&nbsp;		this.finalText = t;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the comments.
+&nbsp;	 */
+&nbsp;	public String getComments() {
+<b class="fc">&nbsp;		return comments;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param comments The comments to set.
+&nbsp;	 */
+&nbsp;	public void setComments(String comments) {
+<b class="fc">&nbsp;		this.comments = comments;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the state.
+&nbsp;	 */
+&nbsp;	public String getState() {
+<b class="fc">&nbsp;		return state;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param state The state to set.
+&nbsp;	 */
+&nbsp;	public void setState(String state) {
+<b class="fc">&nbsp;		this.state = state;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the encounter.
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounter The encounter to set.
+&nbsp;	 */
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		if (conceptProposalId == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return conceptProposalId.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the obs.
+&nbsp;	 */
+&nbsp;	public Obs getObs() {
+<b class="fc">&nbsp;		return obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param obs The obs to set.
+&nbsp;	 */
+&nbsp;	public void setObs(Obs obs) {
+<b class="fc">&nbsp;		this.obs = obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the obsConcept.
+&nbsp;	 */
+&nbsp;	public Concept getObsConcept() {
+<b class="fc">&nbsp;		return obsConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param obsConcept The obsConcept to set.
+&nbsp;	 */
+&nbsp;	public void setObsConcept(Concept obsConcept) {
+<b class="fc">&nbsp;		this.obsConcept = obsConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the mappedConcept.
+&nbsp;	 */
+&nbsp;	public Concept getMappedConcept() {
+<b class="fc">&nbsp;		return mappedConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param mappedConcept The mappedConcept to set.
+&nbsp;	 */
+&nbsp;	public void setMappedConcept(Concept mappedConcept) {
+<b class="fc">&nbsp;		this.mappedConcept = mappedConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to mark this proposal as rejected. Be sure to call
+&nbsp;	 * Context.getConceptService().saveConceptProposal(/thisObject/) after calling this method
+&nbsp;	 */
+&nbsp;	public void rejectConceptProposal() {
+<b class="fc">&nbsp;		setState(OpenmrsConstants.CONCEPT_PROPOSAL_REJECT);</b>
+<b class="fc">&nbsp;		setFinalText(&quot;&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getConceptProposalId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptProposalId(id);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

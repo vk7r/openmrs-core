@@ -1,0 +1,183 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsCoreModuleException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsCoreModuleException (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsCoreModuleException</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * This error is thrown when OpenMRS is started but there is a module that is core to OpenMRS and
+&nbsp; * that module is not present or did not start &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This error is also thrown when trying to stop a module that is marked as core.
+&nbsp; * 
+&nbsp; * @see Context#startup(java.util.Properties)
+&nbsp; * @see ModuleUtil#startup(java.util.Properties)
+&nbsp; * @see ModuleConstants#CORE_MODULES
+&nbsp; */
+&nbsp;public class OpenmrsCoreModuleException extends ModuleMustStartException {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	private Map&lt;String, String&gt; modules;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor is used when a user tries to stop a core module.
+&nbsp;	 * 
+&nbsp;	 * @param moduleId the module id that is trying to be stopped
+&nbsp;	 */
+&nbsp;	public OpenmrsCoreModuleException(String moduleId) {
+<b class="nc">&nbsp;		super(&quot;The &quot; + moduleId + &quot; module is set as &#39;core&#39; by OpenMRS and so cannot be stopped or unloaded.&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param modules map from module id to version that is core and didn&#39;t start
+&nbsp;	 */
+&nbsp;	public OpenmrsCoreModuleException(Map&lt;String, String&gt; modules) {
+<b class="nc">&nbsp;		super(createMessage(modules));</b>
+&nbsp;		
+&nbsp;		// set the moduleIds property for use by the StartupErrorFilter
+<b class="nc">&nbsp;		this.modules = modules;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Helper method to turn the given modules map into a message string so that it can be passed to
+&nbsp;	 * a super constructor
+&nbsp;	 * 
+&nbsp;	 * @param modules map from module id to the version that is required
+&nbsp;	 * @return the string to display to the user
+&nbsp;	 */
+&nbsp;	private static String createMessage(Map&lt;String, String&gt; modules) {
+<b class="nc">&nbsp;		StringBuilder msg = new StringBuilder(</b>
+&nbsp;		        &quot;The following modules are marked as &#39;core&#39; by OpenMRS but were unable to start: &quot;);
+<b class="nc">&nbsp;		for (Map.Entry&lt;String, String&gt; entry : modules.entrySet()) {</b>
+<b class="nc">&nbsp;			msg.append(entry.getKey());</b>
+<b class="nc">&nbsp;			msg.append(&quot; v&quot;);</b>
+<b class="nc">&nbsp;			msg.append(entry.getValue());</b>
+<b class="nc">&nbsp;			msg.append(&quot;, &quot;);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return msg.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The module ids that caused this exception
+&nbsp;	 * 
+&nbsp;	 * @return the module ids that caused this exception
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getModules() {
+<b class="nc">&nbsp;		return modules;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

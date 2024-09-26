@@ -1,0 +1,149 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsMetadata</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsMetadata (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsMetadata</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * In OpenMRS, we distinguish between data and metadata within our data model. Metadata represent
+&nbsp; * system and descriptive data such as data types &amp;mdash; a relationship type or encounter type.
+&nbsp; * Metadata are generally referenced by clinical data but don&#39;t represent patient-specific data
+&nbsp; * themselves. OpenMRS objects that represent metadata should implement this interface.
+&nbsp; * 
+&nbsp; * @see OpenmrsData
+&nbsp; * @see BaseChangeableOpenmrsMetadata
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;public interface OpenmrsMetadata extends Auditable, Retireable {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the name
+&nbsp;	 */
+&nbsp;	public String getName();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param name the name to set
+&nbsp;	 */
+&nbsp;	public void setName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the description
+&nbsp;	 */
+&nbsp;	public String getDescription();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param description the description to set
+&nbsp;	 */
+&nbsp;	public void setDescription(String description);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated As of version 2.2 OpenmrsMetadata is immutable by default, it&#39;s up to the
+&nbsp;	 *             subclasses to make themselves mutable by extending BaseChangeableOpenmrsMetadata,
+&nbsp;	 *             this method will be removed in 2.3
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	User getChangedBy();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated As of version 2.2 OpenmrsMetadata is immutable by default, it&#39;s up to the
+&nbsp;	 *             subclasses to make themselves mutable by extending BaseChangeableOpenmrsMetadata,
+&nbsp;	 *             this method will be removed in 2.3
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	void setChangedBy(User changedBy);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated As of version 2.2 OpenmrsMetadata is immutable by default, it&#39;s up to the
+&nbsp;	 *             subclasses to make themselves mutable by extending BaseChangeableOpenmrsMetadata,
+&nbsp;	 *             this method will be removed in 2.3
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	Date getDateChanged();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated As of version 2.2 OpenmrsMetadata is immutable by default, it&#39;s up to the
+&nbsp;	 *             subclasses to make themselves mutable by extending BaseChangeableOpenmrsMetadata,
+&nbsp;	 *             this method will be removed in 2.3
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	void setDateChanged(Date dateChanged);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

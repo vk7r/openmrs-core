@@ -1,0 +1,969 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Location</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Location (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Location</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,1%
+  </span>
+  <span class="absValue">
+    (62/72)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,2%
+  </span>
+  <span class="absValue">
+    (91/126)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Location$HibernateProxy$gRSfB93w</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    86,1%
+  </span>
+  <span class="absValue">
+    (62/72)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,2%
+  </span>
+  <span class="absValue">
+    (91/126)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.annotations.BatchSize;
+&nbsp;import org.hibernate.annotations.Cache;
+&nbsp;import org.hibernate.annotations.CacheConcurrencyStrategy;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.annotation.Independent;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;import javax.persistence.AttributeOverride;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.FetchType;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.JoinTable;
+&nbsp;import javax.persistence.ManyToMany;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.OrderBy;
+&nbsp;import javax.persistence.Table;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * A Location is a physical place, such as a hospital, a room, a clinic, or a district. Locations
+&nbsp; * support a single hierarchy, such that each location may have one parent location. A
+&nbsp; * non-geographical grouping of locations, such as &quot;All Community Health Centers&quot; is not a location,
+&nbsp; * and should be modeled using {@link LocationTag}s.
+&nbsp; * Note: Prior to version 1.9 this class extended BaseMetadata
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;location&quot;)
+&nbsp;@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+&nbsp;@AttributeOverride(name = &quot;attributes&quot;, column = @Column(name = &quot;location_id&quot;))
+&nbsp;@Audited
+&nbsp;public class Location extends BaseCustomizableMetadata&lt;LocationAttribute&gt; implements java.io.Serializable, Attributable&lt;Location&gt;, Address {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 455634L;
+&nbsp;	
+&nbsp;	public static final int LOCATION_UNKNOWN = 1;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@Id
+&nbsp;	@Column(name = &quot;location_id&quot;)
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	private Integer locationId;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;location_type_concept_id&quot;)
+&nbsp;	private Concept type;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address1&quot;)
+&nbsp;	private String address1;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address2&quot;)
+&nbsp;	private String address2;
+&nbsp;	
+&nbsp;	@Column(name = &quot;city_village&quot;)
+&nbsp;	private String cityVillage;
+&nbsp;	
+&nbsp;	@Column(name = &quot;state_province&quot;)
+&nbsp;	private String stateProvince;
+&nbsp;	
+&nbsp;	@Column(name = &quot;country&quot;, length = 50)
+&nbsp;	private String country;
+&nbsp;	
+&nbsp;	@Column(name = &quot;postal_code&quot;, length = 50)
+&nbsp;	private String postalCode;
+&nbsp;	
+&nbsp;	@Column(name = &quot;latitude&quot;, length = 50)
+&nbsp;	private String latitude;
+&nbsp;	
+&nbsp;	@Column(name = &quot;longitude&quot;, length = 50)
+&nbsp;	private String longitude;
+&nbsp;	
+&nbsp;	@Column(name = &quot;county_district&quot;)
+&nbsp;	private String countyDistrict;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address3&quot;)
+&nbsp;	private String address3;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address4&quot;)
+&nbsp;	private String address4;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address6&quot;)
+&nbsp;	private String address6;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address5&quot;)
+&nbsp;	private String address5;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address7&quot;)
+&nbsp;	private String address7;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address8&quot;)
+&nbsp;	private String address8;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address9&quot;)
+&nbsp;	private String address9;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address10&quot;)
+&nbsp;	private String address10;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address11&quot;)
+&nbsp;	private String address11;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address12&quot;)
+&nbsp;	private String address12;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address13&quot;)
+&nbsp;	private String address13;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address14&quot;)
+&nbsp;	private String address14;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address15&quot;)
+&nbsp;	private String address15;
+&nbsp;
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;parent_location&quot;)
+&nbsp;	private Location parentLocation;
+&nbsp;	
+&nbsp;	@OneToMany(mappedBy = &quot;parentLocation&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;	@BatchSize(size = 100)
+&nbsp;	@OrderBy(&quot;name&quot;)
+&nbsp;	private Set&lt;Location&gt; childLocations;
+&nbsp;	
+&nbsp;	@ManyToMany(fetch = FetchType.LAZY)
+&nbsp;	@JoinTable(
+&nbsp;		name = &quot;location_tag_map&quot;,
+&nbsp;		joinColumns = @JoinColumn(name = &quot;location_id&quot;),
+&nbsp;		inverseJoinColumns = @JoinColumn(name = &quot;location_tag_id&quot;))
+&nbsp;	@Independent
+&nbsp;	private Set&lt;LocationTag&gt; tags;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Location() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public Location(Integer locationId) {</b>
+<b class="fc">&nbsp;		this.locationId = locationId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the address1.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress1() {
+<b class="fc">&nbsp;		return address1;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param address1 The address1 to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress1(String address1) {
+<b class="fc">&nbsp;		this.address1 = address1;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the address2.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress2() {
+<b class="fc">&nbsp;		return address2;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param address2 The address2 to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress2(String address2) {
+<b class="fc">&nbsp;		this.address2 = address2;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the cityVillage.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getCityVillage() {
+<b class="fc">&nbsp;		return cityVillage;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cityVillage The cityVillage to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCityVillage(String cityVillage) {
+<b class="fc">&nbsp;		this.cityVillage = cityVillage;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the country.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getCountry() {
+<b class="fc">&nbsp;		return country;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param country The country to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCountry(String country) {
+<b class="fc">&nbsp;		this.country = country;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the latitude.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getLatitude() {
+<b class="fc">&nbsp;		return latitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param latitude The latitude to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setLatitude(String latitude) {
+<b class="fc">&nbsp;		this.latitude = latitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the locationId.
+&nbsp;	 */
+&nbsp;	public Integer getLocationId() {
+<b class="fc">&nbsp;		return locationId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param locationId The locationId to set.
+&nbsp;	 */
+&nbsp;	public void setLocationId(Integer locationId) {
+<b class="nc">&nbsp;		this.locationId = locationId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the longitude.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getLongitude() {
+<b class="fc">&nbsp;		return longitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param longitude The longitude to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setLongitude(String longitude) {
+<b class="fc">&nbsp;		this.longitude = longitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the postalCode.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getPostalCode() {
+<b class="fc">&nbsp;		return postalCode;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param postalCode The postalCode to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setPostalCode(String postalCode) {
+<b class="fc">&nbsp;		this.postalCode = postalCode;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the stateProvince.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getStateProvince() {
+<b class="fc">&nbsp;		return stateProvince;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param stateProvince The stateProvince to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setStateProvince(String stateProvince) {
+<b class="fc">&nbsp;		this.stateProvince = stateProvince;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (getName() != null) {</b>
+<b class="fc">&nbsp;			return getName();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getId() != null) {</b>
+<b class="nc">&nbsp;			return getId().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the countyDistrict.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getCountyDistrict() {
+<b class="fc">&nbsp;		return countyDistrict;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param countyDistrict The countyDistrict to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCountyDistrict(String countyDistrict) {
+<b class="fc">&nbsp;		this.countyDistrict = countyDistrict;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return Returns the code indicating the type of location this is
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public Concept getType() {
+<b class="fc">&nbsp;		return type;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param type The Concept for the type of location this is
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	public void setType(Concept type) {
+<b class="fc">&nbsp;		this.type = type;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#findPossibleValues(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;Location&gt; findPossibleValues(String searchText) {
+&nbsp;		try {
+<b class="nc">&nbsp;			return Context.getLocationService().getLocations(searchText);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#getPossibleValues()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;Location&gt; getPossibleValues() {
+&nbsp;		try {
+<b class="nc">&nbsp;			return Context.getLocationService().getAllLocations();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#hydrate(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Location hydrate(String locationId) {
+&nbsp;		try {
+<b class="nc">&nbsp;			return Context.getLocationService().getLocation(Integer.valueOf(locationId));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			return new Location();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#serialize()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String serialize() {
+<b class="nc">&nbsp;		if (getLocationId() != null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot; + getLocationId();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Attributable#getDisplayString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDisplayString() {
+<b class="nc">&nbsp;		return getName();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the parentLocation.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public Location getParentLocation() {
+<b class="fc">&nbsp;		return parentLocation;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param parentLocationId The parentLocation to set.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setParentLocation(Location parentLocationId) {
+<b class="fc">&nbsp;		this.parentLocation = parentLocationId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the childLocations.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public Set&lt;Location&gt; getChildLocations() {
+<b class="fc">&nbsp;		return childLocations;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all childLocations where child.locationId = this.locationId.
+&nbsp;	 *
+&nbsp;	 * @param includeRetired specifies whether or not to include voided childLocations
+&nbsp;	 * @return Returns a Set&amp;lt;Location&amp;gt; of all the childLocations.
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a set of locations
+&nbsp;	 */
+&nbsp;	public Set&lt;Location&gt; getChildLocations(boolean includeRetired) {
+<b class="nc">&nbsp;		Set&lt;Location&gt; ret = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		if (includeRetired) {</b>
+<b class="nc">&nbsp;			ret = getChildLocations();</b>
+<b class="nc">&nbsp;		} else if (getChildLocations() != null) {</b>
+<b class="nc">&nbsp;			for (Location l : getChildLocations()) {</b>
+<b class="nc">&nbsp;				if (!l.getRetired()) {</b>
+<b class="nc">&nbsp;					ret.add(l);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the descendant locations.
+&nbsp;	 *
+&nbsp;	 * @param includeRetired specifies whether or not to include voided childLocations
+&nbsp;	 * @return Returns a Set&amp;lt;Location&amp;gt; of the descendant location.
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Set&lt;Location&gt; getDescendantLocations(boolean includeRetired) {
+<b class="fc">&nbsp;		Set&lt;Location&gt; result = new HashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Location childLocation : getChildLocations()) {</b>
+<b class="fc">&nbsp;			if (!childLocation.getRetired() || includeRetired) {</b>
+<b class="fc">&nbsp;				result.add(childLocation);</b>
+<b class="fc">&nbsp;				result.addAll(childLocation.getDescendantLocations(includeRetired));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param childLocations The childLocations to set.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setChildLocations(Set&lt;Location&gt; childLocations) {
+<b class="fc">&nbsp;		this.childLocations = childLocations;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param child The child location to add.
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null given null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException given same object as child
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if child already in hierarchy
+&nbsp;	 */
+&nbsp;	public void addChildLocation(Location child) {
+<b class="fc">&nbsp;		if (child == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (getChildLocations() == null) {</b>
+<b class="fc">&nbsp;			childLocations = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (child.equals(this)) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Location.cannot.be.its.own.child&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Traverse all the way up (down?) to the root, then check whether the child is already
+&nbsp;		// anywhere in the tree
+<b class="fc">&nbsp;		Location root = this;</b>
+<b class="fc">&nbsp;		while (root.getParentLocation() != null) {</b>
+<b class="fc">&nbsp;			root = root.getParentLocation();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (isInHierarchy(child, root)) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Location.hierarchy.loop&quot;, new Object[] { child, this });</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		child.setParentLocation(this);</b>
+<b class="fc">&nbsp;		childLocations.add(child);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether &#39;location&#39; is a member of the tree starting at &#39;root&#39;.
+&nbsp;	 *
+&nbsp;	 * @param location The location to be tested.
+&nbsp;	 * @param root Location node from which to start the testing (down in the hierarchy).
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false given any null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true given same object in both parameters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true given location that is already somewhere in hierarchy
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false given location that is not in hierarchy
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should find location in hierarchy
+&nbsp;	 */
+&nbsp;	public static Boolean isInHierarchy(Location location, Location root) {
+<b class="fc">&nbsp;		if (root == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		while (true) {
+<b class="fc">&nbsp;			if (location == null) {</b>
+<b class="fc">&nbsp;				return false;</b>
+<b class="fc">&nbsp;			} else if (root.equals(location)) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			location = location.getParentLocation();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param child The child location to remove.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void removeChildLocation(Location child) {
+<b class="fc">&nbsp;		if (getChildLocations() != null) {</b>
+<b class="fc">&nbsp;			childLocations.remove(child);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the tags which have been attached to this Location.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public Set&lt;LocationTag&gt; getTags() {
+<b class="fc">&nbsp;		return tags;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the tags which are attached to this Location.
+&nbsp;	 *
+&nbsp;	 * @param tags The tags to set.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setTags(Set&lt;LocationTag&gt; tags) {
+<b class="nc">&nbsp;		this.tags = tags;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Attaches a tag to the Location.
+&nbsp;	 *
+&nbsp;	 * @param tag The tag to add.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void addTag(LocationTag tag) {
+<b class="fc">&nbsp;		if (getTags() == null) {</b>
+<b class="fc">&nbsp;			tags = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (tag != null &amp;&amp; !tags.contains(tag)) {</b>
+<b class="fc">&nbsp;			tags.add(tag);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the tag from the Location.
+&nbsp;	 *
+&nbsp;	 * @param tag The tag to remove.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void removeTag(LocationTag tag) {
+<b class="fc">&nbsp;		if (getTags() != null) {</b>
+<b class="fc">&nbsp;			tags.remove(tag);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the Location has a particular tag.
+&nbsp;	 *
+&nbsp;	 * @param tagToFind the string of the tag for which to check
+&nbsp;	 * @return true if the tags include the specified tag, false otherwise
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail given null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false given empty string parameter
+&nbsp;	 */
+&nbsp;	public Boolean hasTag(String tagToFind) {
+<b class="nc">&nbsp;		if (tagToFind != null &amp;&amp; getTags() != null) {</b>
+<b class="nc">&nbsp;			for (LocationTag locTag : getTags()) {</b>
+<b class="nc">&nbsp;				if (locTag.getName().equals(tagToFind)) {</b>
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address3
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress3() {
+<b class="fc">&nbsp;		return address3;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address3 the address3 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress3(String address3) {
+<b class="fc">&nbsp;		this.address3 = address3;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address4
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress4() {
+<b class="fc">&nbsp;		return address4;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address4 the address4 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress4(String address4) {
+<b class="fc">&nbsp;		this.address4 = address4;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address6
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress6() {
+<b class="fc">&nbsp;		return address6;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address6 the address6 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress6(String address6) {
+<b class="fc">&nbsp;		this.address6 = address6;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address5
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress5() {
+<b class="fc">&nbsp;		return address5;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address5 the address5 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress5(String address5) {
+<b class="fc">&nbsp;		this.address5 = address5;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getLocationId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setLocationId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress7() {
+<b class="fc">&nbsp;		return address7;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress7(String address7) {
+<b class="fc">&nbsp;		this.address7 = address7;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress8() {
+<b class="fc">&nbsp;		return address8;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress8(String address8) {
+<b class="fc">&nbsp;		this.address8 = address8;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress9() {
+<b class="fc">&nbsp;		return address9;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress9(String address9) {
+<b class="fc">&nbsp;		this.address9 = address9;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress10() {
+<b class="fc">&nbsp;		return address10;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress10(String address10) {
+<b class="fc">&nbsp;		this.address10 = address10;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress11() {
+<b class="fc">&nbsp;		return address11;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress11(String address11) {
+<b class="fc">&nbsp;		this.address11 = address11;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress12() {
+<b class="fc">&nbsp;		return address12;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress12(String address12) {
+<b class="fc">&nbsp;		this.address12 = address12;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress13() {
+<b class="fc">&nbsp;		return address13;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress13(String address13) {
+<b class="fc">&nbsp;		this.address13 = address13;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress14() {
+<b class="fc">&nbsp;		return address14;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress14(String address14) {
+<b class="fc">&nbsp;		this.address14 = address14;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress15() {
+<b class="fc">&nbsp;		return address15;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress15(String address15) {
+<b class="fc">&nbsp;		this.address15 = address15;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

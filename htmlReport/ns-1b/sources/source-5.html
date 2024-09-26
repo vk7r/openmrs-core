@@ -1,0 +1,197 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsPropertyLookup</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logging</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsPropertyLookup (org.openmrs.logging)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsPropertyLookup</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (1/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4,2%
+  </span>
+  <span class="absValue">
+    (1/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logging;
+&nbsp;
+&nbsp;import org.apache.logging.log4j.core.LogEvent;
+&nbsp;import org.apache.logging.log4j.core.config.plugins.Plugin;
+&nbsp;import org.apache.logging.log4j.core.lookup.AbstractLookup;
+&nbsp;import org.apache.logging.log4j.core.lookup.StrLookup;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.ServiceNotFoundException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class exposes a subset of OpenMRS properties to the log4j context configuration. This is intended to allow the
+&nbsp; * logger to make use of certain OpenMRS properties.
+&nbsp; * &lt;p/&gt;
+&nbsp; * To use these properties in your logger configuration, reference them like &lt;tt&gt;${openmrs:&amp;lt;property&amp;gt;}&lt;/tt&gt;, e.g.
+&nbsp; * &lt;tt&gt;${openmrs:applicationDirectory}&lt;/tt&gt;.
+&nbsp; * &lt;p/&gt;
+&nbsp; * Supported properties:
+&nbsp; * &lt;dl&gt;
+&nbsp; *     &lt;dt&gt;applicationDirectory&lt;/dt&gt;
+&nbsp; *     &lt;dd&gt;The OpenMRS application directory as a string&lt;/dd&gt;
+&nbsp; *     &lt;dt&gt;logLocation&lt;/dt&gt;
+&nbsp; *     &lt;dd&gt;The current value for the &lt;tt&gt;log.location&lt;/tt&gt; setting&lt;/dd&gt;
+&nbsp; *     &lt;dt&gt;logLayout&lt;/dt&gt;
+&nbsp; *     &lt;dd&gt;The current value for the &lt;tt&gt;log.layout&lt;/tt&gt; setting&lt;/dd&gt;
+&nbsp; * &lt;/dl&gt;
+&nbsp; * &lt;p/&gt;
+&nbsp; * Care should be taken in exposing information through this class to ensure that no
+&nbsp; */
+&nbsp;@Plugin(name = OpenmrsPropertyLookup.NAME, category = StrLookup.CATEGORY)
+&nbsp;@SuppressWarnings(&quot;unused&quot;)
+<b class="fc">&nbsp;public class OpenmrsPropertyLookup extends AbstractLookup {</b>
+&nbsp;	
+&nbsp;	public static final String NAME = &quot;openmrs&quot;;
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String lookup(LogEvent event, String key) {
+<b class="nc">&nbsp;		AdministrationService adminService = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			adminService = Context.getAdministrationService();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ServiceNotFoundException ignored) {</b>
+&nbsp;			
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		switch (key) {</b>
+&nbsp;			case &quot;applicationDirectory&quot;:
+<b class="nc">&nbsp;				final String applicationDirectory = OpenmrsUtil.getApplicationDataDirectory();</b>
+<b class="nc">&nbsp;				return applicationDirectory == null || applicationDirectory.isEmpty() ? null : applicationDirectory;</b>
+&nbsp;			case &quot;logLocation&quot;:
+<b class="nc">&nbsp;				final String logLocation = getGlobalProperty(adminService, OpenmrsConstants.GP_LOG_LOCATION);</b>
+<b class="nc">&nbsp;				return logLocation == null ?</b>
+<b class="nc">&nbsp;					null :</b>
+<b class="nc">&nbsp;						logLocation.endsWith(&quot;/&quot;) ?</b>
+<b class="nc">&nbsp;							logLocation.substring(0, logLocation.length() - 1) : logLocation;</b>
+&nbsp;			case &quot;logLayout&quot;:
+<b class="nc">&nbsp;				return getGlobalProperty(adminService, OpenmrsConstants.GP_LOG_LAYOUT);</b>
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new IllegalArgumentException(key);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private String getGlobalProperty(AdministrationService adminService, String globalPropertyName) {
+<b class="nc">&nbsp;		if (adminService == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		String value = adminService.getGlobalProperty(globalPropertyName);</b>
+<b class="nc">&nbsp;		if (value == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			value = value.trim();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (value.isEmpty()) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return value;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

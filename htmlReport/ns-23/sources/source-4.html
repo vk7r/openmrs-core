@@ -1,0 +1,320 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Extension</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: Extension (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Extension</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (8/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (9/18)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Extension$MEDIA_TYPE</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (8/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45%
+  </span>
+  <span class="absValue">
+    (9/20)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * An extension is a small snippet of code that is run at certain &quot;extension points&quot; throughout the
+&nbsp; * user interface
+&nbsp; * &lt;p&gt;
+&nbsp; * An extension is not necessarily tied to only one certain point. If all of the need return values
+&nbsp; * are defined it can be used to extend any point. A module can contain many extensions for many
+&nbsp; * different points.
+&nbsp; */
+&nbsp;
+&nbsp;public abstract class Extension {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Extension.class);</b>
+&nbsp;	
+&nbsp;	// point which this extension is extending
+&nbsp;	private String pointId;
+&nbsp;	
+&nbsp;	// id of the module implementing this point
+&nbsp;	private String moduleId;
+&nbsp;	
+&nbsp;	// parameters given at the extension point
+&nbsp;	private Map&lt;String, String&gt; parameterMap;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * String separating the pointId and media type in an extension id
+&nbsp;	 *
+&nbsp;	 * @see #toExtensionId(String, MEDIA_TYPE)
+&nbsp;	 */
+&nbsp;	public static final String EXTENSION_ID_SEPARATOR = &quot;|&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * All media types allowed by the module extension system. If an extension specifies &#39;html&#39; as
+&nbsp;	 * its media type, it is assumed to mainly work just within html rendering environments. If an
+&nbsp;	 * extension has a null media type, it should work for any visual/text rendering environment
+&nbsp;	 */
+<b class="nc">&nbsp;	public enum MEDIA_TYPE {</b>
+<b class="nc">&nbsp;		html</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public Extension() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called before being displayed each time
+&nbsp;	 *
+&nbsp;	 * @param parameterMap
+&nbsp;	 */
+&nbsp;	public void initialize(Map&lt;String, String&gt; parameterMap) {
+<b class="nc">&nbsp;		log.debug(&quot;Initializing extension for point: &quot; + pointId);</b>
+<b class="nc">&nbsp;		this.setPointId(pointId);</b>
+<b class="nc">&nbsp;		this.setParameterMap(parameterMap);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the point id
+&nbsp;	 *
+&nbsp;	 * @return the &lt;code&gt;String&lt;/code&gt; Point Id
+&nbsp;	 */
+&nbsp;	public String getPointId() {
+<b class="fc">&nbsp;		return pointId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the point id
+&nbsp;	 *
+&nbsp;	 * @param pointId
+&nbsp;	 */
+&nbsp;	public void setPointId(String pointId) {
+<b class="fc">&nbsp;		this.pointId = pointId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all of the parameters given to this extension point
+&nbsp;	 *
+&nbsp;	 * @return key-value parameter map
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getParameterMap() {
+<b class="nc">&nbsp;		return parameterMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parameters given at the extension point This method is usually called only during extension
+&nbsp;	 * initialization
+&nbsp;	 *
+&nbsp;	 * @param parameterMap key-value parameter map
+&nbsp;	 */
+&nbsp;	public void setParameterMap(Map&lt;String, String&gt; parameterMap) {
+<b class="nc">&nbsp;		this.parameterMap = parameterMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the content type of this extension. If null is returned this extension should work
+&nbsp;	 * across all medium types
+&nbsp;	 *
+&nbsp;	 * @return type of the medium that this extension works for
+&nbsp;	 */
+&nbsp;	public abstract Extension.MEDIA_TYPE getMediaType();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the extension point id
+&nbsp;	 *
+&nbsp;	 * @return the &lt;code&gt;String&lt;/code&gt; Extension Id
+&nbsp;	 */
+&nbsp;	public String getExtensionId() {
+<b class="fc">&nbsp;		return toExtensionId(getPointId(), getMediaType());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If this method returns a non-null value then the return value will be used as the default
+&nbsp;	 * content for this extension at this extension point
+&nbsp;	 *
+&nbsp;	 * @return override content
+&nbsp;	 */
+&nbsp;	public String getOverrideContent(String bodyContent) {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get this extension&#39;s module id
+&nbsp;	 *
+&nbsp;	 * @return the &lt;code&gt;String&lt;/code&gt; Module Id
+&nbsp;	 */
+&nbsp;	public final String getModuleId() {
+<b class="fc">&nbsp;		return moduleId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the module id of this extension
+&nbsp;	 *
+&nbsp;	 * @param moduleId
+&nbsp;	 */
+&nbsp;	public final void setModuleId(String moduleId) {
+<b class="fc">&nbsp;		this.moduleId = moduleId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If multiple extensions are added to the same extension point, set the order
+&nbsp;	 * of those extensions by overriding this property.  Lower order numbers will generally 
+&nbsp;	 * appear first within the extension point.
+&nbsp;	 *
+&nbsp;	 * @return 0
+&nbsp;	 */
+&nbsp;	public int getOrder() {
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the string representation of this extension
+&nbsp;	 *
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public final String toString() {
+<b class="nc">&nbsp;		return &quot;Extension: &quot; + this.getExtensionId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convert the given pointId and mediaType to an extensionId. The extension id is usually
+&nbsp;	 * pointid|mediaType if mediatype is null, extension id is just point id
+&nbsp;	 *
+&nbsp;	 * @param pointId
+&nbsp;	 * @param mediaType
+&nbsp;	 * @return string extension id
+&nbsp;	 */
+&nbsp;	public static final String toExtensionId(String pointId, MEDIA_TYPE mediaType) {
+<b class="fc">&nbsp;		if (mediaType != null) {</b>
+<b class="nc">&nbsp;			return pointId + Extension.EXTENSION_ID_SEPARATOR + mediaType;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return pointId;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

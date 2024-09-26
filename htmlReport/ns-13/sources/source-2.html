@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HL7InArchive</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7</a>
+</div>
+
+<h1>Coverage Summary for Class: HL7InArchive (org.openmrs.hl7)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HL7InArchive</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (10/15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">HL7InArchive$HibernateProxy$AmD7p2Xw</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (10/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a successfully processed hl7 message.
+&nbsp; * 
+&nbsp; * @see HL7InQueue
+&nbsp; * @see HL7Service
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class HL7InArchive extends HL7QueueItem {
+&nbsp;	
+&nbsp;	private int hl7InArchiveId;
+&nbsp;	
+&nbsp;	private Integer messageState;
+&nbsp;	
+<b class="fc">&nbsp;	private boolean loaded = false;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor
+&nbsp;	 */
+<b class="nc">&nbsp;	public HL7InArchive() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to build archive from an existing queue entry
+&nbsp;	 * 
+&nbsp;	 * @param hl7InQueue queue entry from which archive entry will be constructed
+&nbsp;	 */
+<b class="fc">&nbsp;	public HL7InArchive(HL7InQueue hl7InQueue) {</b>
+<b class="fc">&nbsp;		setHL7Source(hl7InQueue.getHL7Source());</b>
+<b class="fc">&nbsp;		setHL7SourceKey(hl7InQueue.getHL7SourceKey());</b>
+<b class="fc">&nbsp;		setHL7Data(hl7InQueue.getHL7Data());</b>
+<b class="fc">&nbsp;		setMessageState(HL7Constants.HL7_STATUS_PROCESSED);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the hl7InArchiveId.
+&nbsp;	 */
+&nbsp;	public int getHL7InArchiveId() {
+<b class="fc">&nbsp;		return hl7InArchiveId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param hl7InArchiveId The hl7InArchiveId to set.
+&nbsp;	 */
+&nbsp;	public void setHL7InArchiveId(int hl7InArchiveId) {
+<b class="fc">&nbsp;		this.hl7InArchiveId = hl7InArchiveId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns message state.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public Integer getMessageState() {
+<b class="fc">&nbsp;		return messageState;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param messageState The message source to set.
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setMessageState(Integer messageState) {
+<b class="fc">&nbsp;		this.messageState = messageState;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getHL7InArchiveId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setHL7InArchiveId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * describes whether hl7 data has been loaded from the filesystem
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 * @return the loaded status (true or false)
+&nbsp;	 */
+&nbsp;	public boolean isLoaded() {
+<b class="nc">&nbsp;		return loaded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * sets the flag for hl7 data having been loaded from the filesystem
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 * @param loaded status to set
+&nbsp;	 */
+&nbsp;	public void setLoaded(boolean loaded) {
+<b class="nc">&nbsp;		this.loaded = loaded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

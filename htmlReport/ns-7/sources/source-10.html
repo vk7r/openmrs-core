@@ -1,0 +1,240 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VisitDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: VisitDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">VisitDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.VisitAttribute;
+&nbsp;import org.openmrs.VisitAttributeType;
+&nbsp;import org.openmrs.VisitType;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.VisitService;
+&nbsp;import org.openmrs.parameter.VisitSearchCriteria;
+&nbsp;
+&nbsp;/**
+&nbsp; * Database access functions for visits.
+&nbsp; * 
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;public interface VisitDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getAllVisitTypes()
+&nbsp;	 */
+&nbsp;	List&lt;VisitType&gt; getAllVisitTypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getAllVisitTypes(boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;VisitType&gt; getAllVisitTypes(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	VisitType getVisitType(Integer visitTypeId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	VisitType getVisitTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#getVisitTypes(java.lang.String)
+&nbsp;	 */
+&nbsp;	List&lt;VisitType&gt; getVisitTypes(String fuzzySearchPhrase);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#saveVisitType(org.openmrs.VisitType)
+&nbsp;	 */
+&nbsp;	VisitType saveVisitType(VisitType visitType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.VisitService#purgeVisitType(org.openmrs.VisitType)
+&nbsp;	 */
+&nbsp;	void purgeVisitType(VisitType visitType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#getVisit(Integer)
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Visit getVisit(Integer visitId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#getVisitByUuid(String)
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Visit getVisitByUuid(String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#saveVisit(Visit)
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Visit saveVisit(Visit visit) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#purgeVisit(Visit)
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteVisit(Visit visit) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the visits matching the specified arguments
+&nbsp;	 * 
+&nbsp;	 * @param visitTypes a list of visit types to match against
+&nbsp;	 * @param patients a list of patients to match against
+&nbsp;	 * @param locations a list of locations to match against
+&nbsp;	 * @param indications a list of indication concepts to match against
+&nbsp;	 * @param minStartDatetime the minimum visit start date to match against
+&nbsp;	 * @param maxStartDatetime the maximum visit start date to match against
+&nbsp;	 * @param minEndDatetime the minimum visit end date to match against
+&nbsp;	 * @param maxEndDatetime the maximum visit end date to match against
+&nbsp;	 * @param includeInactive specifies if inactive visits should be returned or not
+&nbsp;	 * @param includeVoided specifies if voided visits should also be returned
+&nbsp;	 * @return a list of visits
+&nbsp;	 * @throws DAOException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all unvoided visits if includeEnded is set to true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only active visits if includeEnded is set to false
+&nbsp;	 */
+&nbsp;	public List&lt;Visit&gt; getVisits(Collection&lt;VisitType&gt; visitTypes, Collection&lt;Patient&gt; patients,
+&nbsp;	        Collection&lt;Location&gt; locations, Collection&lt;Concept&gt; indications, Date minStartDatetime, Date maxStartDatetime,
+&nbsp;	        Date minEndDatetime, Date maxEndDatetime, Map&lt;VisitAttributeType, String&gt; serializedAttributeValues,
+&nbsp;	        boolean includeInactive, boolean includeVoided) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the visits matching the specified search criteria
+&nbsp;	 * 
+&nbsp;	 * @param criteria the search criteria
+&nbsp;	 * @return a list of visits
+&nbsp;	 * @throws DAOException
+&nbsp;	 * 
+&nbsp;	 * @since 2.6.8
+&nbsp;	 * @since 2.7.0
+&nbsp;	 */
+&nbsp;	public List&lt;Visit&gt; getVisits(VisitSearchCriteria criteria) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#getAllVisitAttributeTypes()
+&nbsp;	 */
+&nbsp;	List&lt;VisitAttributeType&gt; getAllVisitAttributeTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#getVisitAttributeType(Integer)
+&nbsp;	 */
+&nbsp;	VisitAttributeType getVisitAttributeType(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#getVisitAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	VisitAttributeType getVisitAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#saveVisitAttributeType(VisitAttributeType)
+&nbsp;	 */
+&nbsp;	VisitAttributeType saveVisitAttributeType(VisitAttributeType visitAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a visit attribute type from the database
+&nbsp;	 * 
+&nbsp;	 * @param visitAttributeType
+&nbsp;	 */
+&nbsp;	void deleteVisitAttributeType(VisitAttributeType visitAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see VisitService#getVisitAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	VisitAttribute getVisitAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the next active visit which matches the specified visit types
+&nbsp;	 * 
+&nbsp;	 * @param previousVisit the visit that precedes the one we are fetching
+&nbsp;	 * @param visitTypes a collection of visit types to match against
+&nbsp;	 * @param maximumStartDate the next visit should have been created before or at this date time
+&nbsp;	 * @return a {@link Visit}
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the next unvoided active visit matching the specified types and startDate
+&nbsp;	 */
+&nbsp;	public Visit getNextVisit(Visit previousVisit, Collection&lt;VisitType&gt; visitTypes, Date maximumStartDate);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

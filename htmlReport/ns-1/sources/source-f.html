@@ -1,0 +1,323 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseOpenmrsData</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseOpenmrsData (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseOpenmrsData</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.MappedSuperclass;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.search.annotations.Field;
+&nbsp;
+&nbsp;/**
+&nbsp; * In OpenMRS, we distinguish between data and metadata within our data model. Data (as opposed to
+&nbsp; * metadata) generally represent person- or patient-specific data. This provides a default abstract
+&nbsp; * implementation of the OpenmrsData interface
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; * @see OpenmrsData
+&nbsp; */
+&nbsp;@MappedSuperclass
+&nbsp;public abstract class BaseOpenmrsData extends BaseOpenmrsObject implements OpenmrsData {
+&nbsp;	
+&nbsp;	//***** Properties *****
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;creator&quot;, updatable = false)
+&nbsp;	protected User creator;
+&nbsp;	
+&nbsp;	@Column(name = &quot;date_created&quot;, nullable = false, updatable = false)
+&nbsp;	private Date dateCreated;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;changed_by&quot;)
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	@Column(name = &quot;date_changed&quot;)
+&nbsp;	private Date dateChanged;
+&nbsp;	
+<b class="fc">&nbsp;	@Column(name = &quot;voided&quot;, nullable = false)</b>
+&nbsp;	@Field
+&nbsp;	private Boolean voided = Boolean.FALSE;
+&nbsp;	
+&nbsp;	@Column(name = &quot;date_voided&quot;)
+&nbsp;	private Date dateVoided;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;voided_by&quot;)
+&nbsp;	private User voidedBy;
+&nbsp;	
+&nbsp;	@Column(name = &quot;void_reason&quot;, length = 255)
+&nbsp;	private String voidReason;
+&nbsp;	
+&nbsp;	//***** Constructors *****
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default Constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public BaseOpenmrsData() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	//***** Property Access *****
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsData#getCreator()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsData#setCreator(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsData#getDateCreated()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsData#setDateCreated(java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of version 2.2
+&nbsp;	 * @see org.openmrs.OpenmrsData#getChangedBy()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of version 2.2
+&nbsp;	 * @see org.openmrs.OpenmrsData#setChangedBy(User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of version 2.2
+&nbsp;	 * @see org.openmrs.OpenmrsData#getDateChanged()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of version 2.2
+&nbsp;	 * @see org.openmrs.OpenmrsData#setDateChanged(Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of 2.0, use {@link #getVoided()}
+&nbsp;	 * @see org.openmrs.Voidable#isVoided()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isVoided() {
+<b class="fc">&nbsp;		return getVoided();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#getVoided()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Boolean getVoided() {
+<b class="fc">&nbsp;		return voided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#setVoided(java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoided(Boolean voided) {
+<b class="fc">&nbsp;		this.voided = voided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#getDateVoided()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateVoided() {
+<b class="fc">&nbsp;		return dateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#setDateVoided(java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateVoided(Date dateVoided) {
+<b class="fc">&nbsp;		this.dateVoided = dateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#getVoidedBy()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getVoidedBy() {
+<b class="fc">&nbsp;		return voidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#setVoidedBy(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoidedBy(User voidedBy) {
+<b class="fc">&nbsp;		this.voidedBy = voidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#getVoidReason()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getVoidReason() {
+<b class="fc">&nbsp;		return voidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Voidable#setVoidReason(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoidReason(String voidReason) {
+<b class="fc">&nbsp;		this.voidReason = voidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

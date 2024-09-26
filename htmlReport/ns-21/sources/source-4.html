@@ -1,0 +1,478 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MutableResourceBundleMessageSource</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.messagesource.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: MutableResourceBundleMessageSource (org.openmrs.messagesource.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MutableResourceBundleMessageSource</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (8/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    29,9%
+  </span>
+  <span class="absValue">
+    (40/134)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.messagesource.impl;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.messagesource.MutableMessageSource;
+&nbsp;import org.openmrs.messagesource.PresentationMessage;
+&nbsp;import org.openmrs.module.Module;
+&nbsp;import org.openmrs.module.ModuleClassLoader;
+&nbsp;import org.openmrs.module.ModuleFactory;
+&nbsp;import org.openmrs.util.LocaleUtility;
+&nbsp;import org.openmrs.util.OpenmrsClassLoader;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+&nbsp;import org.springframework.core.io.Resource;
+&nbsp;import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+&nbsp;import org.springframework.core.io.support.ResourcePatternResolver;
+&nbsp;
+&nbsp;/**
+&nbsp; * ResourceBundleMessageSource extends ReloadableResourceBundleMessageSource to provide the
+&nbsp; * additional features of a MutableMessageSource.
+&nbsp; */
+<b class="fc">&nbsp;public class MutableResourceBundleMessageSource extends ReloadableResourceBundleMessageSource implements MutableMessageSource {</b>
+&nbsp;
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MutableResourceBundleMessageSource.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Local reference to basenames used to search for properties files.
+&nbsp;	 */
+<b class="fc">&nbsp;	private String[] basenames = new String[0];</b>
+&nbsp;	
+<b class="fc">&nbsp;	private int cacheMilliseconds = -1;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private long lastCached = System.currentTimeMillis();</b>
+&nbsp;	
+&nbsp;	/** Cached list of available locales. */
+&nbsp;	private Collection&lt;Locale&gt; locales;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MessageSourceService#getLocales()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;Locale&gt; getLocales() {
+<b class="fc">&nbsp;		long now = System.currentTimeMillis();</b>
+<b class="fc">&nbsp;		if (locales == null || cacheMilliseconds &lt;= 0 || now - cacheMilliseconds &gt; lastCached) {</b>
+<b class="fc">&nbsp;			locales = findLocales();</b>
+<b class="fc">&nbsp;			lastCached = now;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return locales;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setCacheSeconds(int cacheSeconds) {
+<b class="fc">&nbsp;		this.cacheMilliseconds = cacheSeconds * 1000;</b>
+<b class="fc">&nbsp;		super.setCacheSeconds(cacheSeconds);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method looks at the current property files and deduces what locales are available from
+&nbsp;	 * those
+&nbsp;	 *
+&nbsp;	 * @see #getLocales()
+&nbsp;	 * @see #findPropertiesFiles()
+&nbsp;	 */
+&nbsp;	private Collection&lt;Locale&gt; findLocales() {
+<b class="fc">&nbsp;		Collection&lt;Locale&gt; foundLocales = new HashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Resource propertiesFile : findPropertiesFiles()) {</b>
+<b class="fc">&nbsp;			String filename = propertiesFile.getFilename();</b>
+&nbsp;			
+<b class="fc">&nbsp;			Locale parsedLocale = parseLocaleFrom(filename);</b>
+&nbsp;			
+<b class="fc">&nbsp;			foundLocales.add(parsedLocale);</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (foundLocales.isEmpty()) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;no locales found.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return foundLocales;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method for deriving a locale from a filename, presumed to have an embedded locale
+&nbsp;	 * specification near the end. For instance messages_it.properties if the filename is
+&nbsp;	 * messages.properties, the Locale is presumed to be the default set for Java
+&nbsp;	 *
+&nbsp;	 * @param filename the name to parse
+&nbsp;	 * @return Locale derived from the given string
+&nbsp;	 */
+&nbsp;	private Locale parseLocaleFrom(String filename) {
+&nbsp;		Locale parsedLocale;
+&nbsp;		
+&nbsp;		// trim off leading basename
+<b class="fc">&nbsp;		filename = filename.substring(&quot;messages&quot;.length());</b>
+&nbsp;		
+&nbsp;		// trim off extension
+<b class="fc">&nbsp;		String localespec = filename.substring(0, filename.indexOf(&#39;.&#39;));</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (&quot;&quot;.equals(localespec)) {</b>
+<b class="fc">&nbsp;			parsedLocale = Locale.getDefault();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			localespec = localespec.substring(1); // trim off leading &#39;_&#39;</b>
+<b class="fc">&nbsp;			parsedLocale = LocaleUtility.fromSpecification(localespec);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return parsedLocale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all available messages.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.messagesource.MessageSourceService#getPresentations()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;PresentationMessage&gt; getPresentations() {
+<b class="nc">&nbsp;		Collection&lt;PresentationMessage&gt; presentations = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (Resource propertiesFile : findPropertiesFiles()) {</b>
+<b class="nc">&nbsp;			Locale currentLocale = parseLocaleFrom(propertiesFile.getFilename());</b>
+<b class="nc">&nbsp;			Properties props = new Properties();</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				OpenmrsUtil.loadProperties(props, propertiesFile.getInputStream());</b>
+<b class="nc">&nbsp;				for (Map.Entry&lt;Object, Object&gt; property : props.entrySet()) {</b>
+<b class="nc">&nbsp;					presentations.add(new PresentationMessage(property.getKey().toString(), currentLocale, property</b>
+<b class="nc">&nbsp;					        .getValue().toString(), &quot;&quot;));</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+&nbsp;				// skip over errors in loading a single file
+<b class="nc">&nbsp;				log.error(&quot;Unable to load properties from file: &quot; + propertiesFile.getFilename(), e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return presentations;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Override to obtain a local reference to the basenames.
+&nbsp;	 *
+&nbsp;	 * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setBasename(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setBasename(String basename) {
+<b class="nc">&nbsp;		super.setBasename(basename);</b>
+<b class="nc">&nbsp;		this.basenames = new String[] { basename };</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Override to obtain a local reference to the basenames.
+&nbsp;	 *
+&nbsp;	 * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setBasenames(java.lang.String[])
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setBasenames(String... basenames) {
+<b class="fc">&nbsp;		if (basenames == null) {</b>
+<b class="nc">&nbsp;			this.basenames = new String[0];</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			this.basenames = Arrays.copyOf(basenames, basenames.length);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//add module file urls to basenames used for locating message properties files
+<b class="fc">&nbsp;		Collection&lt;Module&gt; modules = ModuleFactory.getStartedModules();</b>
+<b class="fc">&nbsp;		if (!modules.isEmpty()) {</b>
+<b class="nc">&nbsp;			String[] names =  new String[this.basenames.length + modules.size()];</b>
+<b class="nc">&nbsp;			System.arraycopy(this.basenames, 0, names, 0, this.basenames.length);</b>
+<b class="nc">&nbsp;			int index = this.basenames.length;</b>
+<b class="nc">&nbsp;			for (Module module : modules) {</b>
+<b class="nc">&nbsp;				names[index] = &quot;jar:file:&quot; + module.getFile().getAbsolutePath() + &quot;!/messages&quot;;</b>
+<b class="nc">&nbsp;				index++;</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+<b class="nc">&nbsp;			basenames = names;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		super.setBasenames(basenames);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#addPresentation(org.openmrs.messagesource.PresentationMessage)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void addPresentation(PresentationMessage message) {
+<b class="nc">&nbsp;		Resource propertyFile = findPropertiesFileFor(message.getCode());</b>
+<b class="nc">&nbsp;		if (propertyFile != null) {</b>
+<b class="nc">&nbsp;			Properties props = new Properties();</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				OpenmrsUtil.loadProperties(props, propertyFile.getInputStream());</b>
+<b class="nc">&nbsp;				props.setProperty(message.getCode(), message.getMessage());</b>
+&nbsp;				
+&nbsp;				//TODO properties files are now in api jar files which cannot be modified. TRUNK-4097
+&nbsp;				//We should therefore remove this method implementation or stop claiming that we are a mutable resource
+&nbsp;				//OpenmrsUtil.storeProperties(props, propertyFile.getInputStream(), &quot;OpenMRS Application Messages&quot;);
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Error generated&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#removePresentation(org.openmrs.messagesource.PresentationMessage)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void removePresentation(PresentationMessage message) {
+<b class="nc">&nbsp;		Resource propertyFile = findPropertiesFileFor(message.getCode());</b>
+<b class="nc">&nbsp;		if (propertyFile != null) {</b>
+<b class="nc">&nbsp;			Properties props = new Properties();</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				OpenmrsUtil.loadProperties(props, propertyFile.getInputStream());</b>
+<b class="nc">&nbsp;				props.remove(message.getCode());</b>
+&nbsp;				
+&nbsp;				//TODO properties files are now in api jar files which cannot be modified. TRUNK-4097
+&nbsp;				//We should therefore remove this method implementation or stop claiming that we are a mutable resource
+&nbsp;				//OpenmrsUtil.storeProperties(props, propertyFile, PROPERTIES_FILE_COMMENT);
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Error generated&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to scan the available properties files, looking for the one that has a
+&nbsp;	 * definition for the given code.
+&nbsp;	 *
+&nbsp;	 * @param code
+&nbsp;	 * @return the file which defines the code, or null if not found
+&nbsp;	 */
+&nbsp;	private Resource findPropertiesFileFor(String code) {
+<b class="nc">&nbsp;		Properties props = new Properties();</b>
+<b class="nc">&nbsp;		Resource foundFile = null;</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (Resource propertiesFile : findPropertiesFiles()) {</b>
+<b class="nc">&nbsp;			props.clear();</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				OpenmrsUtil.loadProperties(props, propertiesFile.getInputStream());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Error generated&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			if (props.containsKey(code)) {</b>
+<b class="nc">&nbsp;				foundFile = propertiesFile;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return foundFile;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Searches the filesystem for message properties files. ABKTODO: consider caching this, rather
+&nbsp;	 * than searching every time
+&nbsp;	 *
+&nbsp;	 * @return an array of property file names
+&nbsp;	 */
+&nbsp;	private Resource[] findPropertiesFiles() {
+<b class="fc">&nbsp;		Set&lt;Resource&gt; resourceSet = new HashSet&lt;&gt;();</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			String pattern = &quot;classpath*:messages*.properties&quot;;</b>
+<b class="fc">&nbsp;			ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver(OpenmrsClassLoader.getInstance());</b>
+<b class="fc">&nbsp;			Resource[] propertiesFiles = resourceResolver.getResources(pattern);</b>
+<b class="fc">&nbsp;			Collections.addAll(resourceSet, propertiesFiles);</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (ModuleClassLoader moduleClassLoader : ModuleFactory.getModuleClassLoaders()) {</b>
+<b class="nc">&nbsp;				resourceResolver = new PathMatchingResourcePatternResolver(moduleClassLoader);</b>
+<b class="nc">&nbsp;				propertiesFiles = resourceResolver.getResources(pattern);</b>
+<b class="nc">&nbsp;				Collections.addAll(resourceSet, propertiesFiles);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Error generated&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		if (log.isWarnEnabled() &amp;&amp; (resourceSet.isEmpty())) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;No properties files found.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return resourceSet.toArray(new Resource[resourceSet.size()]);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#merge(MutableMessageSource, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void merge(MutableMessageSource fromSource, boolean overwrite) {
+&nbsp;		
+&nbsp;		// collect all existing properties
+<b class="nc">&nbsp;		Resource[] propertiesFiles = findPropertiesFiles();</b>
+<b class="nc">&nbsp;		Map&lt;Locale, List&lt;Resource&gt;&gt; localeToFilesMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		Map&lt;Resource, Properties&gt; fileToPropertiesMap = new HashMap&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (Resource propertiesFile : propertiesFiles) {</b>
+<b class="nc">&nbsp;			Properties props = new Properties();</b>
+<b class="nc">&nbsp;			Locale propsLocale = parseLocaleFrom(propertiesFile.getFilename());</b>
+<b class="nc">&nbsp;			List&lt;Resource&gt; propList = localeToFilesMap.computeIfAbsent(propsLocale, k -&gt; new ArrayList&lt;&gt;());</b>
+<b class="nc">&nbsp;			propList.add(propertiesFile);</b>
+&nbsp;			
+&nbsp;			try {
+<b class="nc">&nbsp;				OpenmrsUtil.loadProperties(props, propertiesFile.getInputStream());</b>
+<b class="nc">&nbsp;				fileToPropertiesMap.put(propertiesFile, props);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+&nbsp;				// skip over errors in loading a single file
+<b class="nc">&nbsp;				log.error(&quot;Unable to load properties from file: &quot; + propertiesFile.getFilename(), e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// merge in the new properties
+<b class="nc">&nbsp;		for (PresentationMessage message : fromSource.getPresentations()) {</b>
+<b class="nc">&nbsp;			Locale messageLocale = message.getLocale();</b>
+&nbsp;			
+<b class="nc">&nbsp;			List&lt;Resource&gt; filelist = localeToFilesMap.get(messageLocale);</b>
+<b class="nc">&nbsp;			if (filelist != null) {</b>
+<b class="nc">&nbsp;				Properties propertyDestination = null;</b>
+<b class="nc">&nbsp;				boolean propExists = false;</b>
+<b class="nc">&nbsp;				for (Resource propertiesFile : filelist) {</b>
+<b class="nc">&nbsp;					Properties possibleDestination = fileToPropertiesMap.get(propertiesFile);</b>
+&nbsp;					
+<b class="nc">&nbsp;					if (possibleDestination.containsKey(message.getCode())) {</b>
+<b class="nc">&nbsp;						propertyDestination = possibleDestination;</b>
+<b class="nc">&nbsp;						propExists = true;</b>
+<b class="nc">&nbsp;						break;</b>
+<b class="nc">&nbsp;					} else if (propertyDestination == null) {</b>
+<b class="nc">&nbsp;						propertyDestination = possibleDestination;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;				if (!propExists || overwrite) {</b>
+<b class="nc">&nbsp;					propertyDestination.put(message.getCode(), message.getMessage());</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			message.getCode();</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#getPresentation(java.lang.String,
+&nbsp;	 *      java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PresentationMessage getPresentation(String key, Locale forLocale) {
+&nbsp;		// TODO Auto-generated method stub
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#getPresentationsInLocale(java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;PresentationMessage&gt; getPresentationsInLocale(Locale locale) {
+&nbsp;		// TODO Auto-generated method stub
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

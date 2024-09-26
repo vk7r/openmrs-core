@@ -1,0 +1,262 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AllergyReaction</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: AllergyReaction (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AllergyReaction</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,1%
+  </span>
+  <span class="absValue">
+    (19/26)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AllergyReaction$HibernateProxy$pfC0zb2N</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,1%
+  </span>
+  <span class="absValue">
+    (19/26)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represent allergy reactions
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class AllergyReaction extends BaseOpenmrsObject implements java.io.Serializable{
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 1;
+&nbsp;
+&nbsp;
+&nbsp;	private Integer allergyReactionId;
+&nbsp;	
+&nbsp;	private Allergy allergy;
+&nbsp;	
+&nbsp;	private Concept reaction;
+&nbsp;	
+&nbsp;	private String reactionNonCoded;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public AllergyReaction(){</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param allergy the allergy to set
+&nbsp;	 * @param reaction the reaction to set
+&nbsp;	 * @param reactionNonCoded the reactionNonCoded to set
+&nbsp;	 */
+<b class="fc">&nbsp;	public AllergyReaction(Allergy allergy, Concept reaction, String reactionNonCoded) {</b>
+<b class="fc">&nbsp;		this.allergy = allergy;</b>
+<b class="fc">&nbsp;		this.reaction = reaction;</b>
+<b class="fc">&nbsp;		this.reactionNonCoded = reactionNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getAllergyReactionId() {
+<b class="fc">&nbsp;		return allergyReactionId;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setAllergyReactionId(Integer allergyReactionId) {
+<b class="fc">&nbsp;		this.allergyReactionId = allergyReactionId;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return allergyReactionId;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer allergyReactionId) {
+<b class="nc">&nbsp;		this.allergyReactionId = allergyReactionId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the allergy
+&nbsp;	 */
+&nbsp;	public Allergy getAllergy() {
+<b class="fc">&nbsp;		return allergy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param allergy the allergy to set
+&nbsp;	 */
+&nbsp;	public void setAllergy(Allergy allergy) {
+<b class="fc">&nbsp;		this.allergy = allergy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the reaction
+&nbsp;	 */
+&nbsp;	public Concept getReaction() {
+<b class="fc">&nbsp;		return reaction;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param reaction the reaction to set
+&nbsp;	 */
+&nbsp;	public void setReaction(Concept reaction) {
+<b class="fc">&nbsp;		this.reaction = reaction;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the reactionNonCoded
+&nbsp;	 */
+&nbsp;	public String getReactionNonCoded() {
+<b class="fc">&nbsp;		return reactionNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param reactionNonCoded the reactionNonCoded to set
+&nbsp;	 */
+&nbsp;	public void setReactionNonCoded(String reactionNonCoded) {
+<b class="fc">&nbsp;		this.reactionNonCoded = reactionNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;	    if (StringUtils.isNotBlank(reactionNonCoded)) {</b>
+<b class="nc">&nbsp;	    	return reactionNonCoded;</b>
+&nbsp;	    }
+<b class="nc">&nbsp;	    return reaction.getName().getName();</b>
+&nbsp;    }
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if this reaction has the same values as the given one
+&nbsp;	 * 
+&nbsp;	 * @param reaction the reaction whose values to compare with
+&nbsp;	 * @return true if the values match, else false
+&nbsp;	 */
+&nbsp;	public boolean hasSameValues(AllergyReaction reaction) {
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getAllergyReactionId(), reaction.getAllergyReactionId())) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!OpenmrsUtil.nullSafeEquals(getReaction(), reaction.getReaction())) {</b>
+&nbsp;			//if object instances are different but with the same concept id, then not changed
+<b class="fc">&nbsp;			if (getReaction() != null &amp;&amp; reaction.getReaction() != null) {</b>
+<b class="fc">&nbsp;				if (!OpenmrsUtil.nullSafeEquals(getReaction().getConceptId(), reaction.getReaction().getConceptId())) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			else {
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return OpenmrsUtil.nullSafeEquals(getReactionNonCoded(), reaction.getReactionNonCoded());</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,338 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptDatatype</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptDatatype (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptDatatype</td>
+<td class="coverageStat">
+  <span class="percent">
+    70%
+  </span>
+  <span class="absValue">
+    (14/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (15/21)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptDatatype$HibernateProxy$IbZlnIyv</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    70%
+  </span>
+  <span class="absValue">
+    (14/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (15/21)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;
+&nbsp;/**
+&nbsp; * ConceptDatatype
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptDatatype extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 473L;
+&nbsp;	
+&nbsp;	// HL7 abbreviations (along with our own boolean creature)
+&nbsp;	
+&nbsp;	public static final String BOOLEAN = &quot;BIT&quot;;
+&nbsp;	
+&nbsp;	public static final String CODED = &quot;CWE&quot;;
+&nbsp;	
+&nbsp;	public static final String DATE = &quot;DT&quot;;
+&nbsp;	
+&nbsp;	public static final String DATETIME = &quot;TS&quot;;
+&nbsp;	
+&nbsp;	public static final String DOCUMENT = &quot;RP&quot;;
+&nbsp;	
+&nbsp;	public static final String NUMERIC = &quot;NM&quot;;
+&nbsp;	
+&nbsp;	public static final String TEXT = &quot;ST&quot;;
+&nbsp;	
+&nbsp;	public static final String TIME = &quot;TM&quot;;
+&nbsp;	
+&nbsp;	// UUIDs for core datatypes
+&nbsp;	
+&nbsp;	public static final String NUMERIC_UUID = &quot;8d4a4488-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String CODED_UUID = &quot;8d4a48b6-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String TEXT_UUID = &quot;8d4a4ab4-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String N_A_UUID = &quot;8d4a4c94-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String DOCUMENT_UUID = &quot;8d4a4e74-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String DATE_UUID = &quot;8d4a505e-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String TIME_UUID = &quot;8d4a591e-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String DATETIME_UUID = &quot;8d4a5af4-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String BOOLEAN_UUID = &quot;8d4a5cca-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String RULE_UUID = &quot;8d4a5e96-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String STRUCTURED_NUMERIC_UUID = &quot;8d4a606c-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String COMPLEX_UUID = &quot;8d4a6242-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@DocumentId
+&nbsp;	private Integer conceptDatatypeId;
+&nbsp;	
+&nbsp;	private String hl7Abbreviation;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptDatatype() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public ConceptDatatype(Integer conceptDatatypeId) {</b>
+<b class="fc">&nbsp;		this.conceptDatatypeId = conceptDatatypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	public Integer getConceptDatatypeId() {
+<b class="fc">&nbsp;		return this.conceptDatatypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConceptDatatypeId(Integer conceptDatatypeId) {
+<b class="fc">&nbsp;		this.conceptDatatypeId = conceptDatatypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the hl7Abbreviation.
+&nbsp;	 */
+&nbsp;	public String getHl7Abbreviation() {
+<b class="fc">&nbsp;		return hl7Abbreviation;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param hl7Abbreviation The hl7Abbreviation to set.
+&nbsp;	 */
+&nbsp;	public void setHl7Abbreviation(String hl7Abbreviation) {
+<b class="fc">&nbsp;		this.hl7Abbreviation = hl7Abbreviation;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/*
+&nbsp;	 * Convenience methods for resolving common data types
+&nbsp;	 */
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is N/A, i.e. this concept is only an answer, not a
+&nbsp;	 *         question
+&nbsp;	 */
+&nbsp;	public boolean isAnswerOnly() {
+<b class="nc">&nbsp;		return N_A_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is a numeric datatype
+&nbsp;	 */
+&nbsp;	public boolean isNumeric() {
+<b class="fc">&nbsp;		return NUMERIC_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is coded (i.e., an identifier from a vocabulary)
+&nbsp;	 */
+&nbsp;	public boolean isCoded() {
+<b class="fc">&nbsp;		return CODED_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is representation of date (but NOT a time or
+&nbsp;	 *         datatime--see containsDate() and containsTime())
+&nbsp;	 */
+&nbsp;	public boolean isDate() {
+<b class="fc">&nbsp;		return DATE_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is representation of time
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public boolean isTime() {
+<b class="fc">&nbsp;		return TIME_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is representation of Datetime
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public boolean isDateTime() {
+<b class="fc">&nbsp;		return DATETIME_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is representation of either date or Datetime
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public boolean containsDate() {
+<b class="nc">&nbsp;		return DATE_UUID.equals(getUuid()) || DATETIME_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is representation of either time or Datetime
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public boolean containsTime() {
+<b class="nc">&nbsp;		return TIME_UUID.equals(getUuid()) || DATETIME_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is text-based
+&nbsp;	 */
+&nbsp;	public boolean isText() {
+<b class="fc">&nbsp;		return TEXT_UUID.equals(getUuid()) || DOCUMENT_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is boolean
+&nbsp;	 */
+&nbsp;	public boolean isBoolean() {
+<b class="fc">&nbsp;		return BOOLEAN_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getConceptDatatypeId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptDatatypeId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is complex
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public boolean isComplex() {
+<b class="nc">&nbsp;		return COMPLEX_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return &lt;code&gt;true&lt;/code&gt; if datatype is a rule
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public boolean isRule() {
+<b class="nc">&nbsp;		return RULE_UUID.equals(getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1190 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ServiceContext</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.context</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceContext (org.openmrs.api.context)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceContext</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,7%
+  </span>
+  <span class="absValue">
+    (72/83)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,7%
+  </span>
+  <span class="absValue">
+    (177/247)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ServiceContext$ServiceContextHolder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    87,1%
+  </span>
+  <span class="absValue">
+    (74/85)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,9%
+  </span>
+  <span class="absValue">
+    (179/249)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.context;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.aopalliance.aop.Advice;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.CohortService;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.ConditionService;
+&nbsp;import org.openmrs.api.DatatypeService;
+&nbsp;import org.openmrs.api.DiagnosisService;
+&nbsp;import org.openmrs.api.EncounterService;
+&nbsp;import org.openmrs.api.FormService;
+&nbsp;import org.openmrs.api.LocationService;
+&nbsp;import org.openmrs.api.MedicationDispenseService;
+&nbsp;import org.openmrs.api.ObsService;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.api.OrderService;
+&nbsp;import org.openmrs.api.OrderSetService;
+&nbsp;import org.openmrs.api.PatientService;
+&nbsp;import org.openmrs.api.PersonService;
+&nbsp;import org.openmrs.api.ProgramWorkflowService;
+&nbsp;import org.openmrs.api.ProviderService;
+&nbsp;import org.openmrs.api.SerializationService;
+&nbsp;import org.openmrs.api.ServiceNotFoundException;
+&nbsp;import org.openmrs.api.UserService;
+&nbsp;import org.openmrs.api.VisitService;
+&nbsp;import org.openmrs.hl7.HL7Service;
+&nbsp;import org.openmrs.logic.LogicService;
+&nbsp;import org.openmrs.messagesource.MessageSourceService;
+&nbsp;import org.openmrs.messagesource.impl.DefaultMessageSourceServiceImpl;
+&nbsp;import org.openmrs.notification.AlertService;
+&nbsp;import org.openmrs.notification.MessageService;
+&nbsp;import org.openmrs.scheduler.SchedulerService;
+&nbsp;import org.openmrs.util.OpenmrsClassLoader;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.aop.Advisor;
+&nbsp;import org.springframework.aop.framework.Advised;
+&nbsp;import org.springframework.aop.framework.ProxyFactory;
+&nbsp;import org.springframework.beans.BeansException;
+&nbsp;import org.springframework.context.ApplicationContext;
+&nbsp;import org.springframework.context.ApplicationContextAware;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents an OpenMRS &lt;code&gt;Service Context&lt;/code&gt;, which returns the services represented
+&nbsp; * throughout the system. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This class should not be access directly, but rather used through the &lt;code&gt;Context&lt;/code&gt; class. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This class is essentially static and only one instance is kept because this is fairly
+&nbsp; * heavy-weight. Spring takes care of filling in the actual service implementations via dependency
+&nbsp; * injection. See the /metadata/api/spring/applicationContext-service.xml file. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Module services are also accessed through this class. See {@link #getService(Class)}
+&nbsp; *
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;public class ServiceContext implements ApplicationContextAware {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ServiceContext.class);</b>
+&nbsp;
+&nbsp;	private ApplicationContext applicationContext;
+&nbsp;	
+<b class="fc">&nbsp;	private static boolean refreshingContext = false;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Object refreshingContextLock = new Object();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Static variable holding whether or not to use the system classloader. By default this is
+&nbsp;	 * false so the openmrs classloader is used instead
+&nbsp;	 */
+<b class="fc">&nbsp;	private boolean useSystemClassLoader = false;</b>
+&nbsp;	
+&nbsp;	// Cached service objects
+<b class="fc">&nbsp;	Map&lt;Class, Object&gt; services = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// Advisors added to services by this service
+<b class="fc">&nbsp;	Map&lt;Class, Set&lt;Advisor&gt;&gt; addedAdvisors = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// Advice added to services by this service
+<b class="fc">&nbsp;	Map&lt;Class, Set&lt;Advice&gt;&gt; addedAdvice = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Services implementing the OpenmrsService interface for each module. The map is keyed by the
+&nbsp;	 * full class name including package.
+&nbsp;	 *
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+<b class="fc">&nbsp;	Map&lt;String, OpenmrsService&gt; moduleOpenmrsServices = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The default constructor is private so as to keep only one instance per java vm.
+&nbsp;	 *
+&nbsp;	 * @see ServiceContext#getInstance()
+&nbsp;	 */
+<b class="fc">&nbsp;	private ServiceContext() {</b>
+<b class="fc">&nbsp;		log.debug(&quot;Instantiating service context&quot;);</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static class ServiceContextHolder {</b>
+&nbsp;
+&nbsp;		private ServiceContextHolder() {
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		private static ServiceContext instance = null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * There should only be one ServiceContext per openmrs (java virtual machine). This method
+&nbsp;	 * should be used when wanting to fetch the service context Note: The ServiceContext shouldn&#39;t
+&nbsp;	 * be used independently. All calls should go through the Context
+&nbsp;	 *
+&nbsp;	 * @return This VM&#39;s current ServiceContext.
+&nbsp;	 * @see org.openmrs.api.context.Context
+&nbsp;	 */
+&nbsp;	public static ServiceContext getInstance() {
+<b class="fc">&nbsp;		if (ServiceContextHolder.instance == null) {</b>
+<b class="fc">&nbsp;			ServiceContextHolder.instance = new ServiceContext();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return ServiceContextHolder.instance;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Null out the current instance of the ServiceContext. This should be used when modules are
+&nbsp;	 * refreshing (being added/removed) and/or openmrs is shutting down
+&nbsp;	 */
+&nbsp;	public static void destroyInstance() {
+<b class="fc">&nbsp;		if (ServiceContextHolder.instance != null &amp;&amp; ServiceContextHolder.instance.services != null) {</b>
+<b class="fc">&nbsp;			for (Map.Entry&lt;Class, Object&gt; entry : ServiceContextHolder.instance.services.entrySet()) {</b>
+<b class="fc">&nbsp;				log.debug(&quot;Service - {} : {}&quot;, entry.getKey().getName(), entry.getValue());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// Remove advice and advisors that this service added
+<b class="fc">&nbsp;			for (Class serviceClass : ServiceContextHolder.instance.services.keySet()) {</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.removeAddedAOP(serviceClass);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (ServiceContextHolder.instance.services != null) {</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.services.clear();</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.services = null;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (ServiceContextHolder.instance.addedAdvisors != null) {</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.addedAdvisors.clear();</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.addedAdvisors = null;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (ServiceContextHolder.instance.addedAdvice != null) {</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.addedAdvice.clear();</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.addedAdvice = null;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ServiceContextHolder.instance != null) {</b>
+<b class="fc">&nbsp;			ServiceContextHolder.instance.applicationContext = null;</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (ServiceContextHolder.instance.moduleOpenmrsServices != null) {</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.moduleOpenmrsServices.clear();</b>
+<b class="fc">&nbsp;				ServiceContextHolder.instance.moduleOpenmrsServices = null;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		log.debug(&quot;Destroying ServiceContext instance: {}&quot;, ServiceContextHolder.instance);</b>
+<b class="fc">&nbsp;		ServiceContextHolder.instance = null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return encounter-related services
+&nbsp;	 */
+&nbsp;	public EncounterService getEncounterService() {
+<b class="fc">&nbsp;		return getService(EncounterService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return location services
+&nbsp;	 */
+&nbsp;	public LocationService getLocationService() {
+<b class="fc">&nbsp;		return getService(LocationService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return observation services
+&nbsp;	 */
+&nbsp;	public ObsService getObsService() {
+<b class="fc">&nbsp;		return getService(ObsService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return condition related service
+&nbsp;	 * 
+&nbsp;	 * @since 2.2
+&nbsp;	 */
+&nbsp;	public ConditionService getConditionService() {
+<b class="fc">&nbsp;		return getService(ConditionService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conditionService condition related service
+&nbsp;	 *            
+&nbsp;	 * @since 2.2   
+&nbsp;	 */
+&nbsp;	public void setConditionService(ConditionService conditionService) {
+<b class="fc">&nbsp;		setService(ConditionService.class, conditionService);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return diagnosis related service
+&nbsp;	 *
+&nbsp;	 * @since 2.2
+&nbsp;	 */
+&nbsp;	public DiagnosisService getDiagnosisService() {
+<b class="fc">&nbsp;		return getService(DiagnosisService.class);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param diagnosisService diagnosis related service
+&nbsp;	 *
+&nbsp;	 * @since 2.2
+&nbsp;	 */
+&nbsp;	public void setDiagnosisService(DiagnosisService diagnosisService) {
+<b class="fc">&nbsp;		setService(DiagnosisService.class, diagnosisService);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return MedicationDispense related service
+&nbsp;	 * @since 2.6.0
+&nbsp;	 */
+&nbsp;	public MedicationDispenseService getMedicationDispenseService() {
+<b class="nc">&nbsp;		return getService(MedicationDispenseService.class);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param medicationDispenseService MedicationDispense related service
+&nbsp;	 * @since 2.6.0
+&nbsp;	 */
+&nbsp;	public void setMedicationDispenseService(MedicationDispenseService medicationDispenseService) {
+<b class="fc">&nbsp;		setService(MedicationDispenseService.class, medicationDispenseService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return cohort related service
+&nbsp;	 */
+&nbsp;	public CohortService getCohortService() {
+<b class="fc">&nbsp;		return getService(CohortService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cs cohort related service
+&nbsp;	 */
+&nbsp;	public void setCohortService(CohortService cs) {
+<b class="fc">&nbsp;		setService(CohortService.class, cs);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return order set service
+&nbsp;	 */
+&nbsp;	public OrderSetService getOrderSetService() {
+<b class="fc">&nbsp;		return getService(OrderSetService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return order service
+&nbsp;	 */
+&nbsp;	public OrderService getOrderService() {
+<b class="fc">&nbsp;		return getService(OrderService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return form service
+&nbsp;	 */
+&nbsp;	public FormService getFormService() {
+<b class="fc">&nbsp;		return getService(FormService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return serialization service
+&nbsp;	 */
+&nbsp;	public SerializationService getSerializationService() {
+<b class="fc">&nbsp;		return getService(SerializationService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return admin-related services
+&nbsp;	 */
+&nbsp;	public AdministrationService getAdministrationService() {
+<b class="fc">&nbsp;		return getService(AdministrationService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return programWorkflowService
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowService getProgramWorkflowService() {
+<b class="fc">&nbsp;		return getService(ProgramWorkflowService.class);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return logicService
+&nbsp;	 */
+&nbsp;	public LogicService getLogicService() {
+<b class="nc">&nbsp;		return getService(LogicService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return scheduler service
+&nbsp;	 */
+&nbsp;	public SchedulerService getSchedulerService() {
+<b class="fc">&nbsp;		return getService(SchedulerService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the scheduler service.
+&nbsp;	 *
+&nbsp;	 * @param schedulerService
+&nbsp;	 */
+&nbsp;	public void setSchedulerService(SchedulerService schedulerService) {
+<b class="fc">&nbsp;		setService(SchedulerService.class, schedulerService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return alert service
+&nbsp;	 */
+&nbsp;	public AlertService getAlertService() {
+<b class="fc">&nbsp;		return getService(AlertService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param alertService
+&nbsp;	 */
+&nbsp;	public void setAlertService(AlertService alertService) {
+<b class="fc">&nbsp;		setService(AlertService.class, alertService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param programWorkflowService
+&nbsp;	 */
+&nbsp;	public void setProgramWorkflowService(ProgramWorkflowService programWorkflowService) {
+<b class="fc">&nbsp;		setService(ProgramWorkflowService.class, programWorkflowService);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param logicService
+&nbsp;	 */
+&nbsp;	public void setLogicService(LogicService logicService) {
+<b class="nc">&nbsp;		setService(LogicService.class, logicService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return message service
+&nbsp;	 */
+&nbsp;	public MessageService getMessageService() {
+<b class="fc">&nbsp;		return getService(MessageService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the message service.
+&nbsp;	 *
+&nbsp;	 * @param messageService
+&nbsp;	 */
+&nbsp;	public void setMessageService(MessageService messageService) {
+<b class="fc">&nbsp;		setService(MessageService.class, messageService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the hl7Service
+&nbsp;	 */
+&nbsp;	public HL7Service getHL7Service() {
+<b class="fc">&nbsp;		return getService(HL7Service.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param hl7Service the hl7Service to set
+&nbsp;	 */
+&nbsp;	public void setHl7Service(HL7Service hl7Service) {
+<b class="fc">&nbsp;		setService(HL7Service.class, hl7Service);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param administrationService the administrationService to set
+&nbsp;	 */
+&nbsp;	public void setAdministrationService(AdministrationService administrationService) {
+<b class="fc">&nbsp;		setService(AdministrationService.class, administrationService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounterService the encounterService to set
+&nbsp;	 */
+&nbsp;	public void setEncounterService(EncounterService encounterService) {
+<b class="fc">&nbsp;		setService(EncounterService.class, encounterService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param locationService the LocationService to set
+&nbsp;	 */
+&nbsp;	public void setLocationService(LocationService locationService) {
+<b class="fc">&nbsp;		setService(LocationService.class, locationService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param formService the formService to set
+&nbsp;	 */
+&nbsp;	public void setFormService(FormService formService) {
+<b class="fc">&nbsp;		setService(FormService.class, formService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param obsService the obsService to set
+&nbsp;	 */
+&nbsp;	public void setObsService(ObsService obsService) {
+<b class="fc">&nbsp;		setService(ObsService.class, obsService);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param orderService the orderService to set
+&nbsp;	 */
+&nbsp;	public void setOrderService(OrderService orderService) {
+<b class="fc">&nbsp;		setService(OrderService.class, orderService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orderSetService the orderSetService to set
+&nbsp;	 */
+&nbsp;	public void setOrderSetService(OrderSetService orderSetService) {
+<b class="fc">&nbsp;		setService(OrderSetService.class, orderSetService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param serializationService
+&nbsp;	 */
+&nbsp;	public void setSerializationService(SerializationService serializationService) {
+<b class="fc">&nbsp;		setService(SerializationService.class, serializationService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return patient related services
+&nbsp;	 */
+&nbsp;	public PatientService getPatientService() {
+<b class="fc">&nbsp;		return getService(PatientService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param patientService the patientService to set
+&nbsp;	 */
+&nbsp;	public void setPatientService(PatientService patientService) {
+<b class="fc">&nbsp;		setService(PatientService.class, patientService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return person related services
+&nbsp;	 */
+&nbsp;	public PersonService getPersonService() {
+<b class="fc">&nbsp;		return getService(PersonService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param personService the personService to set
+&nbsp;	 */
+&nbsp;	public void setPersonService(PersonService personService) {
+<b class="fc">&nbsp;		setService(PersonService.class, personService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return concept related services
+&nbsp;	 */
+&nbsp;	public ConceptService getConceptService() {
+<b class="fc">&nbsp;		return getService(ConceptService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptService the conceptService to set
+&nbsp;	 */
+&nbsp;	public void setConceptService(ConceptService conceptService) {
+<b class="fc">&nbsp;		setService(ConceptService.class, conceptService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return user-related services
+&nbsp;	 */
+&nbsp;	public UserService getUserService() {
+<b class="fc">&nbsp;		return getService(UserService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param userService the userService to set
+&nbsp;	 */
+&nbsp;	public void setUserService(UserService userService) {
+<b class="fc">&nbsp;		setService(UserService.class, userService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the MessageSourceService used in the context.
+&nbsp;	 *
+&nbsp;	 * @return MessageSourceService
+&nbsp;	 */
+&nbsp;	public MessageSourceService getMessageSourceService() {
+&nbsp;		try {
+<b class="fc">&nbsp;			return getService(MessageSourceService.class);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (APIException ex) {</b>
+&nbsp;			//must be a service not found exception because of spring not being started
+<b class="nc">&nbsp;			return DefaultMessageSourceServiceImpl.getInstance();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the MessageSourceService used in the context.
+&nbsp;	 *
+&nbsp;	 * @param messageSourceService the MessageSourceService to use
+&nbsp;	 */
+&nbsp;	public void setMessageSourceService(MessageSourceService messageSourceService) {
+<b class="fc">&nbsp;		setService(MessageSourceService.class, messageSourceService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cls
+&nbsp;	 * @param advisor
+&nbsp;	 */
+&nbsp;	public void addAdvisor(Class cls, Advisor advisor) {
+<b class="nc">&nbsp;		Advised advisedService = (Advised) services.get(cls);</b>
+<b class="nc">&nbsp;		if (advisedService.indexOf(advisor) &lt; 0) {</b>
+<b class="nc">&nbsp;			advisedService.addAdvisor(advisor);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		addedAdvisors.computeIfAbsent(cls, k -&gt; new HashSet&lt;&gt;());</b>
+<b class="nc">&nbsp;		getAddedAdvisors(cls).add(advisor);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cls
+&nbsp;	 * @param advice
+&nbsp;	 */
+&nbsp;	public void addAdvice(Class cls, Advice advice) {
+<b class="nc">&nbsp;		Advised advisedService = (Advised) services.get(cls);</b>
+<b class="nc">&nbsp;		if (advisedService.indexOf(advice) &lt; 0) {</b>
+<b class="nc">&nbsp;			advisedService.addAdvice(advice);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		addedAdvice.computeIfAbsent(cls, k -&gt; new HashSet&lt;&gt;());</b>
+<b class="nc">&nbsp;		getAddedAdvice(cls).add(advice);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cls
+&nbsp;	 * @param advisor
+&nbsp;	 */
+&nbsp;	public void removeAdvisor(Class cls, Advisor advisor) {
+<b class="nc">&nbsp;		Advised advisedService = (Advised) services.get(cls);</b>
+<b class="nc">&nbsp;		advisedService.removeAdvisor(advisor);</b>
+<b class="nc">&nbsp;		getAddedAdvisors(cls).remove(advisor);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cls
+&nbsp;	 * @param advice
+&nbsp;	 */
+&nbsp;	public void removeAdvice(Class cls, Advice advice) {
+<b class="nc">&nbsp;		Advised advisedService = (Advised) services.get(cls);</b>
+<b class="nc">&nbsp;		advisedService.removeAdvice(advice);</b>
+<b class="nc">&nbsp;		getAddedAdvice(cls).remove(advice);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Moves advisors and advice added by ServiceContext from the source service to the target one.
+&nbsp;	 *
+&nbsp;	 * @param source the existing service
+&nbsp;	 * @param target the new service
+&nbsp;	 */
+&nbsp;	private void moveAddedAOP(Advised source, Advised target) {
+<b class="fc">&nbsp;		Class serviceClass = source.getClass();</b>
+<b class="fc">&nbsp;		Set&lt;Advisor&gt; existingAdvisors = getAddedAdvisors(serviceClass);</b>
+<b class="fc">&nbsp;		for (Advisor advisor : existingAdvisors) {</b>
+<b class="nc">&nbsp;			target.addAdvisor(advisor);</b>
+<b class="nc">&nbsp;			source.removeAdvisor(advisor);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;Advice&gt; existingAdvice = getAddedAdvice(serviceClass);</b>
+<b class="fc">&nbsp;		for (Advice advice : existingAdvice) {</b>
+<b class="nc">&nbsp;			target.addAdvice(advice);</b>
+<b class="nc">&nbsp;			source.removeAdvice(advice);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes all advice and advisors added by ServiceContext.
+&nbsp;	 *
+&nbsp;	 * @param cls the class of the cached service to cleanup
+&nbsp;	 */
+&nbsp;	private void removeAddedAOP(Class cls) {
+<b class="fc">&nbsp;		removeAddedAdvisors(cls);</b>
+<b class="fc">&nbsp;		removeAddedAdvice(cls);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes all the advisors added by ServiceContext.
+&nbsp;	 *
+&nbsp;	 * @param cls the class of the cached service to cleanup
+&nbsp;	 */
+&nbsp;	private void removeAddedAdvisors(Class cls) {
+<b class="fc">&nbsp;		Advised advisedService = (Advised) services.get(cls);</b>
+<b class="fc">&nbsp;		Set&lt;Advisor&gt; advisorsToRemove = addedAdvisors.get(cls);</b>
+<b class="fc">&nbsp;		if (advisedService != null &amp;&amp; advisorsToRemove != null) {</b>
+<b class="nc">&nbsp;			for (Advisor advisor : advisorsToRemove.toArray(new Advisor[] {})) {</b>
+<b class="nc">&nbsp;				removeAdvisor(cls, advisor);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the set of advisors added by ServiceContext.
+&nbsp;	 *
+&nbsp;	 * @param cls the class of the cached service
+&nbsp;	 * @return the set of advisors or an empty set
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	private Set&lt;Advisor&gt; getAddedAdvisors(Class cls) {
+<b class="fc">&nbsp;		Set&lt;Advisor&gt; result = addedAdvisors.get(cls);</b>
+<b class="fc">&nbsp;		return (Set&lt;Advisor&gt;) (result == null ? Collections.emptySet() : result);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes all the advice added by the ServiceContext.
+&nbsp;	 *
+&nbsp;	 * @param cls the class of the caches service to cleanup
+&nbsp;	 */
+&nbsp;	private void removeAddedAdvice(Class cls) {
+<b class="fc">&nbsp;		Advised advisedService = (Advised) services.get(cls);</b>
+<b class="fc">&nbsp;		Set&lt;Advice&gt; adviceToRemove = addedAdvice.get(cls);</b>
+<b class="fc">&nbsp;		if (advisedService != null &amp;&amp; adviceToRemove != null) {</b>
+<b class="nc">&nbsp;			for (Advice advice : adviceToRemove.toArray(new Advice[] {})) {</b>
+<b class="nc">&nbsp;				removeAdvice(cls, advice);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the set of advice added by ServiceContext.
+&nbsp;	 *
+&nbsp;	 * @param cls the class of the cached service
+&nbsp;	 * @return the set of advice or an empty set
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	private Set&lt;Advice&gt; getAddedAdvice(Class cls) {
+<b class="fc">&nbsp;		Set&lt;Advice&gt; result = addedAdvice.get(cls);</b>
+<b class="fc">&nbsp;		return (Set&lt;Advice&gt;) (result == null ? Collections.emptySet() : result);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the current proxy that is stored for the Class &lt;code&gt;cls&lt;/code&gt;
+&nbsp;	 *
+&nbsp;	 * @param cls
+&nbsp;	 * @return Object that is a proxy for the &lt;code&gt;cls&lt;/code&gt; class
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public &lt;T&gt; T getService(Class&lt;? extends T&gt; cls) {
+<b class="fc">&nbsp;		if (log.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;			log.trace(&quot;Getting service: &quot; + cls);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if the context is refreshing, wait until it is
+&nbsp;		// done -- otherwise a null service might be returned
+<b class="fc">&nbsp;		synchronized (refreshingContextLock) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				while (refreshingContext) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;Waiting to get service: {} while the context is being refreshed&quot;, cls);</b>
+&nbsp;					
+<b class="nc">&nbsp;					refreshingContextLock.wait();</b>
+&nbsp;					
+<b class="nc">&nbsp;					log.debug(&quot;Finished waiting to get service {} while the context was being refreshed&quot;, cls);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+<b class="nc">&nbsp;			catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Refresh lock was interrupted&quot;, e);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		Object service = services.get(cls);</b>
+<b class="fc">&nbsp;		if (service == null) {</b>
+<b class="fc">&nbsp;			throw new ServiceNotFoundException(cls);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return (T) service;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allow other services to be added to our service layer
+&nbsp;	 *
+&nbsp;	 * @param cls Interface to proxy
+&nbsp;	 * @param classInstance the actual instance of the &lt;code&gt;cls&lt;/code&gt; interface
+&nbsp;	 */
+&nbsp;	public void setService(Class cls, Object classInstance) {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Setting service: &quot; + cls);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (cls != null &amp;&amp; classInstance != null) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Advised cachedService = (Advised) services.get(cls);</b>
+<b class="fc">&nbsp;				boolean noExistingService = cachedService == null;</b>
+<b class="fc">&nbsp;				boolean replacingService = cachedService != null &amp;&amp; cachedService != classInstance;</b>
+<b class="fc">&nbsp;				boolean serviceAdvised = classInstance instanceof Advised;</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (noExistingService || replacingService) {</b>
+&nbsp;					
+&nbsp;					Advised advisedService;
+&nbsp;					
+<b class="fc">&nbsp;					if (!serviceAdvised) {</b>
+&nbsp;						// Adding a bare service, wrap with AOP proxy
+<b class="fc">&nbsp;						Class[] interfaces = { cls };</b>
+<b class="fc">&nbsp;						ProxyFactory factory = new ProxyFactory(interfaces);</b>
+<b class="fc">&nbsp;						factory.setTarget(classInstance);</b>
+<b class="fc">&nbsp;						advisedService = (Advised) factory.getProxy(OpenmrsClassLoader.getInstance());</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						advisedService = (Advised) classInstance;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (replacingService) {</b>
+<b class="fc">&nbsp;						moveAddedAOP(cachedService, advisedService);</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					services.put(cls, advisedService);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				log.debug(&quot;Service: &quot; + cls + &quot; set successfully&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				throw new APIException(&quot;service.unable.create.proxy.factory&quot;, new Object[] { classInstance.getClass()</b>
+<b class="nc">&nbsp;				        .getName() }, e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Allow other services to be added to our service layer &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Classes will be found/loaded with the ModuleClassLoader &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * &lt;code&gt;params&lt;/code&gt;[0] = string representing the service interface&lt;br&gt;
+&nbsp;	 * &lt;code&gt;params&lt;/code&gt;[1] = service instance
+&nbsp;	 *
+&nbsp;	 * @param params list of parameters
+&nbsp;	 */
+&nbsp;	public void setModuleService(List&lt;Object&gt; params) {
+<b class="fc">&nbsp;		String classString = (String) params.get(0);</b>
+<b class="fc">&nbsp;		Object classInstance = params.get(1);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (classString == null || classInstance == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(</b>
+<b class="fc">&nbsp;			        String.format(&quot;Unable to find service as unexpected null value found for class [%s] or instance [%s]&quot;,</b>
+&nbsp;			            classString, classInstance));
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Class cls = null;</b>
+&nbsp;		
+&nbsp;		// load the given &#39;classString&#39; class from either the openmrs class
+&nbsp;		// loader or the system class loader depending on if we&#39;re in a testing
+&nbsp;		// environment or not (system == testing, openmrs == normal)
+&nbsp;		try {
+<b class="fc">&nbsp;			if (!useSystemClassLoader) {</b>
+<b class="fc">&nbsp;				cls = OpenmrsClassLoader.getInstance().loadClass(classString);</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (cls != null &amp;&amp; log.isDebugEnabled()) {</b>
+&nbsp;					try {
+<b class="nc">&nbsp;						log.debug(&quot;cls classloader: {} uid: {}&quot;, cls.getClass().getClassLoader(),</b>
+<b class="nc">&nbsp;						    cls.getClass().getClassLoader().hashCode());</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (Exception e) { /*pass*/}</b>
+&nbsp;				}
+<b class="nc">&nbsp;			} else if (useSystemClassLoader) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					cls = Class.forName(classString);</b>
+<b class="nc">&nbsp;					log.debug(&quot;cls2 classloader: {} uid: {}&quot;, cls.getClass().getClassLoader(),</b>
+<b class="nc">&nbsp;					    cls.getClass().getClassLoader().hashCode());</b>
+&nbsp;					//pay attention that here, cls = Class.forName(classString), the system class loader and
+&nbsp;					//cls2 is the openmrs class loader, like above.
+<b class="nc">&nbsp;					log.debug(&quot;cls==cls2: {}&quot;,</b>
+<b class="nc">&nbsp;					    String.valueOf(cls == OpenmrsClassLoader.getInstance().loadClass(classString)));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) { /*pass*/}</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		catch (ClassNotFoundException e) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Unable to find service as class not found: &quot; + classString, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// add this module service to the normal list of services
+<b class="fc">&nbsp;		setService(cls, classInstance);</b>
+&nbsp;		
+&nbsp;		//Run onStartup for all services implementing the OpenmrsService interface.
+<b class="fc">&nbsp;		if (OpenmrsService.class.isAssignableFrom(classInstance.getClass())) {</b>
+<b class="fc">&nbsp;			moduleOpenmrsServices.put(classString, (OpenmrsService) classInstance);</b>
+<b class="fc">&nbsp;			runOpenmrsServiceOnStartup((OpenmrsService) classInstance, classString);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set this service context to use the system class loader if the
+&nbsp;	 * &lt;code&gt;useSystemClassLoader&lt;/code&gt; is set to true. If false, the openmrs class loader is used
+&nbsp;	 * to load module services
+&nbsp;	 *
+&nbsp;	 * @param useSystemClassLoader true/false whether to use the system class loader
+&nbsp;	 */
+&nbsp;	public void setUseSystemClassLoader(boolean useSystemClassLoader) {
+<b class="fc">&nbsp;		this.useSystemClassLoader = useSystemClassLoader;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if we are using the system class loader.
+&nbsp;	 *
+&nbsp;	 * @return true if using the system class loader, else false.
+&nbsp;	 */
+&nbsp;	public boolean isUseSystemClassLoader() {
+<b class="fc">&nbsp;		return useSystemClassLoader;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setRefreshingContext(boolean refreshingContext) {
+<b class="nc">&nbsp;		ServiceContext.refreshingContext = refreshingContext;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Should be called &lt;b&gt;right before&lt;/b&gt; any spring context refresh This forces all calls to
+&nbsp;	 * getService to wait until &lt;code&gt;doneRefreshingContext&lt;/code&gt; is called
+&nbsp;	 */
+&nbsp;	public void startRefreshingContext() {
+<b class="nc">&nbsp;		synchronized (refreshingContextLock) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Refreshing Context&quot;);</b>
+<b class="nc">&nbsp;			setRefreshingContext(true);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Should be called &lt;b&gt;right after&lt;/b&gt; any spring context refresh This wakes up all calls to
+&nbsp;	 * getService that were waiting because &lt;code&gt;startRefreshingContext&lt;/code&gt; was called
+&nbsp;	 */
+&nbsp;	public void doneRefreshingContext() {
+<b class="nc">&nbsp;		synchronized (refreshingContextLock) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Done refreshing Context&quot;);</b>
+<b class="nc">&nbsp;			setRefreshingContext(false);</b>
+<b class="nc">&nbsp;			refreshingContextLock.notifyAll();</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns true/false whether startRefreshingContext() has been called without a subsequent call
+&nbsp;	 * to doneRefreshingContext() yet. All methods involved in starting/stopping a module should
+&nbsp;	 * call this if a service method is needed -- otherwise a deadlock will occur.
+&nbsp;	 *
+&nbsp;	 * @return true/false whether the services are currently blocking waiting for a call to
+&nbsp;	 *         doneRefreshingContext()
+&nbsp;	 */
+&nbsp;	public boolean isRefreshingContext() {
+<b class="nc">&nbsp;		synchronized (refreshingContextLock) {</b>
+<b class="nc">&nbsp;			return refreshingContext;</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves all Beans which have been registered in the Spring {@link ApplicationContext} that
+&nbsp;	 * match the given object type (including subclasses).
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * &lt;b&gt;NOTE: This method introspects top-level beans only.&lt;/b&gt; It does &lt;i&gt;not&lt;/i&gt; check nested
+&nbsp;	 * beans which might match the specified type as well.
+&nbsp;	 *
+&nbsp;	 * @see ApplicationContext#getBeansOfType(Class)
+&nbsp;	 * @param type the type of Bean to retrieve from the Spring {@link ApplicationContext}
+&nbsp;	 * @return a List of all registered Beans that are valid instances of the passed type
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of all registered beans of the passed type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return beans registered in a module
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return an empty list if no beans have been registered of the passed type
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public &lt;T&gt; List&lt;T&gt; getRegisteredComponents(Class&lt;T&gt; type) {
+<b class="fc">&nbsp;		Map&lt;String, T&gt; m = getRegisteredComponents(applicationContext, type);</b>
+<b class="fc">&nbsp;		if (log.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;			log.trace(&quot;getRegisteredComponents(&quot; + type + &quot;) = &quot; + m);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return new ArrayList&lt;&gt;(m.values());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a bean that match the given type (including subclasses) and name.
+&nbsp;	 *
+&nbsp;	 * @param beanName the name of registered bean to retrieve
+&nbsp;	 * @param type the type of bean to retrieve 
+&nbsp;	 * @return bean of passed type
+&nbsp;	 *
+&nbsp;	 * @since 1.9.4
+&nbsp;	 */
+&nbsp;	public &lt;T&gt; T getRegisteredComponent(String beanName, Class&lt;T&gt; type) throws APIException {
+&nbsp;		try {
+<b class="fc">&nbsp;			return applicationContext.getBean(beanName, type);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (BeansException beanException) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;service.error.during.getting.component&quot;, null, beanException);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Private method which returns all components registered in a Spring applicationContext of a
+&nbsp;	 * given type This method recurses through each parent ApplicationContext
+&nbsp;	 *
+&nbsp;	 * @param context - The applicationContext to check
+&nbsp;	 * @param type - The type of component to retrieve
+&nbsp;	 * @return all components registered in a Spring applicationContext of a given type
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	private &lt;T&gt; Map&lt;String, T&gt; getRegisteredComponents(ApplicationContext context, Class&lt;T&gt; type) {
+<b class="fc">&nbsp;		Map&lt;String, T&gt; components = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		Map&lt;String, T&gt; registeredComponents = context.getBeansOfType(type);</b>
+<b class="fc">&nbsp;		if (log.isTraceEnabled()) {</b>
+<b class="nc">&nbsp;			log.trace(&quot;getRegisteredComponents(&quot; + context + &quot;, &quot; + type + &quot;) = &quot; + registeredComponents);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (registeredComponents != null) {</b>
+<b class="fc">&nbsp;			components.putAll(registeredComponents);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (context.getParent() != null) {</b>
+<b class="fc">&nbsp;			components.putAll(getRegisteredComponents(context.getParent(), type));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return components;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param applicationContext the applicationContext to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setApplicationContext(ApplicationContext applicationContext) {
+<b class="fc">&nbsp;		this.applicationContext = applicationContext;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public ApplicationContext getApplicationContext() {
+<b class="fc">&nbsp;		return applicationContext;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Calls the {@link OpenmrsService#onStartup()} method for an instance implementing the
+&nbsp;	 * {@link OpenmrsService} interface.
+&nbsp;	 *
+&nbsp;	 * @param openmrsService instance implementing the {@link OpenmrsService} interface.
+&nbsp;	 * @param classString the full instance class name including the package name.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	private void runOpenmrsServiceOnStartup(final OpenmrsService openmrsService, final String classString) {
+<b class="fc">&nbsp;		new Thread(() -&gt; {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				synchronized (refreshingContextLock) {</b>
+&nbsp;					//Need to wait for application context to finish refreshing otherwise we get into trouble.
+<b class="fc">&nbsp;					while (refreshingContext) {</b>
+<b class="nc">&nbsp;						log.debug(&quot;Waiting to get service: {} while the context is being refreshed&quot;, classString);</b>
+&nbsp;
+<b class="nc">&nbsp;						refreshingContextLock.wait();</b>
+&nbsp;
+<b class="nc">&nbsp;						log.debug(&quot;Finished waiting to get service {} while the context was being refreshed&quot;, classString);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;
+<b class="fc">&nbsp;				Daemon.runStartupForService(openmrsService);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Refresh lock was interrupted while waiting to run OpenmrsService.onStartup() for &quot;</b>
+&nbsp;				        + classString, e);
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}).start();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a list of services implementing the {@link OpenmrsService} interface, for a given
+&nbsp;	 * module.
+&nbsp;	 *
+&nbsp;	 * @param modulePackage the module&#39;s package name.
+&nbsp;	 * @return the list of service instances.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public List&lt;OpenmrsService&gt; getModuleOpenmrsServices(String modulePackage) {
+<b class="fc">&nbsp;		List&lt;OpenmrsService&gt; openmrsServices = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Entry&lt;String, OpenmrsService&gt; entry : moduleOpenmrsServices.entrySet()) {</b>
+<b class="fc">&nbsp;			if (entry.getKey().startsWith(modulePackage)) {</b>
+<b class="fc">&nbsp;				openmrsServices.add(entry.getValue());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return openmrsServices;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the visit service.
+&nbsp;	 *
+&nbsp;	 * @return visit service.
+&nbsp;	 * @since 1.9
+&nbsp;	 **/
+&nbsp;	public VisitService getVisitService() {
+<b class="fc">&nbsp;		return getService(VisitService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the visit service.
+&nbsp;	 *
+&nbsp;	 * @param visitService the visitService to set
+&nbsp;	 * @since 1.9
+&nbsp;	 **/
+&nbsp;	public void setVisitService(VisitService visitService) {
+<b class="fc">&nbsp;		setService(VisitService.class, visitService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the provider service.
+&nbsp;	 *
+&nbsp;	 * @return provider service.
+&nbsp;	 * @since 1.9
+&nbsp;	 **/
+&nbsp;	
+&nbsp;	public ProviderService getProviderService() {
+<b class="fc">&nbsp;		return getService(ProviderService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the provider service.
+&nbsp;	 *
+&nbsp;	 * @param providerService the providerService to set
+&nbsp;	 * @since 1.9
+&nbsp;	 **/
+&nbsp;	public void setProviderService(ProviderService providerService) {
+<b class="fc">&nbsp;		setService(ProviderService.class, providerService);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the datatype service
+&nbsp;	 *
+&nbsp;	 * @return custom datatype service
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public DatatypeService getDatatypeService() {
+<b class="fc">&nbsp;		return getService(DatatypeService.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the datatype service
+&nbsp;	 *
+&nbsp;	 * @param datatypeService the datatypeService to set
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setDatatypeService(DatatypeService datatypeService) {
+<b class="fc">&nbsp;		setService(DatatypeService.class, datatypeService);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,955 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+  <tr>
+    <td class="name">PersonService$ATTR_VIEW_TYPE</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonAddress;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonAttributeType;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.Relationship;
+&nbsp;import org.openmrs.RelationshipType;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.PersonDAO;
+&nbsp;import org.openmrs.person.PersonMergeLog;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to Persons in the system Use:&lt;br&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; * 
+&nbsp; * 
+&nbsp; * List&amp;lt;Person&amp;gt; personObjects = Context.getPersonService().getAllPersons();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.Patient
+&nbsp; */
+&nbsp;public interface PersonService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * These enumerations are used when determining which person attr types to display. If listing
+&nbsp;	 * off a lot of patients/users, one set of types are shown. When only displaying one
+&nbsp;	 * patient/user, another type is shown.
+&nbsp;	 */
+<b class="fc">&nbsp;	public static enum ATTR_VIEW_TYPE {</b>
+&nbsp;		/**
+&nbsp;		 * Attributes to be shown when listing off multiple patients or users
+&nbsp;		 */
+<b class="fc">&nbsp;		LISTING,</b>
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * Attributes to be shown when only showing one patient or user
+&nbsp;		 */
+<b class="fc">&nbsp;		VIEWING,</b>
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * Attributes to be shown in the header
+&nbsp;		 */
+<b class="fc">&nbsp;		HEADER,</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the DAO for this service. This is done through spring injection
+&nbsp;	 * 
+&nbsp;	 * @param dao DAO for this service
+&nbsp;	 */
+&nbsp;	public void setPersonDAO(PersonDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find a similar person given the attributes. This does a very loose lookup with the
+&nbsp;	 * &lt;code&gt;nameSearch&lt;/code&gt; parameter. This does a very loose lookup on &lt;code&gt;birthyear&lt;/code&gt; as
+&nbsp;	 * well. Any person with a null/missing birthdate is included and anyone with a birthyear
+&nbsp;	 * plus/minus one year from the given &lt;code&gt;birthyear&lt;/code&gt; is also included
+&nbsp;	 * 
+&nbsp;	 * @param nameSearch string to search the person&#39;s name for
+&nbsp;	 * @param birthyear the year of birth to restrict
+&nbsp;	 * @param gender The gender field to search on (Typically just &quot;M&quot; or &quot;F&quot;)
+&nbsp;	 * @return Set&amp;lt;Person&amp;gt; object with all people matching criteria
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; accept greater than three names
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match single search to any name part
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match two word search to any name part
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match three word search to any name part
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match search to familyName2
+&nbsp;	 */
+&nbsp;	// TODO: make gender a (definable?) constant
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public Set&lt;Person&gt; getSimilarPeople(String nameSearch, Integer birthyear, String gender) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Find a person matching the &lt;tt&gt;searchPhrase&lt;/tt&gt; search string
+&nbsp;	 * 
+&nbsp;	 * @param searchPhrase person name to match on
+&nbsp;	 * @param dead if true will return only dead patients, if false will return only alive patients,
+&nbsp;	 *            if null will return both
+&nbsp;	 * @return list of person objects matches the parameters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match search to familyName2
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public List&lt;Person&gt; getPeople(String searchPhrase, Boolean dead) throws APIException;
+&nbsp;	
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public List&lt;Person&gt; getPeople(String searchPhrase, Boolean dead, Boolean voided) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Save the given person attribute type in the database. &lt;br&gt;
+&nbsp;	 * If the given type&#39;s Id is not empty, then also need to change any global property which is in
+&nbsp;	 * {@link OpenmrsConstants#GLOBAL_PROPERTIES_OF_PERSON_ATTRIBUTES} and reference this given
+&nbsp;	 * type, prior to saving this given type. &lt;br&gt;
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 * @return the saved person attribute type
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the date created and creator on new
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the date changed and changed by on update
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update any global property which reference this type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to save person attribute type while person attribute types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public PersonAttributeType savePersonAttributeType(PersonAttributeType type) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retire a Person Attribute Type
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 * @param retiredReason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to retire person attribute type while person attribute types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public PersonAttributeType retirePersonAttributeType(PersonAttributeType type, String retiredReason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retire a Person Relationship Type
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 * @param retiredReason
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_RELATIONSHIP_TYPES })
+&nbsp;	public RelationshipType retireRelationshipType(RelationshipType type, String retiredReason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretire a Person Relationship Type
+&nbsp;	 * 
+&nbsp;	 * @param relationshipType retiredReason
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_RELATIONSHIP_TYPES })
+&nbsp;	public RelationshipType unretireRelationshipType(RelationshipType relationshipType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purges a PersonAttribute type from the database (cannot be undone)
+&nbsp;	 * 
+&nbsp;	 * @param type type to be purged from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete person attribute type from database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to delete person attribute type while person attribute types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public void purgePersonAttributeType(PersonAttributeType type) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretires a PersonAttribute type from the database (can be undone)
+&nbsp;	 * 
+&nbsp;	 * @param type type to be restored from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; restore person attribute type from database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an error when trying to unretire person attribute type while person attribute types are locked
+&nbsp;	 */
+&nbsp;	
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public void unretirePersonAttributeType(PersonAttributeType type) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Effectively removes this person from the system. Voids Patient and retires Users as well.
+&nbsp;	 * 
+&nbsp;	 * @param person person to be voided
+&nbsp;	 * @param reason reason for voiding person
+&nbsp;	 * @return the person that was voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return voided person with given reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire users
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public Person voidPerson(Person person, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Effectively resurrects this person in the db. Unvoids Patient as well.
+&nbsp;	 * 
+&nbsp;	 * @param person person to be revived
+&nbsp;	 * @return the person that was unvoided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid the given person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not unretire users
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public Person unvoidPerson(Person person) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get all PersonAttributeTypes in the database
+&nbsp;	 * 
+&nbsp;	 * @see #getAllPersonAttributeTypes(boolean)
+&nbsp;	 * @return All person attribute types including the retired ones
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all person attribute types including retired
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public List&lt;PersonAttributeType&gt; getAllPersonAttributeTypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all PersonAttributeTypes in the database with the option of including the retired types
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include retired attribute types as well?
+&nbsp;	 * @return List&amp;lt;PersonAttributeType&amp;gt; object of all PersonAttributeTypes, possibly including
+&nbsp;	 *         retired ones
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all person attribute types including retired when include retired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all person attribute types excluding retired when include retired is false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public List&lt;PersonAttributeType&gt; getAllPersonAttributeTypes(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find person attribute types matching the given parameters. Retired types are included in the
+&nbsp;	 * results
+&nbsp;	 * 
+&nbsp;	 * @param exactName (optional) The name of type
+&nbsp;	 * @param format (optional) The format for this type
+&nbsp;	 * @param foreignKey (optional) The foreign key
+&nbsp;	 * @param searchable (optional) if true only returns searchable types, if false returns only
+&nbsp;	 *            nonsearchable and if null returns all
+&nbsp;	 * @return list of PersonAttributeTypes matching the given parameters
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return person attribute types matching given parameters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no person attribute types match given parameters
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public List&lt;PersonAttributeType&gt; getPersonAttributeTypes(String exactName, String format, Integer foreignKey,
+&nbsp;	        Boolean searchable) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the PersonAttributeType given the type&#39;s PersonAttributeTypeId
+&nbsp;	 * 
+&nbsp;	 * @param typeId PersonAttributeType.personAttributeTypeId to match on
+&nbsp;	 * @return the type matching this id or null if none was found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no person attribute with the given id exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public PersonAttributeType getPersonAttributeType(Integer typeId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a person attribute type with the given uuid.
+&nbsp;	 * 
+&nbsp;	 * @param uuid the universally unique identifier to lookup
+&nbsp;	 * @return a person attribute type with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public PersonAttributeType getPersonAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a PersonAttribute from the database with the given PersonAttributeid
+&nbsp;	 * 
+&nbsp;	 * @param id the PersonAttribute.personAttributeId to match on
+&nbsp;	 * @return the matching PersonAttribute or null if none was found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when PersonAttribute with given id does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return person attribute when PersonAttribute with given id does exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public PersonAttribute getPersonAttribute(Integer id) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the PersonAttributeType given the type&#39;s name
+&nbsp;	 * 
+&nbsp;	 * @param typeName
+&nbsp;	 * @return the PersonAttributeType that has the given name or null if none found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return person attribute type when name matches given typeName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no person attribute type match given typeName
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES })
+&nbsp;	public PersonAttributeType getPersonAttributeTypeByName(String typeName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get relationship by internal relationship identifier
+&nbsp;	 * 
+&nbsp;	 * @param relationshipId
+&nbsp;	 * @return Relationship the relationship to match on or null if none found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return relationship with given id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when relationship with given id does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public Relationship getRelationship(Integer relationshipId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Relationship by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return relationship or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public Relationship getRelationshipByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get list of relationships that are not voided
+&nbsp;	 * 
+&nbsp;	 * @return non-voided Relationship list
+&nbsp;	 * @throws APIException
+&nbsp;	 * @return list of all unvoided relationship
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all unvoided relationships
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getAllRelationships() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get list of relationships optionally including the voided ones or not
+&nbsp;	 * 
+&nbsp;	 * @param includeVoided true/false whether to include the voided relationships
+&nbsp;	 * @return non-voided Relationship list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all relationship including voided when include voided equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all relationship excluding voided when include voided equals false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getAllRelationships(boolean includeVoided) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get list of relationships that include Person in person_id or relative_id Does not include
+&nbsp;	 * voided relationships
+&nbsp;	 * 
+&nbsp;	 * @param p person object listed on either side of the relationship
+&nbsp;	 * @return Relationship list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only get unvoided relationships
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships associated with the given person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch unvoided relationships only
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getRelationshipsByPerson(Person p) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get list of relationships that include Person in person_id or relative_id. Does not include
+&nbsp;	 * voided relationships. Accepts an effectiveDate parameter which, if supplied, will limit the
+&nbsp;	 * returned relationships to those that were active on the given date. Such active relationships
+&nbsp;	 * include those that have a startDate that is null or less than or equal to the effectiveDate,
+&nbsp;	 * and that have an endDate that is null or greater than or equal to the effectiveDate.
+&nbsp;	 * 
+&nbsp;	 * @param p person object listed on either side of the relationship
+&nbsp;	 * @param effectiveDate effective date of relationship
+&nbsp;	 * @return Relationship list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only get unvoided relationships
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only get unvoided relationships regardless of effective date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships associated with the given person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships that were active during effectiveDate
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getRelationshipsByPerson(Person p, Date effectiveDate) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get relationships stored in the database that
+&nbsp;	 * 
+&nbsp;	 * @param fromPerson (optional) Person to in the person_id column
+&nbsp;	 * @param toPerson (optional) Person in the relative_id column
+&nbsp;	 * @param relType (optional) The RelationshipType to match
+&nbsp;	 * @return relationships matching the given parameters
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given from person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given to person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given rel type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no relationship matching given parameters exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getRelationships(Person fromPerson, Person toPerson, RelationshipType relType)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get relationships stored in the database that are active on the passed date
+&nbsp;	 * 
+&nbsp;	 * @param fromPerson (optional) Person to in the person_id column
+&nbsp;	 * @param toPerson (optional) Person in the relative_id column
+&nbsp;	 * @param relType (optional) The RelationshipType to match
+&nbsp;	 * @param effectiveDate (optional) The date during which the relationship was effective
+&nbsp;	 * @return relationships matching the given parameters
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given from person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given to person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given rel type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no relationship matching given parameters exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships that were active during effectiveDate
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getRelationships(Person fromPerson, Person toPerson, RelationshipType relType,
+&nbsp;	        Date effectiveDate) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get relationships stored in the database that were active during the specified date range
+&nbsp;	 * 
+&nbsp;	 * @param fromPerson (optional) Person to in the person_id column
+&nbsp;	 * @param toPerson (optional) Person in the relative_id column
+&nbsp;	 * @param relType (optional) The RelationshipType to match
+&nbsp;	 * @param startEffectiveDate (optional) The date during which the relationship was effective
+&nbsp;	 *            (lower bound)
+&nbsp;	 * @param endEffectiveDate (optional) The date during which the relationship was effective
+&nbsp;	 *            (upper bound)
+&nbsp;	 * @return relationships matching the given parameters
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given from person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given to person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships matching the given rel type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no relationship matching given parameters exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch relationships that were active during the specified date range
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public List&lt;Relationship&gt; getRelationships(Person fromPerson, Person toPerson, RelationshipType relType,
+&nbsp;	        Date startEffectiveDate, Date endEffectiveDate) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all relationshipTypes Includes retired relationship types
+&nbsp;	 * 
+&nbsp;	 * @return relationshipType list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all relationship types
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public List&lt;RelationshipType&gt; getAllRelationshipTypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all relationshipTypes with the option of including the retired types
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include retired relationshipTypes as well?
+&nbsp;	 * @return relationshipType list
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public List&lt;RelationshipType&gt; getAllRelationshipTypes(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get relationshipType by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param relationshipTypeId
+&nbsp;	 * @return relationshipType with given internal identifier or null if none found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return relationship type with the given relationship type id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no relationship type matches given relationship type id
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public RelationshipType getRelationshipType(Integer relationshipTypeId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the relationship type with the given uuid.
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return relationship type or null
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public RelationshipType getRelationshipTypeByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find relationshipType by exact name match
+&nbsp;	 * 
+&nbsp;	 * @param relationshipTypeName name to match on
+&nbsp;	 * @return RelationshipType with given name or null if none found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no relationship type match the given name
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public RelationshipType getRelationshipTypeByName(String relationshipTypeName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find relationshipTypes by exact name match and/or preferred status
+&nbsp;	 * 
+&nbsp;	 * @param relationshipTypeName name to match on
+&nbsp;	 * @param preferred if true, returns on preferred types, if false returns only the nonpreferred
+&nbsp;	 *            types. if null returns both
+&nbsp;	 * @return RelationshipTypes with given name and preferred status
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return list of preferred relationship type matching given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no preferred relationship type match the given name
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public List&lt;RelationshipType&gt; getRelationshipTypes(String relationshipTypeName, Boolean preferred) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get relationshipTypes by searching through the names and loosely matching to the given
+&nbsp;	 * searchString
+&nbsp;	 * 
+&nbsp;	 * @param searchString string to match to a relationship type name
+&nbsp;	 * @return list of relationship types or empty list if none found
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no relationship type match the search string
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIP_TYPES })
+&nbsp;	public List&lt;RelationshipType&gt; getRelationshipTypes(String searchString) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create or update a relationship between people. Saves the given &lt;code&gt;relationship&lt;/code&gt; to
+&nbsp;	 * the database
+&nbsp;	 * 
+&nbsp;	 * @param relationship relationship to be created or updated
+&nbsp;	 * @return relationship that was created or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new object when relationship id is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update existing object when relationship id is not null
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_RELATIONSHIPS, PrivilegeConstants.EDIT_RELATIONSHIPS })
+&nbsp;	public Relationship saveRelationship(Relationship relationship) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purges a relationship from the database (cannot be undone)
+&nbsp;	 * 
+&nbsp;	 * @param relationship relationship to be purged from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete relationship from the database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_RELATIONSHIPS })
+&nbsp;	public void purgeRelationship(Relationship relationship) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids the given Relationship, effectively removing it from openmrs.
+&nbsp;	 * 
+&nbsp;	 * @param relationship Relationship to void
+&nbsp;	 * @param voidReason String reason the relationship is being voided.
+&nbsp;	 * @return the newly saved relationship
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void relationship with the given reason
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_RELATIONSHIPS })
+&nbsp;	public Relationship voidRelationship(Relationship relationship, String voidReason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unvoid Relationship in the database, effectively marking this as a valid relationship again
+&nbsp;	 * 
+&nbsp;	 * @param relationship Relationship to unvoid
+&nbsp;	 * @return the newly unvoided relationship
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid voided relationship
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_RELATIONSHIPS })
+&nbsp;	public Relationship unvoidRelationship(Relationship relationship) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates a Person in the database
+&nbsp;	 * 
+&nbsp;	 * @param person person to be created or updated
+&nbsp;	 * @return person who was created or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new object when person id is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update existing object when person id is not null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the preferred name and address if none is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set the preferred name and address if they already exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set a voided name or address as preferred
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public Person savePerson(Person person) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purges a person from the database (cannot be undone)
+&nbsp;	 * 
+&nbsp;	 * @param person person to be purged from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete person from the database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PERSONS })
+&nbsp;	public void purgePerson(Person person) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Person by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return person or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public Person getPersonByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get PersonAddress by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return person address or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public PersonAddress getPersonAddressByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get PersonAttribute by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return person attribute or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public PersonAttribute getPersonAttributeByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get PersonName by its personNameId
+&nbsp;	 * 
+&nbsp;	 * @param personNameId
+&nbsp;	 * @return person name or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find PersonName given valid personNameId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given personNameId
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	PersonName getPersonName(Integer personNameId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get PersonName by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return person name or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public PersonName getPersonNameByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a person by internal id
+&nbsp;	 * 
+&nbsp;	 * @param personId internal identifier of person to get
+&nbsp;	 * @return Person person with given internal identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no person has the given id
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PERSONS })
+&nbsp;	public Person getPerson(Integer personId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Inserts or updates the given relationship type object in the database
+&nbsp;	 * 
+&nbsp;	 * @param relationshipType type to be created or updated
+&nbsp;	 * @return relationship type that was created or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new object when relationship type id is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update existing object when relationship type id is not null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the description is not specified
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_RELATIONSHIP_TYPES })
+&nbsp;	public RelationshipType saveRelationshipType(RelationshipType relationshipType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge relationship type from the database (cannot be undone)
+&nbsp;	 * 
+&nbsp;	 * @param relationshipType relationship type to be purged
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete relationship type from the database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_RELATIONSHIP_TYPES })
+&nbsp;	public void purgeRelationshipType(RelationshipType relationshipType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the types defined for the given person type (person, user, patient) and the given type
+&nbsp;	 * of view (one person vs many person objects)
+&nbsp;	 * 
+&nbsp;	 * @param personType PERSON, USER, PATIENT, or null. Both PERSON and null mean to return attr
+&nbsp;	 *            types for both patients and users
+&nbsp;	 * @param viewType whether this is a listing or viewing or null for both listing and viewing
+&nbsp;	 * @return list of PersonAttributeTypes that should be displayed
+&nbsp;	 */
+&nbsp;	// this has anonymous access because its cached into generic js files
+&nbsp;	public List&lt;PersonAttributeType&gt; getPersonAttributeTypes(PERSON_TYPE personType, ATTR_VIEW_TYPE viewType)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids the given PersonName, effectively deleting the name, from the end-user&#39;s point of view.
+&nbsp;	 * 
+&nbsp;	 * @param personName PersonName to void
+&nbsp;	 * @param voidReason String reason the personName is being voided.
+&nbsp;	 * @return the newly saved personName
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void personName with the given reason
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public PersonName voidPersonName(PersonName personName, String voidReason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unvoid PersonName in the database, effectively marking this as a valid personName again
+&nbsp;	 * 
+&nbsp;	 * @param personName PersonName to unvoid
+&nbsp;	 * @return the newly unvoided personName
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid voided personName
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public PersonName unvoidPersonName(PersonName personName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Inserts or updates the given personName object in the database
+&nbsp;	 * 
+&nbsp;	 * @param personName to be created or updated
+&nbsp;	 * @return personName that was created or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if you try to void the last non voided name
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public PersonName savePersonName(PersonName personName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parses a name into a PersonName (separate Given, Middle, and Family names)
+&nbsp;	 * 
+&nbsp;	 * @param name person name to be parsed
+&nbsp;	 * @return parsed person name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse two person name with comma
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse two person name without comma
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when ending with whitespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when ending with a comma
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse four person name
+&nbsp;	 */
+&nbsp;	public PersonName parsePersonName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all relationships for a given type of relationship mapped from the personA to all of the
+&nbsp;	 * personB&#39;s
+&nbsp;	 * 
+&nbsp;	 * @param relationshipType type of relationship for which to retrieve all relationships
+&nbsp;	 * @return all relationships for the given type of relationship
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty map when no relationship has the matching relationship type
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_RELATIONSHIPS })
+&nbsp;	public Map&lt;Person, List&lt;Person&gt;&gt; getRelationshipMap(RelationshipType relationshipType) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Builds the serialized data from
+&nbsp;	 * {@link org.openmrs.person.PersonMergeLog#getPersonMergeLogData}, sets the mergedData String,
+&nbsp;	 * and the creator and date if null. It then saves the &lt;code&gt;PersonMergeLog&lt;/code&gt; object to the
+&nbsp;	 * model.
+&nbsp;	 * 
+&nbsp;	 * @param personMergeLog the &lt;code&gt;PersonMergeLog&lt;/code&gt; object to save.
+&nbsp;	 * @return the persisted &lt;code&gt;PersonMergeLog&lt;/code&gt; object
+&nbsp;	 * @see org.openmrs.person.PersonMergeLog
+&nbsp;	 * @see org.openmrs.api.handler.OpenmrsObjectSaveHandler
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; require PersonMergeLogData
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; require winner
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; require loser
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set date created if null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set creator if null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; serialize PersonMergeLogData
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save PersonMergeLog
+&nbsp;	 */
+&nbsp;	public PersonMergeLog savePersonMergeLog(PersonMergeLog personMergeLog) throws SerializationException, APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a PersonMergeLog object from the model using the UUID identifier. Deserializes the
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @param deserialize
+&nbsp;	 * @return person merge log object
+&nbsp;	 * @throws SerializationException
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; require uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retrieve personMergeLog without deserializing data
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retrieve personMergeLog and deserialize data
+&nbsp;	 */
+&nbsp;	public PersonMergeLog getPersonMergeLogByUuid(String uuid, boolean deserialize) throws SerializationException,
+&nbsp;	        APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all the &lt;code&gt;PersonMergeLog&lt;/code&gt; objects from the model
+&nbsp;	 * 
+&nbsp;	 * @return list of PersonMergeLog objects
+&nbsp;	 * @throws SerializationException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retrieve all PersonMergeLogs from the model
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retrieve all PersonMergeLogs and deserialize them
+&nbsp;	 */
+&nbsp;	public List&lt;PersonMergeLog&gt; getAllPersonMergeLogs(boolean deserialize) throws SerializationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets &lt;code&gt;PersonMergeLog&lt;/code&gt; objects by winning person p. Useful for to getting all persons merged into p.
+&nbsp;	 * @param person the winning person
+&nbsp;	 * @return List of &lt;code&gt;PersonMergeLog&lt;/code&gt; objects
+&nbsp;	 * @throws SerializationException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retrieve PersonMergeLogs by winner
+&nbsp;	 */
+&nbsp;	public List&lt;PersonMergeLog&gt; getWinningPersonMergeLogs(Person person, boolean deserialize) throws SerializationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the &lt;code&gt;PersonMergeLog&lt;/code&gt; where person p is the loser. Useful for getting the person that p was merged into.
+&nbsp;	 * @param person the losing person
+&nbsp;	 * @return The &lt;code&gt;PersonMergeLog&lt;/code&gt; object
+&nbsp;	 * @throws SerializationException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find PersonMergeLog by loser
+&nbsp;	 */
+&nbsp;	public PersonMergeLog getLosingPersonMergeLog(Person person, boolean deserialize) throws SerializationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids the given PersonAddress, effectively deleting the personAddress, from the end-user&#39;s
+&nbsp;	 * point of view.
+&nbsp;	 * 
+&nbsp;	 * @param personAddress PersonAddress to void
+&nbsp;	 * @param voidReason String reason the personAddress is being voided.
+&nbsp;	 * @return the newly saved personAddress
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void personAddress with the given reason
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public PersonAddress voidPersonAddress(PersonAddress personAddress, String voidReason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unvoid PersonAddress in the database, effectively marking this as a valid PersonAddress again
+&nbsp;	 * 
+&nbsp;	 * @param personAddress PersonAddress to unvoid
+&nbsp;	 * @return the newly unvoided personAddress
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid voided personAddress
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public PersonAddress unvoidPersonAddress(PersonAddress personAddress) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Inserts or updates the given personAddress object in the database
+&nbsp;	 * 
+&nbsp;	 * @param personAddress PersonAddress to be created or updated
+&nbsp;	 * @return personAddress that was created or updated
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PERSONS })
+&nbsp;	public PersonAddress savePersonAddress(PersonAddress personAddress);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if the person attribute types are locked, and if they are throws an exception during manipulation of a person attribute type
+&nbsp;	 * 
+&nbsp;	 * @throws PersonAttributeTypeLockedException
+&nbsp;	 */
+&nbsp;	public void checkIfPersonAttributeTypesAreLocked() throws PersonAttributeTypeLockedException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

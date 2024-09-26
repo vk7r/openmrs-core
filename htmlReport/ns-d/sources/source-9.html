@@ -1,0 +1,899 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: FormServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FormServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (44/55)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,1%
+  </span>
+  <span class="absValue">
+    (158/205)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.hibernate.exception.ConstraintViolationException;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptComplex;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Field;
+&nbsp;import org.openmrs.FieldAnswer;
+&nbsp;import org.openmrs.FieldType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.FormField;
+&nbsp;import org.openmrs.FormResource;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.FormService;
+&nbsp;import org.openmrs.api.FormsLockedException;
+&nbsp;import org.openmrs.api.InvalidFileTypeException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.FormDAO;
+&nbsp;import org.openmrs.api.handler.SaveHandler;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;import org.openmrs.obs.ComplexObsHandler;
+&nbsp;import org.openmrs.obs.SerializableComplexObsHandler;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.openmrs.validator.FormValidator;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.validation.BindException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default implementation of the {@link FormService}
+&nbsp; * &lt;p&gt;
+&nbsp; * This class should not be instantiated alone, get a service class from the Context:
+&nbsp; * Context.getFormService();
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.api.FormService
+&nbsp; */
+&nbsp;@Transactional
+&nbsp;public class FormServiceImpl extends BaseOpenmrsService implements FormService {
+&nbsp;	
+&nbsp;	private FormDAO dao;
+&nbsp;	
+&nbsp;	private final FormValidator formValidator;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default empty constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public FormServiceImpl() {</b>
+<b class="fc">&nbsp;		formValidator = new FormValidator();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Method used to inject the data access object.
+&nbsp;	 * 
+&nbsp;	 * @param dao
+&nbsp;	 */
+&nbsp;	public void setFormDAO(FormDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForm(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Form getForm(Integer formId) throws APIException {
+<b class="fc">&nbsp;		return dao.getForm(formId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Duplicate this form and form_fields associated with this form
+&nbsp;	 * 
+&nbsp;	 * @param form
+&nbsp;	 * @return New duplicated form
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see org.openmrs.api.FormService#duplicateForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form duplicateForm(Form form) throws APIException {
+<b class="fc">&nbsp;		checkIfFormsAreLocked();</b>
+&nbsp;		// get original form id for reference later
+<b class="fc">&nbsp;		Integer originalFormId = form.getFormId();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (FormField formField : form.getFormFields()) {</b>
+<b class="fc">&nbsp;			formField.setUuid(null);</b>
+<b class="fc">&nbsp;			formField.setFormFieldId(null);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		// this is required because Hibernate would recognize the original collection
+<b class="fc">&nbsp;		form.setFormFields(new HashSet&lt;&gt;(form.getFormFields()));</b>
+&nbsp;		
+<b class="fc">&nbsp;		form.setUuid(null);</b>
+<b class="fc">&nbsp;		form.setFormId(null);</b>
+<b class="fc">&nbsp;		form.setCreator(null);</b>
+<b class="fc">&nbsp;		form.setDateCreated(null);</b>
+<b class="fc">&nbsp;		form.setChangedBy(null);</b>
+<b class="fc">&nbsp;		form.setDateChanged(null);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Context.clearSession();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Form originalForm = Context.getFormService().getForm(originalFormId);</b>
+&nbsp;		//On upgrading from hibernate 4.3.10.Final to 4.3.11.Final, 
+&nbsp;		//calling getFormResourcesForForm results into a flush which finds the form as dirty,
+&nbsp;		//resulting into the failure of this test
+&nbsp;		//FormServiceTest.duplicateForm_shouldClearChangedDetailsAndUpdateCreationDetails:401 expected null, but was:&lt;admin&gt;
+&nbsp;		//That is why we call getFormResourcesForForm before dao.duplicateForm(form) below.
+<b class="fc">&nbsp;		Collection&lt;FormResource&gt; formResources = Context.getFormService().getFormResourcesForForm(originalForm);</b>
+&nbsp;		
+<b class="fc">&nbsp;		RequiredDataAdvice.recursivelyHandle(SaveHandler.class, form, null);</b>
+<b class="fc">&nbsp;		Form newForm = dao.duplicateForm(form);</b>
+&nbsp;		
+&nbsp;		// duplicate form resources from the old form to the new one
+<b class="fc">&nbsp;		duplicateFormResources(originalForm, newForm, formResources);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return newForm;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#retireForm(org.openmrs.Form, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void retireForm(Form form, String reason) throws APIException {
+<b class="fc">&nbsp;		form.setRetired(true);</b>
+<b class="fc">&nbsp;		form.setRetireReason(reason);</b>
+<b class="fc">&nbsp;		Context.getFormService().saveForm(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#unretireForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void unretireForm(Form form) throws APIException {
+<b class="fc">&nbsp;		form.setRetired(false);</b>
+<b class="fc">&nbsp;		Context.getFormService().saveForm(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllFieldTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;FieldType&gt; getAllFieldTypes() throws APIException {
+<b class="fc">&nbsp;		return Context.getFormService().getAllFieldTypes(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllFieldTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;FieldType&gt; getAllFieldTypes(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllFieldTypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FieldType getFieldType(Integer fieldTypeId) throws APIException {
+<b class="fc">&nbsp;		return dao.getFieldType(fieldTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getField(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Field getField(Integer fieldId) throws APIException {
+<b class="fc">&nbsp;		return dao.getField(fieldId);</b>
+&nbsp;	}
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormField(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FormField getFormField(Integer formFieldId) throws APIException {
+<b class="fc">&nbsp;		return dao.getFormField(formFieldId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormField(org.openmrs.Form, org.openmrs.Concept,
+&nbsp;	 *      java.util.Collection, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FormField getFormField(Form form, Concept concept, Collection&lt;FormField&gt; ignoreFormFields, boolean force)
+&nbsp;	        throws APIException {
+&nbsp;		// create an empty ignoreFormFields list if none was passed in
+<b class="fc">&nbsp;		Collection&lt;FormField&gt; tmpIgnoreFormFields = ignoreFormFields;</b>
+<b class="fc">&nbsp;		if (tmpIgnoreFormFields == null) {</b>
+<b class="fc">&nbsp;			tmpIgnoreFormFields = Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getFormField(form, concept, tmpIgnoreFormFields, force);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Field getFieldByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getFieldByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FieldAnswer getFieldAnswerByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getFieldAnswerByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FieldType getFieldTypeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getFieldTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FieldType getFieldTypeByName(String name) throws APIException {
+<b class="fc">&nbsp;		return dao.getFieldTypeByName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Form getFormByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getFormByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormFieldByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FormField getFormFieldByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getFormFieldByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllFields()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Field&gt; getAllFields() throws APIException {
+<b class="fc">&nbsp;		return Context.getFormService().getAllFields(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllFields(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Field&gt; getAllFields(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllFields(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllFormFields()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;FormField&gt; getAllFormFields() throws APIException {
+<b class="fc">&nbsp;		return dao.getAllFormFields();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllForms()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Form&gt; getAllForms() throws APIException {
+<b class="fc">&nbsp;		return Context.getFormService().getAllForms(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllForms(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Form&gt; getAllForms(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllForms(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFields(java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection, java.util.Collection, java.util.Collection, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.util.Collection, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Field&gt; getFields(Collection&lt;Form&gt; forms, Collection&lt;FieldType&gt; fieldTypes, Collection&lt;Concept&gt; concepts,
+&nbsp;	        Collection&lt;String&gt; tableNames, Collection&lt;String&gt; attributeNames, Boolean selectMultiple,
+&nbsp;	        Collection&lt;FieldAnswer&gt; containsAllAnswers, Collection&lt;FieldAnswer&gt; containsAnyAnswer, Boolean retired)
+&nbsp;	        throws APIException {
+&nbsp;
+<b class="nc">&nbsp;		Collection&lt;Form&gt; tmpForms = forms == null ? Collections.emptyList() : forms;</b>
+<b class="nc">&nbsp;		Collection&lt;Concept&gt; tmpConcepts = concepts == null ? Collections.emptyList() : concepts;</b>
+<b class="nc">&nbsp;		Collection&lt;FieldType&gt; tmpFieldTypes = fieldTypes == null ? Collections.emptyList() : fieldTypes;</b>
+<b class="nc">&nbsp;		Collection&lt;String&gt; tmpTableNames = tableNames == null ? Collections.emptyList() : tableNames;</b>
+<b class="nc">&nbsp;		Collection&lt;String&gt; tmpAttributeNames = attributeNames == null ? Collections.emptyList() : attributeNames;</b>
+<b class="nc">&nbsp;		Collection&lt;FieldAnswer&gt; tmpContainsAllAnswers = containsAllAnswers == null ? Collections.emptyList() : containsAllAnswers;</b>
+<b class="nc">&nbsp;		Collection&lt;FieldAnswer&gt; tmpContainsAnyAnswer = containsAnyAnswer == null ? Collections.emptyList() : containsAnyAnswer;</b>
+&nbsp;		
+<b class="nc">&nbsp;		return dao.getFields(tmpForms, tmpFieldTypes, tmpConcepts, tmpTableNames, tmpAttributeNames, selectMultiple,</b>
+&nbsp;				tmpContainsAllAnswers, tmpContainsAnyAnswer, retired);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForm(java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the form with the highest version, if more than one form with the given name
+&nbsp;	 *         exists
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Form getForm(String name) throws APIException {
+<b class="fc">&nbsp;		List&lt;Form&gt; forms = dao.getFormsByName(name);</b>
+<b class="fc">&nbsp;		if (forms == null || forms.isEmpty()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return forms.get(0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForm(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Form getForm(String name, String version) throws APIException {
+<b class="fc">&nbsp;		return dao.getForm(name, version);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForms(java.lang.String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Form&gt; getForms(String fuzzyName, boolean onlyLatestVersion) {
+&nbsp;		// get all forms including unpublished and including retired
+<b class="nc">&nbsp;		List&lt;Form&gt; forms = Context.getFormService().getForms(fuzzyName, null, null, null, null, null, null);</b>
+&nbsp;		
+<b class="nc">&nbsp;		Set&lt;String&gt; namesAlreadySeen = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (Iterator&lt;Form&gt; i = forms.iterator(); i.hasNext();) {</b>
+<b class="nc">&nbsp;			Form form = i.next();</b>
+<b class="nc">&nbsp;			if (namesAlreadySeen.contains(form.getName())) {</b>
+<b class="nc">&nbsp;				i.remove();</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				namesAlreadySeen.add(form.getName());</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return forms;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForms(java.lang.String, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.lang.Boolean, java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Form&gt; getForms(String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) {
+&nbsp;
+<b class="fc">&nbsp;		Collection&lt;EncounterType&gt; tmpEncounterTypes = encounterTypes == null ? Collections.emptyList() : encounterTypes;</b>
+<b class="fc">&nbsp;		Collection&lt;FormField&gt; tmpContainingAllFormFields = containingAllFormFields == null ? Collections.emptyList() : containingAllFormFields;</b>
+<b class="fc">&nbsp;		Collection&lt;FormField&gt; tmpContainingAnyFormField = containingAnyFormField == null ? Collections.emptyList() : containingAnyFormField;</b>
+<b class="fc">&nbsp;		Collection&lt;Field&gt; tmpFields = fields == null ? Collections.emptyList() : fields;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getForms(partialName, published, tmpEncounterTypes, retired, tmpContainingAnyFormField,</b>
+&nbsp;		    tmpContainingAllFormFields, tmpFields);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormCount(java.lang.String, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.lang.Boolean, java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getFormCount(String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) {
+&nbsp;
+<b class="nc">&nbsp;		Collection&lt;EncounterType&gt; tmpEncounterTypes = encounterTypes == null ? Collections.emptyList() : encounterTypes;</b>
+<b class="nc">&nbsp;		Collection&lt;FormField&gt; tmpContainingAllFormFields = containingAllFormFields == null ? Collections.emptyList() : containingAllFormFields;</b>
+<b class="nc">&nbsp;		Collection&lt;FormField&gt; tmpContainingAnyFormField = containingAnyFormField == null ? Collections.emptyList() : containingAnyFormField;</b>
+<b class="nc">&nbsp;		Collection&lt;Field&gt; tmpFields = fields == null ? Collections.emptyList() : fields;</b>
+&nbsp;		
+<b class="nc">&nbsp;		return dao.getFormCount(partialName, published, tmpEncounterTypes, retired, tmpContainingAnyFormField,</b>
+&nbsp;		    tmpContainingAllFormFields, tmpFields);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getPublishedForms()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Form&gt; getPublishedForms() throws APIException {
+<b class="nc">&nbsp;		return Context.getFormService().getForms(null, true, null, false, null, null, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeField(org.openmrs.Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeField(Field field) throws APIException {
+<b class="fc">&nbsp;		Context.getFormService().purgeField(field, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeField(org.openmrs.Field, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeField(Field field, boolean cascade) throws APIException {
+<b class="fc">&nbsp;		if (cascade) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;general.not.yet.implemented&quot;, (Object[]) null);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dao.deleteField(field);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeForm(Form form) throws APIException {
+<b class="fc">&nbsp;		checkIfFormsAreLocked();</b>
+<b class="fc">&nbsp;		Context.getFormService().purgeForm(form, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeForm(org.openmrs.Form, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeForm(Form form, boolean cascade) throws APIException {
+<b class="fc">&nbsp;		if (cascade) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;general.not.yet.implemented&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// remove resources
+<b class="fc">&nbsp;		for (FormResource resource : Context.getFormService().getFormResourcesForForm(form)) {</b>
+<b class="fc">&nbsp;			Context.getFormService().purgeFormResource(resource);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		dao.deleteForm(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeFormField(org.openmrs.FormField)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeFormField(FormField formField) throws APIException {
+<b class="nc">&nbsp;		dao.deleteFormField(formField);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#retireField(org.openmrs.Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Field retireField(Field field) throws APIException {
+<b class="nc">&nbsp;		if (!field.getRetired()) {</b>
+<b class="nc">&nbsp;			field.setRetired(true);</b>
+<b class="nc">&nbsp;			return Context.getFormService().saveField(field);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return field;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#saveField(org.openmrs.Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Field saveField(Field field) throws APIException {
+<b class="fc">&nbsp;		return dao.saveField(field);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#saveForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form saveForm(Form form) throws APIException {
+<b class="fc">&nbsp;		checkIfFormsAreLocked();</b>
+<b class="fc">&nbsp;		BindException errors = new BindException(form, &quot;form&quot;);</b>
+<b class="fc">&nbsp;		formValidator.validate(form, errors);</b>
+<b class="fc">&nbsp;		if (errors.hasErrors()) {</b>
+<b class="nc">&nbsp;			throw new APIException(errors);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (form.getFormFields() != null) {</b>
+<b class="fc">&nbsp;			for (FormField ff : form.getFormFields()) {</b>
+<b class="fc">&nbsp;				if (ff.getForm() == null) {</b>
+<b class="nc">&nbsp;					ff.setForm(form);</b>
+<b class="fc">&nbsp;				} else if (!ff.getForm().equals(form)) {</b>
+<b class="nc">&nbsp;					throw new APIException(&quot;Form.contains.FormField.error&quot;, new Object[] { ff });</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveForm(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#saveFormField(org.openmrs.FormField)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormField saveFormField(FormField formField) throws APIException {
+<b class="fc">&nbsp;		Field field = formField.getField();</b>
+<b class="fc">&nbsp;		if (field.getCreator() == null) {</b>
+<b class="fc">&nbsp;			field.setCreator(Context.getAuthenticatedUser());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (field.getDateCreated() == null) {</b>
+<b class="fc">&nbsp;			field.setDateCreated(new Date());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// don&#39;t change the changed by and date changed on field for
+&nbsp;		// form field updates
+&nbsp;		
+&nbsp;		// set the uuid here because the RequiredDataAdvice only looks at child lists
+<b class="fc">&nbsp;		if (field.getUuid() == null) {</b>
+<b class="nc">&nbsp;			field.setUuid(UUID.randomUUID().toString());</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		FormField tmpFormField = dao.saveFormField(formField);</b>
+&nbsp;		
+&nbsp;		//Include all formfields from all serializable complex obs handlers
+<b class="fc">&nbsp;		Concept concept = tmpFormField.getField().getConcept();</b>
+<b class="fc">&nbsp;		if (concept != null &amp;&amp; concept.isComplex()) {</b>
+<b class="fc">&nbsp;			ComplexObsHandler handler = Context.getObsService().getHandler(((ConceptComplex) concept).getHandler());</b>
+<b class="fc">&nbsp;			if (handler instanceof SerializableComplexObsHandler) {</b>
+<b class="fc">&nbsp;				SerializableComplexObsHandler sHandler = (SerializableComplexObsHandler) handler;</b>
+<b class="fc">&nbsp;				if (sHandler.getFormFields() != null) {</b>
+<b class="fc">&nbsp;					for (FormField ff : sHandler.getFormFields()) {</b>
+<b class="fc">&nbsp;						ff.setParent(tmpFormField);</b>
+<b class="fc">&nbsp;						ff.setForm(tmpFormField.getForm());</b>
+<b class="fc">&nbsp;						ff.setCreator(tmpFormField.getCreator());</b>
+<b class="fc">&nbsp;						ff.setDateCreated(tmpFormField.getDateCreated());</b>
+<b class="fc">&nbsp;						dao.saveFormField(ff);</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return tmpFormField;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#unretireField(org.openmrs.Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Field unretireField(Field field) throws APIException {
+<b class="nc">&nbsp;		if (field.getRetired()) {</b>
+<b class="nc">&nbsp;			field.setRetired(false);</b>
+<b class="nc">&nbsp;			return Context.getFormService().saveField(field);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return field;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFields(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Field&gt; getFields(String fuzzySearchPhrase) throws APIException {
+<b class="nc">&nbsp;		return dao.getFields(fuzzySearchPhrase);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Field&gt; getFieldsByConcept(Concept concept) throws APIException {
+<b class="nc">&nbsp;		return Context.getFormService().getFields(null, null, Collections.singleton(concept), null, null, null, null, null,</b>
+&nbsp;		    null);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormsContainingConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Form&gt; getFormsContainingConcept(Concept concept) throws APIException {
+<b class="fc">&nbsp;		if (concept.getConceptId() == null) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getFormsContainingConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeFieldType(org.openmrs.FieldType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeFieldType(FieldType fieldType) throws APIException {
+<b class="nc">&nbsp;		dao.deleteFieldType(fieldType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#saveFieldType(org.openmrs.FieldType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FieldType saveFieldType(FieldType fieldType) throws APIException {
+<b class="fc">&nbsp;		return dao.saveFieldType(fieldType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#mergeDuplicateFields()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int mergeDuplicateFields() throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Field&gt; fields = dao.getAllFields(true);</b>
+<b class="fc">&nbsp;		Set&lt;Field&gt; fieldsToDelete = new HashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Map&lt;String, Integer&gt; fieldNameAsKeyAndFieldIdAsValueMap = new HashMap&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Field field : fields) {</b>
+<b class="fc">&nbsp;			if (fieldNameAsKeyAndFieldIdAsValueMap.containsKey(field.getName())) {</b>
+<b class="fc">&nbsp;				Field fieldToCompareTo = dao.getField(fieldNameAsKeyAndFieldIdAsValueMap.get(field.getName()));</b>
+<b class="fc">&nbsp;				if (fieldsAreSimilar(field, fieldToCompareTo)) {</b>
+&nbsp;					
+&nbsp;					//get the formFields that use this duplicate field
+<b class="fc">&nbsp;					List&lt;FormField&gt; formFields = dao.getFormFieldsByField(field);</b>
+&nbsp;					
+&nbsp;					//for each of the formFields that use this duplicate field
+&nbsp;					//replace with field from outer loop
+<b class="fc">&nbsp;					for (FormField formField : formFields) {</b>
+<b class="fc">&nbsp;						formField.setField(fieldToCompareTo);</b>
+<b class="fc">&nbsp;						dao.saveFormField(formField);</b>
+&nbsp;						
+<b class="fc">&nbsp;						fieldsToDelete.add(field);</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					fieldNameAsKeyAndFieldIdAsValueMap.put(field.getName(), field.getId());</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				fieldNameAsKeyAndFieldIdAsValueMap.put(field.getName(), field.getId());</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Field field : fieldsToDelete) {</b>
+<b class="fc">&nbsp;			dao.deleteField(field);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return fieldsToDelete.size();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean fieldsAreSimilar(Field field, Field fieldToBeReplaced) {
+&nbsp;		
+<b class="fc">&nbsp;		return (OpenmrsUtil.nullSafeEquals(field.getName(), fieldToBeReplaced.getName())</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.nullSafeEquals(field.getSelectMultiple(), fieldToBeReplaced.getSelectMultiple())</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.nullSafeEquals(field.getFieldType(), fieldToBeReplaced.getFieldType())</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.nullSafeEquals(field.getConcept(), fieldToBeReplaced.getConcept())</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.nullSafeEquals(field.getTableName(), fieldToBeReplaced.getTableName())</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.nullSafeEquals(field.getDefaultValue(), fieldToBeReplaced.getDefaultValue())</b>
+<b class="fc">&nbsp;		        &amp;&amp; field.getRetired() != null &amp;&amp; !field.getRetired());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormResource(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FormResource getFormResource(Integer formResourceId) throws APIException {
+<b class="fc">&nbsp;		return dao.getFormResource(formResourceId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormResourceByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FormResource getFormResourceByUuid(String uuid) throws APIException {
+<b class="nc">&nbsp;		return dao.getFormResourceByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormResource(org.openmrs.Form, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public FormResource getFormResource(Form form, String name) throws APIException {
+<b class="fc">&nbsp;		return dao.getFormResource(form, name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#saveFormResource(org.openmrs.FormResource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormResource saveFormResource(FormResource formResource) throws APIException {
+<b class="fc">&nbsp;	    	if (formResource == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		// If a form resource with same name exists, replace it with current value
+<b class="fc">&nbsp;		FormResource toPersist = formResource;</b>
+<b class="fc">&nbsp;		FormResource original = Context.getFormService().getFormResource(formResource.getForm(), formResource.getName());</b>
+<b class="fc">&nbsp;		if (original != null) {</b>
+<b class="fc">&nbsp;			original.setName(formResource.getName());</b>
+<b class="fc">&nbsp;			original.setValue(formResource.getValue());</b>
+<b class="fc">&nbsp;			original.setDatatypeClassname(formResource.getDatatypeClassname());</b>
+<b class="fc">&nbsp;			original.setDatatypeConfig(formResource.getDatatypeConfig());</b>
+<b class="fc">&nbsp;			original.setPreferredHandlerClassname(formResource.getPreferredHandlerClassname());</b>
+<b class="fc">&nbsp;			toPersist = original;</b>
+&nbsp;		}
+&nbsp;		try {
+<b class="fc">&nbsp;		    CustomDatatypeUtil.saveIfDirty(toPersist);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ConstraintViolationException ex) {</b>
+<b class="nc">&nbsp;		    throw new InvalidFileTypeException(ex.getMessage(), ex);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveFormResource(toPersist);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#purgeFormResource(org.openmrs.FormResource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeFormResource(FormResource formResource) throws APIException {
+<b class="fc">&nbsp;		dao.deleteFormResource(formResource);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormResourcesForForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Collection&lt;FormResource&gt; getFormResourcesForForm(Form form) throws APIException {
+<b class="fc">&nbsp;		return dao.getFormResourcesForForm(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * duplicates form resources from one form to another
+&nbsp;	 * 
+&nbsp;	 * @param source the form to copy resources from
+&nbsp;	 * @param destination the form to copy resources to
+&nbsp;	 * @param formResources the form resources from the source form
+&nbsp;	 */
+&nbsp;	private void duplicateFormResources(Form source, Form destination, Collection&lt;FormResource&gt; formResources) {
+<b class="fc">&nbsp;		FormService service = Context.getFormService();</b>
+<b class="fc">&nbsp;		for (FormResource resource : formResources) {</b>
+<b class="fc">&nbsp;			FormResource newResource = new FormResource(resource);</b>
+<b class="fc">&nbsp;			newResource.setForm(destination);</b>
+<b class="fc">&nbsp;			service.saveFormResource(newResource);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/*
+&nbsp;	 * @see org.openmrs.api.FormService#checkIfFormsAreLocked()
+&nbsp;	 * @see FormsLockedException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void checkIfFormsAreLocked() {
+<b class="fc">&nbsp;		String locked = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_FORMS_LOCKED,</b>
+&nbsp;		    &quot;false&quot;);
+<b class="fc">&nbsp;		if (Boolean.valueOf(locked)) {</b>
+<b class="fc">&nbsp;			throw new FormsLockedException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,543 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateLocationDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateLocationDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateLocationDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,3%
+  </span>
+  <span class="absValue">
+    (26/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,7%
+  </span>
+  <span class="absValue">
+    (130/145)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.TypedQuery;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Join;
+&nbsp;import javax.persistence.criteria.Order;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import javax.persistence.criteria.Subquery;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.LocationAttribute;
+&nbsp;import org.openmrs.LocationAttributeType;
+&nbsp;import org.openmrs.LocationTag;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.LocationDAO;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate location-related database functions
+&nbsp; */
+<b class="fc">&nbsp;public class HibernateLocationDAO implements LocationDAO {</b>
+&nbsp;	
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#setSessionFactory(org.hibernate.SessionFactory)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#saveLocation(org.openmrs.Location)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Location saveLocation(Location location) {
+<b class="fc">&nbsp;		if (location.getChildLocations() != null &amp;&amp; location.getLocationId() != null) {</b>
+&nbsp;			// hibernate has a problem updating child collections
+&nbsp;			// if the parent object was already saved so we do it
+&nbsp;			// explicitly here
+<b class="fc">&nbsp;			for (Location child : location.getChildLocations()) {</b>
+<b class="fc">&nbsp;				if (child.getLocationId() == null) {</b>
+<b class="fc">&nbsp;					saveLocation(child);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(location);</b>
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocation(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Location getLocation(Integer locationId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Location.class, locationId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocation(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Location getLocation(String name) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Location&gt; cq = cb.createQuery(Location.class);</b>
+<b class="fc">&nbsp;		Root&lt;Location&gt; locationRoot = cq.from(Location.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(locationRoot.get(&quot;name&quot;), name));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Location&gt; locations = session.createQuery(cq).getResultList();</b>
+<b class="fc">&nbsp;		if (null == locations || locations.isEmpty()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return locations.get(0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getAllLocations(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Location&gt; getAllLocations(boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Location&gt; cq = cb.createQuery(Location.class);</b>
+<b class="fc">&nbsp;		Root&lt;Location&gt; locationRoot = cq.from(Location.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Order&gt; orderList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			cq.where(cb.isFalse(locationRoot.get(&quot;retired&quot;)));</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			orderList.add(cb.asc(locationRoot.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		orderList.add(cb.asc(locationRoot.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.orderBy(orderList);</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#deleteLocation(org.openmrs.Location)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteLocation(Location location) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(location);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#saveLocation(org.openmrs.Location)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationTag saveLocationTag(LocationTag tag) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(tag);</b>
+<b class="fc">&nbsp;		return tag;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationTag(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationTag getLocationTag(Integer locationTagId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(LocationTag.class, locationTagId);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationTagByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationTag getLocationTagByName(String tag) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;LocationTag&gt; cq = cb.createQuery(LocationTag.class);</b>
+<b class="fc">&nbsp;		Root&lt;LocationTag&gt; root = cq.from(LocationTag.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), tag));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;LocationTag&gt; tags = session.createQuery(cq).getResultList();</b>
+<b class="fc">&nbsp;		if (null == tags || tags.isEmpty()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return tags.get(0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getAllLocationTags(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;LocationTag&gt; getAllLocationTags(boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;LocationTag&gt; cq = cb.createQuery(LocationTag.class);</b>
+<b class="fc">&nbsp;		Root&lt;LocationTag&gt; root = cq.from(LocationTag.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		cq.orderBy(cb.asc(root.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationTags(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;LocationTag&gt; getLocationTags(String search) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;LocationTag&gt; cq = cb.createQuery(LocationTag.class);</b>
+<b class="fc">&nbsp;		Root&lt;LocationTag&gt; root = cq.from(LocationTag.class);</b>
+&nbsp;
+&nbsp;		// &#39;ilike&#39; case insensitive search
+<b class="fc">&nbsp;		cq.where(cb.like(cb.lower(root.get(&quot;name&quot;)), MatchMode.START.toLowerCasePattern(search)));</b>
+<b class="fc">&nbsp;		cq.orderBy(cb.asc(root.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#deleteLocationTag(org.openmrs.LocationTag)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteLocationTag(LocationTag tag) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(tag);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Location getLocationByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Location.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationTagByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationTag getLocationTagByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, LocationTag.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getCountOfLocations(String, Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Long getCountOfLocations(String nameFragment, Boolean includeRetired) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;Long&gt; cq = cb.createQuery(Long.class);</b>
+<b class="nc">&nbsp;		Root&lt;Location&gt; root = cq.from(Location.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		cq.select(cb.count(root));</b>
+&nbsp;
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (StringUtils.isNotBlank(nameFragment)) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.like(cb.lower(root.get(&quot;name&quot;)), MatchMode.START.toLowerCasePattern(nameFragment)));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		cq.where(cb.and(predicates.toArray(new Predicate[]{})));</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getSingleResult();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see LocationDAO#getLocations(String, org.openmrs.Location, java.util.Map, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Location&gt; getLocations(String nameFragment, Location parent,
+&nbsp;	        Map&lt;LocationAttributeType, String&gt; serializedAttributeValues, boolean includeRetired, Integer start,
+&nbsp;	        Integer length) {
+&nbsp;
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Location&gt; cq = cb.createQuery(Location.class);</b>
+<b class="fc">&nbsp;		Root&lt;Location&gt; locationRoot = cq.from(Location.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(nameFragment)) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.like(cb.lower(locationRoot.get(&quot;name&quot;)), MatchMode.START.toLowerCasePattern(nameFragment)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (parent != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.equal(locationRoot.get(&quot;parentLocation&quot;), parent));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (serializedAttributeValues != null) {</b>
+<b class="fc">&nbsp;			predicates.addAll(HibernateUtil.getAttributePredicate(cb, locationRoot, serializedAttributeValues));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(locationRoot.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.and(predicates.toArray(new Predicate[]{})));</b>
+<b class="fc">&nbsp;		cq.orderBy(cb.asc(locationRoot.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		TypedQuery&lt;Location&gt; query = session.createQuery(cq);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (start != null) {</b>
+<b class="nc">&nbsp;			query.setFirstResult(start);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (length != null &amp;&amp; length &gt; 0) {</b>
+<b class="nc">&nbsp;			query.setMaxResults(length);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see LocationDAO#getRootLocations(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Location&gt; getRootLocations(boolean includeRetired) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Location&gt; cq = cb.createQuery(Location.class);</b>
+<b class="fc">&nbsp;		Root&lt;Location&gt; locationRoot = cq.from(Location.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(locationRoot.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		predicates.add(cb.isNull(locationRoot.get(&quot;parentLocation&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(predicates.toArray(new Predicate[]{}));</b>
+<b class="fc">&nbsp;		cq.orderBy(cb.asc(locationRoot.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getAllLocationAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;LocationAttributeType&gt; getAllLocationAttributeTypes() {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;LocationAttributeType&gt; cq = cb.createQuery(LocationAttributeType.class);</b>
+<b class="fc">&nbsp;		cq.from(LocationAttributeType.class);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationAttributeType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationAttributeType getLocationAttributeType(Integer id) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(LocationAttributeType.class, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationAttributeTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationAttributeType getLocationAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, LocationAttributeType.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#saveLocationAttributeType(org.openmrs.LocationAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationAttributeType saveLocationAttributeType(LocationAttributeType locationAttributeType) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(locationAttributeType);</b>
+<b class="fc">&nbsp;		return locationAttributeType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#deleteLocationAttributeType(org.openmrs.LocationAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteLocationAttributeType(LocationAttributeType locationAttributeType) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(locationAttributeType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationAttributeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationAttribute getLocationAttributeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, LocationAttribute.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationAttributeTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LocationAttributeType getLocationAttributeTypeByName(String name) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;LocationAttributeType&gt; cq = cb.createQuery(LocationAttributeType.class);</b>
+<b class="fc">&nbsp;		Root&lt;LocationAttributeType&gt; root = cq.from(LocationAttributeType.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), name));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.LocationDAO#getLocationsHavingAllTags(java.util.List)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Location&gt; getLocationsHavingAllTags(List&lt;LocationTag&gt; tags) {
+<b class="fc">&nbsp;		tags.removeAll(Collections.singleton(null));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Integer&gt; tagIds = getLocationTagIds(tags);</b>
+&nbsp;
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+&nbsp;
+<b class="fc">&nbsp;		CriteriaQuery&lt;Location&gt; mainQuery = cb.createQuery(Location.class);</b>
+<b class="fc">&nbsp;		Root&lt;Location&gt; locationRoot = mainQuery.from(Location.class);</b>
+&nbsp;
+&nbsp;		// Create a subquery to count matching tags
+<b class="fc">&nbsp;		Subquery&lt;Long&gt; tagCountSubquery = mainQuery.subquery(Long.class);</b>
+<b class="fc">&nbsp;		Root&lt;Location&gt; subRoot = tagCountSubquery.from(Location.class);</b>
+<b class="fc">&nbsp;		Join&lt;Location, LocationTag&gt; tagsJoin = subRoot.join(&quot;tags&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		tagCountSubquery.select(cb.count(subRoot))</b>
+<b class="fc">&nbsp;			.where(cb.and(</b>
+<b class="fc">&nbsp;				tagsJoin.get(&quot;locationTagId&quot;).in(tagIds),</b>
+<b class="fc">&nbsp;				cb.equal(subRoot.get(&quot;locationId&quot;), locationRoot.get(&quot;locationId&quot;))</b>
+&nbsp;			));
+&nbsp;
+<b class="fc">&nbsp;		mainQuery.select(locationRoot)</b>
+<b class="fc">&nbsp;			.where(cb.and(</b>
+<b class="fc">&nbsp;				cb.isFalse(locationRoot.get(&quot;retired&quot;)),</b>
+<b class="fc">&nbsp;				cb.equal(cb.literal((long) tags.size()), tagCountSubquery)</b>
+&nbsp;			));
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(mainQuery).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Extract locationTagIds from the list of LocationTag objects provided.
+&nbsp;	 *
+&nbsp;	 * @param tags A list of LocationTag objects from which to extract the location tag IDs.
+&nbsp;	 *             This list should not be null.
+&nbsp;	 * @return A List of Integer representing the IDs of the provided LocationTag objects.
+&nbsp;	 *         Returns an empty list if the input list is empty.
+&nbsp;	 */
+&nbsp;	private List&lt;Integer&gt; getLocationTagIds(List&lt;LocationTag&gt; tags) {
+<b class="fc">&nbsp;		List&lt;Integer&gt; locationTagIds = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (LocationTag tag : tags) {</b>
+<b class="fc">&nbsp;			locationTagIds.add(tag.getLocationTagId());</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return locationTagIds;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

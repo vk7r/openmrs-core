@@ -1,0 +1,342 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: FormUtil (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FormUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/66)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Map.Entry;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.TreeSet;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.FormField;
+&nbsp;import org.openmrs.hl7.HL7Constants;
+&nbsp;
+&nbsp;/**
+&nbsp; * OpenMRS utilities related to forms.
+&nbsp; *
+&nbsp; * @see org.openmrs.Form
+&nbsp; * @see org.openmrs.FormField
+&nbsp; * @see org.openmrs.Field
+&nbsp; * @see org.openmrs.FieldType
+&nbsp; * @see org.openmrs.FieldAnswer
+&nbsp; */
+&nbsp;public class FormUtil {
+&nbsp;
+&nbsp;	private FormUtil() {
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static final String DATE_TIME_FORMAT = &quot;yyyy-MM-dd&#39;T&#39;HH:mm:ssZ&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Converts a string into a valid XML token (tag name)
+&nbsp;	 *
+&nbsp;	 * @param s string to convert into XML token
+&nbsp;	 * @return valid XML token based on s
+&nbsp;	 */
+&nbsp;	public static String getXmlToken(String s) {
+&nbsp;		// Converts a string into a valid XML token (tag name)
+&nbsp;		// No spaces, start with a letter or underscore, not &#39;xml*&#39;
+&nbsp;		
+&nbsp;		// if len(s) &lt; 1, return &#39;_blank&#39;
+<b class="nc">&nbsp;		if (s == null || s.length() &lt; 1) {</b>
+<b class="nc">&nbsp;			return &quot;_blank&quot;;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// xml tokens must start with a letter
+<b class="nc">&nbsp;		String letters = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_&quot;;</b>
+&nbsp;		
+&nbsp;		// after the leading letter, xml tokens may have
+&nbsp;		// digits, period, or hyphen
+<b class="nc">&nbsp;		String nameChars = letters + &quot;0123456789.-&quot;;</b>
+&nbsp;		
+&nbsp;		// special characters that should be replaced with valid text
+&nbsp;		// all other invalid characters will be removed
+<b class="nc">&nbsp;		Map&lt;String, String&gt; swapChars = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;!&quot;, &quot;bang&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;#&quot;, &quot;pound&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;\\*&quot;, &quot;star&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;&#39;&quot;, &quot;apos&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;\&quot;&quot;, &quot;quote&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;%&quot;, &quot;percent&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;&lt;&quot;, &quot;lt&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;&gt;&quot;, &quot;gt&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;=&quot;, &quot;eq&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;/&quot;, &quot;slash&quot;);</b>
+<b class="nc">&nbsp;		swapChars.put(&quot;\\\\&quot;, &quot;backslash&quot;);</b>
+&nbsp;		
+&nbsp;		// start by cleaning whitespace and converting to lowercase
+<b class="nc">&nbsp;		s = s.replaceAll(&quot;^\\s+&quot;, &quot;&quot;).replaceAll(&quot;\\s+$&quot;, &quot;&quot;).replaceAll(&quot;\\s+&quot;, &quot;_&quot;).toLowerCase();</b>
+&nbsp;		
+&nbsp;		// swap characters
+<b class="nc">&nbsp;		Set&lt;Entry&lt;String, String&gt;&gt; swaps = swapChars.entrySet();</b>
+<b class="nc">&nbsp;		for (Entry&lt;String, String&gt; entry : swaps) {</b>
+<b class="nc">&nbsp;			if (entry.getValue() != null) {</b>
+<b class="nc">&nbsp;				s = s.replaceAll(entry.getKey(), &quot;_&quot; + entry.getValue() + &quot;_&quot;);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				s = s.replaceAll(String.valueOf(entry.getKey()), &quot;&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// ensure that invalid characters and consecutive underscores are
+&nbsp;		// removed
+<b class="nc">&nbsp;		StringBuilder token = new StringBuilder(&quot;&quot;);</b>
+<b class="nc">&nbsp;		boolean underscoreFlag = false;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; s.length(); i++) {</b>
+<b class="nc">&nbsp;			if (nameChars.indexOf(s.charAt(i)) != -1 &amp;&amp; (s.charAt(i) != &#39;_&#39; || !underscoreFlag)) {</b>
+<b class="nc">&nbsp;				token.append(s.charAt(i));</b>
+<b class="nc">&nbsp;				underscoreFlag = (s.charAt(i) == &#39;_&#39;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// remove extraneous underscores before returning token
+<b class="nc">&nbsp;		String tokenStr = token.toString();</b>
+<b class="nc">&nbsp;		tokenStr = tokenStr.replaceAll(&quot;_+&quot;, &quot;_&quot;);</b>
+<b class="nc">&nbsp;		tokenStr = tokenStr.replaceAll(&quot;_+$&quot;, &quot;&quot;);</b>
+&nbsp;		
+&nbsp;		// make sure token starts with valid letter
+<b class="nc">&nbsp;		if (letters.indexOf(tokenStr.charAt(0)) == -1 || tokenStr.startsWith(&quot;xml&quot;)) {</b>
+<b class="nc">&nbsp;			tokenStr = &quot;_&quot; + tokenStr;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// return token
+<b class="nc">&nbsp;		return tokenStr;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Generates a new, unique tag name for any given string
+&nbsp;	 *
+&nbsp;	 * @param s string to convert into a unique XML tag
+&nbsp;	 * @param tagList java.util.Vector containing all previously created tags. If the tagList is
+&nbsp;	 *            null, it will be initialized automatically
+&nbsp;	 * @return unique XML tag name from given string (guaranteed not to duplicate any tag names
+&nbsp;	 *         already within &lt;code&gt;tagList&lt;/code&gt;)
+&nbsp;	 */
+&nbsp;	public static String getNewTag(String s, ArrayList&lt;String&gt; tagList) {
+<b class="nc">&nbsp;		String token = getXmlToken(s);</b>
+<b class="nc">&nbsp;		if (tagList.contains(token)) {</b>
+<b class="nc">&nbsp;			int i = 1;</b>
+<b class="nc">&nbsp;			while (tagList.contains(token + &quot;_&quot; + i)) {</b>
+<b class="nc">&nbsp;				i++;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			String tagName = token + &quot;_&quot; + i;</b>
+<b class="nc">&nbsp;			tagList.add(tagName);</b>
+<b class="nc">&nbsp;			return tagName;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			tagList.add(token);</b>
+<b class="nc">&nbsp;			return token;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a sorted and structured map of &lt;code&gt;FormField&lt;/code&gt;s for the given OpenMRS form.
+&nbsp;	 * The root sections of the schema are stored under a key of zero (i.e.,
+&nbsp;	 * &lt;code&gt;java.lang.Integer.&lt;em&gt;valueOf(0)&lt;/em&gt;&lt;/code&gt;). All other entries represent sequences of
+&nbsp;	 * children stored under the identifier (&lt;code&gt;formField.&lt;em&gt;getFormFieldId()&lt;/em&gt;&lt;/code&gt;) of
+&nbsp;	 * their parent FormField. The form structure is sorted by the natural sorting order of the
+&nbsp;	 * &lt;code&gt;FormField&lt;/code&gt;s (as defined by the &lt;em&gt;.equals()&lt;/em&gt; and &lt;em&gt;.compareTo()&lt;/em&gt;
+&nbsp;	 * methods).
+&nbsp;	 *
+&nbsp;	 * @param form form for which structure is requested
+&nbsp;	 * @return sorted map of &lt;code&gt;FormField&lt;/code&gt;s, where the top-level fields are under the key
+&nbsp;	 *         zero and all other leaves are stored under their parent &lt;code&gt;FormField&lt;/code&gt;&#39;s id.
+&nbsp;	 */
+&nbsp;	public static Map&lt;Integer, TreeSet&lt;FormField&gt;&gt; getFormStructure(Form form) {
+<b class="nc">&nbsp;		Map&lt;Integer, TreeSet&lt;FormField&gt;&gt; formStructure = new TreeMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		Integer base = 0;</b>
+<b class="nc">&nbsp;		formStructure.put(base, new TreeSet&lt;&gt;());</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (FormField formField : form.getFormFields()) {</b>
+<b class="nc">&nbsp;			FormField parent = formField.getParent();</b>
+<b class="nc">&nbsp;			if (parent == null) {</b>
+&nbsp;				// top-level branches should be added to the base
+<b class="nc">&nbsp;				formStructure.get(base).add(formField);</b>
+&nbsp;			} else {
+&nbsp;				// child branches/leaves are added to their parent&#39;s branch
+<b class="nc">&nbsp;				if (!formStructure.containsKey(parent.getFormFieldId())) {</b>
+<b class="nc">&nbsp;					formStructure.put(parent.getFormFieldId(), new TreeSet&lt;&gt;());</b>
+&nbsp;				}
+<b class="nc">&nbsp;				formStructure.get(parent.getFormFieldId()).add(formField);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return formStructure;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String dateToString() {
+<b class="nc">&nbsp;		return dateToString(new Date());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	
+&nbsp;	
+&nbsp;	public static String dateToString(Date date) {
+<b class="nc">&nbsp;		DateFormat dateFormatter = new SimpleDateFormat(DATE_TIME_FORMAT);</b>
+<b class="nc">&nbsp;		String dateString = dateFormatter.format(new Date());</b>
+&nbsp;		// ISO 8601 requires a colon in time zone offset (Java doesn&#39;t
+&nbsp;		// include the colon, so we need to insert it
+<b class="nc">&nbsp;		return dateString.substring(0, 22) + &quot;:&quot; + dateString.substring(22);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a string somewhat unique to this form. Combines the form&#39;s id and version and build
+&nbsp;	 *
+&nbsp;	 * @param form Form to get the uri for
+&nbsp;	 * @return String representing this form
+&nbsp;	 */
+&nbsp;	public static String getFormUriWithoutExtension(Form form) {
+<b class="nc">&nbsp;		return form.getFormId() + &quot;-&quot; + form.getVersion() + &quot;-&quot; + form.getBuild();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Turn the given concept into a string acceptable to for hl7 and forms
+&nbsp;	 *
+&nbsp;	 * @param concept Concept to convert to a string
+&nbsp;	 * @param locale Locale to use for the concept name
+&nbsp;	 * @return String representation of the given concept
+&nbsp;	 */
+&nbsp;	public static String conceptToString(Concept concept, Locale locale) {
+<b class="nc">&nbsp;		ConceptName localizedName = concept.getName(locale, false);</b>
+<b class="nc">&nbsp;		return conceptToString(concept, localizedName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Turn the given concept/concept-name pair into a string acceptable for hl7 and forms
+&nbsp;	 *
+&nbsp;	 * @param concept Concept to convert to a string
+&nbsp;	 * @param localizedName specific localized concept-name
+&nbsp;	 * @return String representation of the given concept
+&nbsp;	 */
+&nbsp;	public static String conceptToString(Concept concept, ConceptName localizedName) {
+<b class="nc">&nbsp;		return concept.getConceptId() + &quot;^&quot; + localizedName.getName() + &quot;^&quot; + HL7Constants.HL7_LOCAL_CONCEPT; // + &quot;^&quot;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Turn the given drug into a string acceptable for hl7 and forms
+&nbsp;	 *
+&nbsp;	 * @param drug Drug to convert to a string
+&nbsp;	 * @return String representation of the given drug
+&nbsp;	 */
+&nbsp;	public static String drugToString(Drug drug) {
+<b class="nc">&nbsp;		return drug.getDrugId() + &quot;^&quot; + drug.getName() + &quot;^&quot; + HL7Constants.HL7_LOCAL_DRUG;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

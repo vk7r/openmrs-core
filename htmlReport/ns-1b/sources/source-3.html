@@ -1,0 +1,423 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsConfigurationFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logging</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsConfigurationFactory (org.openmrs.logging)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsConfigurationFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (8/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    38,3%
+  </span>
+  <span class="absValue">
+    (31/81)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OpenmrsConfigurationFactory$OpenmrsJsonConfiguration</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">OpenmrsConfigurationFactory$OpenmrsXmlConfiguration</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">OpenmrsConfigurationFactory$OpenmrsYamlConfiguration</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (10/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,8%
+  </span>
+  <span class="absValue">
+    (34/90)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logging;
+&nbsp;
+&nbsp;import org.apache.commons.io.FileUtils;
+&nbsp;import org.apache.commons.io.FilenameUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.core.LoggerContext;
+&nbsp;import org.apache.logging.log4j.core.config.AbstractConfiguration;
+&nbsp;import org.apache.logging.log4j.core.config.Configuration;
+&nbsp;import org.apache.logging.log4j.core.config.ConfigurationFactory;
+&nbsp;import org.apache.logging.log4j.core.config.ConfigurationSource;
+&nbsp;import org.apache.logging.log4j.core.config.LoggerConfig;
+&nbsp;import org.apache.logging.log4j.core.config.Order;
+&nbsp;import org.apache.logging.log4j.core.config.composite.CompositeConfiguration;
+&nbsp;import org.apache.logging.log4j.core.config.json.JsonConfiguration;
+&nbsp;import org.apache.logging.log4j.core.config.plugins.Plugin;
+&nbsp;import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+&nbsp;import org.apache.logging.log4j.core.config.yaml.YamlConfiguration;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.ServiceNotFoundException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import javax.validation.constraints.NotNull;
+&nbsp;import java.io.File;
+&nbsp;import java.net.URI;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;/**
+&nbsp; * {@link ConfigurationFactory} to handle OpenMRS&#39;s logging configuration.
+&nbsp; * &lt;p/&gt;
+&nbsp; * Functionality provided by this {@link ConfigurationFactory}:
+&nbsp; * &lt;ul&gt;
+&nbsp; *     &lt;li&gt;Load log4j2 configuration files from the OpenMRS application directory&lt;/li&gt;
+&nbsp; *     &lt;li&gt;Ensures that the configuration includes the MEMORY_APPENDER to keep log files in memory&lt;/li&gt;
+&nbsp; *     &lt;li&gt;Allows the &lt;tt&gt;log.level&lt;/tt&gt; setting to override logger settings&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; */
+&nbsp;@Plugin(name = &quot;OpenmrsConfigurationFactory&quot;, category = ConfigurationFactory.CATEGORY)
+&nbsp;@Order(10)
+&nbsp;@SuppressWarnings(&quot;unused&quot;)
+<b class="fc">&nbsp;public class OpenmrsConfigurationFactory extends ConfigurationFactory {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OpenmrsConfigurationFactory.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final String[] SUFFIXES = new String[] { &quot;.xml&quot;, &quot;.yml&quot;, &quot;.yaml&quot;, &quot;.json&quot;, &quot;*&quot; };</b>
+&nbsp;
+&nbsp;	// Extensions are all SUFFIXES except wildcard, with leading &quot;.&quot; removed
+<b class="fc">&nbsp;	public static final String[] EXTENSIONS = Arrays.stream(SUFFIXES)</b>
+<b class="fc">&nbsp;		.filter(s -&gt; !s.equals(&quot;*&quot;)).map(s -&gt; s.substring(1)).toArray(String[]::new);</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Configuration getConfiguration(LoggerContext loggerContext, String name, URI configLocation) {
+<b class="fc">&nbsp;		if (!isActive()) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// try to load the configuration from the application data directory
+<b class="fc">&nbsp;		if (configLocation == null) {</b>
+<b class="fc">&nbsp;			List&lt;File&gt; configurationFiles = getConfigurationFiles();</b>
+<b class="fc">&nbsp;			if (!configurationFiles.isEmpty()) {</b>
+<b class="nc">&nbsp;				if (configurationFiles.size() == 1) {</b>
+<b class="nc">&nbsp;					System.out.println(&quot;Adding log4j2 configuration file: &quot; + configurationFiles.get(0).getPath());</b>
+<b class="nc">&nbsp;					return super.getConfiguration(loggerContext, name, configurationFiles.get(0).toURI());</b>
+&nbsp;				}
+&nbsp;				else {
+<b class="nc">&nbsp;					List&lt;AbstractConfiguration&gt; abstractConfigurations = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;					for (File configFile : configurationFiles) {</b>
+<b class="nc">&nbsp;						Configuration configuration = super.getConfiguration(loggerContext, name, configFile.toURI());</b>
+<b class="nc">&nbsp;						if (configuration instanceof AbstractConfiguration) {</b>
+<b class="nc">&nbsp;							System.out.println(&quot;Adding log4j2 configuration file: &quot; + configFile.getPath());</b>
+<b class="nc">&nbsp;							abstractConfigurations.add((AbstractConfiguration) configuration);</b>
+&nbsp;						}
+&nbsp;						else {
+<b class="nc">&nbsp;							System.err.println(&quot;Unable to add log4j2 configuration file: &quot; + configFile.getPath());</b>
+&nbsp;						}
+<b class="nc">&nbsp;					}</b>
+<b class="nc">&nbsp;					return new CompositeConfiguration(abstractConfigurations);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return super.getConfiguration(loggerContext, name, configLocation);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Configuration getConfiguration(LoggerContext loggerContext, ConfigurationSource source) {
+<b class="fc">&nbsp;		switch (FilenameUtils.getExtension(source.getLocation()).toLowerCase(Locale.ROOT)) {</b>
+&nbsp;			case &quot;xml&quot;:
+<b class="fc">&nbsp;				return new OpenmrsXmlConfiguration(loggerContext, source);</b>
+&nbsp;			case &quot;yaml&quot;:
+&nbsp;			case &quot;yml&quot;:
+<b class="nc">&nbsp;				return new OpenmrsYamlConfiguration(loggerContext, source);</b>
+&nbsp;			case &quot;json&quot;:
+<b class="nc">&nbsp;				return new OpenmrsJsonConfiguration(loggerContext, source);</b>
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new IllegalArgumentException(</b>
+<b class="nc">&nbsp;					OpenmrsConfigurationFactory.class.getName() + &quot; does not know how to handle source &quot; + source.getFile());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	protected String[] getSupportedTypes() {
+<b class="fc">&nbsp;		return SUFFIXES;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;File&gt; getConfigurationFiles() {
+<b class="fc">&nbsp;		List&lt;File&gt; configurationFiles = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (File configDir : new File[] {</b>
+<b class="fc">&nbsp;			OpenmrsUtil.getDirectoryInApplicationDataDirectory(&quot;configuration&quot;),</b>
+<b class="fc">&nbsp;			OpenmrsUtil.getApplicationDataDirectoryAsFile()</b>
+&nbsp;		}) {
+<b class="fc">&nbsp;			for (File configFile : FileUtils.listFiles(configDir, EXTENSIONS, false)) {</b>
+<b class="nc">&nbsp;				if (configFile.getName().startsWith(getDefaultPrefix()) &amp;&amp; configFile.canRead()) {</b>
+<b class="nc">&nbsp;					configurationFiles.add(configFile);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		configurationFiles.sort(Comparator.comparing(File::getName));</b>
+<b class="fc">&nbsp;		return configurationFiles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	protected static void doOpenmrsCustomisations(AbstractConfiguration configuration) {
+&nbsp;		// if we don&#39;t have an in-memory appender, add it
+<b class="fc">&nbsp;		MemoryAppender memoryAppender = configuration.getAppender(OpenmrsConstants.MEMORY_APPENDER_NAME);</b>
+<b class="fc">&nbsp;		if (memoryAppender == null) {</b>
+<b class="fc">&nbsp;			memoryAppender = MemoryAppender.newBuilder().build();</b>
+<b class="fc">&nbsp;			memoryAppender.start();</b>
+&nbsp;			
+<b class="fc">&nbsp;			configuration.addAppender(memoryAppender);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		LoggerConfig rootLogger = configuration.getRootLogger();</b>
+<b class="fc">&nbsp;		if (rootLogger.getAppenders().get(OpenmrsConstants.MEMORY_APPENDER_NAME) == null) {</b>
+<b class="fc">&nbsp;			rootLogger.addAppender(memoryAppender, null, memoryAppender.getFilter());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			AdministrationService adminService = Context.getAdministrationService();</b>
+<b class="nc">&nbsp;			applyLogLevels(configuration, adminService);</b>
+<b class="fc">&nbsp;		} catch (ServiceNotFoundException e) {</b>
+&nbsp;			// if AdministrativeService is not available, we&#39;ll assume we&#39;re starting up and everything is ok
+<b class="fc">&nbsp;			if (!e.getServiceClass().isAssignableFrom(AdministrationService.class)) {</b>
+<b class="nc">&nbsp;				throw e;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static void applyLogLevels(AbstractConfiguration configuration, AdministrationService adminService) {
+<b class="nc">&nbsp;		String logLevel = adminService.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOG_LEVEL, &quot;&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (String level : logLevel.split(&quot;,&quot;)) {</b>
+<b class="nc">&nbsp;			String[] classAndLevel = level.split(&quot;:&quot;);</b>
+<b class="nc">&nbsp;			if (classAndLevel.length == 0) {</b>
+<b class="nc">&nbsp;				break;</b>
+<b class="nc">&nbsp;			} else if (classAndLevel.length == 1) {</b>
+<b class="nc">&nbsp;				applyLogLevel(configuration, OpenmrsConstants.LOG_CLASS_DEFAULT, classAndLevel[0].trim());</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				applyLogLevel(configuration, classAndLevel[0].trim(), classAndLevel[1].trim());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static void applyLogLevel(AbstractConfiguration configuration, @NotNull String loggerName, String loggerLevel) {
+<b class="nc">&nbsp;		if (StringUtils.isBlank(loggerLevel)) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (loggerName == null) {</b>
+<b class="nc">&nbsp;			loggerName = OpenmrsConstants.LOG_CLASS_DEFAULT;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		LoggerConfig loggerConfig = configuration.getLogger(loggerName);</b>
+<b class="nc">&nbsp;		if (loggerConfig != null) {</b>
+<b class="nc">&nbsp;			switch (loggerLevel.toLowerCase(Locale.ROOT)) {</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_TRACE:
+<b class="nc">&nbsp;					loggerConfig.setLevel(Level.TRACE);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_DEBUG:
+<b class="nc">&nbsp;					loggerConfig.setLevel(Level.DEBUG);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_INFO:
+<b class="nc">&nbsp;					loggerConfig.setLevel(Level.INFO);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_WARN:
+<b class="nc">&nbsp;					loggerConfig.setLevel(Level.WARN);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_ERROR:
+<b class="nc">&nbsp;					loggerConfig.setLevel(Level.ERROR);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_FATAL:
+<b class="nc">&nbsp;					loggerConfig.setLevel(Level.FATAL);</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				default:
+<b class="nc">&nbsp;					log.warn(&quot;Log level {} is invalid. &quot; +</b>
+&nbsp;						&quot;Valid values are trace, debug, info, warn, error or fatal&quot;, loggerLevel);
+&nbsp;					break;
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static class OpenmrsXmlConfiguration extends XmlConfiguration {
+&nbsp;		
+&nbsp;		public OpenmrsXmlConfiguration(LoggerContext loggerContext, ConfigurationSource configSource) {
+<b class="fc">&nbsp;			super(loggerContext, configSource);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		protected void doConfigure() {
+<b class="fc">&nbsp;			super.doConfigure();</b>
+<b class="fc">&nbsp;			doOpenmrsCustomisations(this);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static class OpenmrsYamlConfiguration extends YamlConfiguration {
+&nbsp;		
+&nbsp;		public OpenmrsYamlConfiguration(LoggerContext loggerContext, ConfigurationSource configSource) {
+<b class="nc">&nbsp;			super(loggerContext, configSource);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		protected void doConfigure() {
+<b class="nc">&nbsp;			super.doConfigure();</b>
+<b class="nc">&nbsp;			doOpenmrsCustomisations(this);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static class OpenmrsJsonConfiguration extends JsonConfiguration {
+&nbsp;		
+&nbsp;		public OpenmrsJsonConfiguration(LoggerContext loggerContext, ConfigurationSource configSource) {
+<b class="nc">&nbsp;			super(loggerContext, configSource);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		protected void doConfigure() {
+<b class="nc">&nbsp;			super.doConfigure();</b>
+<b class="nc">&nbsp;			doOpenmrsCustomisations(this);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

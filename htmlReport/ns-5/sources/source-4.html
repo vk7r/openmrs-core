@@ -1,0 +1,163 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsCacheManagerFactoryBean</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.cache</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsCacheManagerFactoryBean (org.openmrs.api.cache)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsCacheManagerFactoryBean</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OpenmrsCacheManagerFactoryBean$$EnhancerBySpringCGLIB$$4bcf790</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.cache;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+&nbsp;
+&nbsp;import net.sf.ehcache.Cache;
+&nbsp;import net.sf.ehcache.CacheManager;
+&nbsp;import net.sf.ehcache.config.CacheConfiguration;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class creates cache configurations from apiCacheConfig.properties files in the classpath. This file should be
+&nbsp; * created in modules resource directory only. To configure cache in openmrs-core go to ehcache-api.xml.
+&nbsp; * If the configuration already exists it won&#39;t be overridden.
+&nbsp; * Example content for apiCacheConfig.properties:
+&nbsp; * userSearchLocales.maxElementsInMemory=500
+&nbsp; * userSearchLocales.eternal=false
+&nbsp; * userSearchLocales.timeToIdleSeconds=300
+&nbsp; * userSearchLocales.timeToLiveSeconds=300
+&nbsp; * userSearchLocales.memoryStoreEvictionPolicy=LRU
+&nbsp; */
+<b class="fc">&nbsp;public class OpenmrsCacheManagerFactoryBean extends EhCacheManagerFactoryBean {</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public CacheManager getObject() {
+<b class="fc">&nbsp;		CacheManager cacheManager = super.getObject();</b>
+&nbsp;
+<b class="fc">&nbsp;		Map&lt;String, CacheConfiguration&gt; cacheConfig = cacheManager.getConfiguration().getCacheConfigurations();</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;CacheConfiguration&gt; cacheConfigurations = CachePropertiesUtil.getCacheConfigurations();</b>
+<b class="fc">&nbsp;		cacheConfigurations.stream()</b>
+<b class="fc">&nbsp;				.filter(cc -&gt;</b>
+<b class="fc">&nbsp;						cacheConfig.get(cc.getName()) == null)</b>
+<b class="fc">&nbsp;				.forEach(cc -&gt;</b>
+<b class="fc">&nbsp;						cacheManager.addCache(new Cache(cc)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return cacheManager;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

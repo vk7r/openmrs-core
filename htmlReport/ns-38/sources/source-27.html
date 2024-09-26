@@ -1,0 +1,236 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonAddressValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonAddressValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonAddressValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,9%
+  </span>
+  <span class="absValue">
+    (30/38)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.commons.beanutils.PropertyUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.PersonAddress;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.layout.address.AddressTemplate;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class validates a PersonAddress object.
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = { PersonAddress.class }, order = 50)
+<b class="fc">&nbsp;public class PersonAddressValidator implements Validator {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PersonAddressValidator.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return PersonAddress.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if all the dates are valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the startDate is in the future
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the endDate is before the startDate
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if startDate and endDate are both null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if startDate is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if endDate is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if required fields are empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if required fields are not empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object object, Errors errors) {
+&nbsp;		//TODO Validate other aspects of the personAddress object
+<b class="fc">&nbsp;		log.debug(&quot;{}.validate...&quot;, this.getClass().getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (object == null) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;The personAddress object should not be null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		PersonAddress personAddress = (PersonAddress) object;</b>
+&nbsp;		
+&nbsp;		//resolve a shorter name to display along with the error message
+&nbsp;		String addressString;
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(personAddress.getAddress1())) {</b>
+<b class="fc">&nbsp;			addressString = personAddress.getAddress1();</b>
+<b class="fc">&nbsp;		} else if (StringUtils.isNotBlank(personAddress.getAddress2())) {</b>
+<b class="nc">&nbsp;			addressString = personAddress.getAddress2();</b>
+<b class="fc">&nbsp;		} else if (StringUtils.isNotBlank(personAddress.getCityVillage())) {</b>
+<b class="fc">&nbsp;			addressString = personAddress.getCityVillage();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			addressString = personAddress.toString();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (OpenmrsUtil.compareWithNullAsEarliest(personAddress.getStartDate(), new Date()) &gt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;startDate&quot;, &quot;PersonAddress.error.startDateInFuture&quot;, new Object[] { &quot;&#39;&quot; + addressString</b>
+&nbsp;			        + &quot;&#39;&quot; }, &quot;The Start Date for address &#39;&quot; + addressString + &quot;&#39; shouldn&#39;t be in the future&quot;);
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (personAddress.getStartDate() != null</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.compareWithNullAsLatest(personAddress.getStartDate(), personAddress.getEndDate()) &gt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;endDate&quot;, &quot;PersonAddress.error.endDateBeforeStartDate&quot;, new Object[] { &quot;&#39;&quot; + addressString</b>
+&nbsp;			        + &quot;&#39;&quot; }, &quot;The End Date for address &#39;&quot; + addressString + &quot;&#39; shouldn&#39;t be earlier than the Start Date&quot;);
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		String xml = Context.getLocationService().getAddressTemplate();</b>
+&nbsp;		List&lt;String&gt; requiredElements;
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			AddressTemplate addressTemplate = Context.getSerializationService().getDefaultSerializer().deserialize(xml,</b>
+&nbsp;			    AddressTemplate.class);
+<b class="fc">&nbsp;			requiredElements = addressTemplate.getRequiredElements();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			errors.reject(Context.getMessageSourceService().getMessage(&quot;AddressTemplate.error&quot;));</b>
+&nbsp;			return;
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (requiredElements != null) {</b>
+<b class="fc">&nbsp;			for (String fieldName : requiredElements) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					Object value = PropertyUtils.getProperty(personAddress, fieldName);</b>
+<b class="fc">&nbsp;					if (StringUtils.isBlank((String) value)) {</b>
+&nbsp;						//required field not found
+<b class="fc">&nbsp;						errors.reject(Context.getMessageSourceService().getMessage(</b>
+&nbsp;						    &quot;AddressTemplate.error.requiredAddressFieldIsBlank&quot;, new Object[] { fieldName },
+<b class="fc">&nbsp;						    Context.getLocale()));</b>
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+&nbsp;					//wrong field declared in template
+<b class="nc">&nbsp;					errors</b>
+<b class="nc">&nbsp;					        .reject(Context.getMessageSourceService().getMessage(</b>
+&nbsp;					            &quot;AddressTemplate.error.fieldNotDeclaredInTemplate&quot;, new Object[] { fieldName },
+<b class="nc">&nbsp;					            Context.getLocale()));</b>
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, object.getClass(), &quot;address1&quot;, &quot;address2&quot;, &quot;cityVillage&quot;, &quot;stateProvince&quot;,</b>
+&nbsp;		    &quot;postalCode&quot;, &quot;country&quot;, &quot;latitude&quot;, &quot;longitude&quot;, &quot;voidReason&quot;, &quot;countyDistrict&quot;, &quot;address3&quot;, &quot;address4&quot;,
+&nbsp;		    &quot;address5&quot;, &quot;address6&quot;, &quot;address7&quot;, &quot;address8&quot;, &quot;address9&quot;, &quot;address10&quot;, &quot;address11&quot;, &quot;address12&quot;, &quot;address13&quot;, 
+&nbsp;		    &quot;address14&quot;, &quot;address15&quot;);
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

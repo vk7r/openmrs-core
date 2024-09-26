@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptStopWord</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptStopWord (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptStopWord</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (10/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,7%
+  </span>
+  <span class="absValue">
+    (13/15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptStopWord$HibernateProxy$maOD46oG</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (10/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,7%
+  </span>
+  <span class="absValue">
+    (13/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * ConceptStopWord is the real world term used to filter the words for indexing
+&nbsp; * from search phrase. Common words like &#39;and&#39;, &#39;if&#39; are examples of this. It&#39;s
+&nbsp; * specific to locale.
+&nbsp; * 
+&nbsp; * @since 1.8
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptStopWord extends BaseOpenmrsObject {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 3671020002642184656L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	private Integer conceptStopWordId;
+&nbsp;	
+&nbsp;	private String value;
+&nbsp;	
+&nbsp;	private Locale locale;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptStopWord() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to create a ConceptStopWord object with default
+&nbsp;	 * locale English
+&nbsp;	 * 
+&nbsp;	 * @param value
+&nbsp;	 */
+&nbsp;	public ConceptStopWord(String value) {
+<b class="fc">&nbsp;		this(value, Context.getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to create a ConceptStopWord object with value and
+&nbsp;	 * locale
+&nbsp;	 * 
+&nbsp;	 * @param value
+&nbsp;	 * @param locale
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptStopWord(String value, Locale locale) {</b>
+<b class="fc">&nbsp;		setValue(value);</b>
+<b class="fc">&nbsp;		setLocale(locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getValue() {
+<b class="fc">&nbsp;		return value;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setValue(String value) {
+<b class="fc">&nbsp;		if (StringUtils.hasText(value)) {</b>
+<b class="fc">&nbsp;			this.value = value.toUpperCase();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Locale getLocale() {
+<b class="fc">&nbsp;		return locale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setLocale(Locale locale) {
+<b class="fc">&nbsp;		this.locale = locale == null ? Context.getLocale() : locale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getConceptStopWordId() {
+<b class="fc">&nbsp;		return conceptStopWordId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConceptStopWordId(Integer conceptStopWordId) {
+<b class="fc">&nbsp;		this.conceptStopWordId = conceptStopWordId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptStopWordId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptStopWordId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return &quot;ConceptStopWord: &quot; + this.value + &quot;, Locale: &quot; + locale;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

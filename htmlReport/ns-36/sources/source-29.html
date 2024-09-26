@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UpgradeUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: UpgradeUtil (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UpgradeUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,9%
+  </span>
+  <span class="absValue">
+    (53/61)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.io.FileInputStream;
+&nbsp;import java.io.FileNotFoundException;
+&nbsp;import java.io.IOException;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Properties;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;
+&nbsp;public class UpgradeUtil {
+&nbsp;
+&nbsp;	private UpgradeUtil() {
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns conceptId for the given units from DatabaseUtil#ORDER_ENTRY_UPGRADE_SETTINGS_FILENAME
+&nbsp;	 * located in application data directory.
+&nbsp;	 * 
+&nbsp;	 * @param units
+&nbsp;	 * @return conceptId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return concept_id for units
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if units is not specified
+&nbsp;	 */
+&nbsp;	public static Integer getConceptIdForUnits(String units) {
+<b class="fc">&nbsp;		String appDataDir = OpenmrsUtil.getApplicationDataDirectory();</b>
+<b class="fc">&nbsp;		Properties props = new Properties();</b>
+<b class="fc">&nbsp;		String conceptId = null;</b>
+<b class="fc">&nbsp;		String filePath = appDataDir +</b>
+<b class="fc">&nbsp;				System.getProperty(&quot;file.separator&quot;) +</b>
+&nbsp;				DatabaseUtil.ORDER_ENTRY_UPGRADE_SETTINGS_FILENAME;
+&nbsp;
+<b class="fc">&nbsp;		try (FileInputStream fis = new FileInputStream(filePath)) {</b>
+&nbsp;
+<b class="fc">&nbsp;			props.load(fis);</b>
+<b class="fc">&nbsp;			for (Map.Entry&lt;Object, Object&gt; prop : props.entrySet()) {</b>
+<b class="fc">&nbsp;				if (prop.getKey().equals(units)) {</b>
+<b class="fc">&nbsp;					conceptId = prop.getValue().toString();</b>
+<b class="fc">&nbsp;					return Integer.valueOf(conceptId);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		catch (NumberFormatException e) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Your order entry upgrade settings file&quot; + &quot;contains invalid mapping from &quot; + units</b>
+&nbsp;			        + &quot; to concept ID &quot; + conceptId
+<b class="fc">&nbsp;			        + &quot;. ID must be an integer or null. Please refer to upgrade instructions for more details. https://wiki.openmrs.org/x/OALpAw Cause:&quot; + e.getMessage());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException e) {</b>
+<b class="nc">&nbsp;			if (e instanceof FileNotFoundException) {</b>
+<b class="nc">&nbsp;				throw new APIException(&quot;Unable to find file named order_entry_upgrade_settings.txt containing order entry upgrade settings in your &quot;</b>
+&nbsp;				        + &quot;application data directory: &quot; + appDataDir
+<b class="nc">&nbsp;				        + &quot;\nPlease refer to upgrade instructions for more details. https://wiki.openmrs.org/x/OALpAw Cause:&quot; + e.getMessage());</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new APIException(e);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		throw new APIException(&quot;Your order entry upgrade settings file&quot; + &quot; does not have mapping for &quot; + units</b>
+&nbsp;		        + &quot;. Please refer to upgrade instructions for more details. https://wiki.openmrs.org/x/OALpAw&quot;);
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String getConceptUuid(Connection connection, int conceptId) throws SQLException {
+&nbsp;
+<b class="fc">&nbsp;		try (PreparedStatement select = connection.prepareStatement(&quot;select uuid from concept where concept_id = ?&quot;)) {</b>
+<b class="fc">&nbsp;			select.setInt(1, conceptId);</b>
+&nbsp;			
+<b class="fc">&nbsp;			ResultSet resultSet = select.executeQuery();</b>
+<b class="fc">&nbsp;			if (resultSet.next()) {</b>
+<b class="fc">&nbsp;				return resultSet.getString(1);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Concept not found &quot; + conceptId);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String getGlobalProperty(Connection connection, String gp) throws SQLException {
+&nbsp;
+<b class="fc">&nbsp;		try (PreparedStatement select = connection</b>
+<b class="fc">&nbsp;				.prepareStatement(&quot;select property_value from global_property where property = ?&quot;)) {</b>
+<b class="fc">&nbsp;			select.setString(1, gp);</b>
+&nbsp;			
+<b class="fc">&nbsp;			ResultSet resultSet = select.executeQuery();</b>
+<b class="fc">&nbsp;			if (resultSet.next()) {</b>
+<b class="fc">&nbsp;				return resultSet.getString(1);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Global property not found &quot; + gp);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static List&lt;Integer&gt; getMemberSetIds(Connection connection, String conceptUuid) throws SQLException {
+&nbsp;		Integer conceptSetId;
+&nbsp;
+<b class="fc">&nbsp;		try (PreparedStatement select = connection.prepareStatement(&quot;select concept_id from concept where uuid = ?&quot;)) {</b>
+<b class="fc">&nbsp;			select.setString(1, conceptUuid);</b>
+&nbsp;			
+<b class="fc">&nbsp;			ResultSet resultSet = select.executeQuery();</b>
+<b class="fc">&nbsp;			if (resultSet.next()) {</b>
+<b class="fc">&nbsp;				conceptSetId = resultSet.getInt(1);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Concept not found &quot; + conceptUuid);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Integer&gt; conceptIds = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		try (PreparedStatement selectConceptIds = connection</b>
+<b class="fc">&nbsp;				.prepareStatement(&quot;select concept_id from concept_set where concept_set = ?&quot;)) {</b>
+<b class="fc">&nbsp;			selectConceptIds.setInt(1, conceptSetId);</b>
+&nbsp;			
+<b class="fc">&nbsp;			ResultSet resultSet = selectConceptIds.executeQuery();</b>
+<b class="fc">&nbsp;			while (resultSet.next()) {</b>
+<b class="fc">&nbsp;				conceptIds.add(resultSet.getInt(1));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return conceptIds;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Integer getOrderFrequencyIdForConceptId(Connection connection, Integer conceptIdForFrequency)
+&nbsp;	        throws SQLException {
+<b class="fc">&nbsp;		PreparedStatement orderFrequencyIdQuery = connection</b>
+<b class="fc">&nbsp;		        .prepareStatement(&quot;select order_frequency_id from order_frequency where concept_id = ?&quot;);</b>
+<b class="fc">&nbsp;		orderFrequencyIdQuery.setInt(1, conceptIdForFrequency);</b>
+<b class="fc">&nbsp;		ResultSet orderFrequencyIdResultSet = orderFrequencyIdQuery.executeQuery();</b>
+<b class="fc">&nbsp;		if (!orderFrequencyIdResultSet.next()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return orderFrequencyIdResultSet.getInt(&quot;order_frequency_id&quot;);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

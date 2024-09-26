@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CachePropertiesUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.cache</a>
+</div>
+
+<h1>Coverage Summary for Class: CachePropertiesUtil (org.openmrs.api.cache)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CachePropertiesUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,1%
+  </span>
+  <span class="absValue">
+    (37/42)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.cache;
+&nbsp;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.lang.reflect.InvocationTargetException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.beanutils.BeanUtils;
+&nbsp;import org.springframework.core.io.Resource;
+&nbsp;import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+&nbsp;import org.springframework.core.io.support.ResourcePatternResolver;
+&nbsp;
+&nbsp;import net.sf.ehcache.config.CacheConfiguration;
+&nbsp;
+&nbsp;public class CachePropertiesUtil {
+&nbsp;
+&nbsp;    private CachePropertiesUtil() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method looks for all apiCacheConfig.properties file located in cacheConfig folder in classpath
+&nbsp;     * @return list of CacheConfiguration objects
+&nbsp;     */
+&nbsp;    public static List&lt;CacheConfiguration&gt; getCacheConfigurations(){
+<b class="fc">&nbsp;        List&lt;CacheConfiguration&gt; openmrsCacheConfigurationList = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        Resource[] resourceFromClassPath = getResourceFromClassPath();</b>
+<b class="fc">&nbsp;        Arrays.stream(resourceFromClassPath)</b>
+<b class="fc">&nbsp;                .forEach(r -&gt; addCacheConfigsFormResourceToList(r, openmrsCacheConfigurationList));</b>
+&nbsp;
+<b class="fc">&nbsp;        return openmrsCacheConfigurationList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static CacheConfiguration createCacheConfiguration(OpenmrsCacheConfiguration openmrsCacheConfiguration) {
+<b class="fc">&nbsp;        CacheConfiguration cacheConfiguration = new CacheConfiguration();</b>
+<b class="fc">&nbsp;        openmrsCacheConfiguration.getAllKeys()</b>
+<b class="fc">&nbsp;                .forEach(key -&gt; {</b>
+&nbsp;                    try {
+<b class="fc">&nbsp;                        BeanUtils.setProperty(cacheConfiguration, key, openmrsCacheConfiguration.getProperty(key));</b>
+<b class="nc">&nbsp;                    } catch (IllegalAccessException | InvocationTargetException e) {</b>
+<b class="nc">&nbsp;                        throw new IllegalStateException(e);</b>
+<b class="fc">&nbsp;                    }</b>
+&nbsp;                });
+<b class="fc">&nbsp;        return cacheConfiguration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void addCacheConfigsFormResourceToList(Resource resource, List&lt;CacheConfiguration&gt; openmrsCacheConfigurationList) {
+<b class="fc">&nbsp;        Properties cacheProperties = getPropertiesFromResource(resource);</b>
+<b class="fc">&nbsp;        getAllCacheNames(cacheProperties.keySet())</b>
+<b class="fc">&nbsp;                .forEach(cacheName -&gt; {</b>
+<b class="fc">&nbsp;                    OpenmrsCacheConfiguration openmrsCacheConfiguration = new OpenmrsCacheConfiguration();</b>
+<b class="fc">&nbsp;                    openmrsCacheConfiguration.addProperty(&quot;name&quot;, cacheName);</b>
+<b class="fc">&nbsp;                    cacheProperties.keySet()</b>
+<b class="fc">&nbsp;                            .stream()</b>
+<b class="fc">&nbsp;                            .filter(key -&gt; key.toString().startsWith(cacheName))</b>
+<b class="fc">&nbsp;                            .forEach(key -&gt; {</b>
+<b class="fc">&nbsp;                                String s = key.toString();</b>
+<b class="fc">&nbsp;                                openmrsCacheConfiguration.addProperty(</b>
+<b class="fc">&nbsp;                                        s.replace(cacheName+&quot;.&quot;, &quot;&quot;),</b>
+<b class="fc">&nbsp;                                        cacheProperties.getProperty(key.toString()));</b>
+&nbsp;                            });
+<b class="fc">&nbsp;                    openmrsCacheConfigurationList.add(createCacheConfiguration(openmrsCacheConfiguration));</b>
+&nbsp;                });
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Set&lt;String&gt; getAllCacheNames(Set&lt;Object&gt; keys) {
+<b class="fc">&nbsp;        Set&lt;String&gt; cacheNames = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        keys.forEach(cacheName -&gt; {</b>
+<b class="fc">&nbsp;            String s = cacheName.toString();</b>
+<b class="fc">&nbsp;            cacheNames.add(s.substring(0, s.indexOf(&quot;.&quot;)));</b>
+&nbsp;        });
+<b class="fc">&nbsp;        return cacheNames;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Properties getPropertiesFromResource(Resource resource) {
+<b class="fc">&nbsp;        Properties properties = new Properties();</b>
+<b class="fc">&nbsp;        try (InputStream inputStream = resource.getInputStream()){</b>
+<b class="fc">&nbsp;            properties.load(inputStream);</b>
+<b class="fc">&nbsp;            return properties;</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new IllegalStateException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Resource[] getResourceFromClassPath() {
+<b class="fc">&nbsp;        ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return patternResolver.getResources(&quot;classpath*:apiCacheConfig.properties&quot;);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new IllegalStateException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

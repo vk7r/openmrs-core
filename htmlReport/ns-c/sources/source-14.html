@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonSaveHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonSaveHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonSaveHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,3%
+  </span>
+  <span class="absValue">
+    (28/30)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.Address;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonAddress;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class deals with {@link Person} objects when they are saved via a save* method in an Openmrs
+&nbsp; * Service. This handler is automatically called by the {@link RequiredDataAdvice} AOP class. &lt;br&gt;
+&nbsp; *
+&nbsp; * @see RequiredDataHandler
+&nbsp; * @see SaveHandler
+&nbsp; * @see Person
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;@Handler(supports = Person.class)
+<b class="fc">&nbsp;public class PersonSaveHandler implements SaveHandler&lt;Person&gt; {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.handler.SaveHandler#handle(org.openmrs.OpenmrsObject, org.openmrs.User,
+&nbsp;	 *      java.util.Date, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void handle(Person person, User creator, Date dateCreated, String other) {
+&nbsp;		
+&nbsp;		// address collection
+<b class="fc">&nbsp;		if (person.getAddresses() != null &amp;&amp; !person.getAddresses().isEmpty()) {</b>
+<b class="fc">&nbsp;			Set&lt;Address&gt; blankAddresses = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (PersonAddress pAddress : person.getAddresses()) {</b>
+<b class="fc">&nbsp;				if (pAddress.isBlank()) {</b>
+<b class="fc">&nbsp;					blankAddresses.add(pAddress);</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				pAddress.setPerson(person);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;
+<b class="fc">&nbsp;			person.getAddresses().removeAll(blankAddresses);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// name collection
+<b class="fc">&nbsp;		if (person.getNames() != null &amp;&amp; !person.getNames().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (PersonName pName : person.getNames()) {</b>
+<b class="fc">&nbsp;				pName.setPerson(person);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// attribute collection
+<b class="fc">&nbsp;		if (person.getAttributes() != null &amp;&amp; !person.getAttributes().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (PersonAttribute pAttr : person.getAttributes()) {</b>
+<b class="fc">&nbsp;				pAttr.setPerson(person);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//if the patient was marked as dead and reversed, drop the cause of death
+<b class="fc">&nbsp;		if (!person.getDead() &amp;&amp; person.getCauseOfDeath() != null) {</b>
+<b class="nc">&nbsp;			person.setCauseOfDeath(null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// do the checks for voided attributes (also in PersonVoidHandler)
+<b class="fc">&nbsp;		if (person.getPersonVoided()) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!StringUtils.hasLength(person.getPersonVoidReason())) {</b>
+<b class="nc">&nbsp;				throw new APIException(&quot;Person.voided.bit&quot;, new Object[] { person });</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (person.getPersonVoidedBy() == null) {</b>
+<b class="fc">&nbsp;				person.setPersonVoidedBy(creator);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (person.getPersonDateVoided() == null) {</b>
+<b class="fc">&nbsp;				person.setPersonDateVoided(dateCreated);</b>
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			// voided is set to false
+<b class="fc">&nbsp;			person.setPersonVoidedBy(null);</b>
+<b class="fc">&nbsp;			person.setPersonDateVoided(null);</b>
+<b class="fc">&nbsp;			person.setPersonVoidReason(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

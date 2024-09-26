@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UpdateLayoutAddressFormatChangeSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: UpdateLayoutAddressFormatChangeSet (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UpdateLayoutAddressFormatChangeSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,8%
+  </span>
+  <span class="absValue">
+    (26/33)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * This change set is run to update layout.address.format global property
+&nbsp; */
+<b class="fc">&nbsp;public class UpdateLayoutAddressFormatChangeSet implements CustomTaskChange {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(UpdateLayoutAddressFormatChangeSet.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see CustomTaskChange#execute(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="fc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+<b class="fc">&nbsp;		Statement stmt = null;</b>
+<b class="fc">&nbsp;		PreparedStatement pStmt = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			stmt = connection.createStatement();</b>
+<b class="fc">&nbsp;			ResultSet rs = stmt</b>
+<b class="fc">&nbsp;			        .executeQuery(&quot;SELECT property_value FROM global_property WHERE property = &#39;layout.address.format&#39;&quot;);</b>
+<b class="fc">&nbsp;			if (rs.next()) {</b>
+<b class="fc">&nbsp;				String value = rs.getString(&quot;property_value&quot;);</b>
+<b class="fc">&nbsp;				value = value.replace(&quot;org.openmrs.layout.web.&quot;, &quot;org.openmrs.layout.&quot;);</b>
+&nbsp;				
+<b class="fc">&nbsp;				pStmt = connection</b>
+<b class="fc">&nbsp;				        .prepareStatement(&quot;UPDATE global_property SET property_value = ? WHERE property = &#39;layout.address.format&#39;&quot;);</b>
+<b class="fc">&nbsp;				pStmt.setString(1, value);</b>
+<b class="fc">&nbsp;				pStmt.addBatch();</b>
+<b class="fc">&nbsp;				pStmt.executeBatch();</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Error generated&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (stmt != null) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					stmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the statement object&quot;);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (pStmt != null) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					pStmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to close the prepared statement object&quot;);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="fc">&nbsp;		return &quot;Finished updating global property&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(liquibase.resource.ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor resourceAccessor) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

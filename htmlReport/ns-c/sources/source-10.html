@@ -1,0 +1,184 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientDataUnvoidHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientDataUnvoidHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientDataUnvoidHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,7%
+  </span>
+  <span class="absValue">
+    (22/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Order;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;import org.openmrs.api.CohortService;
+&nbsp;import org.openmrs.api.EncounterService;
+&nbsp;import org.openmrs.api.OrderService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.parameter.EncounterSearchCriteria;
+&nbsp;import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class deals with {@link Patient} objects when they are unvoided via the unvoid* method in an
+&nbsp; * Openmrs Service. This handler is automatically called by the {@link RequiredDataAdvice} AOP
+&nbsp; * class. &lt;br&gt;
+&nbsp; * The handler unvoids all the encounters(including their associated observations) and orders
+&nbsp; * associated to the specified patient object that got voided because the patient was getting voided
+&nbsp; *
+&nbsp; * @see RequiredDataHandler
+&nbsp; * @see UnvoidHandler
+&nbsp; * @see Patient
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = {Patient.class}, order = 50)
+<b class="fc">&nbsp;public class PatientDataUnvoidHandler implements UnvoidHandler&lt;Patient&gt; {</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void handle(Patient patient, User originalVoidingUser, Date origParentVoidedDate, String unused) {
+&nbsp;		//can&#39;t be unvoiding a patient that doesn&#39;t exist in the database
+<b class="fc">&nbsp;		if (patient.getId() != null) {</b>
+&nbsp;			//unvoid all the encounter that got voided as a result of the patient getting voided
+<b class="fc">&nbsp;			EncounterService es = Context.getEncounterService();</b>
+<b class="fc">&nbsp;			EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()</b>
+<b class="fc">&nbsp;				.setPatient(patient)</b>
+<b class="fc">&nbsp;				.setIncludeVoided(true)</b>
+<b class="fc">&nbsp;				.createEncounterSearchCriteria();</b>
+<b class="fc">&nbsp;			List&lt;Encounter&gt; encounters = es.getEncounters(encounterSearchCriteria);</b>
+<b class="fc">&nbsp;			if (CollectionUtils.isNotEmpty(encounters)) {</b>
+<b class="fc">&nbsp;				for (Encounter encounter : encounters) {</b>
+<b class="fc">&nbsp;					if (encounter.getVoided() &amp;&amp; encounter.getDateVoided().equals(origParentVoidedDate)</b>
+<b class="fc">&nbsp;					        &amp;&amp; encounter.getVoidedBy().equals(originalVoidingUser)) {</b>
+<b class="fc">&nbsp;						es.unvoidEncounter(encounter);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//unvoid all the orders that got voided as a result of the patient getting voided
+<b class="fc">&nbsp;			OrderService os = Context.getOrderService();</b>
+<b class="fc">&nbsp;			List&lt;Order&gt; orders = os.getAllOrdersByPatient(patient);</b>
+<b class="fc">&nbsp;			if (CollectionUtils.isNotEmpty(orders)) {</b>
+<b class="fc">&nbsp;				for (Order order : orders) {</b>
+<b class="fc">&nbsp;					if (order.getVoided() &amp;&amp; order.getDateVoided().equals(origParentVoidedDate)</b>
+<b class="nc">&nbsp;					        &amp;&amp; order.getVoidedBy().equals(originalVoidingUser)) {</b>
+<b class="nc">&nbsp;						os.unvoidOrder(order);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			CohortService cs = Context.getCohortService();</b>
+<b class="fc">&nbsp;			cs.notifyPatientUnvoided(patient, originalVoidingUser, origParentVoidedDate);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

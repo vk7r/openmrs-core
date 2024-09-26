@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptSetsEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.propertyeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptSetsEditor (org.openmrs.propertyeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptSetsEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/32)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.propertyeditor;
+&nbsp;
+&nbsp;import java.beans.PropertyEditorSupport;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.ConceptSet;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Turns a list of concept ids &quot;123 1234 1235&quot; into a List of ConceptSets
+&nbsp; */
+&nbsp;public class ConceptSetsEditor extends PropertyEditorSupport {
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ConceptSetsEditor.class);</b>
+&nbsp;	
+&nbsp;	private Collection&lt;ConceptSet&gt; originalConceptSets;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor taking in the current sets on a concept
+&nbsp;	 * 
+&nbsp;	 * @param conceptSets the current object on the concept
+&nbsp;	 */
+<b class="nc">&nbsp;	public ConceptSetsEditor(Collection&lt;ConceptSet&gt; conceptSets) {</b>
+<b class="nc">&nbsp;		if (conceptSets == null) {</b>
+<b class="nc">&nbsp;			originalConceptSets = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		this.originalConceptSets = conceptSets;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.beans.PropertyEditorSupport#setAsText(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAsText(String text) throws IllegalArgumentException {
+<b class="nc">&nbsp;		log.debug(&quot;setting conceptSets with text: &quot; + text);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (StringUtils.hasText(text)) {</b>
+<b class="nc">&nbsp;			ConceptService cs = Context.getConceptService();</b>
+<b class="nc">&nbsp;			String[] conceptIds = text.split(&quot; &quot;);</b>
+<b class="nc">&nbsp;			List&lt;Integer&gt; requestConceptIds = new ArrayList&lt;&gt;();</b>
+&nbsp;			//set up parameter Set for easier add/delete functions
+&nbsp;			// and removal of duplicates
+<b class="nc">&nbsp;			for (String id : conceptIds) {</b>
+<b class="nc">&nbsp;				id = id.trim();</b>
+<b class="nc">&nbsp;				if (!(&quot;&quot;.equals(id)) &amp;&amp; !requestConceptIds.contains(Integer.valueOf(id))) { //remove whitespace, blank lines, and duplicate entries</b>
+<b class="nc">&nbsp;					requestConceptIds.add(Integer.valueOf(id));</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+&nbsp;			// used when adding in concept sets
+<b class="nc">&nbsp;			List&lt;Integer&gt; originalConceptSetIds = new ArrayList&lt;&gt;(originalConceptSets.size());</b>
+&nbsp;			
+&nbsp;			// remove all sets that aren&#39;t in the request (aka, that have been deleted by the user)
+<b class="nc">&nbsp;			Collection&lt;ConceptSet&gt; copyOfOriginalConceptSets = new ArrayList&lt;&gt;(originalConceptSets);</b>
+<b class="nc">&nbsp;			for (ConceptSet origConceptSet : copyOfOriginalConceptSets) {</b>
+<b class="nc">&nbsp;				if (!requestConceptIds.contains(origConceptSet.getConcept().getConceptId())) {</b>
+<b class="nc">&nbsp;					originalConceptSets.remove(origConceptSet);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				// add to quick list used when adding later
+<b class="nc">&nbsp;				originalConceptSetIds.add(origConceptSet.getConcept().getConceptId());</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// insert all sets that are new (aka, that have been added by the user).
+&nbsp;			// Also normalize all weight attributes
+<b class="nc">&nbsp;			for (int x = 0; x &lt; requestConceptIds.size(); x++) {</b>
+<b class="nc">&nbsp;				Integer requestConceptId = requestConceptIds.get(x);</b>
+&nbsp;				
+&nbsp;				// if this isn&#39;t in the originalList, add it
+&nbsp;				
+<b class="nc">&nbsp;				if (!originalConceptSetIds.contains(requestConceptId)) {</b>
+&nbsp;					// the null weight will be reset in the next step of normalization
+<b class="nc">&nbsp;					originalConceptSets.add(new ConceptSet(cs.getConcept(requestConceptId), (double) x));</b>
+&nbsp;				} else {
+&nbsp;					// find this conceptId in the original set and set its weight
+<b class="nc">&nbsp;					for (ConceptSet conceptSet : originalConceptSets) {</b>
+<b class="nc">&nbsp;						if (conceptSet.getConcept().getConceptId().equals(requestConceptId)) {</b>
+<b class="nc">&nbsp;							conceptSet.setSortWeight((double) x);</b>
+&nbsp;						}
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			originalConceptSets.clear();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		setValue(originalConceptSets);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

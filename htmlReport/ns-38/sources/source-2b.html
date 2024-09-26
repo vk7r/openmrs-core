@@ -1,0 +1,331 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (53/53)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonAddress;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class validates a Person object.
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = { Person.class }, order = 50)
+<b class="fc">&nbsp;public class PersonValidator implements Validator {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PersonValidator.class);</b>
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private PersonNameValidator personNameValidator;
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private PersonAddressValidator personAddressValidator;
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; clazz) {
+<b class="fc">&nbsp;		return Person.class.isAssignableFrom(clazz);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if birthdate makes patient older than 140 years old
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if birthdate is a future date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if deathdate is a future date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if birthdate is after death date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if voidReason is blank when patient is voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if causeOfDeath and causeOfDeathNonCoded is blank when patient is dead
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if causeOfDeath and causeOfDeathNonCoded is both set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if gender is blank for Persons
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object target, Errors errors) {
+<b class="fc">&nbsp;		log.debug(&quot;{}.validate...&quot;, this.getClass().getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (target == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Person person = (Person) target;</b>
+&nbsp;		
+<b class="fc">&nbsp;		validatePersonNames(person, errors);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!person.getVoided() &amp;&amp; !validatePersonHasAtLeastOneNonVoidedName(person)) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;names&quot;, &quot;Person.shouldHaveAtleastOneNonVoidedName&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		validatePersonAddresses(person, errors);</b>
+&nbsp;		
+<b class="fc">&nbsp;		validateBirthDate(errors, person.getBirthdate());</b>
+<b class="fc">&nbsp;		validateDeathDate(errors, person.getDeathDate(), person.getBirthdate());</b>
+<b class="fc">&nbsp;		if (person.getVoided()) {</b>
+<b class="fc">&nbsp;			ValidationUtils.rejectIfEmptyOrWhitespace(errors, &quot;voidReason&quot;, &quot;error.null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		validateDeathCause(person, errors);</b>
+&nbsp;		
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, Person.class, &quot;gender&quot;, &quot;personVoidReason&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if a person contains any non voided PersonName attribute
+&nbsp;	 *
+&nbsp;	 * @param person The person that is analysed for voided names
+&nbsp;	 * @return true if at leas one personName is not voided
+&nbsp;	 */
+&nbsp;	private boolean validatePersonHasAtLeastOneNonVoidedName(Person person) {
+<b class="fc">&nbsp;			return person.getNames().stream().anyMatch(personName -&gt; !personName.getVoided());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the names of a person fulfill the expected criteria  
+&nbsp;	 *
+&nbsp;	 * @param person The person whose names should be validated
+&nbsp;	 * @param errors Stores information about errors encountered during validation.
+&nbsp;	 */
+&nbsp;	private void validatePersonNames(Person person, Errors errors) {
+<b class="fc">&nbsp;		int index = 0;</b>
+<b class="fc">&nbsp;		for (PersonName personName : person.getNames()) {</b>
+<b class="fc">&nbsp;			errors.pushNestedPath(&quot;names[&quot; + index + &quot;]&quot;);</b>
+<b class="fc">&nbsp;			personNameValidator.validate(personName, errors);</b>
+<b class="fc">&nbsp;			errors.popNestedPath();</b>
+<b class="fc">&nbsp;			index++;</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the addresses of a person fulfill the expected criteria  
+&nbsp;	 *
+&nbsp;	 * @param person The person whose addresses should be validated
+&nbsp;	 * @param errors Stores information about errors encountered during validation.
+&nbsp;	 */
+&nbsp;	private void validatePersonAddresses(Person person, Errors errors) {
+<b class="fc">&nbsp;		int index = 0;</b>
+<b class="fc">&nbsp;		for (PersonAddress address : person.getAddresses()) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				errors.pushNestedPath(&quot;addresses[&quot; + index + &quot;]&quot;);</b>
+<b class="fc">&nbsp;				ValidationUtils.invokeValidator(personAddressValidator, address, errors);</b>
+&nbsp;			}
+&nbsp;			finally {
+<b class="fc">&nbsp;				errors.popNestedPath();</b>
+<b class="fc">&nbsp;				index++;</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the death cause and death cause non coded fulfill the business logic
+&nbsp;	 *
+&nbsp;	 * @param person The person whose death attributes should be validated.
+&nbsp;	 * @param errors Stores information about errors encountered during validation.
+&nbsp;	 */
+&nbsp;	private void validateDeathCause(Person person, Errors errors){
+<b class="fc">&nbsp;		if (person.getDead()) {</b>
+<b class="fc">&nbsp;			if(person.getCauseOfDeath() != null &amp;&amp; person.getCauseOfDeathNonCoded() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;causeOfDeath&quot;, &quot;Person.dead.shouldHaveOnlyOneCauseOfDeathOrCauseOfDeathNonCodedSet&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			else if(person.getCauseOfDeath() == null &amp;&amp; person.getCauseOfDeathNonCoded() == null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;causeOfDeath&quot;, &quot;Person.dead.causeOfDeathAndCauseOfDeathNonCodedNull&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the birth date specified is in the future or older than 140 years old..
+&nbsp;	 *
+&nbsp;	 * @param birthDate The birthdate to validate.
+&nbsp;	 * @param errors Stores information about errors encountered during validation.
+&nbsp;	 */
+&nbsp;	private void validateBirthDate(Errors errors, Date birthDate) {
+<b class="fc">&nbsp;		if (birthDate == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		rejectIfFutureDate(errors, birthDate, &quot;birthdate&quot;);</b>
+<b class="fc">&nbsp;		rejectDateIfBefore140YearsAgo(errors, birthDate, &quot;birthdate&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the death date is in the future.
+&nbsp;	 * 
+&nbsp;	 * @param errors Stores information about errors encountered during validation
+&nbsp;	 * @param deathDate the deathdate to validate
+&nbsp;	 */
+&nbsp;	private void validateDeathDate(Errors errors, Date deathDate, Date birthDate) {
+<b class="fc">&nbsp;		if (deathDate == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		rejectIfFutureDate(errors, deathDate, &quot;deathDate&quot;);</b>
+<b class="fc">&nbsp;		if (birthDate == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		rejectDeathDateIfBeforeBirthDate(errors, deathDate, birthDate);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Rejects a date if it is in the future.
+&nbsp;	 * 
+&nbsp;	 * @param errors the error object
+&nbsp;	 * @param date the date to check
+&nbsp;	 * @param dateField the name of the field
+&nbsp;	 */
+&nbsp;	private void rejectIfFutureDate(Errors errors, Date date, String dateField) {
+<b class="fc">&nbsp;		if (OpenmrsUtil.compare(date, new Date()) &gt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(dateField, &quot;error.date.future&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Rejects a date if it is before 140 years ago.
+&nbsp;	 * 
+&nbsp;	 * @param errors the error object
+&nbsp;	 * @param date the date to check
+&nbsp;	 * @param dateField the name of the field
+&nbsp;	 */
+&nbsp;	private void rejectDateIfBefore140YearsAgo(Errors errors, Date date, String dateField) {
+<b class="fc">&nbsp;		Calendar c = Calendar.getInstance();</b>
+<b class="fc">&nbsp;		c.setTime(new Date());</b>
+<b class="fc">&nbsp;		c.add(Calendar.YEAR, -140);</b>
+<b class="fc">&nbsp;		if (OpenmrsUtil.compare(date, c.getTime()) &lt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(dateField, &quot;error.date.nonsensical&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Rejects a death date if it is before birth date
+&nbsp;	 * 
+&nbsp;	 * @param errors the error object
+&nbsp;	 * @param deathdate the date to check
+&nbsp;	 * @param birthdate to check with
+&nbsp;	 */
+&nbsp;	private void rejectDeathDateIfBeforeBirthDate(Errors errors, Date deathdate, Date birthdate) {
+<b class="fc">&nbsp;		if (OpenmrsUtil.compare(deathdate, birthdate) &lt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;deathDate&quot;, &quot;error.deathdate.before.birthdate&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

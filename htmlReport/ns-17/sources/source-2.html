@@ -1,0 +1,486 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LayoutTemplate</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.layout</a>
+</div>
+
+<h1>Coverage Summary for Class: LayoutTemplate (org.openmrs.layout)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LayoutTemplate</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,4%
+  </span>
+  <span class="absValue">
+    (13/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,2%
+  </span>
+  <span class="absValue">
+    (84/118)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.layout;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Generic class used by AddressTemplate and NameTemplate layouts
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;public abstract class LayoutTemplate {
+&nbsp;	
+&nbsp;	protected static final String LAYOUT_TOKEN = &quot;&lt;!-- openmrsToken --&gt;&quot;;
+&nbsp;	
+&nbsp;	protected String displayName;
+&nbsp;	
+&nbsp;	protected String codeName;
+&nbsp;	
+&nbsp;	protected String country;
+&nbsp;	
+&nbsp;	protected Map&lt;String, String&gt; nameMappings;
+&nbsp;	
+&nbsp;	protected Map&lt;String, String&gt; sizeMappings;
+&nbsp;	
+&nbsp;	protected Map&lt;String, String&gt; elementDefaults;
+&nbsp;	
+&nbsp;	protected Map&lt;String, String&gt; elementRegex;
+&nbsp;	
+&nbsp;	protected Map&lt;String, String&gt; elementRegexFormats;
+&nbsp;	
+&nbsp;	protected List&lt;String&gt; lineByLineFormat;
+&nbsp;	
+&nbsp;	protected List&lt;String&gt; requiredElements;
+&nbsp;	
+&nbsp;	// The largest number of tokens on one given line
+<b class="fc">&nbsp;	protected int maxTokens = 0;</b>
+&nbsp;	
+&nbsp;	protected String startDate;
+&nbsp;	
+&nbsp;	protected String endDate;
+&nbsp;	
+<b class="fc">&nbsp;	public LayoutTemplate() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Very crude way of setting just one line of template. This just puts
+&nbsp;	 * something on {@link #setLineByLineFormat(List)} with this string
+&nbsp;	 *
+&nbsp;	 * @param simpleTemplate
+&nbsp;	 *            first template line
+&nbsp;	 */
+<b class="nc">&nbsp;	public LayoutTemplate(String simpleTemplate) {</b>
+<b class="nc">&nbsp;		setLineByLineFormat(Collections.singletonList(simpleTemplate));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public abstract String getLayoutToken();
+&nbsp;	
+&nbsp;	public abstract String getNonLayoutToken();
+&nbsp;	
+&nbsp;	private String replaceTokens(String line) {
+<b class="fc">&nbsp;		LayoutSupport&lt;?&gt; as = getLayoutSupportInstance();</b>
+<b class="fc">&nbsp;		List&lt;String&gt; specialTokens = nonUniqueStringsGoLast(as.getSpecialTokens());</b>
+<b class="fc">&nbsp;		for (String token : specialTokens) {</b>
+<b class="fc">&nbsp;			line = line.replaceAll(token, LAYOUT_TOKEN);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return line;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;Map&lt;String, String&gt;&gt; convertToTokens(String line, String[] nonTokens) {
+<b class="fc">&nbsp;		List&lt;Map&lt;String, String&gt;&gt; ret = null;</b>
+<b class="fc">&nbsp;		if (line != null &amp;&amp; nonTokens != null &amp;&amp; nonTokens.length &gt; 0) {</b>
+<b class="fc">&nbsp;			int idxCurr = -1;</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (int i = 0; i &lt; nonTokens.length; i++) {</b>
+<b class="fc">&nbsp;				String nonToken = nonTokens[i];</b>
+<b class="fc">&nbsp;				if (idxCurr + 1 &lt; line.length()) {</b>
+<b class="fc">&nbsp;					idxCurr = line.indexOf(nonToken, idxCurr + 1);</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (ret == null) {</b>
+<b class="fc">&nbsp;					ret = new ArrayList&lt;&gt;();</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (i == 0 &amp;&amp; idxCurr &gt; 0) {</b>
+&nbsp;					// this means there is a token at the beginning - we&#39;ll have to grab it
+<b class="nc">&nbsp;					Map&lt;String, String&gt; currToken = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;					currToken.put(&quot;isToken&quot;, getLayoutToken());</b>
+<b class="nc">&nbsp;					String realToken = line.substring(0, idxCurr);</b>
+<b class="nc">&nbsp;					currToken.put(&quot;displayText&quot;, this.getNameMappings().get(realToken));</b>
+<b class="nc">&nbsp;					currToken.put(&quot;displaySize&quot;, this.getSizeMappings().get(realToken));</b>
+<b class="nc">&nbsp;					currToken.put(&quot;codeName&quot;, realToken);</b>
+<b class="nc">&nbsp;					ret.add(currToken);</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (i &lt; nonTokens.length - 1) {</b>
+&nbsp;					// this means we are still not at the last non-token, so let&#39;s add this non-token AND this token
+<b class="fc">&nbsp;					int idxNext = line.indexOf(nonTokens[i + 1], idxCurr + 1);</b>
+&nbsp;					
+<b class="fc">&nbsp;					Map&lt;String, String&gt; currNonToken = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;					currNonToken.put(&quot;isToken&quot;, getNonLayoutToken());</b>
+<b class="fc">&nbsp;					currNonToken.put(&quot;displayText&quot;, nonToken);</b>
+&nbsp;					
+<b class="fc">&nbsp;					Map&lt;String, String&gt; currToken = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;					currToken.put(&quot;isToken&quot;, getLayoutToken());</b>
+&nbsp;					//HERE:  real Token is wrong...
+<b class="fc">&nbsp;					String realToken = line.substring(idxCurr + nonToken.length(), idxNext);</b>
+<b class="fc">&nbsp;					currToken.put(&quot;displayText&quot;, this.getNameMappings().get(realToken));</b>
+<b class="fc">&nbsp;					currToken.put(&quot;displaySize&quot;, this.getSizeMappings().get(realToken));</b>
+<b class="fc">&nbsp;					currToken.put(&quot;codeName&quot;, realToken);</b>
+<b class="fc">&nbsp;					ret.add(currNonToken);</b>
+<b class="fc">&nbsp;					ret.add(currToken);</b>
+<b class="fc">&nbsp;				} else {</b>
+&nbsp;					// we are on the last non-token, so check if it is the end
+<b class="fc">&nbsp;					Map&lt;String, String&gt; currNonToken = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;					currNonToken.put(&quot;isToken&quot;, getNonLayoutToken());</b>
+<b class="fc">&nbsp;					currNonToken.put(&quot;displayText&quot;, nonToken);</b>
+&nbsp;					
+<b class="fc">&nbsp;					ret.add(currNonToken);</b>
+<b class="fc">&nbsp;					if (idxCurr + nonToken.length() &lt; line.length()) {</b>
+&nbsp;						// we need to add one last token at the end
+<b class="nc">&nbsp;						Map&lt;String, String&gt; currToken = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;						currToken.put(&quot;isToken&quot;, getLayoutToken());</b>
+<b class="nc">&nbsp;						String realToken = line.substring(idxCurr + nonToken.length());</b>
+<b class="nc">&nbsp;						currToken.put(&quot;displayText&quot;, this.getNameMappings().get(realToken));</b>
+<b class="nc">&nbsp;						currToken.put(&quot;displaySize&quot;, this.getSizeMappings().get(realToken));</b>
+<b class="nc">&nbsp;						currToken.put(&quot;codeName&quot;, realToken);</b>
+<b class="nc">&nbsp;						ret.add(currToken);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (line != null &amp;&amp; line.length() &gt; 0) {</b>
+&nbsp;			// looks like we have a single token on a line by itself
+<b class="fc">&nbsp;			if (ret == null) {</b>
+<b class="fc">&nbsp;				ret = new ArrayList&lt;&gt;();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			Map&lt;String, String&gt; currToken = new HashMap&lt;&gt;();</b>
+&nbsp;			
+&nbsp;			// adding a nontoken to match the code that does &quot;more than a single token on a line&quot;
+<b class="fc">&nbsp;			Map&lt;String, String&gt; currNonToken = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;			currNonToken.put(&quot;isToken&quot;, getNonLayoutToken());</b>
+<b class="fc">&nbsp;			currNonToken.put(&quot;displayText&quot;, &quot;&quot;);</b>
+<b class="fc">&nbsp;			ret.add(currNonToken);</b>
+&nbsp;			
+<b class="fc">&nbsp;			currToken.put(&quot;isToken&quot;, getLayoutToken());</b>
+<b class="fc">&nbsp;			currToken.put(&quot;displayText&quot;, this.getNameMappings().get(line));</b>
+<b class="fc">&nbsp;			currToken.put(&quot;displaySize&quot;, this.getSizeMappings().get(line));</b>
+<b class="fc">&nbsp;			currToken.put(&quot;codeName&quot;, line);</b>
+&nbsp;			
+<b class="fc">&nbsp;			ret.add(currToken);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ret != null &amp;&amp; this.maxTokens &lt; ret.size()) {</b>
+<b class="fc">&nbsp;			this.maxTokens = ret.size();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;List&lt;Map&lt;String, String&gt;&gt;&gt; getLines() {
+<b class="fc">&nbsp;		List&lt;List&lt;Map&lt;String, String&gt;&gt;&gt; ret = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (this.lineByLineFormat != null) {</b>
+<b class="fc">&nbsp;			for (String line : this.lineByLineFormat) {</b>
+<b class="fc">&nbsp;				if (ret == null) {</b>
+<b class="fc">&nbsp;					ret = new ArrayList&lt;&gt;();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				String tokenizedLine = replaceTokens(line);</b>
+<b class="fc">&nbsp;				String[] nonTokens = tokenizedLine.split(LAYOUT_TOKEN);</b>
+<b class="fc">&nbsp;				List&lt;Map&lt;String, String&gt;&gt; lineTokens = convertToTokens(line, nonTokens);</b>
+<b class="fc">&nbsp;				ret.add(lineTokens);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			return ret;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return ret;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the codeName
+&nbsp;	 */
+&nbsp;	public String getCodeName() {
+<b class="fc">&nbsp;		return codeName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param codeName the codeName to set
+&nbsp;	 */
+&nbsp;	public void setCodeName(String codeName) {
+<b class="nc">&nbsp;		this.codeName = codeName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the country
+&nbsp;	 */
+&nbsp;	public String getCountry() {
+<b class="nc">&nbsp;		return country;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param country the country to set
+&nbsp;	 */
+&nbsp;	public void setCountry(String country) {
+<b class="nc">&nbsp;		this.country = country;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the displayName
+&nbsp;	 */
+&nbsp;	public String getDisplayName() {
+<b class="fc">&nbsp;		return displayName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param displayName the displayName to set
+&nbsp;	 */
+&nbsp;	public void setDisplayName(String displayName) {
+<b class="nc">&nbsp;		this.displayName = displayName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the elementDefaults
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getElementDefaults() {
+<b class="nc">&nbsp;		return elementDefaults;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param elementDefaults the elementDefaults to set
+&nbsp;	 */
+&nbsp;	public void setElementDefaults(Map&lt;String, String&gt; elementDefaults) {
+<b class="nc">&nbsp;		this.elementDefaults = elementDefaults;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the element regular expressions. These can be used to enforce that an element matches a
+&nbsp;	 * regex.
+&nbsp;	 *
+&nbsp;	 * @return the elementRegex
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getElementRegex() {
+<b class="nc">&nbsp;		return elementRegex;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the element regular expressions. These can be used to enforce that an element matches a
+&nbsp;	 * regex.
+&nbsp;	 *
+&nbsp;	 * @param elementRegex the elementRegex to set
+&nbsp;	 */
+&nbsp;	public void setElementRegex(Map&lt;String, String&gt; elementRegex) {
+<b class="nc">&nbsp;		this.elementRegex = elementRegex;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the element formats. These can be used to display an example format that an element
+&nbsp;	 * should look like.
+&nbsp;	 *
+&nbsp;	 * @return the elementFormats
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getElementRegexFormats() {
+<b class="nc">&nbsp;		return elementRegexFormats;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the element formats. These can be used to display an example format that an element
+&nbsp;	 * should look like.
+&nbsp;	 *
+&nbsp;	 * @param elementRegexFormats the elementFormats to set
+&nbsp;	 */
+&nbsp;	public void setElementRegexFormats(Map&lt;String, String&gt; elementRegexFormats) {
+<b class="nc">&nbsp;		this.elementRegexFormats = elementRegexFormats;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the lineByLineFormat
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getLineByLineFormat() {
+<b class="nc">&nbsp;		return lineByLineFormat;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param lineByLineFormat the lineByLineFormat to set
+&nbsp;	 */
+&nbsp;	public void setLineByLineFormat(List&lt;String&gt; lineByLineFormat) {
+<b class="fc">&nbsp;		this.lineByLineFormat = lineByLineFormat;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the requiredElements
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getRequiredElements() {
+<b class="fc">&nbsp;		return requiredElements;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param requiredElements the requiredElements to set
+&nbsp;	 */
+&nbsp;	public void setRequiredElements(List&lt;String&gt; requiredElements) {
+<b class="nc">&nbsp;		this.requiredElements = requiredElements;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the maxTokens
+&nbsp;	 */
+&nbsp;	public int getMaxTokens() {
+<b class="nc">&nbsp;		if (maxTokens == -1) {</b>
+&nbsp;			// initialize the maxTokens variable
+<b class="nc">&nbsp;			getLines();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return maxTokens;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param maxTokens the maxTokens to set
+&nbsp;	 */
+&nbsp;	public void setMaxTokens(int maxTokens) {
+<b class="nc">&nbsp;		this.maxTokens = maxTokens;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the nameMappings
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getNameMappings() {
+<b class="fc">&nbsp;		return nameMappings;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param nameMappings the nameMappings to set
+&nbsp;	 */
+&nbsp;	public void setNameMappings(Map&lt;String, String&gt; nameMappings) {
+<b class="fc">&nbsp;		this.nameMappings = nameMappings;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the sizeMappings
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getSizeMappings() {
+<b class="fc">&nbsp;		return sizeMappings;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param sizeMappings the sizeMappings to set
+&nbsp;	 */
+&nbsp;	public void setSizeMappings(Map&lt;String, String&gt; sizeMappings) {
+<b class="fc">&nbsp;		this.sizeMappings = sizeMappings;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public abstract LayoutSupport&lt;?&gt; getLayoutSupportInstance();
+&nbsp;	
+&nbsp;	public List&lt;String&gt; nonUniqueStringsGoLast(List&lt;String&gt; strListArg) {
+<b class="fc">&nbsp;		List&lt;String&gt; dup = new ArrayList&lt;&gt;();</b>
+&nbsp;		// copy the list so we don&#39;t get concurrentmodification exceptions
+<b class="fc">&nbsp;		List&lt;String&gt; strList = new ArrayList&lt;&gt;(strListArg);</b>
+<b class="fc">&nbsp;		for (String s : strList) {</b>
+<b class="fc">&nbsp;			for (String sInner : strList) {</b>
+<b class="fc">&nbsp;				if (sInner.contains(s) &amp;&amp; s.length() &lt; sInner.length() &amp;&amp; !dup.contains(s)) {</b>
+<b class="fc">&nbsp;					dup.add(s);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		if (dup.size() &gt; 1) {</b>
+<b class="nc">&nbsp;			dup = nonUniqueStringsGoLast(dup);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		strList.removeAll(dup);</b>
+<b class="fc">&nbsp;		strList.addAll(dup);</b>
+<b class="fc">&nbsp;		return strList;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

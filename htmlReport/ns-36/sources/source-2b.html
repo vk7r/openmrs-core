@@ -1,0 +1,150 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VelocityExceptionHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: VelocityExceptionHandler (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VelocityExceptionHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import org.apache.velocity.app.event.MethodExceptionEventHandler;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class to safely catch velocity exceptions
+&nbsp; */
+<b class="nc">&nbsp;public class VelocityExceptionHandler implements MethodExceptionEventHandler {</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(VelocityExceptionHandler.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * When a user-supplied method throws an exception, the MethodExceptionEventHandler is invoked
+&nbsp;	 * with the Class, method name and thrown Exception. The handler can either return a valid
+&nbsp;	 * Object to be used as the return value of the method call, or throw the passed-in or new
+&nbsp;	 * Exception, which will be wrapped and propagated to the user as a MethodInvocationException
+&nbsp;	 *
+&nbsp;	 * @see org.apache.velocity.app.event.MethodExceptionEventHandler#methodException(java.lang.Class,
+&nbsp;	 *      java.lang.String, java.lang.Exception)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Object methodException(Class claz, String method, Exception e) throws Exception {
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Claz: &quot; + claz.getName() + &quot; method: &quot; + method, e);</b>
+&nbsp;		
+&nbsp;		// if formatting a date (and probably getting an &quot;IllegalArgumentException&quot;)
+<b class="nc">&nbsp;		if (&quot;format&quot;.equals(method)) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// keep the default behavior
+<b class="nc">&nbsp;		throw e;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

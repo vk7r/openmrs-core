@@ -1,0 +1,246 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PresentationMessageMap</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.messagesource</a>
+</div>
+
+<h1>Coverage Summary for Class: PresentationMessageMap (org.openmrs.messagesource)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PresentationMessageMap</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,2%
+  </span>
+  <span class="absValue">
+    (6/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65%
+  </span>
+  <span class="absValue">
+    (13/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.messagesource;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * A mapped collection of PresentationMessages, all of which are enforced to be in the same locale.
+&nbsp; */
+&nbsp;public class PresentationMessageMap implements Map&lt;String, PresentationMessage&gt; {
+&nbsp;	
+&nbsp;	private Locale locale;
+&nbsp;	
+<b class="fc">&nbsp;	private Map&lt;String, PresentationMessage&gt; internalMap = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a new PresentationMessageMap for the given locale.
+&nbsp;	 * 
+&nbsp;	 * @param locale
+&nbsp;	 */
+<b class="fc">&nbsp;	public PresentationMessageMap(Locale locale) {</b>
+<b class="fc">&nbsp;		this.locale = locale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#clear()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void clear() {
+<b class="nc">&nbsp;		internalMap.clear();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#containsKey(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean containsKey(Object key) {
+<b class="fc">&nbsp;		return internalMap.containsKey(key);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#containsValue(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean containsValue(Object value) {
+<b class="nc">&nbsp;		return internalMap.containsValue(value);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#entrySet()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Set&lt;Entry&lt;String, PresentationMessage&gt;&gt; entrySet() {
+<b class="nc">&nbsp;		return internalMap.entrySet();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#get(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PresentationMessage get(Object key) {
+<b class="fc">&nbsp;		return internalMap.get(key);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#isEmpty()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isEmpty() {
+<b class="nc">&nbsp;		return internalMap.isEmpty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#keySet()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Set&lt;String&gt; keySet() {
+<b class="nc">&nbsp;		return internalMap.keySet();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should ignore non matching locale messages
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PresentationMessage put(String key, PresentationMessage value) {
+<b class="fc">&nbsp;		PresentationMessage putValue = null;</b>
+<b class="fc">&nbsp;		if (value.getLocale().equals(locale)) {</b>
+<b class="fc">&nbsp;			putValue = internalMap.put(key, value);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return putValue;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds all entries from an input Map which have PresentationMessages from the same locale.
+&nbsp;	 * 
+&nbsp;	 * @see java.util.Map#putAll(java.util.Map)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; filter out non matching locale messages from batch add
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void putAll(Map&lt;? extends String, ? extends PresentationMessage&gt; t) {
+<b class="fc">&nbsp;		for (Entry&lt;? extends String, ? extends PresentationMessage&gt; entry : t.entrySet()) {</b>
+<b class="fc">&nbsp;			put(entry.getKey(), entry.getValue());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#remove(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PresentationMessage remove(Object key) {
+<b class="nc">&nbsp;		return internalMap.remove(key);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#size()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int size() {
+<b class="fc">&nbsp;		return internalMap.size();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Map#values()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;PresentationMessage&gt; values() {
+<b class="nc">&nbsp;		return internalMap.values();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

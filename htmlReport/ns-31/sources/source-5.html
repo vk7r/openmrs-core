@@ -1,0 +1,418 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > TaskDefinition</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskDefinition (org.openmrs.scheduler)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskDefinition</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (24/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (30/39)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TaskDefinition$HibernateProxy$MgxuE3qh</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (24/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (30/39)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.envers.NotAudited;
+&nbsp;import org.openmrs.BaseChangeableOpenmrsMetadata;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents the metadata for a task that can be scheduled.
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class TaskDefinition extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(TaskDefinition.class);</b>
+&nbsp;	
+&nbsp;	// Task metadata
+&nbsp;	private Integer id;
+&nbsp;	
+&nbsp;	// This class must implement the schedulable interface or it will fail to start
+&nbsp;	private String taskClass;
+&nbsp;	
+<b class="fc">&nbsp;	private Task taskInstance = null;</b>
+&nbsp;	
+&nbsp;	// Scheduling metadata
+&nbsp;	private Date startTime;
+&nbsp;	
+&nbsp;	private Date lastExecutionTime;
+&nbsp;	
+&nbsp;	private Long repeatInterval; // NOW in seconds to give us ability to
+&nbsp;	
+&nbsp;	// support longer intervals (years, decades,
+&nbsp;	// milleniums)
+&nbsp;	
+&nbsp;	private Boolean startOnStartup;
+&nbsp;	
+&nbsp;	private String startTimePattern;
+&nbsp;	
+&nbsp;	private Boolean started;
+&nbsp;	
+&nbsp;	// Relationships
+&nbsp;	@NotAudited
+&nbsp;	private Map&lt;String, String&gt; properties;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default no-arg public constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public TaskDefinition() {</b>
+<b class="fc">&nbsp;		this.started = Boolean.FALSE; // default</b>
+<b class="fc">&nbsp;		this.startTime = new Date(); // makes it easier during task creation</b>
+&nbsp;		// as we have a default date populated
+<b class="fc">&nbsp;		this.properties = new HashMap&lt;&gt;();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Public constructor
+&nbsp;	 */
+&nbsp;	public TaskDefinition(Integer id, String name, String description, String taskClass) {
+<b class="nc">&nbsp;		this();</b>
+<b class="nc">&nbsp;		log.debug(&quot;Creating taskconfig: &quot; + id);</b>
+<b class="nc">&nbsp;		this.id = id;</b>
+<b class="nc">&nbsp;		setName(name);</b>
+<b class="nc">&nbsp;		setDescription(description);</b>
+<b class="nc">&nbsp;		this.taskClass = taskClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the task identifier.
+&nbsp;	 * 
+&nbsp;	 * @return &lt;code&gt;Integer&lt;/code&gt; identifier of the task
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return this.id;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the task identifier.
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		this.id = id;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the data map used to provide the task with runtime data.
+&nbsp;	 * 
+&nbsp;	 * @return the data map
+&nbsp;	 */
+&nbsp;	@NotAudited
+&nbsp;	public Map&lt;String, String&gt; getProperties() {
+<b class="fc">&nbsp;		return this.properties;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the properties of the task. This overrides any properties previously set with the
+&nbsp;	 * setProperty(String, String) method.
+&nbsp;	 * 
+&nbsp;	 * @param properties &lt;code&gt;Map&amp;lt;String, String&amp;gt;&lt;/code&gt; of the properties to set
+&nbsp;	 */
+&nbsp;	public void setProperties(Map&lt;String, String&gt; properties) {
+<b class="fc">&nbsp;		this.properties = properties;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the schedulable object to be executed.
+&nbsp;	 * 
+&nbsp;	 * @return the schedulable object
+&nbsp;	 */
+&nbsp;	public String getTaskClass() {
+<b class="fc">&nbsp;		return this.taskClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the schedulable object to be executed.
+&nbsp;	 * 
+&nbsp;	 * @param taskClass &lt;code&gt;String&lt;/code&gt; taskClass of a schedulable object
+&nbsp;	 */
+&nbsp;	public void setTaskClass(String taskClass) {
+<b class="fc">&nbsp;		this.taskClass = taskClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the start time for when the task should be executed.
+&nbsp;	 * 
+&nbsp;	 * @return long start time
+&nbsp;	 */
+&nbsp;	public Date getStartTime() {
+<b class="fc">&nbsp;		return startTime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the start time for when the task should be executed. For instance, use &quot;new Date()&quot;, if
+&nbsp;	 * you want it to start now.
+&nbsp;	 * 
+&nbsp;	 * @param startTime start time for the task
+&nbsp;	 */
+&nbsp;	public void setStartTime(Date startTime) {
+<b class="fc">&nbsp;		this.startTime = startTime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the time the task was last executed.
+&nbsp;	 * 
+&nbsp;	 * @return long last execution time
+&nbsp;	 */
+&nbsp;	public Date getLastExecutionTime() {
+<b class="fc">&nbsp;		return lastExecutionTime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the time the task was last executed
+&nbsp;	 * 
+&nbsp;	 * @param lastExecutionTime last execution time
+&nbsp;	 */
+&nbsp;	public void setLastExecutionTime(Date lastExecutionTime) {
+<b class="fc">&nbsp;		this.lastExecutionTime = lastExecutionTime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the number of seconds until task is executed again.
+&nbsp;	 * 
+&nbsp;	 * @return long number of seconds.
+&nbsp;	 */
+&nbsp;	public Long getRepeatInterval() {
+<b class="fc">&nbsp;		return repeatInterval;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the number of seconds until task is executed again.
+&nbsp;	 * 
+&nbsp;	 * @param repeatInterval number of seconds, or 0 to indicate to repetition
+&nbsp;	 */
+&nbsp;	public void setRepeatInterval(Long repeatInterval) {
+<b class="fc">&nbsp;		this.repeatInterval = repeatInterval;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the date format used to set the start time.
+&nbsp;	 */
+&nbsp;	public String getStartTimePattern() {
+<b class="fc">&nbsp;		return this.startTimePattern;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the date format used to set the start time.
+&nbsp;	 */
+&nbsp;	public void setStartTimePattern(String pattern) {
+<b class="fc">&nbsp;		this.startTimePattern = pattern;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the flag that indicates whether the task should startup as soon as the scheduler starts.
+&nbsp;	 */
+&nbsp;	public Boolean getStartOnStartup() {
+<b class="fc">&nbsp;		return this.startOnStartup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the flag that indicates whether the task should startup as soon as the scheduler starts.
+&nbsp;	 */
+&nbsp;	public void setStartOnStartup(Boolean startOnStartup) {
+<b class="fc">&nbsp;		this.startOnStartup = startOnStartup;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the flag that indicates whether the task has been started.
+&nbsp;	 */
+&nbsp;	public Boolean getStarted() {
+<b class="fc">&nbsp;		return this.started;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the flag that indicates whether the task has been started.
+&nbsp;	 */
+&nbsp;	public void setStarted(Boolean started) {
+<b class="fc">&nbsp;		this.started = started;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get task configuration property.
+&nbsp;	 * 
+&nbsp;	 * @param key the &lt;code&gt;String&lt;/code&gt; key of the property to get
+&nbsp;	 * @return the &lt;code&gt;String&lt;/code&gt; value for the given key
+&nbsp;	 */
+&nbsp;	public String getProperty(String key) {
+<b class="nc">&nbsp;		return this.properties.get(key);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set task configuration property. Only supports strings at the moment.
+&nbsp;	 * 
+&nbsp;	 * @param key the &lt;code&gt;String&lt;/code&gt; key of the property to set
+&nbsp;	 * @param value the &lt;code&gt;String&lt;/code&gt; value of the property to set
+&nbsp;	 */
+&nbsp;	public void setProperty(String key, String value) {
+<b class="nc">&nbsp;		this.properties.put(key, value);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that asks SchedulerUtil for it&#39;s next execution time.
+&nbsp;	 * 
+&nbsp;	 * @return the &lt;code&gt;Date&lt;/code&gt; of the next execution
+&nbsp;	 */
+&nbsp;	public Date getNextExecutionTime() {
+<b class="fc">&nbsp;		return SchedulerUtil.getNextExecution(this);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to calculate the seconds until the next execution time.
+&nbsp;	 * 
+&nbsp;	 * @return the number of seconds until the next execution
+&nbsp;	 */
+&nbsp;	public long getSecondsUntilNextExecutionTime() {
+<b class="fc">&nbsp;		return (getNextExecutionTime().getTime() - System.currentTimeMillis()) / 1000;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ==================================   Metadata ============================
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;[TaskDefinition &quot; + &quot; id=&quot; + getId() + &quot; name=&quot; + getName() + &quot; class=&quot; + getTaskClass() + &quot; startTime=&quot;</b>
+<b class="fc">&nbsp;		        + getStartTime() + &quot; repeatInterval=&quot; + this.getRepeatInterval() + &quot; secondsUntilNext=&quot;</b>
+<b class="fc">&nbsp;		        + this.getSecondsUntilNextExecutionTime() + &quot;]&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the runnable task instance associated with this definition.
+&nbsp;	 * 
+&nbsp;	 * @return related task, or null if none instantiated (definition hasn&#39;t been scheduled)
+&nbsp;	 */
+&nbsp;	public Task getTaskInstance() {
+<b class="nc">&nbsp;		return taskInstance;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the runnable task instance associated with this definition. This should be set by the
+&nbsp;	 * scheduler which instantiates the task.
+&nbsp;	 * 
+&nbsp;	 * @param taskInstance
+&nbsp;	 */
+&nbsp;	public void setTaskInstance(Task taskInstance) {
+<b class="fc">&nbsp;		this.taskInstance = taskInstance;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

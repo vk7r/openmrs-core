@@ -1,0 +1,434 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LogicService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicService (org.openmrs.logic)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LogicService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.logic.datasource.LogicDataSource;
+&nbsp;import org.openmrs.logic.result.Result;
+&nbsp;import org.openmrs.logic.result.Result.Datatype;
+&nbsp;import org.openmrs.logic.rule.RuleParameterInfo;
+&nbsp;
+&nbsp;/**
+&nbsp; * The Logic Service provides a mechanism for both registering and consuming business logic in the
+&nbsp; * form of logic &lt;em&gt;rules&lt;/em&gt;. Rules may be run against a single patient or a set of patients.
+&nbsp; * Rules are registered under a unique string &lt;em&gt;token&lt;/em&gt;. Later evaluation and/or retrieval of
+&nbsp; * the rule is done through the token. Tokens can be tagged with any number of string word/phrases
+&nbsp; * to simplify organization and lookup of tokens. Data source results can be obtained directly by
+&nbsp; * using a token in the form &lt;em&gt;@foo.bar&lt;/em&gt;, where &lt;em&gt;foo&lt;/em&gt; is the logic data source name and
+&nbsp; * &lt;em&gt;bar&lt;/em&gt; is the key for that data source. For example, the token &lt;em&gt;@person.gender&lt;/em&gt; is a
+&nbsp; * direct reference to the &lt;em&gt;gender&lt;/em&gt; key of the &lt;em&gt;person&lt;/em&gt; logic data source. &lt;h3&gt;Example
+&nbsp; * Usage&lt;/h3&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * Patient myPatient = Context.getPatientService().getPatient(123);
+&nbsp; * LogicService logicService = Context.getLogicService();
+&nbsp; * Result result = logicService.eval(myPatient, &amp;quot;HIV POSITIVE&amp;quot;);
+&nbsp; * if (result.toBoolean()) {
+&nbsp; * 	// patient is HIV positive
+&nbsp; * }
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * Results can be derived with specific criteria as well. For example, to fetch the maximum CD4
+&nbsp; * count within the past six months:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; *   Result result = logicService.eval(myPatient, new LogicCriteria(&amp;quot;CD4 COUNT&amp;quot;)
+&nbsp; *     .within(Duration.months(6)).max();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * or within 6 months of 11-November-2006:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; *   Calendar calendar = Calendar.getInstance();
+&nbsp; *   calendar.set(2006, 11, 11);
+&nbsp; *   Date targetDate = calendar.getTime();
+&nbsp; *   Result result = logicService.eval(myPatient, new LogicCriteria(&amp;quot;CD4 COUNT&amp;quot;)
+&nbsp; *     .asOf(targetDate).within(Duration.months(6)).max();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.logic.Rule
+&nbsp; * @see org.openmrs.logic.LogicCriteria
+&nbsp; * @see org.openmrs.logic.datasource.LogicDataSource
+&nbsp; */
+&nbsp;public interface LogicService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetch all known (registered) tokens
+&nbsp;	 * 
+&nbsp;	 * @return all known (registered) tokens
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all registered token
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getAllTokens();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetch all known (registered) tokens matching a given string
+&nbsp;	 * 
+&nbsp;	 * @param partialToken full or partial token name
+&nbsp;	 * @return all tokens containing the given string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all registered token matching the input fully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all registered token matching the input partially
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when input is null
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getTokens(String partialToken);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Registers a new rule with the logic service.
+&nbsp;	 * 
+&nbsp;	 * @param token the lookup key (&quot;token&quot;) for this rule
+&nbsp;	 * @param rule new rule to be registered
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see org.openmrs.logic.Rule
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when another rule is registered on the same token
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; persist the rule and associate it with the token
+&nbsp;	 */
+&nbsp;	public void addRule(String token, Rule rule) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Registers a new rule with the logic service, associating the tags with the given token
+&nbsp;	 * 
+&nbsp;	 * @param token the unique lookup key (&quot;token&quot;) for this rule
+&nbsp;	 * @param tags words or phrases associated with this token (do not need to be unique)
+&nbsp;	 * @param rule new rule to be registered
+&nbsp;	 * @throws LogicException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when no tags is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; persist rule with the tags
+&nbsp;	 */
+&nbsp;	public void addRule(String token, String[] tags, Rule rule) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the rule registered under a given token
+&nbsp;	 * 
+&nbsp;	 * @param token lookup key (&quot;token&quot;) under which the rule is registered
+&nbsp;	 * @return rule registered under the given token
+&nbsp;	 * @throws LogicException if no rule by that name is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return Rule associated with the input token
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when no Rule is associated with the input token
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return ReferenceRule
+&nbsp;	 */
+&nbsp;	public Rule getRule(String token) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update a rule that has previously been registered
+&nbsp;	 * 
+&nbsp;	 * @param token lookup key (&quot;token&quot;) for the rule to be updated
+&nbsp;	 * @param rule new version of rule (replaces existing rule)
+&nbsp;	 * @throws LogicException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update Rule when another Rule is registered under the same token
+&nbsp;	 */
+&nbsp;	public void updateRule(String token, Rule rule) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a rule from the logic service
+&nbsp;	 * 
+&nbsp;	 * @param token lookup key (&quot;token&quot;) under which rule to be removed is registered
+&nbsp;	 * @throws LogicException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove rule
+&nbsp;	 */
+&nbsp;	public void removeRule(String token) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a rule for a given patient, given the token for the rule.
+&nbsp;	 * 
+&nbsp;	 * @param patientId patient for whom the rule is to be calculated
+&nbsp;	 * @param expression expression to be parsed and evaluated
+&nbsp;	 * @return patient-specific result from given rule
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see #parse(String)
+&nbsp;	 * @since 1.6.3, 1.7.2, and 1.8
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, String expression) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a rule for a given patient, given a token and parameters for the rule.
+&nbsp;	 * 
+&nbsp;	 * @param patientId patient for whom the rule is to be calculated
+&nbsp;	 * @param expression expression to be parsed and evaluated
+&nbsp;	 * @param parameters parameters to be passed to the rule
+&nbsp;	 * @return patient-specific result from given rule
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see #parse(String)
+&nbsp;	 * @since 1.6.3, 1.7.2, and 1.8
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, String expression, Map&lt;String, Object&gt; parameters) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a query for a given patient
+&nbsp;	 * 
+&nbsp;	 * @param patientId patient for whom the query is to be run
+&nbsp;	 * @param criteria question to be answered (along with the token) for the given patient
+&nbsp;	 * @return result of query
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @since 1.6.3, 1.7.2, and 1.8
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, LogicCriteria criteria) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a query for a given patient
+&nbsp;	 * 
+&nbsp;	 * @param patientId &lt;code&gt;Patient&lt;/code&gt; for whom the query is to be run
+&nbsp;	 * @param criteria &lt;code&gt;Criteria&lt;/code&gt; question to be answered (along with the token) for the
+&nbsp;	 *            given patient
+&nbsp;	 * @param parameters &lt;code&gt;Map&lt;/code&gt; of arguments to be passed to the rule
+&nbsp;	 * @return &lt;code&gt;Result&lt;/code&gt; of query
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @since 1.6.3, 1.7.2, and 1.8
+&nbsp;	 */
+&nbsp;	public Result eval(Integer patientId, LogicCriteria criteria, Map&lt;String, Object&gt; parameters) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates multiple logic expressions for a single patient.
+&nbsp;	 * (The expressions argument is an array and comes last because using a List would give this method
+&nbsp;	 * the same type erasure as the {@link LogicCriteria}... version.)  
+&nbsp;	 * 
+&nbsp;	 * @param patientId which patient to run the rules on 
+&nbsp;	 * @param parameters global parameters to be passed to all rule evaluations
+&nbsp;	 * @param expressions expressions to be parsed and run
+&nbsp;	 * @return results of the rule evaluations
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see #parse(String)
+&nbsp;	 * @since 1.6.3, 1.7.2, and 1.8
+&nbsp;	 */
+&nbsp;	public Map&lt;String, Result&gt; eval(Integer patientId, Map&lt;String, Object&gt; parameters, String... expressions)
+&nbsp;	        throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates multiple {@link LogicCriteria} for a single patient.
+&nbsp;	 * (The criteria argument is an array and comes last because using a List would give this method
+&nbsp;	 * the same type erasure as the {@link String}... version.)
+&nbsp;	 * 
+&nbsp;	 * @param patientId which patient to run the rules on 
+&nbsp;	 * @param parameters global parameters to be passed to all rule evaluations
+&nbsp;	 * @param criteria what criteria to run
+&nbsp;	 * @return results of the rule evaluations
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @since 1.6.3, 1.7.2, and 1.8
+&nbsp;	 */
+&nbsp;	public Map&lt;LogicCriteria, Result&gt; eval(Integer patientId, Map&lt;String, Object&gt; parameters, LogicCriteria... criteria)
+&nbsp;	        throws LogicException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Evaluates a query over a list of patients
+&nbsp;	 * 
+&nbsp;	 * @param who patients for whom the query is to be run
+&nbsp;	 * @param expression expression to be parsed and evaluated for each patient
+&nbsp;	 * @return result for each patient
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see #parse(String)
+&nbsp;	 */
+&nbsp;	public Map&lt;Integer, Result&gt; eval(Cohort who, String expression) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a query over a list of patients
+&nbsp;	 * 
+&nbsp;	 * @param who patients for whom the query is to be run
+&nbsp;	 * @param expression expression to be parsed and evaluated for each patient
+&nbsp;	 * @param parameters parameters to be passed to the rule
+&nbsp;	 * @return result for each patient
+&nbsp;	 * @throws LogicException
+&nbsp;	 * @see #parse(String)
+&nbsp;	 */
+&nbsp;	public Map&lt;Integer, Result&gt; eval(Cohort who, String expression, Map&lt;String, Object&gt; parameters) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a query over a list of patients
+&nbsp;	 * 
+&nbsp;	 * @param who patients for whom the query is to be run
+&nbsp;	 * @param criteria question to be answered (along with the token) for each patient
+&nbsp;	 * @return result for each patient
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	public Map&lt;Integer, Result&gt; eval(Cohort who, LogicCriteria criteria) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a query over a list of patients
+&nbsp;	 * 
+&nbsp;	 * @param who patients for whom the query is to run
+&nbsp;	 * @param criteria question to be answered (along with the token) for each patient
+&nbsp;	 * @param parameters arguments to be passed to the rule
+&nbsp;	 * @return result for each patient
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	public Map&lt;Integer, Result&gt; eval(Cohort who, LogicCriteria criteria, Map&lt;String, Object&gt; parameters)
+&nbsp;	        throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluates a collection of queries for a set of patients
+&nbsp;	 * 
+&nbsp;	 * @param who patients for whom the queries are to be run
+&nbsp;	 * @param criterias parallel list of criteria to be evaluated on each patient
+&nbsp;	 * @return results for each patient
+&nbsp;	 * @throws LogicException
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public Map&lt;LogicCriteria, Map&lt;Integer, Result&gt;&gt; eval(Cohort who, List&lt;LogicCriteria&gt; criterias) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a tag to the given token.
+&nbsp;	 * 
+&nbsp;	 * @param token
+&nbsp;	 * @param tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add tag for a token
+&nbsp;	 */
+&nbsp;	public void addTokenTag(String token, String tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a token&#39;s previously assigned tag.
+&nbsp;	 * 
+&nbsp;	 * @param token
+&nbsp;	 * @param tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove tag from a token
+&nbsp;	 */
+&nbsp;	public void removeTokenTag(String token, String tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all tags associated with this token.
+&nbsp;	 * 
+&nbsp;	 * @param token token to look up by
+&nbsp;	 * @return collection of tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return set of tags for a certain token
+&nbsp;	 */
+&nbsp;	public Set&lt;String&gt; getTokenTags(String token);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all tokens associated with this tag.
+&nbsp;	 * 
+&nbsp;	 * @param tag tag to look up by
+&nbsp;	 * @return collection of tokens
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return set of token associated with a tag
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getTokensWithTag(String tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Performs a partial match search for token tags among all known tokens.
+&nbsp;	 * 
+&nbsp;	 * @param partialTag partial match string
+&nbsp;	 * @return collection of tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return set of tags matching input tag partially
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getTags(String partialTag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches the default datatype this token will return when fed to an eval() call. Results
+&nbsp;	 * (returned by the logic service) are loosely typed by design; however, the default datatype
+&nbsp;	 * can be a useful hint for managing user interfaces or providing default behavior when working
+&nbsp;	 * with rules.
+&nbsp;	 * 
+&nbsp;	 * @param token token to look the datatype up for
+&nbsp;	 * @return datatype of the given token
+&nbsp;	 */
+&nbsp;	public Datatype getDefaultDatatype(String token);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetches the parameters expected by a given rule
+&nbsp;	 * 
+&nbsp;	 * @return list of parameters
+&nbsp;	 */
+&nbsp;	public Set&lt;RuleParameterInfo&gt; getParameterList(String token);
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get all registered logic data sources
+&nbsp;	 * 
+&nbsp;	 * @return all registered logic data sources
+&nbsp;	 */
+&nbsp;	public Map&lt;String, LogicDataSource&gt; getLogicDataSources();
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get a logic data source by name
+&nbsp;	 * 
+&nbsp;	 * @param name name of the desired logic data source
+&nbsp;	 * @return the logic data source with the given name or &lt;code&gt;null&lt;/code&gt; if there is no data
+&nbsp;	 *         source registered under the given name (must be an exact match)
+&nbsp;	 */
+&nbsp;	public LogicDataSource getLogicDataSource(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parse a criteria String to create a new LogicCriteria. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Example: &lt;br&gt;
+&nbsp;	 * &lt;code&gt;logicService.parseString(&quot;LAST &#39;CD4 COUNT&#39; &amp;lt; 200&quot;);&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param criteria LogicCriteria expression in a plain String object.
+&nbsp;	 * @return LogicCriteria using all possible operand and operator from the String input
+&nbsp;	 */
+&nbsp;	public LogicCriteria parse(String criteria);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

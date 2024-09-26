@@ -1,0 +1,459 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateObsDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateObsDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateObsDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (93/98)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.persistence.TypedQuery;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Order;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import javax.persistence.criteria.Subquery;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.FlushMode;
+&nbsp;import org.hibernate.SQLQuery;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.ObsDAO;
+&nbsp;import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate specific Observation related functions This class should not be used directly. All
+&nbsp; * calls should go through the {@link org.openmrs.api.ObsService} methods.
+&nbsp; *
+&nbsp; * @see org.openmrs.api.db.ObsDAO
+&nbsp; * @see org.openmrs.api.ObsService
+&nbsp; */
+<b class="fc">&nbsp;public class HibernateObsDAO implements ObsDAO {</b>
+&nbsp;	
+&nbsp;	protected SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory that allows us to connect to the database that Hibernate knows about.
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#deleteObs(org.openmrs.Obs)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteObs(Obs obs) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(obs);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObs(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs getObs(Integer obsId) throws DAOException {
+<b class="fc">&nbsp;		return (Obs) sessionFactory.getCurrentSession().get(Obs.class, obsId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#saveObs(org.openmrs.Obs)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs saveObs(Obs obs) throws DAOException {
+<b class="fc">&nbsp;		if (obs.hasGroupMembers() &amp;&amp; obs.getObsId() != null) {</b>
+&nbsp;			// hibernate has a problem updating child collections
+&nbsp;			// if the parent object was already saved so we do it
+&nbsp;			// explicitly here
+<b class="nc">&nbsp;			for (Obs member : obs.getGroupMembers()) {</b>
+<b class="nc">&nbsp;				if (member.getObsId() == null) {</b>
+<b class="nc">&nbsp;					saveObs(member);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(obs);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return obs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getObservations(List, List, List, List, List, List, List,
+&nbsp;	 *      Integer, Integer, Date, Date, boolean, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sortList,
+&nbsp;	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws DAOException {
+&nbsp;		
+<b class="fc">&nbsp;		return this.getObservations(whom, encounters, questions, answers, personTypes, locations, sortList, null, mostRecentN, obsGroupId, </b>
+&nbsp;				fromDate, toDate, includeVoidedObs, accessionNumber);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getObservations(List, List, List, List, List, List, List, List,
+&nbsp;	 *      Integer, Integer, Date, Date, boolean, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sortList, List&lt;Visit&gt; visits,
+&nbsp;	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Obs&gt; cq = cb.createQuery(Obs.class);</b>
+<b class="fc">&nbsp;		Root&lt;Obs&gt; root = cq.from(Obs.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = createGetObservationsCriteria(cb, root, whom, encounters, questions, answers, personTypes, locations,</b>
+&nbsp;			obsGroupId, fromDate, toDate, null, visits, includeVoidedObs, accessionNumber);
+&nbsp;
+<b class="fc">&nbsp;		cq.where(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.orderBy(createOrderList(cb, root, sortList));</b>
+&nbsp;
+<b class="fc">&nbsp;		TypedQuery&lt;Obs&gt; query = session.createQuery(cq);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (mostRecentN != null &amp;&amp; mostRecentN &gt; 0) {</b>
+<b class="fc">&nbsp;			query.setMaxResults(mostRecentN);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;						
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getObservationCount(List, List, List, List, List, List, Integer, Date, Date, List, boolean, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Long getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId,
+&nbsp;	        Date fromDate, Date toDate, List&lt;ConceptName&gt; valueCodedNameAnswers, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws DAOException {
+&nbsp;		
+<b class="fc">&nbsp;		return this.getObservationCount(whom, encounters, questions, answers, personTypes, locations, obsGroupId, </b>
+&nbsp;				fromDate, toDate, valueCodedNameAnswers, null, includeVoidedObs, accessionNumber);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getObservationCount(List, List, List, List, List, List, Integer, Date, Date, List, List, boolean, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Long getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId,
+&nbsp;	        Date fromDate, Date toDate, List&lt;ConceptName&gt; valueCodedNameAnswers, List&lt;Visit&gt; visits, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Long&gt; criteriaQuery = cb.createQuery(Long.class);</b>
+<b class="fc">&nbsp;		Root&lt;Obs&gt; root = criteriaQuery.from(Obs.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		criteriaQuery.select(cb.count(root));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = createGetObservationsCriteria(cb, root, whom, encounters, questions, answers,</b>
+&nbsp;			personTypes, locations, obsGroupId, fromDate, toDate,
+&nbsp;			valueCodedNameAnswers, visits, includeVoidedObs, accessionNumber);
+&nbsp;
+<b class="fc">&nbsp;		criteriaQuery.where(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(criteriaQuery).getSingleResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A utility method for creating a criteria based on parameters (which are optional)
+&nbsp;	 *
+&nbsp;	 * @param cb
+&nbsp;	 * @param root
+&nbsp;	 * @param whom
+&nbsp;	 * @param encounters
+&nbsp;	 * @param questions
+&nbsp;	 * @param answers
+&nbsp;	 * @param personTypes
+&nbsp;	 * @param locations
+&nbsp;	 * @param obsGroupId
+&nbsp;	 * @param fromDate
+&nbsp;	 * @param toDate
+&nbsp;	 * @param includeVoidedObs
+&nbsp;	 * @param accessionNumber
+&nbsp;	 * @return a list of predicates that can form part of a query
+&nbsp;	 */
+&nbsp;	private List&lt;Predicate&gt; createGetObservationsCriteria(CriteriaBuilder cb, Root&lt;Obs&gt; root, List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId, Date fromDate, Date toDate, List&lt;ConceptName&gt; valueCodedNameAnswers,
+&nbsp;	        List&lt;Visit&gt; visits, boolean includeVoidedObs, String accessionNumber) {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(whom)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;person&quot;).in(whom));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(encounters)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;encounter&quot;).in(encounters));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(questions)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;concept&quot;).in(questions));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(answers)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;valueCoded&quot;).in(answers));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(personTypes)) {</b>
+<b class="fc">&nbsp;			predicates.addAll(getCriteriaPersonModifier(cb, root, personTypes));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(locations)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;location&quot;).in(locations));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(visits)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;encounter&quot;).get(&quot;visit&quot;).in(visits));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (obsGroupId != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.equal(root.get(&quot;obsGroup&quot;).get(&quot;obsId&quot;), obsGroupId));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (fromDate != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.greaterThanOrEqualTo(root.get(&quot;obsDatetime&quot;), fromDate));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (toDate != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.lessThanOrEqualTo(root.get(&quot;obsDatetime&quot;), toDate));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(valueCodedNameAnswers)) {</b>
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;valueCodedName&quot;).in(valueCodedNameAnswers));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!includeVoidedObs) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;voided&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (accessionNumber != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.equal(root.get(&quot;accessionNumber&quot;), accessionNumber));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return predicates;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private List&lt;Order&gt; createOrderList(CriteriaBuilder cb, Root&lt;Obs&gt; root, List&lt;String&gt; sortList) {
+<b class="fc">&nbsp;		List&lt;Order&gt; orders = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(sortList)) {</b>
+<b class="fc">&nbsp;			for (String sort : sortList) {</b>
+<b class="fc">&nbsp;				if (StringUtils.isNotEmpty(sort)) {</b>
+&nbsp;					// Split the sort, the field name shouldn&#39;t contain space char, so it&#39;s safe
+<b class="fc">&nbsp;					String[] split = sort.split(&quot; &quot;, 2);</b>
+<b class="fc">&nbsp;					String fieldName = split[0];</b>
+&nbsp;
+<b class="fc">&nbsp;					if (split.length == 2 &amp;&amp; &quot;asc&quot;.equals(split[1])) {</b>
+&nbsp;						/* If asc is specified */
+<b class="fc">&nbsp;						orders.add(cb.asc(root.get(fieldName)));</b>
+&nbsp;					} else {
+&nbsp;						/* If the field hasn&#39;t got ordering or desc is specified */
+<b class="fc">&nbsp;						orders.add(cb.desc(root.get(fieldName)));</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return orders;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Convenience method that adds an expression to a list of predicates according to the types of person objects
+&nbsp;	 * that are required.
+&nbsp;	 *
+&nbsp;	 * @param cb          instance of CriteriaBuilder
+&nbsp;	 * @param root        Root entity in the JPA criteria query
+&nbsp;	 * @param personTypes list of person types as filters
+&nbsp;	 * @return a list of javax.persistence.criteria.Predicate instances.
+&nbsp;	 */
+&nbsp;	private List&lt;Predicate&gt; getCriteriaPersonModifier(CriteriaBuilder cb, Root&lt;Obs&gt; root, List&lt;PERSON_TYPE&gt; personTypes) {
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (personTypes.contains(PERSON_TYPE.PATIENT)) {</b>
+<b class="fc">&nbsp;			Subquery&lt;Integer&gt; patientSubquery = cb.createQuery().subquery(Integer.class);</b>
+<b class="fc">&nbsp;			Root&lt;Patient&gt; patientRoot = patientSubquery.from(Patient.class);</b>
+<b class="fc">&nbsp;			patientSubquery.select(patientRoot.get(&quot;patientId&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;			predicates.add(cb.in(root.get(&quot;person&quot;).get(&quot;personId&quot;)).value(patientSubquery));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (personTypes.contains(PERSON_TYPE.USER)) {</b>
+<b class="fc">&nbsp;			Subquery&lt;Integer&gt; userSubquery = cb.createQuery().subquery(Integer.class);</b>
+<b class="fc">&nbsp;			Root&lt;User&gt; userRoot = userSubquery.from(User.class);</b>
+<b class="fc">&nbsp;			userSubquery.select(userRoot.get(&quot;userId&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;			predicates.add(cb.in(root.get(&quot;person&quot;).get(&quot;personId&quot;)).value(userSubquery));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return predicates;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getObsByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs getObsByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Obs.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getRevisionObs(org.openmrs.Obs)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs getRevisionObs(Obs initialObs) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Obs&gt; cq = cb.createQuery(Obs.class);</b>
+<b class="fc">&nbsp;		Root&lt;Obs&gt; root = cq.from(Obs.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;previousVersion&quot;), initialObs));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ObsDAO#getSavedStatus(org.openmrs.Obs)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Obs.Status getSavedStatus(Obs obs) {
+&nbsp;		// avoid premature flushes when this internal method is called from inside a service method
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		FlushMode flushMode = session.getHibernateFlushMode();</b>
+<b class="fc">&nbsp;		session.setHibernateFlushMode(FlushMode.MANUAL);</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			SQLQuery sql = session.createSQLQuery(&quot;select status from obs where obs_id = :obsId&quot;);</b>
+<b class="fc">&nbsp;			sql.setParameter(&quot;obsId&quot;, obs.getObsId());</b>
+<b class="fc">&nbsp;			return Obs.Status.valueOf((String) sql.uniqueResult());</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			session.setHibernateFlushMode(flushMode);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

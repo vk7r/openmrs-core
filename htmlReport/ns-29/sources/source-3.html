@@ -1,0 +1,112 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SerializableComplexObsHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.obs</a>
+</div>
+
+<h1>Coverage Summary for Class: SerializableComplexObsHandler (org.openmrs.obs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SerializableComplexObsHandler</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.obs;
+&nbsp;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.ConceptComplex;
+&nbsp;import org.openmrs.FormField;
+&nbsp;
+&nbsp;/**
+&nbsp; * Interface for handling complex obs. Implementing classes are responsible for generating
+&nbsp; * {@link FormField}s to embed inside a parent {@link FormField}. When a form is submitted and it
+&nbsp; * has a {@link ConceptComplex} associated to an implementing handler class, then the handler&#39;s
+&nbsp; * serializeFormData method is invoked to perform the serialization of the complex data.
+&nbsp; * 
+&nbsp; * @since 1.10
+&nbsp; */
+&nbsp;public interface SerializableComplexObsHandler extends ComplexObsHandler {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the form fields that should be added to the forms using complex concepts that are
+&nbsp;	 * associated to this handler
+&nbsp;	 * 
+&nbsp;	 * @return Set of form fields
+&nbsp;	 */
+&nbsp;	public Set&lt;FormField&gt; getFormFields();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Transforms the incoming data from one format to another. For example, this can be useful if
+&nbsp;	 * the data is to be sent as an hl7 message which doesn&#39;t support xml
+&nbsp;	 * 
+&nbsp;	 * @param data the data to serialize
+&nbsp;	 * @return the serialized form data
+&nbsp;	 */
+&nbsp;	public String serializeFormData(String data);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

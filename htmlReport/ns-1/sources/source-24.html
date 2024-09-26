@@ -1,0 +1,325 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptReferenceTerm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptReferenceTerm (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptReferenceTerm</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (16/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,3%
+  </span>
+  <span class="absValue">
+    (29/38)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptReferenceTerm$HibernateProxy$AGTGoz7c</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (16/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,3%
+  </span>
+  <span class="absValue">
+    (29/38)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.Analyze;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;import org.hibernate.search.annotations.Field;
+&nbsp;
+&nbsp;/**
+&nbsp; * A concept reference term is typically name for a concept by which it is referred in another
+&nbsp; * institution like ICD9, ICD10, SNOMED that keeps a concept dictionary or any other OpenMRS
+&nbsp; * implementation
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptReferenceTerm extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	@DocumentId
+&nbsp;	private Integer conceptReferenceTermId;
+&nbsp;	
+&nbsp;	private ConceptSource conceptSource;
+&nbsp;	
+&nbsp;	//The unique code used to identify the reference term in it&#39;s reference terminology
+&nbsp;	@Field(analyze = Analyze.NO)
+&nbsp;	private String code;
+&nbsp;	
+&nbsp;	private String version;
+&nbsp;	
+&nbsp;	private Set&lt;ConceptReferenceTermMap&gt; conceptReferenceTermMaps;
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptReferenceTerm() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with conceptReferenceTermId */
+<b class="fc">&nbsp;	public ConceptReferenceTerm(Integer conceptReferenceTermId) {</b>
+<b class="fc">&nbsp;		this.conceptReferenceTermId = conceptReferenceTermId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor with the required fields filled in
+&nbsp;	 *
+&nbsp;	 * @param source the ConceptSource belongs in
+&nbsp;	 * @param code the code within that concept
+&nbsp;	 * @param name the user readable name of this term
+&nbsp;	 * @since 1.9.2, 1.10.0
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptReferenceTerm(ConceptSource source, String code, String name) {</b>
+<b class="fc">&nbsp;		this.conceptSource = source;</b>
+<b class="fc">&nbsp;		this.code = code;</b>
+<b class="fc">&nbsp;		setName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptReferenceTermId
+&nbsp;	 */
+&nbsp;	public Integer getConceptReferenceTermId() {
+<b class="fc">&nbsp;		return conceptReferenceTermId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptReferenceTermId the conceptReferenceTermId to set
+&nbsp;	 */
+&nbsp;	public void setConceptReferenceTermId(Integer conceptReferenceTermId) {
+<b class="fc">&nbsp;		this.conceptReferenceTermId = conceptReferenceTermId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptSource
+&nbsp;	 */
+&nbsp;	public ConceptSource getConceptSource() {
+<b class="fc">&nbsp;		return conceptSource;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptSource the conceptSource to set
+&nbsp;	 */
+&nbsp;	public void setConceptSource(ConceptSource conceptSource) {
+<b class="fc">&nbsp;		this.conceptSource = conceptSource;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the code
+&nbsp;	 */
+&nbsp;	public String getCode() {
+<b class="fc">&nbsp;		return code;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param code the code to set
+&nbsp;	 */
+&nbsp;	public void setCode(String code) {
+<b class="fc">&nbsp;		this.code = code;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the version
+&nbsp;	 */
+&nbsp;	public String getVersion() {
+<b class="fc">&nbsp;		return version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param version the version to set
+&nbsp;	 */
+&nbsp;	public void setVersion(String version) {
+<b class="fc">&nbsp;		this.version = version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptReferenceTermMaps
+&nbsp;	 */
+&nbsp;	public Set&lt;ConceptReferenceTermMap&gt; getConceptReferenceTermMaps() {
+<b class="fc">&nbsp;		if (conceptReferenceTermMaps == null) {</b>
+<b class="fc">&nbsp;			conceptReferenceTermMaps = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return conceptReferenceTermMaps;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptReferenceTermMaps the conceptReferenceTermMaps to set
+&nbsp;	 */
+&nbsp;	public void setConceptReferenceTermMaps(Set&lt;ConceptReferenceTermMap&gt; conceptReferenceTermMaps) {
+<b class="fc">&nbsp;		this.conceptReferenceTermMaps = conceptReferenceTermMaps;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptReferenceTermId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptReferenceTermId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given {@link ConceptReferenceTermMap} object to this concept reference term&#39;s list of
+&nbsp;	 * concept reference term maps. If there is already a corresponding ConceptReferenceTermMap
+&nbsp;	 * object for this concept reference term already, this one will not be added.
+&nbsp;	 *
+&nbsp;	 * @param conceptReferenceTermMap
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not add a map where termB is itself
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set termA as the term to which a mapping is being added
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not add duplicate concept reference term maps
+&nbsp;	 */
+&nbsp;	public void addConceptReferenceTermMap(ConceptReferenceTermMap conceptReferenceTermMap) {
+<b class="fc">&nbsp;		if (conceptReferenceTermMap != null &amp;&amp; conceptReferenceTermMap.getTermB() != null</b>
+<b class="fc">&nbsp;		        &amp;&amp; !this.equals(conceptReferenceTermMap.getTermB())) {</b>
+&nbsp;			//can&#39;t map a term to itself
+<b class="fc">&nbsp;			conceptReferenceTermMap.setTermA(this);</b>
+<b class="fc">&nbsp;			if (conceptReferenceTermMaps == null) {</b>
+<b class="fc">&nbsp;				conceptReferenceTermMaps = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!conceptReferenceTermMaps.contains(conceptReferenceTermMap)) {</b>
+<b class="fc">&nbsp;				conceptReferenceTermMaps.add(conceptReferenceTermMap);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the given ConceptReferenceTermMap from the list of conceptReferenceTermMaps for this
+&nbsp;	 * {@link ConceptReferenceTerm}
+&nbsp;	 *
+&nbsp;	 * @param conceptReferenceTermMap
+&nbsp;	 * @return true if the entity was removed, false otherwise
+&nbsp;	 */
+&nbsp;	public boolean removeConceptReferenceTermMap(ConceptReferenceTermMap conceptReferenceTermMap) {
+<b class="nc">&nbsp;		if (conceptReferenceTermMaps != null) {</b>
+<b class="nc">&nbsp;			return conceptReferenceTermMaps.remove(conceptReferenceTermMap);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (getCode() != null &amp;&amp; getName() != null) {</b>
+<b class="fc">&nbsp;			return getName() + &quot;(&quot; + getCode() + &quot;)&quot;;</b>
+<b class="nc">&nbsp;		} else if (getCode() == null) {</b>
+<b class="nc">&nbsp;			return getName();</b>
+<b class="nc">&nbsp;		} else if (getName() == null) {</b>
+<b class="nc">&nbsp;			return getCode();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

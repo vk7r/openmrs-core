@@ -1,0 +1,825 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateUserDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateUserDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateUserDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,7%
+  </span>
+  <span class="absValue">
+    (38/41)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,3%
+  </span>
+  <span class="absValue">
+    (211/239)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.Query;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Join;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.Privilege;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.Daemon;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.LoginCredential;
+&nbsp;import org.openmrs.api.db.UserDAO;
+&nbsp;import org.openmrs.patient.impl.LuhnIdentifierValidator;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.Security;
+&nbsp;import org.openmrs.util.UserByNameComparator;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate specific database methods for the UserService
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.api.db.UserDAO
+&nbsp; * @see org.openmrs.api.UserService
+&nbsp; */
+<b class="fc">&nbsp;public class HibernateUserDAO implements UserDAO {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HibernateUserDAO.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 * 
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#saveUser(org.openmrs.User, java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User saveUser(User user, String password) {
+&nbsp;		
+&nbsp;		// only change the user&#39;s password when creating a new user
+<b class="fc">&nbsp;		boolean isNewUser = user.getUserId() == null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(user);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (isNewUser &amp;&amp; password != null) {</b>
+&nbsp;			/* In OpenMRS, we are using generation strategy as native which will convert to IDENTITY 
+&nbsp;			 for MySQL and SEQUENCE for PostgreSQL. When using IDENTITY strategy, hibernate directly 
+&nbsp;			 issues insert statements where as with  SEQUENCE strategy hibernate only increments 
+&nbsp;			 sequences and issues insert on session flush ( batching is possible) . 
+&nbsp;			 PostgreSQL behaves differently than MySQL because it makes use of SEQUENCE strategy. 
+&nbsp;			*/
+<b class="fc">&nbsp;			sessionFactory.getCurrentSession().flush();</b>
+&nbsp;			
+&nbsp;			//update the new user with the password
+<b class="fc">&nbsp;			String salt = Security.getRandomToken();</b>
+<b class="fc">&nbsp;			String hashedPassword = Security.encodeString(password + salt);</b>
+&nbsp;			
+<b class="fc">&nbsp;			updateUserPassword(hashedPassword, salt, Context.getAuthenticatedUser().getUserId(), new Date(), user</b>
+<b class="fc">&nbsp;			        .getUserId());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return user;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUserByUsername(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public User getUserByUsername(String username) {
+<b class="fc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(</b>
+&nbsp;		    &quot;from User u where u.retired = &#39;0&#39; and (u.username = ?0 or u.systemId = ?1)&quot;);
+<b class="fc">&nbsp;		query.setParameter(0, username);</b>
+<b class="fc">&nbsp;		query.setParameter(1, username);</b>
+<b class="fc">&nbsp;		List&lt;User&gt; users = query.getResultList();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (users == null || users.isEmpty()) {</b>
+<b class="fc">&nbsp;			log.warn(&quot;request for username &#39;&quot; + username + &quot;&#39; not found&quot;);</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return users.get(0);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUserByEmail(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getUserByEmail(String email) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;User&gt; cq = cb.createQuery(User.class);</b>
+<b class="fc">&nbsp;		Root&lt;User&gt; root = cq.from(User.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(cb.lower(root.get(&quot;email&quot;)), email.toLowerCase()));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getLoginCredentialByActivationKey(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LoginCredential getLoginCredentialByActivationKey(String activationKey) {
+<b class="fc">&nbsp;		String key = Security.encodeString(activationKey);</b>
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;LoginCredential&gt; cq = cb.createQuery(LoginCredential.class);</b>
+<b class="fc">&nbsp;		Root&lt;LoginCredential&gt; root = cq.from(LoginCredential.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.like(cb.lower(root.get(&quot;activationKey&quot;)), MatchMode.START.toCaseSensitivePattern(key)));</b>
+&nbsp;
+<b class="fc">&nbsp;		LoginCredential loginCred = session.createQuery(cq).uniqueResult();</b>
+&nbsp;
+<b class="fc">&nbsp;		if(loginCred != null) {</b>
+<b class="fc">&nbsp;			String[] credTokens = loginCred.getActivationKey().split(&quot;:&quot;);</b>
+<b class="fc">&nbsp;			if(credTokens[0].equals(key)){</b>
+<b class="fc">&nbsp;				return loginCred;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#hasDuplicateUsername(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean hasDuplicateUsername(String username, String systemId, Integer userId) {
+<b class="fc">&nbsp;		if (username == null || username.length() == 0) {</b>
+<b class="fc">&nbsp;			username = &quot;-&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (systemId == null || systemId.length() == 0) {</b>
+<b class="nc">&nbsp;			systemId = &quot;-&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (userId == null) {</b>
+<b class="fc">&nbsp;			userId = -1;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		String usernameWithCheckDigit = username;</b>
+&nbsp;		try {
+&nbsp;			//Hardcoding in Luhn since past user IDs used this validator.
+<b class="fc">&nbsp;			usernameWithCheckDigit = new LuhnIdentifierValidator().getValidIdentifier(username);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {}</b>
+&nbsp;		
+<b class="fc">&nbsp;		Query query = sessionFactory</b>
+<b class="fc">&nbsp;		        .getCurrentSession()</b>
+<b class="fc">&nbsp;		        .createQuery(</b>
+&nbsp;		            &quot;select count(*) from User u where (u.username = :uname1 or u.systemId = :uname2 or u.username = :sysid1 or u.systemId = :sysid2 or u.systemId = :uname3) and u.userId &lt;&gt; :uid&quot;);
+<b class="fc">&nbsp;		query.setParameter(&quot;uname1&quot;, username);</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;uname2&quot;, username);</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;sysid1&quot;, systemId);</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;sysid2&quot;, systemId);</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;uname3&quot;, usernameWithCheckDigit);</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;uid&quot;, userId);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Long count = JpaUtils.getSingleResultOrNull(query);</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;# users found: &quot; + count);</b>
+<b class="fc">&nbsp;		return (count != null &amp;&amp; count != 0);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUser(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getUser(Integer userId) {
+&nbsp;
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(User.class, userId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getAllUsers()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;User&gt; getAllUsers() throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().createQuery(&quot;from User where not uuid = :daemonUserUuid order by userId&quot;)</b>
+<b class="fc">&nbsp;		        .setParameter(&quot;daemonUserUuid&quot;, Daemon.getDaemonUserUuid()).list();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#deleteUser(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteUser(User user) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(user);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUsersByRole(org.openmrs.Role)
+&nbsp;	 */
+&nbsp;	public List&lt;User&gt; getUsersByRole(Role role) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;User&gt; cq = cb.createQuery(User.class);</b>
+<b class="nc">&nbsp;		Root&lt;User&gt; root = cq.from(User.class);</b>
+<b class="nc">&nbsp;		Join&lt;User, Role&gt; roles = root.join(&quot;roles&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		Predicate roleLike = cb.like(roles.get(&quot;role&quot;), role.getRole());</b>
+<b class="nc">&nbsp;		Predicate uuidNotEqual = cb.notEqual(root.get(&quot;uuid&quot;), Daemon.getDaemonUserUuid());</b>
+&nbsp;
+<b class="nc">&nbsp;		cq.where(roleLike, uuidNotEqual).orderBy(cb.asc(root.get(&quot;username&quot;)));</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getAllPrivileges()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;Privilege&gt; getAllPrivileges() throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().createQuery(&quot;from Privilege p order by p.privilege&quot;).list();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getPrivilege(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Privilege getPrivilege(String p) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Privilege.class, p);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#deletePrivilege(org.openmrs.Privilege)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deletePrivilege(Privilege privilege) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(privilege);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#savePrivilege(org.openmrs.Privilege)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Privilege savePrivilege(Privilege privilege) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(privilege);</b>
+<b class="fc">&nbsp;		return privilege;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#purgeRole(org.openmrs.Role)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteRole(Role role) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(role);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#saveRole(org.openmrs.Role)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Role saveRole(Role role) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(role);</b>
+<b class="fc">&nbsp;		return role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getAllRoles()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;Role&gt; getAllRoles() throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().createQuery(&quot;from Role r order by r.role&quot;).list();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getRole(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Role getRole(String r) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Role.class, r);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#changePassword(org.openmrs.User, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void changePassword(User u, String pw) throws DAOException {
+<b class="fc">&nbsp;		User authUser = Context.getAuthenticatedUser();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (authUser == null) {</b>
+<b class="nc">&nbsp;			authUser = u;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;updating password&quot;);</b>
+<b class="fc">&nbsp;		String salt = getLoginCredential(u).getSalt();</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(salt)) {</b>
+<b class="fc">&nbsp;			salt = Security.getRandomToken();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		String newHashedPassword = Security.encodeString(pw + salt);</b>
+&nbsp;		
+<b class="fc">&nbsp;		updateUserPassword(newHashedPassword, salt, authUser.getUserId(), new Date(), u.getUserId());</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#changeHashedPassword(User, String, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void changeHashedPassword(User user, String hashedPassword, String salt) throws DAOException {
+<b class="fc">&nbsp;		User authUser = Context.getAuthenticatedUser();</b>
+<b class="fc">&nbsp;		updateUserPassword(hashedPassword, salt, authUser.getUserId(), new Date(), user.getUserId());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param newHashedPassword
+&nbsp;	 * @param salt
+&nbsp;	 * @param userId
+&nbsp;	 * @param date
+&nbsp;	 * @param userId2
+&nbsp;	 */
+&nbsp;	private void updateUserPassword(String newHashedPassword, String salt, Integer changedBy, Date dateChanged,
+&nbsp;	        Integer userIdToChange) {
+<b class="fc">&nbsp;		User changeForUser = getUser(userIdToChange);</b>
+<b class="fc">&nbsp;		if (changeForUser == null) {</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Couldn&#39;t find user to set password for userId=&quot; + userIdToChange);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		User changedByUser = getUser(changedBy);</b>
+<b class="fc">&nbsp;		LoginCredential credentials = getLoginCredential(changeForUser);</b>
+<b class="fc">&nbsp;		credentials.setUserId(userIdToChange);</b>
+<b class="fc">&nbsp;		credentials.setHashedPassword(newHashedPassword);</b>
+<b class="fc">&nbsp;		credentials.setSalt(salt);</b>
+<b class="fc">&nbsp;		credentials.setChangedBy(changedByUser);</b>
+<b class="fc">&nbsp;		credentials.setDateChanged(dateChanged);</b>
+<b class="fc">&nbsp;		credentials.setUuid(changeForUser.getUuid());</b>
+&nbsp;		
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().merge(credentials);</b>
+&nbsp;		
+&nbsp;		// reset lockout 
+<b class="fc">&nbsp;		changeForUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP, &quot;&quot;);</b>
+<b class="fc">&nbsp;		changeForUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOGIN_ATTEMPTS, OpenmrsConstants.ZERO_LOGIN_ATTEMPTS_VALUE);</b>
+<b class="fc">&nbsp;		saveUser(changeForUser, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changePassword(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void changePassword(String oldPassword, String newPassword) throws DAOException {
+<b class="fc">&nbsp;		User u = Context.getAuthenticatedUser();</b>
+<b class="fc">&nbsp;		LoginCredential credentials = getLoginCredential(u);</b>
+<b class="fc">&nbsp;		if (!credentials.checkPassword(oldPassword)) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Passwords don&#39;t match&quot;);</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Passwords don&#39;t match&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.info(&quot;updating password for {}&quot;, u.getUsername());</b>
+&nbsp;		
+&nbsp;		// update the user with the new password
+<b class="fc">&nbsp;		String salt = credentials.getSalt();</b>
+<b class="fc">&nbsp;		String newHashedPassword = Security.encodeString(newPassword + salt);</b>
+<b class="fc">&nbsp;		updateUserPassword(newHashedPassword, salt, u.getUserId(), new Date(), u.getUserId());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changeQuestionAnswer(java.lang.String, java.lang.String,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void changeQuestionAnswer(String pw, String question, String answer) throws DAOException {
+<b class="fc">&nbsp;		User u = Context.getAuthenticatedUser();</b>
+&nbsp;		
+<b class="fc">&nbsp;		LoginCredential credentials = getLoginCredential(u);</b>
+<b class="fc">&nbsp;		if (!credentials.checkPassword(pw)) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Passwords don&#39;t match&quot;);</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Passwords don&#39;t match&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		changeQuestionAnswer(u, question, answer);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#changeQuestionAnswer(User, String, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void changeQuestionAnswer(User u, String question, String answer) throws DAOException {
+<b class="fc">&nbsp;		log.info(&quot;Updating secret question and answer for &quot; + u.getUsername());</b>
+&nbsp;		
+<b class="fc">&nbsp;		LoginCredential credentials = getLoginCredential(u);</b>
+<b class="fc">&nbsp;		credentials.setSecretQuestion(question);</b>
+<b class="fc">&nbsp;		String hashedAnswer = Security.encodeString(answer.toLowerCase() + credentials.getSalt());</b>
+<b class="fc">&nbsp;		credentials.setSecretAnswer(hashedAnswer);</b>
+<b class="fc">&nbsp;		credentials.setDateChanged(new Date());</b>
+<b class="fc">&nbsp;		credentials.setChangedBy(u);</b>
+&nbsp;		
+<b class="fc">&nbsp;		updateLoginCredential(credentials);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#isSecretAnswer(User, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isSecretAnswer(User u, String answer) throws DAOException {
+&nbsp;		
+<b class="fc">&nbsp;		if (StringUtils.isEmpty(answer)) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		LoginCredential credentials = getLoginCredential(u);</b>
+<b class="fc">&nbsp;		String answerOnRecord = credentials.getSecretAnswer();</b>
+<b class="fc">&nbsp;		String hashedAnswer = Security.encodeString(answer.toLowerCase() + credentials.getSalt());</b>
+<b class="fc">&nbsp;		return (hashedAnswer.equals(answerOnRecord));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see UserDAO#getUsers(String, List, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;User&gt; getUsers(String name, List&lt;Role&gt; roles, boolean includeRetired, Integer start, Integer length) {
+&nbsp;		
+<b class="fc">&nbsp;		String hqlSelectStart = &quot;select distinct user from User as user inner join user.person.names as name &quot;;</b>
+<b class="fc">&nbsp;		Query query = createUserSearchQuery(name, roles, includeRetired, hqlSelectStart);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (start != null) {</b>
+<b class="nc">&nbsp;			query.setFirstResult(start);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (length != null &amp;&amp; length &gt; 0) {</b>
+<b class="nc">&nbsp;			query.setMaxResults(length);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;User&gt; returnList = query.getResultList();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!CollectionUtils.isEmpty(returnList)) {</b>
+<b class="fc">&nbsp;			returnList.sort(new UserByNameComparator());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return returnList;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#generateSystemId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer generateSystemId() {
+&nbsp;		
+<b class="fc">&nbsp;		String hql = &quot;select max(userId) from User&quot;;</b>
+&nbsp;		
+<b class="fc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(hql);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Object object = JpaUtils.getSingleResultOrNull(query);</b>
+&nbsp;		
+&nbsp;		Integer id;
+<b class="fc">&nbsp;		if (object instanceof Number) {</b>
+<b class="fc">&nbsp;			id = ((Number) JpaUtils.getSingleResultOrNull(query)).intValue() + 1;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			log.warn(&quot;What is being returned here? Definitely nothing expected object value: &#39;&quot; + object + &quot;&#39; of class: &quot;</b>
+<b class="nc">&nbsp;			        + object.getClass());</b>
+<b class="nc">&nbsp;			id = 1;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return id;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.UserService#getUsersByName(java.lang.String, java.lang.String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;User&gt; getUsersByName(String givenName, String familyName, boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;User&gt; cq = cb.createQuery(User.class);</b>
+<b class="fc">&nbsp;		Root&lt;User&gt; root = cq.from(User.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		Join&lt;User, Person&gt; personJoin = root.join(&quot;person&quot;);</b>
+<b class="fc">&nbsp;		Join&lt;Person, PersonName&gt; nameJoin = personJoin.join(&quot;names&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		predicates.add(cb.equal(nameJoin.get(&quot;givenName&quot;), givenName));</b>
+<b class="fc">&nbsp;		predicates.add(cb.equal(nameJoin.get(&quot;familyName&quot;), familyName));</b>
+<b class="fc">&nbsp;		predicates.add(cb.notEqual(root.get(&quot;uuid&quot;), Daemon.getDaemonUserUuid()));</b>
+&nbsp;
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		cq.where(predicates.toArray(predicates.toArray(new Predicate[]{}))).distinct(true);</b>
+&nbsp;
+<b class="fc">&nbsp;		return new ArrayList&lt;&gt;(session.createQuery(cq).getResultList());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getPrivilegeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Privilege getPrivilegeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Privilege.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getRoleByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Role getRoleByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Role.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getUserByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getUserByUuid(String uuid) {
+<b class="fc">&nbsp;		User ret = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (uuid != null) {</b>
+<b class="fc">&nbsp;			uuid = uuid.trim();</b>
+<b class="fc">&nbsp;			ret = HibernateUtil.getUniqueEntityByUUID(sessionFactory, User.class, uuid);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getLoginCredential(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LoginCredential getLoginCredential(User user) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(LoginCredential.class, user.getUserId());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getLoginCredential(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public LoginCredential getLoginCredentialByUuid(String uuid) {
+<b class="nc">&nbsp;		if (uuid == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return HibernateUtil.getUniqueEntityByUUID(sessionFactory, LoginCredential.class, uuid.trim());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#updateLoginCredential(LoginCredential)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void updateLoginCredential(LoginCredential credential) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().update(credential);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getUsersByPerson(org.openmrs.Person, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;User&gt; getUsersByPerson(Person person, boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;User&gt; cq = cb.createQuery(User.class);</b>
+<b class="fc">&nbsp;		Root&lt;User&gt; root = cq.from(User.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		predicates.add(cb.notEqual(root.get(&quot;uuid&quot;), Daemon.getDaemonUserUuid()));</b>
+&nbsp;
+<b class="fc">&nbsp;		if (person != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.equal(root.get(&quot;person&quot;), person));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		cq.where(predicates.toArray(new Predicate[]{}));</b>
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getCountOfUsers(String, List, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getCountOfUsers(String name, List&lt;Role&gt; roles, boolean includeRetired) {
+<b class="nc">&nbsp;		String hqlSelectStart = &quot;select count(distinct user) from User as user inner join user.person.names as name &quot;;</b>
+<b class="nc">&nbsp;		Query query = createUserSearchQuery(name, roles, includeRetired, hqlSelectStart);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return ((Long) JpaUtils.getSingleResultOrNull(query)).intValue();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility methods that creates a hibernate query object from the specified arguments
+&nbsp;	 * 
+&nbsp;	 * @param name The name of the user to search against
+&nbsp;	 * @param roles the roles to match against
+&nbsp;	 * @param includeRetired Specifies if retired users should be included or not
+&nbsp;	 * @param hqlSelectStart The starting phrase of the select statement that includes the joined
+&nbsp;	 *            tables
+&nbsp;	 * @return the created hibernate query object
+&nbsp;	 */
+&nbsp;	private Query createUserSearchQuery(String name, List&lt;Role&gt; roles, boolean includeRetired, String hqlSelectStart) {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;name: &quot; + name);</b>
+&nbsp;		
+<b class="fc">&nbsp;		name = HibernateUtil.escapeSqlWildcards(name, sessionFactory);</b>
+&nbsp;		
+&nbsp;		// Create an HQL query like this:
+&nbsp;		// select distinct user
+&nbsp;		// from User as user inner join user.person.names as name inner join user.roles as role
+&nbsp;		// where (user.username like :name1 or ...and for systemId givenName familyName familyName2...)
+&nbsp;		//   and (user.username like :name2 or ...and for systemId givenName familyName familyName2...)
+&nbsp;		//   ...repeat for all name fragments...
+&nbsp;		//	 and role in :roleList 
+&nbsp;		//   and user.retired = false
+&nbsp;		// order by username asc
+<b class="fc">&nbsp;		List&lt;String&gt; criteria = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		int counter = 0;</b>
+<b class="fc">&nbsp;		Map&lt;String, String&gt; namesMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (name != null) {</b>
+<b class="fc">&nbsp;			name = name.replace(&quot;, &quot;, &quot; &quot;);</b>
+<b class="fc">&nbsp;			String[] names = name.split(&quot; &quot;);</b>
+<b class="fc">&nbsp;			for (String n : names) {</b>
+<b class="fc">&nbsp;				if (n != null &amp;&amp; n.length() &gt; 0) {</b>
+&nbsp;					// compare each fragment of the query against username, systemId, given, middle, family, and family2
+<b class="fc">&nbsp;					String key = &quot;name&quot; + ++counter;</b>
+<b class="fc">&nbsp;					String value = n + &quot;%&quot;;</b>
+<b class="fc">&nbsp;					namesMap.put(key, value);</b>
+<b class="fc">&nbsp;					criteria.add(&quot;(user.username like :&quot; + key + &quot; or user.systemId like :&quot; + key</b>
+&nbsp;					        + &quot; or name.givenName like :&quot; + key + &quot; or name.middleName like :&quot; + key
+&nbsp;					        + &quot; or name.familyName like :&quot; + key + &quot; or name.familyName2 like :&quot; + key + &quot;)&quot;);
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			criteria.add(&quot;user.retired = false&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// build the hql query
+<b class="fc">&nbsp;		StringBuilder hql = new StringBuilder(hqlSelectStart);</b>
+<b class="fc">&nbsp;		boolean searchOnRoles = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(roles)) {</b>
+<b class="fc">&nbsp;			hql.append(&quot;inner join user.roles as role &quot;);</b>
+<b class="fc">&nbsp;			searchOnRoles = true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		hql.append(&quot;where user.uuid != :DAEMON_USER_UUID &quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!criteria.isEmpty() || searchOnRoles) {</b>
+<b class="fc">&nbsp;			hql.append(&quot;and &quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		for (Iterator&lt;String&gt; i = criteria.iterator(); i.hasNext();) {</b>
+<b class="fc">&nbsp;			hql.append(i.next()).append(&quot; &quot;);</b>
+<b class="fc">&nbsp;			if (i.hasNext()) {</b>
+<b class="fc">&nbsp;				hql.append(&quot;and &quot;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		//Match against the specified roles
+<b class="fc">&nbsp;		if (searchOnRoles) {</b>
+<b class="fc">&nbsp;			if (!criteria.isEmpty()) {</b>
+<b class="fc">&nbsp;				hql.append(&quot; and &quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			hql.append(&quot; role in (:roleList)&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;DAEMON_USER_UUID&quot;, Daemon.getDaemonUserUuid());</b>
+<b class="fc">&nbsp;		for (Map.Entry&lt;String, String&gt; e : namesMap.entrySet()) {</b>
+<b class="fc">&nbsp;			query.setParameter(e.getKey(), e.getValue());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (searchOnRoles) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;roleList&quot;, roles);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return query;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#createActivationKey(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUserActivationKey(LoginCredential credentials) {		
+<b class="fc">&nbsp;			sessionFactory.getCurrentSession().merge(credentials);	</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.UserDAO#getLastLoginTime(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getLastLoginTime(User user) {
+<b class="fc">&nbsp;		return user.getUserProperty(OpenmrsConstants.USER_PROPERTY_LAST_LOGIN_TIMESTAMP);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

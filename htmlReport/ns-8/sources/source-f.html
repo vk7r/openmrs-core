@@ -1,0 +1,816 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateFormDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateFormDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateFormDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,1%
+  </span>
+  <span class="absValue">
+    (37/44)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,1%
+  </span>
+  <span class="absValue">
+    (158/219)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import javax.persistence.Query;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Join;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import javax.persistence.criteria.Subquery;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Field;
+&nbsp;import org.openmrs.FieldAnswer;
+&nbsp;import org.openmrs.FieldType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.FormField;
+&nbsp;import org.openmrs.FormResource;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.FormDAO;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate-specific Form-related functions. This class should not be used directly. All calls
+&nbsp; * should go through the {@link org.openmrs.api.FormService} methods.
+&nbsp; *
+&nbsp; * @see org.openmrs.api.db.FormDAO
+&nbsp; * @see org.openmrs.api.FormService
+&nbsp; */
+<b class="fc">&nbsp;public class HibernateFormDAO implements FormDAO {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HibernateFormDAO.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the form object originally passed in, which will have been persisted.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.api.FormService#createForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form saveForm(Form form) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(form);</b>
+<b class="fc">&nbsp;		return form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#duplicateForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form duplicateForm(Form form) throws DAOException {
+<b class="fc">&nbsp;		return (Form) sessionFactory.getCurrentSession().merge(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#deleteForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteForm(Form form) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(form);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForm(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form getForm(Integer formId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Form.class, formId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormFields(Form)
+&nbsp;	 */
+&nbsp;	public List&lt;FormField&gt; getFormFields(Form form) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FormField&gt; cq = cb.createQuery(FormField.class);</b>
+<b class="fc">&nbsp;		Root&lt;FormField&gt; root = cq.from(FormField.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;form&quot;), form));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFields(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Field&gt; getFields(String search) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;Field&gt; cq = cb.createQuery(Field.class);</b>
+<b class="nc">&nbsp;		Root&lt;Field&gt; root = cq.from(Field.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		cq.where(cb.like(root.get(&quot;name&quot;), MatchMode.ANYWHERE.toCaseSensitivePattern(search)));</b>
+<b class="nc">&nbsp;		cq.orderBy(cb.asc(root.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	public List&lt;Field&gt; getFieldsByConcept(Concept concept) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;Field&gt; cq = cb.createQuery(Field.class);</b>
+<b class="nc">&nbsp;		Root&lt;Field&gt; root = cq.from(Field.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		cq.where(cb.equal(root.get(&quot;concept&quot;), concept))</b>
+<b class="nc">&nbsp;			.orderBy(cb.asc(root.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getField(java.lang.Integer)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getField(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Field getField(Integer fieldId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Field.class, fieldId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getAllFields(boolean)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getAllFields(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Field&gt; getAllFields(boolean includeRetired) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Field&gt; criteriaQuery = criteriaBuilder.createQuery(Field.class);</b>
+<b class="fc">&nbsp;		Root&lt;Field&gt; root = criteriaQuery.from(Field.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			criteriaQuery.where(criteriaBuilder.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(criteriaQuery).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldType(java.lang.Integer)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFieldType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FieldType getFieldType(Integer fieldTypeId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(FieldType.class, fieldTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFieldTypes()
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getAllFieldTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;FieldType&gt; getAllFieldTypes(boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FieldType&gt; cq = cb.createQuery(FieldType.class);</b>
+<b class="fc">&nbsp;		Root&lt;FieldType&gt; root = cq.from(FieldType.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormField(java.lang.Integer)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormField(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormField getFormField(Integer formFieldId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(FormField.class, formFieldId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormField(org.openmrs.Form, org.openmrs.Concept,
+&nbsp;	 *      java.util.Collection, boolean)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormField(org.openmrs.Form, org.openmrs.Concept,
+&nbsp;	 *      java.util.Collection, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public FormField getFormField(Form form, Concept concept, Collection&lt;FormField&gt; ignoreFormFields, boolean force)
+&nbsp;	        throws DAOException {
+<b class="fc">&nbsp;		if (form == null) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;form is null, no fields will be matched&quot;);</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FormField&gt; cq = cb.createQuery(FormField.class);</b>
+<b class="fc">&nbsp;		Root&lt;FormField&gt; root = cq.from(FormField.class);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Join&lt;FormField, Field&gt; fieldJoin = root.join(&quot;field&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		cq.where(cb.equal(fieldJoin.get(&quot;concept&quot;), concept), cb.equal(root.get(&quot;form&quot;), form));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;FormField&gt; formFields = session.createQuery(cq).getResultList();</b>
+&nbsp;		
+<b class="fc">&nbsp;		String err = &quot;FormField warning.  No FormField matching concept &#39;&quot; + concept + &quot;&#39; for form &#39;&quot; + form + &quot;&#39;&quot;;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (formFields.isEmpty()) {</b>
+<b class="fc">&nbsp;			log.debug(err);</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// save the first formfield in case we&#39;re not a in a &quot;force&quot; situation
+<b class="fc">&nbsp;		FormField backupPlan = formFields.get(0);</b>
+&nbsp;		
+&nbsp;		// remove the formfields we&#39;re supposed to ignore from the return list
+<b class="fc">&nbsp;		formFields.removeAll(ignoreFormFields);</b>
+&nbsp;		
+&nbsp;		// if we ended up removing all of the formfields, check to see if we&#39;re
+&nbsp;		// in a &quot;force&quot; situation
+<b class="fc">&nbsp;		if (formFields.isEmpty()) {</b>
+<b class="nc">&nbsp;			if (!force) {</b>
+<b class="nc">&nbsp;				return backupPlan;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				log.debug(err);</b>
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			// if formFields.size() is still greater than 0
+<b class="fc">&nbsp;			return formFields.get(0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getForms()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Form&gt; getAllForms(boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Form&gt; cq = cb.createQuery(Form.class);</b>
+<b class="fc">&nbsp;		Root&lt;Form&gt; root = cq.from(Form.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		cq.orderBy(cb.asc(root.get(&quot;name&quot;)), cb.asc(root.get(&quot;formId&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormsContainingConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;Form&gt; getFormsContainingConcept(Concept c) throws DAOException {
+<b class="fc">&nbsp;		String q = &quot;select distinct ff.form from FormField ff where ff.field.concept = :concept&quot;;</b>
+<b class="fc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(q);</b>
+<b class="fc">&nbsp;		query.setParameter(&quot;concept&quot;, c);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#saveField(org.openmrs.Field)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#saveField(org.openmrs.Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Field saveField(Field field) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(field);</b>
+<b class="fc">&nbsp;		return field;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#deleteField(org.openmrs.Field)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#deleteField(org.openmrs.Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteField(Field field) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(field);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#createFormField(org.openmrs.FormField)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormField saveFormField(FormField formField) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(formField);</b>
+<b class="fc">&nbsp;		return formField;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#deleteFormField(org.openmrs.FormField)
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#deleteFormField(org.openmrs.FormField)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteFormField(FormField formField) throws DAOException {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().delete(formField);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getAllFormFields()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;FormField&gt; getAllFormFields() {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FormField&gt; cq = cb.createQuery(FormField.class);</b>
+<b class="fc">&nbsp;		cq.from(FormField.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFields(java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection, java.util.Collection, java.util.Collection, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.util.Collection, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Field&gt; getFields(Collection&lt;Form&gt; forms, Collection&lt;FieldType&gt; fieldTypes, Collection&lt;Concept&gt; concepts,
+&nbsp;	        Collection&lt;String&gt; tableNames, Collection&lt;String&gt; attributeNames, Boolean selectMultiple,
+&nbsp;	        Collection&lt;FieldAnswer&gt; containsAllAnswers, Collection&lt;FieldAnswer&gt; containsAnyAnswer, Boolean retired)
+&nbsp;	        throws DAOException {
+&nbsp;		
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;Field&gt; cq = cb.createQuery(Field.class);</b>
+<b class="nc">&nbsp;		Root&lt;Field&gt; root = cq.from(Field.class);</b>
+&nbsp;		
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		if (!forms.isEmpty()) {</b>
+<b class="nc">&nbsp;			predicates.add(root.get(&quot;form&quot;).in(forms));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!fieldTypes.isEmpty()) {</b>
+<b class="nc">&nbsp;			predicates.add(root.get(&quot;fieldType&quot;).in(fieldTypes));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!concepts.isEmpty()) {</b>
+<b class="nc">&nbsp;			predicates.add(root.get(&quot;concept&quot;).in(concepts));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!tableNames.isEmpty()) {</b>
+<b class="nc">&nbsp;			predicates.add(root.get(&quot;tableName&quot;).in(tableNames));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!attributeNames.isEmpty()) {</b>
+<b class="nc">&nbsp;			predicates.add(root.get(&quot;attributeName&quot;).in(attributeNames));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (selectMultiple != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.equal(root.get(&quot;selectMultiple&quot;), selectMultiple));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!containsAllAnswers.isEmpty()) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Form.getFields.error&quot;, new Object[] { &quot;containsAllAnswers&quot; });</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!containsAnyAnswer.isEmpty()) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Form.getFields.error&quot;, new Object[] { &quot;containsAnyAnswer&quot; });</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (retired != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.equal(root.get(&quot;retired&quot;), retired));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		cq.where(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getForm(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form getForm(String name, String version) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Form&gt; cq = cb.createQuery(Form.class);</b>
+<b class="fc">&nbsp;		Root&lt;Form&gt; root = cq.from(Form.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), name), cb.equal(root.get(&quot;version&quot;), version));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getForms(java.lang.String, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.lang.Boolean, java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Form&gt; getForms(String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) throws DAOException {
+<b class="fc">&nbsp;		CriteriaBuilder cb = sessionFactory.getCurrentSession().getCriteriaBuilder();</b>
+&nbsp;
+<b class="fc">&nbsp;		CriteriaQuery&lt;Form&gt; cq = cb.createQuery(Form.class);</b>
+<b class="fc">&nbsp;		Root&lt;Form&gt; root = cq.from(Form.class);</b>
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = getFormCriteria(cb, cq, root, partialName, published, encounterTypes, retired, containingAnyFormField,</b>
+&nbsp;			containingAllFormFields, fields);
+<b class="fc">&nbsp;		cq.where(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormCount(java.lang.String, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.lang.Boolean, java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getFormCount(String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) throws DAOException {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;Long&gt; cq = cb.createQuery(Long.class);</b>
+<b class="nc">&nbsp;		Root&lt;Form&gt; root = cq.from(Form.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = getFormCriteria(cb, cq, root, partialName, published, encounterTypes, retired, containingAnyFormField,</b>
+&nbsp;		    containingAllFormFields, fields);
+&nbsp;
+<b class="nc">&nbsp;		cq.select(cb.count(root.get(&quot;formId&quot;)))</b>
+<b class="nc">&nbsp;			.where(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;
+<b class="nc">&nbsp;		Long result = sessionFactory.getCurrentSession().createQuery(cq).getSingleResult();</b>
+<b class="nc">&nbsp;		return OpenmrsUtil.convertToInteger(result);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to create the same predicates for both getForms and
+&nbsp;	 * getFormCount
+&nbsp;	 *
+&nbsp;	 * @param cb
+&nbsp;	 * @param cq
+&nbsp;	 * @param root
+&nbsp;	 * @param partialName
+&nbsp;	 * @param published
+&nbsp;	 * @param encounterTypes
+&nbsp;	 * @param retired
+&nbsp;	 * @param containingAnyFormField
+&nbsp;	 * @param containingAllFormFields
+&nbsp;	 * @param fields
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private &lt;T&gt; List&lt;Predicate&gt; getFormCriteria(CriteriaBuilder cb, CriteriaQuery&lt;T&gt; cq, Root&lt;Form&gt; root, String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) {
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (StringUtils.isNotEmpty(partialName)) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.or(</b>
+<b class="fc">&nbsp;				cb.like(root.get(&quot;name&quot;), MatchMode.START.toCaseSensitivePattern(partialName)), </b>
+<b class="fc">&nbsp;				cb.like(root.get(&quot;name&quot;), MatchMode.ANYWHERE.toCaseSensitivePattern(&quot; &quot; + partialName)))</b>
+&nbsp;			);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (published != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.equal(root.get(&quot;published&quot;), published));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!encounterTypes.isEmpty()) {</b>
+<b class="nc">&nbsp;			predicates.add(root.get(&quot;encounterType&quot;).in(encounterTypes));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (retired != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.equal(root.get(&quot;retired&quot;), retired));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// TODO junit test
+<b class="fc">&nbsp;		if (!containingAnyFormField.isEmpty()) {</b>
+&nbsp;			// Convert form field persistents to integers
+<b class="fc">&nbsp;			Set&lt;Integer&gt; anyFormFieldIds = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (FormField ff : containingAnyFormField) {</b>
+<b class="fc">&nbsp;				anyFormFieldIds.add(ff.getFormFieldId());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;
+<b class="fc">&nbsp;			Subquery&lt;Integer&gt; subquery = cq.subquery(Integer.class);</b>
+<b class="fc">&nbsp;			Root&lt;FormField&gt; subqueryRoot = subquery.from(FormField.class);</b>
+<b class="fc">&nbsp;			subquery.select(subqueryRoot.get(&quot;form&quot;).get(&quot;formId&quot;));</b>
+<b class="fc">&nbsp;			subquery.where(subqueryRoot.get(&quot;formFieldId&quot;).in(anyFormFieldIds));</b>
+&nbsp;
+<b class="fc">&nbsp;			predicates.add(root.get(&quot;formId&quot;).in(subquery));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!containingAllFormFields.isEmpty()) {</b>
+&nbsp;			
+&nbsp;			// Convert form field persistents to integers
+<b class="fc">&nbsp;			Set&lt;Integer&gt; allFormFieldIds = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (FormField ff : containingAllFormFields) {</b>
+<b class="fc">&nbsp;				allFormFieldIds.add(ff.getFormFieldId());</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			Subquery&lt;Long&gt; subquery = cq.subquery(Long.class);</b>
+<b class="fc">&nbsp;			Root&lt;FormField&gt; subqueryRoot = subquery.from(FormField.class);</b>
+&nbsp;
+<b class="fc">&nbsp;			subquery.select(cb.count(subqueryRoot.get(&quot;formFieldId&quot;)));</b>
+<b class="fc">&nbsp;			subquery.where(</b>
+<b class="fc">&nbsp;				cb.equal(subqueryRoot.get(&quot;form&quot;).get(&quot;formId&quot;), root.get(&quot;formId&quot;)),</b>
+<b class="fc">&nbsp;				subqueryRoot.get(&quot;formFieldId&quot;).in(allFormFieldIds)</b>
+&nbsp;			);
+<b class="fc">&nbsp;			predicates.add(cb.equal(cb.literal((long) containingAllFormFields.size()), subquery.getSelection()));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// get all forms (dupes included) that have this field on them
+<b class="fc">&nbsp;		if (!fields.isEmpty()) {</b>
+&nbsp;			// Create join object here
+<b class="fc">&nbsp;			Join&lt;Form, FormField&gt; joinFormFields = root.join(&quot;formFields&quot;);</b>
+<b class="fc">&nbsp;			Join&lt;FormField, Form&gt; joinForm = joinFormFields.join(&quot;form&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			predicates.add(cb.equal(joinFormFields.get(&quot;form&quot;).get(&quot;formId&quot;), joinForm.get(&quot;formId&quot;)));</b>
+<b class="fc">&nbsp;			predicates.add(joinFormFields.get(&quot;field&quot;).in(fields));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return predicates;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFieldByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Field getFieldByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Field.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public FieldAnswer getFieldAnswerByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, FieldAnswer.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFieldTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FieldType getFieldTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, FieldType.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFieldTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FieldType getFieldTypeByName(String name) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FieldType&gt; cq = cb.createQuery(FieldType.class);</b>
+<b class="fc">&nbsp;		Root&lt;FieldType&gt; root = cq.from(FieldType.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), name));</b>
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Form getFormByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Form.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormFieldByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormField getFormFieldByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, FormField.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormsByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Form&gt; getFormsByName(String name) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Form&gt; cq = cb.createQuery(Form.class);</b>
+<b class="fc">&nbsp;		Root&lt;Form&gt; root = cq.from(Form.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;name&quot;), name), cb.isFalse(root.get(&quot;retired&quot;)));</b>
+<b class="fc">&nbsp;		cq.orderBy(cb.desc(root.get(&quot;version&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#deleteFieldType(org.openmrs.FieldType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteFieldType(FieldType fieldType) throws DAOException {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().delete(fieldType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#saveFieldType(org.openmrs.FieldType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FieldType saveFieldType(FieldType fieldType) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(fieldType);</b>
+<b class="fc">&nbsp;		return fieldType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormFieldsByField(Field)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;FormField&gt; getFormFieldsByField(Field field) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FormField&gt; cq = cb.createQuery(FormField.class);</b>
+<b class="fc">&nbsp;		Root&lt;FormField&gt; root = cq.from(FormField.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;field&quot;), field));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormResource(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormResource getFormResource(Integer formResourceId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(FormResource.class, formResourceId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormResourceByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormResource getFormResourceByUuid(String uuid) {
+<b class="nc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, FormResource.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormResource(org.openmrs.Form, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormResource getFormResource(Form form, String name) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FormResource&gt; cq = cb.createQuery(FormResource.class);</b>
+<b class="fc">&nbsp;		Root&lt;FormResource&gt; root = cq.from(FormResource.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;form&quot;), form), cb.equal(root.get(&quot;name&quot;), name));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#saveFormResource(org.openmrs.FormResource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormResource saveFormResource(FormResource formResource) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(formResource);</b>
+<b class="fc">&nbsp;		return formResource;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#deleteFormResource(org.openmrs.FormResource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteFormResource(FormResource formResource) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(formResource);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.FormDAO#getFormResourcesForForm(org.openmrs.Form)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;FormResource&gt; getFormResourcesForForm(Form form) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;FormResource&gt; cq = cb.createQuery(FormResource.class);</b>
+<b class="fc">&nbsp;		Root&lt;FormResource&gt; root = cq.from(FormResource.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.equal(root.get(&quot;form&quot;), form));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

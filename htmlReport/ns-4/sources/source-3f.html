@@ -1,0 +1,608 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ObsService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: ObsService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ObsService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.ObsDAO;
+&nbsp;import org.openmrs.obs.ComplexObsHandler;
+&nbsp;import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * The ObsService deals with saving and getting Obs to/from the database Usage:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; *  ObsService obsService = Context.getObsService();
+&nbsp; * 
+&nbsp; *  // get the obs for patient with internal identifier of 1235
+&nbsp; *  List&amp;lt;Obs&amp;gt; someObsList = obsService.getObservationsByPerson(new Patient(1235));
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * There are also a number of convenience methods for extracting obs pertaining to certain Concepts,
+&nbsp; * people, or encounters
+&nbsp; * 
+&nbsp; * @see org.openmrs.Obs
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;public interface ObsService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the given &lt;code&gt;dao&lt;/code&gt; on this obs service. The dao will act as the conduit through
+&nbsp;	 * with all obs calls get to the database
+&nbsp;	 * 
+&nbsp;	 * @param dao specific ObsDAO to use for this service
+&nbsp;	 */
+&nbsp;	public void setObsDAO(ObsDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get an observation
+&nbsp;	 * 
+&nbsp;	 * @param obsId integer obsId of observation desired
+&nbsp;	 * @return matching Obs
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs matching given obsId
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Obs getObs(Integer obsId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Obs by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return obs or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Obs getObsByUuid(String uuid) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get Revision Obs for initial Obs
+&nbsp;	 *
+&nbsp;	 * @param initialObs
+&nbsp;	 * @return obs or null
+&nbsp;	 * @since 2.1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find revision obs for given valid obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no revision obs found for given obs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Obs getRevisionObs(Obs initialObs);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;p&gt;Save the given obs to the database. The behavior differs for first-time save, and edit.&lt;/p&gt;
+&nbsp;	 *
+&nbsp;	 * &lt;p&gt;When you save a new observation to the database:
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 *     &lt;li&gt;the obs you pass in is saved to the database, and its obsId field is filled in&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;the obs you pass in is returned&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;the changeMesssage parameter is ignored&lt;/li&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * &lt;/p&gt;
+&nbsp;	 *
+&nbsp;	 * &lt;p&gt;When you edit an existing observation:
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 *     &lt;li&gt;the values of the obs you pass to this method are written to the database as &lt;em&gt;new&lt;/em&gt; obs&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;the newly-created obs is returned (i.e. not the one you passed in)&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;the obs you passed is marked as voided, with changeMessage as the void reason&lt;/li&gt;
+&nbsp;	 *     &lt;li&gt;the newly-created obs points back to the voided one via its previousVersion field&lt;/li&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * &lt;/p&gt;
+&nbsp;	 *
+&nbsp;	 * @param obs the Obs to save to the database
+&nbsp;	 * @param changeMessage String explaining why &lt;code&gt;obs&lt;/code&gt; is being changed. If
+&nbsp;	 *            &lt;code&gt;obs&lt;/code&gt; is a new obs, changeMessage is nullable, or if it is being
+&nbsp;	 *            updated, it would be required
+&nbsp;	 * @return Obs that was saved to the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new file from complex data for new obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not overwrite file when updating a complex obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void the given obs in the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create very basic obs and add new obsId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; allow setting properties on obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a different object when updating an obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set creator and dateCreated on new obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cascade save to child obs groups
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cascade update to new child obs groups
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; link original and updated obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set void reason message to changeMessage
+&nbsp;     * &lt;strong&gt;Should&lt;/strong&gt; not void an Obs with no changes
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_OBS, PrivilegeConstants.EDIT_OBS })
+&nbsp;	public Obs saveObs(Obs obs, String changeMessage) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Equivalent to deleting an observation
+&nbsp;	 * 
+&nbsp;	 * @param obs Obs to void
+&nbsp;	 * @param reason String reason it&#39;s being voided
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set voided bit on given obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if reason parameter is empty
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_OBS)
+&nbsp;	public Obs voidObs(Obs obs, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Revive an observation (pull a Lazarus)
+&nbsp;	 * 
+&nbsp;	 * @param obs Obs to unvoid
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unset voided bit on given obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cascade unvoid to child grouped obs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_OBS)
+&nbsp;	public Obs unvoidObs(Obs obs) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove an observation from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidObs(Obs) for that one) If other things link to
+&nbsp;	 * this obs, an error will be thrown.
+&nbsp;	 * 
+&nbsp;	 * @param obs
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see #purgeObs(Obs, boolean)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given obs from the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_OBS)
+&nbsp;	public void purgeObs(Obs obs) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove an observation from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidObs(Obs) for that one)
+&nbsp;	 * 
+&nbsp;	 * @param obs the observation to remove from the database
+&nbsp;	 * @param cascade true/false whether or not to cascade down to other things that link to this
+&nbsp;	 *            observation (like Orders and ObsGroups)
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see #purgeObs(Obs, boolean)
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if given true cascade
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete any obsGroupMembers before deleting the obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not delete referenced orders when purging obs
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_OBS)
+&nbsp;	public void purgeObs(Obs obs, boolean cascade) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get all Observations for the given person, sorted by obsDatetime ascending. Does not return
+&nbsp;	 * voided observations.
+&nbsp;	 * 
+&nbsp;	 * @param who the user to match on
+&nbsp;	 * @return a List&amp;lt;Obs&amp;gt; object containing all non-voided observations for the specified person
+&nbsp;	 * @see #getObservations(List, List, List, List, List, List, List, Integer, Integer, Date, Date,
+&nbsp;	 *      boolean)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all observations assigned to given person
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public List&lt;Obs&gt; getObservationsByPerson(Person who);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method fetches observations according to the criteria in the given arguments. All
+&nbsp;	 * arguments are optional and nullable. If more than one argument is non-null, the result is
+&nbsp;	 * equivalent to an &quot;and&quot;ing of the arguments. (e.g. if both a &lt;code&gt;location&lt;/code&gt; and a
+&nbsp;	 * &lt;code&gt;fromDate&lt;/code&gt; are given, only Obs that are &lt;u&gt;both&lt;/u&gt; at that Location and after the
+&nbsp;	 * fromDate are returned). &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Note: If &lt;code&gt;whom&lt;/code&gt; has elements, &lt;code&gt;personType&lt;/code&gt; is ignored &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Note: to get all observations on a certain date, use:&lt;br&gt;
+&nbsp;	 * Date fromDate = &quot;2009-08-15&quot;;&lt;br&gt;
+&nbsp;	 * Date toDate = OpenmrsUtil.lastSecondOfDate(fromDate); List&amp;lt;Obs&amp;gt; obs = getObservations(....,
+&nbsp;	 * fromDate, toDate, ...);
+&nbsp;	 * 
+&nbsp;	 * @param whom List&amp;lt;Person&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param encounters List&amp;lt;Encounter&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param questions List&amp;lt;Concept&amp;gt; to restrict the obs to (optional)
+&nbsp;	 * @param answers List&amp;lt;Concept&amp;gt; to restrict the valueCoded to (optional)
+&nbsp;	 * @param personTypes List&amp;lt;PERSON_TYPE&amp;gt; objects to restrict this to. Only used if
+&nbsp;	 *            &lt;code&gt;whom&lt;/code&gt; is an empty list (optional)
+&nbsp;	 * @param locations The org.openmrs.Location objects to restrict to (optional)
+&nbsp;	 * @param sort list of column names to sort on (obsId, obsDatetime, etc) if null, defaults to
+&nbsp;	 *            obsDatetime (optional)
+&nbsp;	 * @param mostRecentN restrict the number of obs returned to this size (optional)
+&nbsp;	 * @param obsGroupId the Obs.getObsGroupId() to this integer (optional)
+&nbsp;	 * @param fromDate the earliest Obs date to get (optional)
+&nbsp;	 * @param toDate the latest Obs date to get (optional)
+&nbsp;	 * @param includeVoidedObs true/false whether to also include the voided obs (required)
+&nbsp;	 * @return list of Observations that match all of the criteria given in the arguments
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sort,
+&nbsp;	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservations(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.util.List,
+&nbsp;	 *      java.lang.Integer, java.lang.Integer, java.util.Date, java.util.Date, boolean)
+&nbsp;	 *
+&nbsp;	 * This method works exactly the same; it only adds accession number search criteria.
+&nbsp;	 * It effectively surpasses the above method; the old one is however kept for backward
+&nbsp;	 * compatibility reasons.
+&nbsp;	 *
+&nbsp;	 * @param whom List&amp;lt;Person&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param encounters List&amp;lt;Encounter&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param questions List&amp;lt;Concept&amp;gt; to restrict the obs to (optional)
+&nbsp;	 * @param answers List&amp;lt;Concept&amp;gt; to restrict the valueCoded to (optional)
+&nbsp;	 * @param personTypes List&amp;lt;PERSON_TYPE&amp;gt; objects to restrict this to. Only used if
+&nbsp;	 *            &lt;code&gt;whom&lt;/code&gt; is an empty list (optional)
+&nbsp;	 * @param locations The org.openmrs.Location objects to restrict to (optional)
+&nbsp;	 * @param sort list of column names to sort on (obsId, obsDatetime, etc) if null, defaults to
+&nbsp;	 *            obsDatetime (optional)
+&nbsp;	 * @param mostRecentN restrict the number of obs returned to this size (optional)
+&nbsp;	 * @param obsGroupId the Obs.getObsGroupId() to this integer (optional)
+&nbsp;	 * @param fromDate the earliest Obs date to get (optional)
+&nbsp;	 * @param toDate the latest Obs date to get (optional)
+&nbsp;	 * @param includeVoidedObs true/false whether to also include the voided obs (required)
+&nbsp;	 * @param accessionNumber accession number (optional)
+&nbsp;	 * @return list of Observations that match all of the criteria given in the arguments
+&nbsp;	 * @since 1.12
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; compare dates using lte and gte
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all obs assigned to given encounters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all obs with question concept in given questions parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all obs with answer concept in given answers parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all obs whose person is a person only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return obs whose person is a patient only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return obs whose person is a user only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return obs with location in given locations parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; sort returned obs by obsDatetime if sort is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; sort returned obs by conceptId if sort is concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; limit number of obs returned to mostReturnN parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return obs whose groupId is given obsGroupId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include voided obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include voided obs if includeVoidedObs is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return observations with matching accession number
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sort,
+&nbsp;	        Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs,
+&nbsp;	        String accessionNumber) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method fetches the count of observations according to the criteria in the given
+&nbsp;	 * arguments. All arguments are optional and nullable. If more than one argument is non-null,
+&nbsp;	 * the result is equivalent to an &quot;and&quot;ing of the arguments. (e.g. if both a
+&nbsp;	 * &lt;code&gt;location&lt;/code&gt; and a &lt;code&gt;fromDate&lt;/code&gt; are given, only Obs that are &lt;u&gt;both&lt;/u&gt; at
+&nbsp;	 * that Location and after the fromDate are returned). &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Note: If &lt;code&gt;whom&lt;/code&gt; has elements, &lt;code&gt;personType&lt;/code&gt; is ignored &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Note: to get all observations count on a certain date, use:&lt;br&gt;
+&nbsp;	 * Date fromDate = &quot;2009-08-15&quot;;&lt;br&gt;
+&nbsp;	 * Date toDate = OpenmrsUtil.lastSecondOfDate(fromDate); List&amp;lt;Obs&amp;gt; obs = getObservations(....,
+&nbsp;	 * fromDate, toDate, ...);
+&nbsp;	 * 
+&nbsp;	 * @param whom List&amp;lt;Person&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param encounters List&amp;lt;Encounter&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param questions List&amp;lt;Concept&amp;gt; to restrict the obs to (optional)
+&nbsp;	 * @param answers List&amp;lt;Concept&amp;gt; to restrict the valueCoded to (optional)
+&nbsp;	 * @param personTypes List&amp;lt;PERSON_TYPE&amp;gt; objects to restrict this to. Only used if
+&nbsp;	 *            &lt;code&gt;whom&lt;/code&gt; is an empty list (optional)
+&nbsp;	 * @param locations The org.openmrs.Location objects to restrict to (optional) obsDatetime
+&nbsp;	 *            (optional)
+&nbsp;	 * @param obsGroupId the Obs.getObsGroupId() to this integer (optional)
+&nbsp;	 * @param fromDate the earliest Obs date to get (optional)
+&nbsp;	 * @param toDate the latest Obs date to get (optional)
+&nbsp;	 * @param includeVoidedObs true/false whether to also include the voided obs (required)
+&nbsp;	 * @return list of Observations that match all of the criteria given in the arguments
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Integer getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId,
+&nbsp;	        Date fromDate, Date toDate, boolean includeVoidedObs) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservationCount(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.lang.Integer,
+&nbsp;	 *      java.util.Date, java.util.Date, boolean)
+&nbsp;	 *
+&nbsp;	 * This method works exactly the same; it only adds accession number search criteria.
+&nbsp;	 * It effectively surpasses the above method; the old one is however kept for backward
+&nbsp;	 * compatibility reasons.
+&nbsp;	 *
+&nbsp;	 * @param whom List&amp;lt;Person&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param encounters List&amp;lt;Encounter&amp;gt; to restrict obs to (optional)
+&nbsp;	 * @param questions List&amp;lt;Concept&amp;gt; to restrict the obs to (optional)
+&nbsp;	 * @param answers List&amp;lt;Concept&amp;gt; to restrict the valueCoded to (optional)
+&nbsp;	 * @param personTypes List&amp;lt;PERSON_TYPE&amp;gt; objects to restrict this to. Only used if
+&nbsp;	 *            &lt;code&gt;whom&lt;/code&gt; is an empty list (optional)
+&nbsp;	 * @param locations The org.openmrs.Location objects to restrict to (optional) obsDatetime
+&nbsp;	 *            (optional)
+&nbsp;	 * @param obsGroupId the Obs.getObsGroupId() to this integer (optional)
+&nbsp;	 * @param fromDate the earliest Obs date to get (optional)
+&nbsp;	 * @param toDate the latest Obs date to get (optional)
+&nbsp;	 * @param includeVoidedObs true/false whether to also include the voided obs (required)
+&nbsp;	 * @param accessionNumber accession number (optional)
+&nbsp;	 * @return list of Observations that match all of the criteria given in the arguments
+&nbsp;	 * @since 1.12
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; compare dates using lte and gte
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the count of all obs assigned to given encounters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the count of all obs with question concept in given questions parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the count of all obs with answer concept in given answers parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the count of all obs whose person is a person only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the count of all obs whose person is a patient only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the count of obs whose person is a user only
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the count of obs with location in given locations parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the count of obs whose groupId is given obsGroupId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not include count of voided obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include count of voided obs if includeVoidedObs is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return count of obs with matching accession number
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Integer getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;	        List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, Integer obsGroupId,
+&nbsp;	        Date fromDate, Date toDate, boolean includeVoidedObs, String accessionNumber) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method searches the obs table based on the given &lt;code&gt;searchString&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param searchString The string to search on
+&nbsp;	 * @return observations matching the given string
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs matching patient identifier in searchString
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs matching encounterId in searchString
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get obs matching obsId in searchString
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public List&lt;Obs&gt; getObservations(String searchString) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all nonvoided observations for the given patient with the given concept as the question
+&nbsp;	 * concept (conceptId)
+&nbsp;	 * 
+&nbsp;	 * @param who person to match on
+&nbsp;	 * @param question conceptId to match on
+&nbsp;	 * @return list of all nonvoided observations matching these criteria
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see #getObservations(List, List, List, List, List, List, List, Integer, Integer, Date, Date,
+&nbsp;	 *      boolean)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get observations matching person and question
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null person parameter
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public List&lt;Obs&gt; getObservationsByPersonAndConcept(Person who, Concept question) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a complex observation. If obs.isComplex() is true, then returns an Obs with its
+&nbsp;	 * ComplexData. Otherwise returns a simple Obs. 
+&nbsp;	 * @param obsId
+&nbsp;	 * @return Obs with a ComplexData
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fill in complex data object for complex obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return normal obs for non complex obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null view
+&nbsp;	 * @deprecated as of 2.1.0, use {@link #getObs(Integer)} 
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@Authorized( { PrivilegeConstants.GET_OBS })
+&nbsp;	public Obs getComplexObs(Integer obsId, String view) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the ComplexObsHandler that has been registered with the given key
+&nbsp;	 * 
+&nbsp;	 * @param key that has been registered with a handler class
+&nbsp;	 * @return Object representing the handler for the given key
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get handler with matching key
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; have default image and text handlers registered by spring
+&nbsp;	 */
+&nbsp;	public ComplexObsHandler getHandler(String key) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the ComplexObsHandler associated with a complex observation
+&nbsp;	 * Returns the ComplexObsHandler.
+&nbsp;	 * Returns null if the Obs.isComplexObs() is false or there is an error
+&nbsp;	 * instantiating the handler class.
+&nbsp;	 *
+&nbsp;	 * @param obs A complex Obs.
+&nbsp;	 * @return ComplexObsHandler for the complex Obs. or null on error.
+&nbsp;	 * @since 1.12
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get handler associated with complex observation
+&nbsp;	 */
+&nbsp;	public ComplexObsHandler getHandler(Obs obs) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;u&gt;Add&lt;/u&gt; the given map to this service&#39;s handlers. This method registers each
+&nbsp;	 * ComplexObsHandler to this service. If the given String key exists, that handler is
+&nbsp;	 * overwritten with the given handler For most situations, this map is set via spring, see the
+&nbsp;	 * applicationContext-service.xml file to add more handlers.
+&nbsp;	 *
+&nbsp;	 * @param handlers Map of class to handler object
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; override handlers with same key
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add new handlers with new keys
+&nbsp;	 */
+&nbsp;	public void setHandlers(Map&lt;String, ComplexObsHandler&gt; handlers) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the handlers map registered
+&nbsp;	 *
+&nbsp;	 * @return map of keys to handlers
+&nbsp;	 * @since 1.5
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; never return null
+&nbsp;	 */
+&nbsp;	public Map&lt;String, ComplexObsHandler&gt; getHandlers() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Registers the given handler with the given key If the given String key exists, that handler
+&nbsp;	 * is overwritten with the given handler
+&nbsp;	 *
+&nbsp;	 * @param key the key name to use for this handler
+&nbsp;	 * @param handler the class to register with this key
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; register handler with the given key
+&nbsp;	 */
+&nbsp;	public void registerHandler(String key, ComplexObsHandler handler) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for {@link #registerHandler(String, ComplexObsHandler)}
+&nbsp;	 * 
+&nbsp;	 * @param key the key name to use for this handler
+&nbsp;	 * @param handlerClass the class to register with this key
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; load handler and register key
+&nbsp;	 */
+&nbsp;	public void registerHandler(String key, String handlerClass) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Remove the handler associated with the key from list of available handlers
+&nbsp;	 * 
+&nbsp;	 * @param key the key of the handler to unregister
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove handler with matching key
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with invalid key
+&nbsp;	 */
+&nbsp;	public void removeHandler(String key) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the number of observations(including voided ones) that are using the specified
+&nbsp;	 * conceptNames as valueCodedName answers
+&nbsp;	 * 
+&nbsp;	 * @param conceptNames the conceptNames to be searched against
+&nbsp;	 * @param includeVoided whether voided observation should be included
+&nbsp;	 * @return The number of observations using the specified conceptNames as valueCodedNames
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the count of all observations using the specified conceptNames as answers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include voided observations using the specified conceptNames as answers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return zero if no observation is using any of the concepNames in the list
+&nbsp;	 * @since Version 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Integer getObservationCount(List&lt;ConceptName&gt; conceptNames, boolean includeVoided);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservations(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, List, List, java.util.List, java.lang.Integer,
+&nbsp;	 *      java.lang.Integer, java.util.Date, java.util.Date, boolean, java.lang.String)
+&nbsp;	 *      
+&nbsp;	 * This method works exactly the same; it only adds visits to the search criteria.
+&nbsp;	 * It effectively surpasses the above method; the old one is however kept for backward
+&nbsp;	 * compatibility reasons.
+&nbsp;	 * 
+&nbsp;	 * @param visits List&amp;lt;Visit&amp;gt; to restrict obs to (optional)
+&nbsp;	 *      
+&nbsp;	 * @since 2.7.0
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public List&lt;Obs&gt; getObservations(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;			List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;String&gt; sort,
+&nbsp;			List&lt;Visit&gt; visits, Integer mostRecentN, Integer obsGroupId, Date fromDate, Date toDate,
+&nbsp;			boolean includeVoidedObs, String accessionNumber) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ObsService#getObservationCount(java.util.List, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.util.List, java.util.List, java.lang.Integer,
+&nbsp;	 *      java.util.Date, java.util.Date, boolean, java.lang.String)
+&nbsp;	 *      
+&nbsp;	 * This method works exactly the same; it only adds visits to the search criteria.
+&nbsp;	 * It effectively surpasses the above method; the old one is however kept for backward
+&nbsp;	 * compatibility reasons.
+&nbsp;	 * 
+&nbsp;	 * @param visits List&amp;lt;Visit&amp;gt; to restrict obs to (optional)
+&nbsp;	 *      
+&nbsp;	 * @since 2.7.0
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_OBS)
+&nbsp;	public Integer getObservationCount(List&lt;Person&gt; whom, List&lt;Encounter&gt; encounters, List&lt;Concept&gt; questions,
+&nbsp;			List&lt;Concept&gt; answers, List&lt;PERSON_TYPE&gt; personTypes, List&lt;Location&gt; locations, List&lt;Visit&gt; visits,
+&nbsp;			Integer obsGroupId, Date fromDate, Date toDate, boolean includeVoidedObs, String accessionNumber)
+&nbsp;			throws APIException;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

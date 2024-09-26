@@ -1,0 +1,283 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderSetService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderSetService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">OrderSetService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.OrderSet;
+&nbsp;import org.openmrs.OrderSetAttribute;
+&nbsp;import org.openmrs.OrderSetAttributeType;
+&nbsp;import org.openmrs.OrderSetMember;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.OrderSetDAO;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to creating/deleting/voiding Order Sets.
+&nbsp; * 
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;public interface OrderSetService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Setter for the OrderSet data access object. The dao is used for saving and getting orders
+&nbsp;	 * to/from the database
+&nbsp;	 *
+&nbsp;	 * @param dao The data access object to use
+&nbsp;	 */
+&nbsp;	void setOrderSetDAO(OrderSetDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save or update the given &lt;code&gt;orderSet&lt;/code&gt; in the database. If the OrderSet is retired
+&nbsp;	 * it will set retired by and retired date.
+&nbsp;	 * If OrderSetMembers are retired, it will set retired by and retired date.
+&nbsp;	 *
+&nbsp;	 * @param orderSet the OrderSet to save
+&nbsp;	 * @return the OrderSet that was saved
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_ORDER_SETS })
+&nbsp;	OrderSet saveOrderSet(OrderSet orderSet) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all OrderSets that match the specified parameters excluding discontinuation orderSets.
+&nbsp;	 *
+&nbsp;	 * @param includeRetired Specifies whether retired orders should be included or not
+&nbsp;	 * @return list of OrderSets matching the parameters
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SETS)
+&nbsp;	List&lt;OrderSet&gt; getOrderSets(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a specific OrderSet with the matched orderSet Id.
+&nbsp;	 *
+&nbsp;	 * @param orderSetId Specifies a saved orderSet id.
+&nbsp;	 * @return OrderSet
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SETS)
+&nbsp;	OrderSet getOrderSet(Integer orderSetId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a specific OrderSet with the matched orderSet uuid.
+&nbsp;	 *
+&nbsp;	 * @param orderSetUuid Specifies a saved orderSet uuid.
+&nbsp;	 * @return an orderSet
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SETS)
+&nbsp;	OrderSet getOrderSetByUuid(String orderSetUuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires and OrderSet, with matched OrderSet
+&nbsp;	 * 
+&nbsp;	 * @param orderSet Specifies the OrderSet to be retired
+&nbsp;	 * @param retireReason Specifies the reason why the OrderSet has to be retired
+&nbsp;	 * @return an orderSet
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_ORDER_SETS })
+&nbsp;	OrderSet retireOrderSet(OrderSet orderSet, String retireReason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * UnRetires and OrderSet, with matched OrderSet
+&nbsp;	 * 
+&nbsp;	 * @param orderSet Specifies the OrderSet to be retired
+&nbsp;	 * @return an orderSet
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_ORDER_SETS })
+&nbsp;	OrderSet unretireOrderSet(OrderSet orderSet) throws APIException;
+&nbsp;	
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get OrderSetMember by uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid
+&nbsp;	 * @return
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SETS)
+&nbsp;	OrderSetMember getOrderSetMemberByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get order set attribute by uuid 
+&nbsp;	 * 
+&nbsp;	 * @param uuid specifies the order set attribute uuid
+&nbsp;	 * @return the {@link OrderSetAttribute} with the given uuid
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should get the order set attribute with the given uuid
+&nbsp;	 * @should return null if no order set attribute has the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SETS)
+&nbsp;	OrderSetAttribute getOrderSetAttributeByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get all order set attribute types 
+&nbsp;	 * 
+&nbsp;	 * @return all {@link OrderSetAttributeType}s
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should return all orderSet attribute types including retired ones
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	List&lt;OrderSetAttributeType&gt; getAllOrderSetAttributeTypes();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get order set attribute type from the database by a given internal id
+&nbsp;	 * 
+&nbsp;	 * @param id specifies the set attribute type id
+&nbsp;	 * @return the {@link OrderSetAttributeType} with the given internal id
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should return the orderSet attribute type with the given id
+&nbsp;	 * @should return null if no orderSet attribute type exists with the given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	OrderSetAttributeType getOrderSetAttributeType(Integer id);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get order set attribute type by uuid 
+&nbsp;	 * 
+&nbsp;	 * @param uuid specifies the order set attribute type uuid
+&nbsp;	 * @return the {@link OrderSetAttributeType} with the given uuid
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should return the orderSet attribute type with the given uuid
+&nbsp;	 * @should return null if no orderSet attribute type exists with the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	OrderSetAttributeType getOrderSetAttributeTypeByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given order set attribute type 
+&nbsp;	 * 
+&nbsp;	 * @param orderSetAttributeType the order set attribute type to save
+&nbsp;	 * @return the OrderSetAttributeType created/saved
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should create a new orderSet attribute type
+&nbsp;	 * @should edit an existing orderSet attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	OrderSetAttributeType saveOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Retires the given order set attribute type 
+&nbsp;	 * 
+&nbsp;	 * @param orderSetAttributeType specifies the order set attribute type to be retired 
+&nbsp;	 * @return the orderSetAttribute retired
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should retire a orderSet attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	OrderSetAttributeType retireOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType, String reason);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Restores an order set attribute type that was previous retired 
+&nbsp;	 * 
+&nbsp;	 * @param orderSetAttributeType the order set attribute type to be un-retired
+&nbsp;	 * @return the OrderSetAttributeType unretired
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should unretire a retired orderSet attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	OrderSetAttributeType unretireOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely removes an order set attribute type 
+&nbsp;	 * 
+&nbsp;	 * @param orderSetAttributeType the order set attribute type to be purged
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should completely remove an order set attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	void purgeOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Retrieves an order set attribute type object based on the name provided
+&nbsp;	 *
+&nbsp;	 * @param orderSetAttributeTypeName fetches a given order set attribute type by name
+&nbsp;	 * @return the {@link OrderSetAttributeType} with the specified name
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * @should return the orderSet attribute type with the specified name
+&nbsp;	 * @should return null if no orderSet attribute type exists with the specified
+&nbsp;	 *         name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ORDER_SET_ATTRIBUTE_TYPES)
+&nbsp;	OrderSetAttributeType getOrderSetAttributeTypeByName(String orderSetAttributeTypeName);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

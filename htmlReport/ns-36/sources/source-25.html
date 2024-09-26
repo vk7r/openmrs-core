@@ -1,0 +1,306 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Reflect</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: Reflect (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Reflect</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,1%
+  </span>
+  <span class="absValue">
+    (41/45)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;
+&nbsp;import java.lang.annotation.Annotation;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;import java.lang.reflect.ParameterizedType;
+&nbsp;import java.lang.reflect.Type;
+&nbsp;import java.lang.reflect.TypeVariable;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class has convenience methods to find the fields on a class and superclass as well as
+&nbsp; * methods to check the class type of members in a collection
+&nbsp; */
+&nbsp;public class Reflect {
+&nbsp;	
+&nbsp;	
+&nbsp;	private Class parametrizedClass;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param parametrizedClass Class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception when null is passed
+&nbsp;	 */
+<b class="fc">&nbsp;	public Reflect(Class parametrizedClass) {</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (parametrizedClass == null) {</b>
+<b class="fc">&nbsp;			throw new NullPointerException(&quot;Parametrized class cannot be null&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		this.parametrizedClass = parametrizedClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param fieldClass
+&nbsp;	 * @return true if, given fieldClass is Collection otherwise returns false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if given fieldClass is Collection class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given fieldClass is not a Collection class
+&nbsp;	 */
+&nbsp;	public static boolean isCollection(Class&lt;?&gt; fieldClass) {
+<b class="fc">&nbsp;		return Collection.class.isAssignableFrom(fieldClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param object Object
+&nbsp;	 * @return true if, given object is Collection otherwise returns false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if given object is Collection class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given object is not a Collection
+&nbsp;	 */
+&nbsp;	public static boolean isCollection(Object object) {
+<b class="fc">&nbsp;		return isCollection(object.getClass());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method return all the fields (including private) from the given class and its super
+&nbsp;	 * classes.
+&nbsp;	 * 
+&nbsp;	 * @param fieldClass Class
+&nbsp;	 * @return List&amp;lt;Field&amp;gt;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all fields include private and super classes
+&nbsp;	 */
+&nbsp;	public static List&lt;Field&gt; getAllFields(Class&lt;?&gt; fieldClass) {
+<b class="fc">&nbsp;		List&lt;Field&gt; fields = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		while (fieldClass != null) {</b>
+<b class="fc">&nbsp;			Field[] declaredFields = fieldClass.getDeclaredFields();</b>
+<b class="fc">&nbsp;			for (Field field : declaredFields) {</b>
+<b class="fc">&nbsp;				field.setAccessible(true);</b>
+<b class="fc">&nbsp;				fields.add(field);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			fieldClass = fieldClass.getSuperclass();</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return fields;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method returns true if the given annotation is present on the given field.
+&nbsp;	 * 
+&nbsp;	 * @param fieldClass
+&nbsp;	 * @param fieldName
+&nbsp;	 * @param annotation
+&nbsp;	 * @return true if the given annotation is present
+&nbsp;	 */
+&nbsp;	public static boolean isAnnotationPresent(Class&lt;?&gt; fieldClass, String fieldName, Class&lt;? extends Annotation&gt; annotation) {
+&nbsp;		try {
+<b class="fc">&nbsp;			Field field = fieldClass.getDeclaredField(fieldName);</b>
+<b class="fc">&nbsp;			return field.isAnnotationPresent(annotation);</b>
+<b class="fc">&nbsp;		} catch (NoSuchFieldException e) {</b>
+<b class="fc">&nbsp;			return false; </b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param subClass Class
+&nbsp;	 * @return true if, given subClass is accessible from the parameterized class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if given subClass is accessible from given parameterized class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given subClass is not accessible from given parameterized class
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public boolean isSuperClass(Class subClass) {
+<b class="fc">&nbsp;		return parametrizedClass.isAssignableFrom(subClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param t
+&nbsp;	 * @return true if given type is a subclass, or a generic type bounded by a subclass of the
+&nbsp;	 *         parameterized class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true for a generic whose bound is a subclass
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false for a generic whose bound is not a subclass
+&nbsp;	 */
+&nbsp;	public boolean isSuperClass(Type t) {
+<b class="fc">&nbsp;		if (t instanceof TypeVariable&lt;?&gt;) {</b>
+<b class="fc">&nbsp;			TypeVariable&lt;?&gt; typeVar = (TypeVariable&lt;?&gt;) t;</b>
+<b class="fc">&nbsp;			if (typeVar.getBounds() == null || typeVar.getBounds().length == 0) {</b>
+<b class="nc">&nbsp;				return parametrizedClass.equals(Object.class);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			for (Type typeBound : typeVar.getBounds()) {</b>
+<b class="fc">&nbsp;				if (isSuperClass(typeBound)) {</b>
+<b class="fc">&nbsp;					return true;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			return false;</b>
+<b class="fc">&nbsp;		} else if (t instanceof Class&lt;?&gt;) {</b>
+<b class="fc">&nbsp;			return isSuperClass((Class&lt;?&gt;) t);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;Don&#39;t know how to handle: &quot; + t.getClass());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param object Object
+&nbsp;	 * @return true if, given object is accessible from the parameterized class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if given object is accessible from given parameterized class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given object is not accessible from given parameterized class
+&nbsp;	 */
+&nbsp;	public boolean isSuperClass(Object object) {
+<b class="fc">&nbsp;		return isSuperClass(object.getClass());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method validate the given field is Collection and the elements should be of
+&nbsp;	 * parameterized type
+&nbsp;	 * 
+&nbsp;	 * @param field Field
+&nbsp;	 * @return boolean
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if given field is Collection and its element type is given parameterized
+&nbsp;	 *         class type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given field is not a Collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given field is Collection and element type is other than given
+&nbsp;	 *         parameterized class type
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public boolean isCollectionField(Field field) {
+<b class="fc">&nbsp;		if (isCollection(field.getType())) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				ParameterizedType type = (ParameterizedType) field.getGenericType();</b>
+<b class="fc">&nbsp;				if (type.getActualTypeArguments()[0] instanceof Class) {</b>
+<b class="fc">&nbsp;					return (parametrizedClass.isAssignableFrom((Class) type.getActualTypeArguments()[0]));</b>
+<b class="fc">&nbsp;				} else if (type.getActualTypeArguments()[0] instanceof TypeVariable) {</b>
+<b class="fc">&nbsp;					return isSuperClass(type.getActualTypeArguments()[0]);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;			catch (ClassCastException e) {</b>
+&nbsp;				// Do nothing.  If this exception is thrown, then field is not a Collection of OpenmrsObjects
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method return all the fields (including private) until the given parameterized class
+&nbsp;	 * 
+&nbsp;	 * @param subClass Class
+&nbsp;	 * @return List&amp;lt;Field&amp;gt;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only the sub class fields of given parameterized class
+&nbsp;	 */
+&nbsp;	public List&lt;Field&gt; getInheritedFields(Class&lt;?&gt; subClass) {
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Field&gt; allFields = getAllFields(subClass);</b>
+<b class="fc">&nbsp;		allFields.removeIf(field -&gt; !hasField(field));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return allFields;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param field
+&nbsp;	 * @return true if, given field is declared in parameterized class or its sub classes
+&nbsp;	 */
+&nbsp;	public boolean hasField(Field field) {
+<b class="fc">&nbsp;		return isSuperClass(field.getDeclaringClass());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

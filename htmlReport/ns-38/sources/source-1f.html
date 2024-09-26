@@ -1,0 +1,360 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ObsValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: ObsValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ObsValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (80/96)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptDatatype;
+&nbsp;import org.openmrs.ConceptNumeric;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validator for the Obs class. This class checks for anything set on the Obs object that will cause
+&nbsp; * errors or is incorrect. Things checked are similar to:
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;all required properties are filled in on the Obs object.
+&nbsp; * &lt;li&gt;checks for no recursion in the obs grouping.
+&nbsp; * &lt;li&gt;Makes sure the obs has at least one value (if not an obs grouping)&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.Obs
+&nbsp; */
+&nbsp;@Handler(supports = { Obs.class }, order = 50)
+<b class="fc">&nbsp;public class ObsValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	public static final int VALUE_TEXT_MAX_LENGTH = 65535;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; support Obs class
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return Obs.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if personId is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if obsDatetime is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if concept is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if concept datatype is boolean and valueBoolean is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if concept datatype is coded and valueCoded is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if concept datatype is date and valueDatetime is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if concept datatype is numeric and valueNumeric is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if concept datatype is text and valueText is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if obs ancestors contains obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if all values present
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if the parent obs has values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject an invalid concept and drug combination
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if answer concept and concept of value drug match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate if obs is voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate a voided child obs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail for a null object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) {
+<b class="fc">&nbsp;		Obs obs = (Obs) obj;</b>
+<b class="fc">&nbsp;		if (obs == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Obs can&#39;t be null&quot;);</b>
+<b class="fc">&nbsp;		} else if (obs.getVoided()) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		List&lt;Obs&gt; ancestors = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		validateHelper(obs, errors, ancestors, true);</b>
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;accessionNumber&quot;, &quot;valueModifier&quot;, &quot;valueComplex&quot;,</b>
+&nbsp;		    &quot;comment&quot;, &quot;voidReason&quot;);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether obs has all required values, and also checks to make sure that no obs group
+&nbsp;	 * contains any of its ancestors
+&nbsp;	 *
+&nbsp;	 * @param obs
+&nbsp;	 * @param errors
+&nbsp;	 * @param ancestors
+&nbsp;	 * @param atRootNode whether or not this is the obs that validate() was originally called on. If
+&nbsp;	 *            not then we shouldn&#39;t reject fields by name.
+&nbsp;	 */
+&nbsp;	private void validateHelper(Obs obs, Errors errors, List&lt;Obs&gt; ancestors, boolean atRootNode) {
+<b class="fc">&nbsp;		if (obs.getPersonId() == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;person&quot;, &quot;error.null&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (obs.getObsDatetime() == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;obsDatetime&quot;, &quot;error.null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		boolean isObsGroup = obs.hasGroupMembers(true);</b>
+&nbsp;		// if this is an obs group (i.e., parent) make sure that it has no values (other than valueGroupId) set
+<b class="fc">&nbsp;		if (isObsGroup) {</b>
+<b class="fc">&nbsp;			if (obs.getValueCoded() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueCoded&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueDrug() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueDrug&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueDatetime() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueDatetime&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueNumeric() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueNumeric&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueModifier() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueModifier&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueText() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueText&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueBoolean() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueBoolean&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (obs.getValueComplex() != null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueComplex&quot;, &quot;error.not.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+&nbsp;		// if this is NOT an obs group, make sure that it has at least one value set (not counting obsGroupId)
+<b class="fc">&nbsp;		else if (obs.getValueBoolean() == null &amp;&amp; obs.getValueCoded() == null &amp;&amp; obs.getValueCodedName() == null</b>
+<b class="fc">&nbsp;		        &amp;&amp; obs.getValueComplex() == null &amp;&amp; obs.getValueDatetime() == null &amp;&amp; obs.getValueDrug() == null</b>
+<b class="fc">&nbsp;		        &amp;&amp; obs.getValueModifier() == null &amp;&amp; obs.getValueNumeric() == null &amp;&amp; obs.getValueText() == null</b>
+<b class="fc">&nbsp;		        &amp;&amp; obs.getComplexData() == null) {</b>
+<b class="fc">&nbsp;			errors.reject(&quot;error.noValue&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// make sure there is a concept associated with the obs
+<b class="fc">&nbsp;		Concept c = obs.getConcept();</b>
+<b class="fc">&nbsp;		if (c == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;concept&quot;, &quot;error.null&quot;);</b>
+&nbsp;		}
+&nbsp;		// if there is a concept, and this isn&#39;t a group, perform validation tests specific to the concept datatype
+<b class="fc">&nbsp;		else if (!isObsGroup) {</b>
+<b class="fc">&nbsp;			ConceptDatatype dt = c.getDatatype();</b>
+<b class="fc">&nbsp;			if (dt != null) {</b>
+<b class="fc">&nbsp;				if (dt.isBoolean() &amp;&amp; obs.getValueBoolean() == null) {</b>
+<b class="fc">&nbsp;					if (atRootNode) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;valueBoolean&quot;, &quot;error.null&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else if (dt.isCoded() &amp;&amp; obs.getValueCoded() == null) {</b>
+<b class="fc">&nbsp;					if (atRootNode) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;valueCoded&quot;, &quot;error.null&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else if ((dt.isDateTime() || dt.isDate() || dt.isTime()) &amp;&amp; obs.getValueDatetime() == null) {</b>
+<b class="fc">&nbsp;					if (atRootNode) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;valueDatetime&quot;, &quot;error.null&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else if (dt.isNumeric() &amp;&amp; obs.getValueNumeric() == null) {</b>
+<b class="fc">&nbsp;					if (atRootNode) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;valueNumeric&quot;, &quot;error.null&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else if (dt.isNumeric()) {</b>
+<b class="fc">&nbsp;					ConceptNumeric cn = Context.getConceptService().getConceptNumeric(c.getConceptId());</b>
+&nbsp;					// If the concept numeric is not precise, the value cannot be a float, so raise an error 
+<b class="fc">&nbsp;					if (!cn.getAllowDecimal() &amp;&amp; Math.ceil(obs.getValueNumeric()) != obs.getValueNumeric()) {</b>
+<b class="nc">&nbsp;						if (atRootNode) {</b>
+<b class="nc">&nbsp;							errors.rejectValue(&quot;valueNumeric&quot;, &quot;Obs.error.precision&quot;);</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;					// If the number is higher than the absolute range, raise an error 
+<b class="fc">&nbsp;					if (cn.getHiAbsolute() != null &amp;&amp; cn.getHiAbsolute() &lt; obs.getValueNumeric()) {</b>
+<b class="nc">&nbsp;						if (atRootNode) {</b>
+<b class="nc">&nbsp;							errors.rejectValue(&quot;valueNumeric&quot;, &quot;error.outOfRange.high&quot;);</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;					// If the number is lower than the absolute range, raise an error as well 
+<b class="fc">&nbsp;					if (cn.getLowAbsolute() != null &amp;&amp; cn.getLowAbsolute() &gt; obs.getValueNumeric()) {</b>
+<b class="nc">&nbsp;						if (atRootNode) {</b>
+<b class="nc">&nbsp;							errors.rejectValue(&quot;valueNumeric&quot;, &quot;error.outOfRange.low&quot;);</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				} else if (dt.isText() &amp;&amp; obs.getValueText() == null) {</b>
+<b class="fc">&nbsp;					if (atRootNode) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;valueText&quot;, &quot;error.null&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				
+&nbsp;				//If valueText is longer than the maxlength, raise an error as well.
+<b class="fc">&nbsp;				if (dt.isText() &amp;&amp; obs.getValueText() != null &amp;&amp; obs.getValueText().length() &gt; VALUE_TEXT_MAX_LENGTH) {</b>
+<b class="fc">&nbsp;					if (atRootNode) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;valueText&quot;, &quot;error.exceededMaxLengthOfField&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.inGroupMember&quot;);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			} else { // dt is null
+<b class="nc">&nbsp;				errors.rejectValue(&quot;concept&quot;, &quot;must have a datatype&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// If an obs fails validation, don&#39;t bother checking its children
+<b class="fc">&nbsp;		if (errors.hasErrors()) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ancestors.contains(obs)) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;groupMembers&quot;, &quot;Obs.error.groupContainsItself&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (obs.isObsGrouping()) {</b>
+<b class="fc">&nbsp;			ancestors.add(obs);</b>
+<b class="fc">&nbsp;			for (Obs child : obs.getGroupMembers()) {</b>
+<b class="fc">&nbsp;				validateHelper(child, errors, ancestors, false);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			ancestors.remove(ancestors.size() - 1);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (obs.getValueCoded() != null &amp;&amp; obs.getValueDrug() != null &amp;&amp; obs.getValueDrug().getConcept() != null) {</b>
+<b class="fc">&nbsp;			Concept trueConcept = Context.getConceptService().getTrueConcept();</b>
+<b class="fc">&nbsp;			Concept falseConcept = Context.getConceptService().getFalseConcept();</b>
+&nbsp;			//Ignore if this is not a true or false response since they are stored as coded too
+<b class="fc">&nbsp;			if (!obs.getValueCoded().equals(trueConcept) &amp;&amp; !obs.getValueCoded().equals(falseConcept)</b>
+<b class="fc">&nbsp;			        &amp;&amp; !obs.getValueDrug().getConcept().equals(obs.getValueCoded())) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;valueDrug&quot;, &quot;Obs.error.invalidDrug&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

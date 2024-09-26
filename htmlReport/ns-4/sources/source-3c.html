@@ -1,0 +1,676 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UserService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: UserService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">UserService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Privilege;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.util.PersonByNameComparator;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.openmrs.notification.MessageException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to Users in the system Use:&lt;br&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * 
+&nbsp; * 
+&nbsp; * List&amp;lt;User&amp;gt; users = Context.getUserService().getAllUsers();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;public interface UserService extends OpenmrsService {
+&nbsp;
+&nbsp;	public static final String ADMIN_PASSWORD_LOCKED_PROPERTY = &quot;admin_password_locked&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create user with given password.
+&nbsp;	 *
+&nbsp;	 * @param user the user to create
+&nbsp;	 * @param password the password for created user
+&nbsp;	 * @return created user
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_USERS })
+&nbsp;	@Logging(ignoredArgumentIndexes = { 1 })
+&nbsp;	public User createUser(User user, String password) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Change user password.
+&nbsp;	 *
+&nbsp;	 * @param user the user to update password
+&nbsp;	 * @param oldPassword the user password  to update
+&nbsp;	 * @param newPassword the new user password
+&nbsp;	 * @throws APIException for not existing user and if old password is weak
+&nbsp;	 * @since 1.12
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if old password is not correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if new password is the same as old passoword
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if given user does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change password for given user if oldPassword is correctly passed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change password for given user if oldPassword is null and changing user have privileges
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception if oldPassword is null and changing user have not privileges
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception if new password is too short
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_USER_PASSWORDS })
+&nbsp;	@Logging(ignoredArgumentIndexes = { 1, 2 })
+&nbsp;	public void changePassword(User user, String oldPassword, String newPassword) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get user by internal user identifier.
+&nbsp;	 * 
+&nbsp;	 * @param userId internal identifier
+&nbsp;	 * @return requested user
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch user with given userId
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public User getUser(Integer userId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get user by the given uuid.
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return user or null
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch user with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public User getUserByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get user by username (user&#39;s login identifier)
+&nbsp;	 * 
+&nbsp;	 * @param username User&#39;s identifier used for authentication
+&nbsp;	 * @return requested user
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get user by username
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public User getUserByUsername(String username);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a user by username or email
+&nbsp;	 * 
+&nbsp;	 * @param usernameOrEmail User&#39;s email address or username
+&nbsp;	 * @return requested user or null if not found
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public User getUserByUsernameOrEmail(String usernameOrEmail);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a user with the specified activation key
+&nbsp;	 * @param activationKey User&#39;s activation key for password reset 
+&nbsp;	 * @return requested User with associated  activation key
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public User getUserByActivationKey(String activationKey);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * true/false if username or systemId is already in db in username or system_id columns
+&nbsp;	 * 
+&nbsp;	 * @param user User to compare
+&nbsp;	 * @return boolean
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; verify that username and system id is unique
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public boolean hasDuplicateUsername(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get users by role granted
+&nbsp;	 * 
+&nbsp;	 * @param role Role that the Users must have to be returned
+&nbsp;	 * @return users with requested role
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch users assigned given role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch user that does not belong to given role
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public List&lt;User&gt; getUsersByRole(Role role) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Updates a given &lt;code&gt;user&lt;/code&gt; in the database.
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @return the saved user
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_USERS })
+&nbsp;	public User saveUser(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deactivate a user account so that it can no longer log in.
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @param reason
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire user and set attributes
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_USERS })
+&nbsp;	public User retireUser(User user, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Clears retired flag for a user.
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire and unmark all attributes
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_USERS })
+&nbsp;	public User unretireUser(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a location from the database (not reversible). This method delegates to
+&nbsp;	 * #purgeLocation(location, boolean) method.
+&nbsp;	 * 
+&nbsp;	 * @param user the User to remove from the database.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given user
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_USERS })
+&nbsp;	public void purgeUser(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a user from the database (not reversible). This is a delete from the
+&nbsp;	 * database. This is included for troubleshooting and low-level system administration. Ideally,
+&nbsp;	 * this method should &lt;b&gt;never&lt;/b&gt; be called &amp;mdash; &lt;code&gt;Users&lt;/code&gt; should be
+&nbsp;	 * &lt;em&gt;voided&lt;/em&gt; and not &lt;em&gt;deleted&lt;/em&gt; altogether (since many foreign key constraints
+&nbsp;	 * depend on users, deleting a user would require deleting all traces, and any historical trail
+&nbsp;	 * would be lost). This method only clears user roles and attempts to delete the user record. If
+&nbsp;	 * the user has been included in any other parts of the database (through a foreign key), the
+&nbsp;	 * attempt to delete the user will violate foreign key constraints and fail.
+&nbsp;	 * 
+&nbsp;	 * @param cascade &lt;code&gt;true&lt;/code&gt; to delete associated content
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if cascade is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given user when cascade equals false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not delete user roles for given user when cascade equals false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_USERS })
+&nbsp;	public void purgeUser(User user, boolean cascade) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all privileges currently possible for any User
+&nbsp;	 * 
+&nbsp;	 * @return Global list of privileges
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all privileges in the system
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_PRIVILEGES)
+&nbsp;	public List&lt;Privilege&gt; getAllPrivileges() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all roles currently possible for any User
+&nbsp;	 * 
+&nbsp;	 * @return Global list of roles
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all roles in the system
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_ROLES)
+&nbsp;	public List&lt;Role&gt; getAllRoles() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given role in the database
+&nbsp;	 * 
+&nbsp;	 * @param role Role to update
+&nbsp;	 * @return the saved role
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error if role inherits from itself
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save given role to the database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_ROLES })
+&nbsp;	public Role saveRole(Role role) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Complete remove a role from the database
+&nbsp;	 * 
+&nbsp;	 * @param role Role to delete from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when role is a core role
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return if role is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given role from database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_ROLES })
+&nbsp;	public void purgeRole(Role role) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given privilege in the database
+&nbsp;	 * 
+&nbsp;	 * @param privilege Privilege to update
+&nbsp;	 * @return the saved privilege
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save given privilege to the database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PRIVILEGES })
+&nbsp;	public Privilege savePrivilege(Privilege privilege) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a privilege from the database
+&nbsp;	 * 
+&nbsp;	 * @param privilege Privilege to delete
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete given privilege from the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when privilege is core privilege
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PRIVILEGES })
+&nbsp;	public void purgePrivilege(Privilege privilege) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns role object with given string role
+&nbsp;	 * 
+&nbsp;	 * @return Role object for specified string
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch role for given role name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ROLES)
+&nbsp;	public Role getRole(String r) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Role by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return role or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_ROLES)
+&nbsp;	public Role getRoleByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns Privilege in the system with given String privilege
+&nbsp;	 * 
+&nbsp;	 * @return Privilege
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch privilege for given name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_PRIVILEGES)
+&nbsp;	public Privilege getPrivilege(String p) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Privilege by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return privilege or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch privilege for given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_PRIVILEGES)
+&nbsp;	public Privilege getPrivilegeByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all users in the system
+&nbsp;	 * 
+&nbsp;	 * @return Global list of users
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all users in the system
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not contains any duplicate users
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public List&lt;User&gt; getAllUsers() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Changes the current user&#39;s password.
+&nbsp;	 * 
+&nbsp;	 * @param oldPassword current password
+&nbsp;	 * @param newPassword new password
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on correctly hashed sha1 stored password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on incorrectly hashed sha1 stored password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on sha512 hashed password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be able to update password multiple times
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; respect locking via runtime properties
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	@Logging(ignoredArgumentIndexes = { 0, 1 })
+&nbsp;	public void changePassword(String oldPassword, String newPassword) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Changes password of {@link User} passed in
+&nbsp;	 * @param user user whose password is to be changed
+&nbsp;	 * @param newPassword new password to set
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update password of given user when logged in user has edit users password privilege
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not update password of given user when logged in user does not have edit users password privilege
+&nbsp;	 */
+&nbsp;	@Authorized({PrivilegeConstants.EDIT_USER_PASSWORDS})
+&nbsp;	public void changePassword(User user, String newPassword) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Changes the current user&#39;s password directly. This is most useful if migrating users from
+&nbsp;	 * other systems and you want to retain the existing passwords. This method will simply save the
+&nbsp;	 * passed hashed password and salt directly to the database.
+&nbsp;	 * 
+&nbsp;	 * @param user the user whose password you want to change
+&nbsp;	 * @param hashedPassword - the &lt;em&gt;already hashed&lt;/em&gt; password to store
+&nbsp;	 * @param salt - the salt which should be used with this hashed password
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change the hashed password for the given user
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_USER_PASSWORDS })
+&nbsp;	public void changeHashedPassword(User user, String hashedPassword, String salt) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Changes the passed user&#39;s secret question and answer.
+&nbsp;	 * 
+&nbsp;	 * @param u User to change
+&nbsp;	 * @param question
+&nbsp;	 * @param answer
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change the secret question and answer for given user
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_USER_PASSWORDS })
+&nbsp;	@Logging(ignoredArgumentIndexes = { 1, 2 })
+&nbsp;	public void changeQuestionAnswer(User u, String question, String answer) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Changes the current user&#39;s secret question and answer.
+&nbsp;	 * 
+&nbsp;	 * @param pw user&#39;s password
+&nbsp;	 * @param q question
+&nbsp;	 * @param a answer
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on correctly hashed stored password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match on incorrectly hashed stored password
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	@Logging(ignoreAllArgumentValues = true)
+&nbsp;	public void changeQuestionAnswer(String pw, String q, String a) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns secret question for the given user.
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @return
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 2.0
+&nbsp;	 */
+&nbsp;	public String getSecretQuestion(User user) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares &lt;code&gt;answer&lt;/code&gt; against the &lt;code&gt;user&lt;/code&gt;&#39;s secret answer.
+&nbsp;	 * 
+&nbsp;	 * @param u user
+&nbsp;	 * @param answer
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when given answer matches stored secret answer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when given answer does not match the stored secret answer
+&nbsp;	 */
+&nbsp;	@Logging(ignoredArgumentIndexes = { 1 })
+&nbsp;	public boolean isSecretAnswer(User u, String answer) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of users sorted by personName (see {@link PersonByNameComparator}) if any part
+&nbsp;	 * of the search matches first/last/system id and the user has one at least one of the given
+&nbsp;	 * &lt;code&gt;roles&lt;/code&gt; assigned to them
+&nbsp;	 * 
+&nbsp;	 * @param nameSearch string to compare to the beginning of user&#39;s given/middle/family/family2
+&nbsp;	 *            names
+&nbsp;	 * @param roles all the Roles the user must contain
+&nbsp;	 * @param includeVoided true/false whether to include voided users
+&nbsp;	 * @return list of users matching the given attributes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match search to familyName2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch voided users if includedVoided is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch voided users if includedVoided is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch users with name that contains given nameSearch
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch users with systemId that contains given nameSearch
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch users with at least one of the given role objects
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch duplicate users
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all users if nameSearch is empty or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if roles are searched but name is empty
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public List&lt;User&gt; getUsers(String nameSearch, List&lt;Role&gt; roles, boolean includeVoided) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Search for a list of users by exact first name and last name.
+&nbsp;	 * 
+&nbsp;	 * @param givenName
+&nbsp;	 * @param familyName
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return List&amp;lt;User&amp;gt; object of users matching criteria
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch users exactly matching the given givenName and familyName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch voided users whenincludeVoided is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch any voided users when includeVoided is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch any duplicate users
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public List&lt;User&gt; getUsersByName(String givenName, String familyName, boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all user accounts that belong to a given person.
+&nbsp;	 * 
+&nbsp;	 * @param person
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return all user accounts that belong to person, including retired ones if specified
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all accounts for a person when include retired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch retired accounts when include retired is false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public List&lt;User&gt; getUsersByPerson(Person person, boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds the &lt;code&gt;key&lt;/code&gt;/&lt;code&gt;value&lt;/code&gt; pair to the given &lt;code&gt;user&lt;/code&gt;.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * &lt;b&gt;Implementations of this method should handle privileges&lt;/b&gt;
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @param key
+&nbsp;	 * @param value
+&nbsp;	 * @return the user that was passed in and added to
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if user is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when user is not authorized to edit users
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add property with given key and value when key does not already exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; modify property with given key and value when key already exists
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public User setUserProperty(User user, String key, String value) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes the property denoted by &lt;code&gt;key&lt;/code&gt; from the &lt;code&gt;user&lt;/code&gt;&#39;s properties.
+&nbsp;	 * &lt;b&gt;Implementations of this method should handle privileges&lt;/b&gt;
+&nbsp;	 * 
+&nbsp;	 * @param user
+&nbsp;	 * @param key
+&nbsp;	 * @return the user that was passed in and removed from
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if user is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when user is not authorized to edit users
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove user property for given user and key
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public User removeUserProperty(User user, String key) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get/generate/find the next system id to be doled out. Assume check digit /not/ applied in
+&nbsp;	 * this method
+&nbsp;	 * 
+&nbsp;	 * @return new system id
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public String generateSystemId();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a batch of users of a specific size sorted by personName (see
+&nbsp;	 * {@link PersonByNameComparator}) if any part of the search matches first/last/system id and
+&nbsp;	 * the user has one at least one of the given &lt;code&gt;roles&lt;/code&gt; assigned to them. If start and
+&nbsp;	 * length are not specified, then all matches are returned, If name is empty or null, then all
+&nbsp;	 * all users will be returned taking into consideration the values of start and length
+&nbsp;	 * arguments.
+&nbsp;	 * 
+&nbsp;	 * @param name string to compare to the beginning of user&#39;s given/middle/family/family2 names
+&nbsp;	 * @param roles all the Roles the user must contain
+&nbsp;	 * @param includeRetired true/false whether to include voided users
+&nbsp;	 * @param start beginning index for the batch
+&nbsp;	 * @param length number of users to return in the batch
+&nbsp;	 * @return list of matching users of a size based on the specified arguments
+&nbsp;	 * @since 1.8
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return users whose roles inherit requested roles
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public List&lt;User&gt; getUsers(String name, List&lt;Role&gt; roles, boolean includeRetired, Integer start, Integer length)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the number of users with a matching name or system id and have at least one of the
+&nbsp;	 * given roles assigned to them
+&nbsp;	 * 
+&nbsp;	 * @param name patient name
+&nbsp;	 * @param roles all the Roles the user must contain
+&nbsp;	 * @param includeRetired Specifies whether voided users should be included
+&nbsp;	 * @return the number of users matching the given attributes
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_USERS })
+&nbsp;	public Integer getCountOfUsers(String name, List&lt;Role&gt; roles, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves the current key/value as a user property for the current user.
+&nbsp;	 * 
+&nbsp;	 * @param key the authenticated user&#39;s property
+&nbsp;	 * @param value value of the property
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public User saveUserProperty(String key, String value);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Replaces all user properties with the given map of properties for the current user
+&nbsp;	 * 
+&nbsp;	 * @param properties the authenticated user&#39;s properties
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public User saveUserProperties(Map&lt;String, String&gt; properties);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Change user password given the answer to the secret question
+&nbsp;	 * @param secretAnswer the answer to secret question
+&nbsp;	 * @param pw the new password
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update password if secret is correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not update password if secret is not correct
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	public void changePasswordUsingSecretAnswer(String secretAnswer, String pw) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets a user&#39;s activation key
+&nbsp;	 * @param user The user for which the activation key will be set
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_USER_PASSWORDS)
+&nbsp;	public User setUserActivationKey(User user) throws MessageException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Change user password given the activation key
+&nbsp;	 * 
+&nbsp;	 * @param activationKey the activation for password reset
+&nbsp;	 * @param newPassword the new password
+&nbsp;	 */
+&nbsp;	public void changePasswordUsingActivationKey(String activationKey, String newPassword);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param user the User whose Locale to retrieve
+&nbsp;	 * @return the default Locale of the given user, or the system locale if unspecified
+&nbsp;	 * @since 2.3.6, 2.4.6, 2.5.4, 2.6.0
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	Locale getDefaultLocaleForUser(User user);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Retrieves the last login time of the user in Unix Timestamp
+&nbsp;	 * 
+&nbsp;	 * @param user the subject user
+&nbsp;	 * @return timestamp representing last login time (e.g. 1717414410587)
+&nbsp;	 * @since 2.7.0
+&nbsp;	 * 
+&nbsp;	 * @should return empty string on last login time if a different user is logged in
+&nbsp;	 * @should not be empty if user is authenticated
+&nbsp;	 * @should return empty string on last login time if property not set
+&nbsp;	 */
+&nbsp;	@Authorized
+&nbsp;	String getLastLoginTime(User user);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

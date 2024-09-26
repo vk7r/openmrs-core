@@ -1,0 +1,238 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseAttributeType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.attribute</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseAttributeType (org.openmrs.attribute)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseAttributeType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.attribute;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.MappedSuperclass;
+&nbsp;
+&nbsp;import org.openmrs.BaseChangeableOpenmrsMetadata;
+&nbsp;import org.openmrs.customdatatype.Customizable;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract base implementation of {@link AttributeType}. Actual implementations (e.g. VisitAttributeType,
+&nbsp; * ProviderAttributeType) should be able to extend this and provide very little of their own code.
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@MappedSuperclass
+<b class="fc">&nbsp;public abstract class BaseAttributeType&lt;OwningType extends Customizable&lt;?&gt;&gt; extends BaseChangeableOpenmrsMetadata implements AttributeType&lt;OwningType&gt; {</b>
+&nbsp;	
+<b class="fc">&nbsp;	@Column(name = &quot;min_occurs&quot;, nullable = false, length = 11)</b>
+<b class="fc">&nbsp;	private Integer minOccurs = 0;</b>
+&nbsp;	
+<b class="fc">&nbsp;	@Column(name = &quot;max_occurs&quot;, length = 11)</b>
+&nbsp;	private Integer maxOccurs = null;
+&nbsp;	
+&nbsp;	@Column(name = &quot;datatype&quot;, length = 255)
+&nbsp;	private String datatypeClassname;
+&nbsp;	
+&nbsp;	@Column(name = &quot;datatype_config&quot;, length = 65535)
+&nbsp;	private String datatypeConfig;
+&nbsp;	
+&nbsp;	@Column(name = &quot;preferred_handler&quot;, length = 255)
+&nbsp;	private String preferredHandlerClassname;
+&nbsp;	
+&nbsp;	@Column(name = &quot;handler_config&quot;, length = 65535)
+&nbsp;	private String handlerConfig;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.RepeatingCustomValueDescriptor#getMinOccurs()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getMinOccurs() {
+<b class="fc">&nbsp;		return minOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.RepeatingCustomValueDescriptor#getMaxOccurs()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getMaxOccurs() {
+<b class="fc">&nbsp;		return maxOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getDatatypeClassname()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDatatypeClassname() {
+<b class="fc">&nbsp;		return datatypeClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getDatatypeConfig()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDatatypeConfig() {
+<b class="fc">&nbsp;		return datatypeConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getPreferredHandlerClassname()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getPreferredHandlerClassname() {
+<b class="fc">&nbsp;		return preferredHandlerClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getHandlerConfig()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getHandlerConfig() {
+<b class="fc">&nbsp;		return handlerConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param minOccurs the minOccurs to set
+&nbsp;	 */
+&nbsp;	public void setMinOccurs(Integer minOccurs) {
+<b class="fc">&nbsp;		this.minOccurs = minOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param maxOccurs the maxOccurs to set
+&nbsp;	 */
+&nbsp;	public void setMaxOccurs(Integer maxOccurs) {
+<b class="fc">&nbsp;		this.maxOccurs = maxOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param datatypeClassname the datatypeClassname to set
+&nbsp;	 */
+&nbsp;	public void setDatatypeClassname(String datatypeClassname) {
+<b class="fc">&nbsp;		this.datatypeClassname = datatypeClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param datatypeConfig the datatypeConfig to set
+&nbsp;	 */
+&nbsp;	public void setDatatypeConfig(String datatypeConfig) {
+<b class="fc">&nbsp;		this.datatypeConfig = datatypeConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param preferredHandlerClassname the preferredHandlerClassname to set
+&nbsp;	 */
+&nbsp;	public void setPreferredHandlerClassname(String preferredHandlerClassname) {
+<b class="fc">&nbsp;		this.preferredHandlerClassname = preferredHandlerClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param handlerConfig the handlerConfig to set
+&nbsp;	 */
+&nbsp;	public void setHandlerConfig(String handlerConfig) {
+<b class="fc">&nbsp;		this.handlerConfig = handlerConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

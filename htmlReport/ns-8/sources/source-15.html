@@ -1,0 +1,171 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateOpenmrsObjectDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateOpenmrsObjectDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateOpenmrsObjectDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.BaseOpenmrsObject;
+&nbsp;import org.openmrs.api.db.OpenmrsObjectDAO;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;
+&nbsp;/**
+&nbsp; * 
+&nbsp; * Generic base class for all OpenMrs DAOs
+&nbsp; * @since 1.10
+&nbsp; *
+&nbsp; */
+<b class="nc">&nbsp;public class HibernateOpenmrsObjectDAO&lt;T extends BaseOpenmrsObject&gt; implements OpenmrsObjectDAO&lt;T&gt; {</b>
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	protected SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	protected Class&lt;T&gt; mappedClass;
+&nbsp;	
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="nc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public T getById(Serializable id) {
+<b class="nc">&nbsp;		return (T) sessionFactory.getCurrentSession().get(mappedClass, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OpenmrsObjectDAO#getByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public T getByUuid(String uuid) {
+<b class="nc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, mappedClass, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/** 
+&nbsp;	 * @see org.openmrs.api.db.OpenmrsObjectDAO#delete(org.openmrs.BaseOpenmrsObject)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void delete(T persistent) {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().delete(persistent);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OpenmrsObjectDAO#saveOrUpdate(org.openmrs.BaseOpenmrsObject)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public T saveOrUpdate(T persistent) {
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(persistent);</b>
+<b class="nc">&nbsp;		return persistent;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

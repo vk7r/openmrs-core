@@ -1,0 +1,1105 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (73/73)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,8%
+  </span>
+  <span class="absValue">
+    (270/291)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonAddress;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonAttributeType;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.Relationship;
+&nbsp;import org.openmrs.RelationshipType;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.PersonAttributeTypeLockedException;
+&nbsp;import org.openmrs.api.PersonService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.PersonDAO;
+&nbsp;import org.openmrs.person.PersonMergeLog;
+&nbsp;import org.openmrs.person.PersonMergeLogData;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsConstants.PERSON_TYPE;
+&nbsp;import org.openmrs.validator.ValidateUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.slf4j.MarkerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.util.Assert;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default implementation of the PersonService
+&nbsp; * &lt;p&gt;
+&nbsp; * Which implementation to use is determined by Spring. See the spring application context file in
+&nbsp; * /metadata/api/spring/applicatContext-service.xml
+&nbsp; *
+&nbsp; * @see PersonService
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class PersonServiceImpl extends BaseOpenmrsService implements PersonService {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	private PersonDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#setPersonDAO(org.openmrs.api.db.PersonDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setPersonDAO(PersonDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getSimilarPeople(java.lang.String, java.lang.Integer,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Set&lt;Person&gt; getSimilarPeople(String name, Integer birthyear, String gender) throws APIException {
+<b class="fc">&nbsp;		return dao.getSimilarPeople(name, birthyear, gender);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPeople(String, Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Person&gt; getPeople(String searchPhrase, Boolean dead) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getPeople(searchPhrase, dead);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public List&lt;Person&gt; getPeople(String searchPhrase, Boolean dead, Boolean voided) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getPeople(searchPhrase, dead, voided);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllPersonAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PersonAttributeType&gt; getAllPersonAttributeTypes() throws APIException {
+<b class="fc">&nbsp;		return Context.getPersonService().getAllPersonAttributeTypes(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllPersonAttributeTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PersonAttributeType&gt; getAllPersonAttributeTypes(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllPersonAttributeTypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonAttributeTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonAttributeType getPersonAttributeTypeByName(String typeName) throws APIException {
+<b class="fc">&nbsp;		List&lt;PersonAttributeType&gt; types = Context.getPersonService().getPersonAttributeTypes(typeName, null, null, null);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (types.isEmpty()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return types.get(0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#purgePersonAttributeType(org.openmrs.PersonAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePersonAttributeType(PersonAttributeType type) throws APIException {
+<b class="fc">&nbsp;		checkIfPersonAttributeTypesAreLocked();</b>
+<b class="fc">&nbsp;		dao.deletePersonAttributeType(type);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#savePersonAttributeType(org.openmrs.PersonAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonAttributeType savePersonAttributeType(PersonAttributeType type) throws APIException {
+<b class="fc">&nbsp;		checkIfPersonAttributeTypesAreLocked();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (type.getSortWeight() == null) {</b>
+<b class="fc">&nbsp;			List&lt;PersonAttributeType&gt; allTypes = Context.getPersonService().getAllPersonAttributeTypes();</b>
+<b class="fc">&nbsp;			if (!allTypes.isEmpty()) {</b>
+<b class="fc">&nbsp;				type.setSortWeight(allTypes.get(allTypes.size() - 1).getSortWeight() + 1);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				type.setSortWeight(1.0);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		boolean updateExisting = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (type.getId() != null) {</b>
+<b class="fc">&nbsp;			updateExisting = true;</b>
+&nbsp;			
+<b class="fc">&nbsp;			String oldTypeName = dao.getSavedPersonAttributeTypeName(type);</b>
+<b class="fc">&nbsp;			String newTypeName = type.getName();</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!oldTypeName.equals(newTypeName)) {</b>
+<b class="fc">&nbsp;				List&lt;GlobalProperty&gt; props = new ArrayList&lt;&gt;();</b>
+&nbsp;				
+<b class="fc">&nbsp;				AdministrationService as = Context.getAdministrationService();</b>
+&nbsp;				
+<b class="fc">&nbsp;				for (String propName : OpenmrsConstants.GLOBAL_PROPERTIES_OF_PERSON_ATTRIBUTES) {</b>
+<b class="fc">&nbsp;					props.add(as.getGlobalPropertyObject(propName));</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				for (GlobalProperty prop : props) {</b>
+<b class="fc">&nbsp;					if (prop != null) {</b>
+<b class="fc">&nbsp;						String propVal = prop.getPropertyValue();</b>
+<b class="fc">&nbsp;						if (propVal != null &amp;&amp; propVal.contains(oldTypeName)) {</b>
+<b class="fc">&nbsp;							prop.setPropertyValue(propVal.replaceFirst(oldTypeName, newTypeName));</b>
+<b class="fc">&nbsp;							as.saveGlobalProperty(prop);</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		PersonAttributeType attributeType = dao.savePersonAttributeType(type);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (updateExisting ) {</b>
+<b class="fc">&nbsp;			Boolean oldSearchable = dao.getSavedPersonAttributeTypeSearchable(type);</b>
+<b class="fc">&nbsp;			if (oldSearchable == null || !oldSearchable.equals(type.getSearchable())) {</b>
+&nbsp;				//we need to update index searchable property has changed
+<b class="fc">&nbsp;				Context.updateSearchIndexForType(PersonAttribute.class);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return attributeType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#retirePersonAttributeType(PersonAttributeType, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonAttributeType retirePersonAttributeType(PersonAttributeType type, String retiredReason)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		checkIfPersonAttributeTypesAreLocked();</b>
+<b class="fc">&nbsp;		if (retiredReason == null || retiredReason.length() &lt; 1) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Person.retiring.reason.required&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		type.setRetired(true);</b>
+<b class="fc">&nbsp;		type.setRetiredBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		type.setRetireReason(retiredReason);</b>
+<b class="fc">&nbsp;		type.setDateRetired(new Date());</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.savePersonAttributeType(type);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonAttributeTypes(java.lang.String,
+&nbsp;	 *      java.lang.String, java.lang.Integer, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PersonAttributeType&gt; getPersonAttributeTypes(String exactName, String format, Integer foreignKey,
+&nbsp;	        Boolean searchable) throws APIException {
+<b class="fc">&nbsp;		return dao.getPersonAttributeTypes(exactName, format, foreignKey, searchable);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void unretirePersonAttributeType(PersonAttributeType type) throws APIException {
+<b class="fc">&nbsp;		checkIfPersonAttributeTypesAreLocked();</b>
+<b class="fc">&nbsp;		type.setRetired(false);</b>
+<b class="fc">&nbsp;		type.setDateRetired(null);</b>
+<b class="fc">&nbsp;		type.setRetiredBy(null);</b>
+<b class="fc">&nbsp;		type.setRetireReason(null);</b>
+<b class="fc">&nbsp;		Context.getPersonService().savePersonAttributeType(type);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonAttributeType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonAttributeType getPersonAttributeType(Integer typeId) {
+<b class="fc">&nbsp;		return dao.getPersonAttributeType(typeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonAttribute(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonAttribute getPersonAttribute(Integer id) {
+<b class="fc">&nbsp;		return dao.getPersonAttribute(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationship(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Relationship getRelationship(Integer relationshipId) throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationship(relationshipId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public RelationshipType getRelationshipType(Integer relationshipTypeId) throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationshipType(relationshipTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public RelationshipType getRelationshipTypeByName(String relationshipTypeName) throws APIException {
+<b class="fc">&nbsp;		List&lt;RelationshipType&gt; types = dao.getRelationshipTypes(relationshipTypeName, null);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (types.isEmpty()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return types.get(0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#purgePerson(org.openmrs.Person)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePerson(Person person) throws APIException {
+<b class="fc">&nbsp;		dao.deletePerson(person);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#savePerson(org.openmrs.Person)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Person savePerson(Person person) throws APIException {
+<b class="fc">&nbsp;		setPreferredPersonName(person);</b>
+<b class="fc">&nbsp;		setPreferredPersonAddress(person);</b>
+<b class="fc">&nbsp;		return dao.savePerson(person);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setPreferredPersonName(Person person) {
+<b class="fc">&nbsp;		PersonName preferredName = null;</b>
+<b class="fc">&nbsp;		PersonName possiblePreferredName = person.getPersonName();</b>
+<b class="fc">&nbsp;		if (possiblePreferredName != null &amp;&amp; possiblePreferredName.getPreferred() &amp;&amp; !possiblePreferredName.getVoided()) {</b>
+<b class="fc">&nbsp;			preferredName = possiblePreferredName;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (PersonName name : person.getNames()) {</b>
+<b class="fc">&nbsp;			if (preferredName == null &amp;&amp; !name.getVoided()) {</b>
+<b class="fc">&nbsp;				name.setPreferred(true);</b>
+<b class="fc">&nbsp;				preferredName = name;</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!name.equals(preferredName)) {</b>
+<b class="fc">&nbsp;				name.setPreferred(false);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void setPreferredPersonAddress(Person person) {
+<b class="fc">&nbsp;		PersonAddress preferredAddress = null;</b>
+<b class="fc">&nbsp;		PersonAddress possiblePreferredAddress = person.getPersonAddress();</b>
+<b class="fc">&nbsp;		if (possiblePreferredAddress != null &amp;&amp; possiblePreferredAddress.getPreferred()</b>
+<b class="fc">&nbsp;				&amp;&amp; !possiblePreferredAddress.getVoided()) {</b>
+<b class="fc">&nbsp;			preferredAddress = possiblePreferredAddress;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (PersonAddress address : person.getAddresses()) {</b>
+<b class="fc">&nbsp;			if (preferredAddress == null &amp;&amp; !address.getVoided()) {</b>
+<b class="fc">&nbsp;				address.setPreferred(true);</b>
+<b class="fc">&nbsp;				preferredAddress = address;</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!address.equals(preferredAddress)) {</b>
+<b class="fc">&nbsp;				address.setPreferred(false);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#voidPerson(org.openmrs.Person, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Person voidPerson(Person person, String reason) throws APIException {
+<b class="fc">&nbsp;		if (person == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.savePerson(person);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#unvoidPerson(org.openmrs.Person)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Person unvoidPerson(Person person) throws APIException {
+<b class="fc">&nbsp;		if (person == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPersonService().savePerson(person);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPerson(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Person getPerson(Integer personId) throws APIException {
+<b class="fc">&nbsp;		if (personId == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getPerson(personId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllRelationships()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getAllRelationships() throws APIException {
+<b class="fc">&nbsp;		return Context.getPersonService().getAllRelationships(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllRelationships(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getAllRelationships(boolean includeVoided) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllRelationships(includeVoided);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationships(org.openmrs.Person, org.openmrs.Person,
+&nbsp;	 *      org.openmrs.RelationshipType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getRelationships(Person fromPerson, Person toPerson, RelationshipType relType)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationships(fromPerson, toPerson, relType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationships(org.openmrs.Person, org.openmrs.Person,
+&nbsp;	 *      org.openmrs.RelationshipType, java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getRelationships(Person fromPerson, Person toPerson, RelationshipType relType,
+&nbsp;	        Date effectiveDate) throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationships(fromPerson, toPerson, relType, effectiveDate, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationships(org.openmrs.Person, org.openmrs.Person,
+&nbsp;	 *      org.openmrs.RelationshipType, java.util.Date, java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getRelationships(Person fromPerson, Person toPerson, RelationshipType relType,
+&nbsp;	        Date startEffectiveDate, Date endEffectiveDate) throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationships(fromPerson, toPerson, relType, startEffectiveDate, endEffectiveDate);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipsByPerson(org.openmrs.Person)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getRelationshipsByPerson(Person p) throws APIException {
+&nbsp;		
+&nbsp;		// search both the left side and the right side of the relationship
+&nbsp;		// for this person
+<b class="fc">&nbsp;		List&lt;Relationship&gt; rels = Context.getPersonService().getRelationships(p, null, null);</b>
+<b class="fc">&nbsp;		rels.addAll(Context.getPersonService().getRelationships(null, p, null));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return rels;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipsByPerson(org.openmrs.Person,
+&nbsp;	 *      java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Relationship&gt; getRelationshipsByPerson(Person p, Date effectiveDate) throws APIException {
+&nbsp;		
+&nbsp;		// search both the left side and the right side of the relationship
+&nbsp;		// for this person
+<b class="fc">&nbsp;		List&lt;Relationship&gt; rels = Context.getPersonService().getRelationships(p, null, null, effectiveDate);</b>
+<b class="fc">&nbsp;		rels.addAll(Context.getPersonService().getRelationships(null, p, null, effectiveDate));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return rels;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#purgeRelationship(org.openmrs.Relationship)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeRelationship(Relationship relationship) throws APIException {
+<b class="fc">&nbsp;		dao.deleteRelationship(relationship);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#saveRelationship(org.openmrs.Relationship)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Relationship saveRelationship(Relationship relationship) throws APIException {
+<b class="fc">&nbsp;		if (relationship.getPersonA().equals(relationship.getPersonB())) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Person.cannot.same&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveRelationship(relationship);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#voidRelationship(org.openmrs.Relationship,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Relationship voidRelationship(Relationship relationship, String voidReason) throws APIException {
+<b class="fc">&nbsp;		if(relationship == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPersonService().saveRelationship(relationship);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#unvoidRelationship(org.openmrs.Relationship)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Relationship unvoidRelationship(Relationship relationship) throws APIException {
+<b class="fc">&nbsp;		relationship.setVoided(false);</b>
+<b class="fc">&nbsp;		relationship.setVoidedBy(null);</b>
+<b class="fc">&nbsp;		relationship.setDateVoided(null);</b>
+<b class="fc">&nbsp;		relationship.setVoidReason(null);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPersonService().saveRelationship(relationship);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllRelationshipTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;RelationshipType&gt; getAllRelationshipTypes() throws APIException {
+<b class="fc">&nbsp;		return Context.getPersonService().getAllRelationshipTypes(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipTypes(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;RelationshipType&gt; getRelationshipTypes(String searchString) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPersonService().getRelationshipTypes(searchString, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipTypes(java.lang.String, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;RelationshipType&gt; getRelationshipTypes(String relationshipTypeName, Boolean preferred) throws APIException {
+<b class="fc">&nbsp;		Assert.hasText(relationshipTypeName, &quot;The search string cannot be empty&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getRelationshipTypes(relationshipTypeName, preferred);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#purgeRelationshipType(org.openmrs.RelationshipType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeRelationshipType(RelationshipType relationshipType) throws APIException {
+<b class="fc">&nbsp;		dao.deleteRelationshipType(relationshipType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#saveRelationshipType(org.openmrs.RelationshipType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public RelationshipType saveRelationshipType(RelationshipType relationshipType) throws APIException {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(relationshipType.getDescription())) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;error.required&quot;,</b>
+<b class="nc">&nbsp;			        new Object[] { Context.getMessageSourceService().getMessage(&quot;general.description&quot;) });</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveRelationshipType(relationshipType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonAttributeTypes(org.openmrs.util.OpenmrsConstants.PERSON_TYPE,
+&nbsp;	 *      org.openmrs.api.PersonService.ATTR_VIEW_TYPE)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PersonAttributeType&gt; getPersonAttributeTypes(PERSON_TYPE personType, ATTR_VIEW_TYPE viewType)
+&nbsp;	        throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (viewType == null) {</b>
+<b class="fc">&nbsp;			return Context.getPersonService().getAllPersonAttributeTypes();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;String&gt; attrNames = getAttributeTypesFromGlobalProperties(viewType, personType);</b>
+<b class="fc">&nbsp;		List&lt;PersonAttributeType&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (String nameOrId : attrNames) {</b>
+<b class="fc">&nbsp;			if (nameOrId.matches(&quot;\\d&quot;)) {</b>
+<b class="fc">&nbsp;				result.add(getPersonAttributeType(Integer.valueOf(nameOrId)));</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				result.add(getPersonAttributeTypeByName(nameOrId));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private List&lt;String&gt; getAttributeTypesFromGlobalProperties(ATTR_VIEW_TYPE viewType, PERSON_TYPE personType) {
+<b class="fc">&nbsp;		List&lt;String&gt; result = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (viewType == ATTR_VIEW_TYPE.LISTING) {</b>
+<b class="fc">&nbsp;			result = combineAttributes(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_LISTING_ATTRIBUTES, OpenmrsConstants.GLOBAL_PROPERTY_USER_LISTING_ATTRIBUTES, personType);</b>
+<b class="fc">&nbsp;		} else if (viewType == ATTR_VIEW_TYPE.VIEWING) {</b>
+<b class="fc">&nbsp;			result = combineAttributes(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_VIEWING_ATTRIBUTES, OpenmrsConstants.GLOBAL_PROPERTY_USER_VIEWING_ATTRIBUTES, personType);</b>
+<b class="fc">&nbsp;		} else if (viewType == ATTR_VIEW_TYPE.HEADER) {</b>
+<b class="fc">&nbsp;			result = combineAttributes(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_HEADER_ATTRIBUTES, OpenmrsConstants.GLOBAL_PROPERTY_USER_HEADER_ATTRIBUTES, personType);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			log.error(MarkerFactory.getMarker(&quot;FATAL&quot;), &quot;Should not be here.&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;String&gt; attrTypes = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (String res : result) {</b>
+<b class="fc">&nbsp;			for (String attrType : res.split(&quot;,&quot;)) {</b>
+<b class="fc">&nbsp;				if (attrType != null) {</b>
+<b class="fc">&nbsp;					attrType = attrType.trim();</b>
+<b class="fc">&nbsp;					if (!attrType.isEmpty()) {</b>
+<b class="fc">&nbsp;						attrTypes.add(attrType);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return attrTypes;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private List&lt;String&gt; combineAttributes(String patientAttributeProperty, String userAttributeProperty, PERSON_TYPE personType) {
+<b class="fc">&nbsp;		List&lt;String&gt; result = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (personType == null || personType == PERSON_TYPE.PERSON) {</b>
+<b class="fc">&nbsp;			result = getGlobalProperties(patientAttributeProperty, userAttributeProperty);</b>
+<b class="fc">&nbsp;		} else if (personType == PERSON_TYPE.PATIENT) {</b>
+<b class="fc">&nbsp;			result = getGlobalProperties(patientAttributeProperty);</b>
+<b class="fc">&nbsp;		} else if (personType == PERSON_TYPE.USER) {</b>
+<b class="fc">&nbsp;			result = getGlobalProperties(userAttributeProperty);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			log.error(MarkerFactory.getMarker(&quot;FATAL&quot;), &quot;Should not be here.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;String&gt; getGlobalProperties(String... properties) {
+<b class="fc">&nbsp;		List&lt;String&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		AdministrationService as = Context.getAdministrationService();</b>
+<b class="fc">&nbsp;		for (String p : properties) {</b>
+<b class="fc">&nbsp;			String id = as.getGlobalProperty(p, &quot;&quot;);</b>
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(id)) {</b>
+<b class="fc">&nbsp;				result.add(id.trim());</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#parsePersonName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonName parsePersonName(String name) throws APIException {
+&nbsp;		// strip beginning/ending whitespace
+<b class="fc">&nbsp;		name = name.trim();</b>
+&nbsp;		
+&nbsp;		// trim off all trailing commas
+<b class="fc">&nbsp;		while (name.endsWith(&quot;,&quot;)) {</b>
+<b class="fc">&nbsp;			name = name.substring(0, name.length() - 1);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		String firstName = name;</b>
+<b class="fc">&nbsp;		String middleName = &quot;&quot;;</b>
+<b class="fc">&nbsp;		String lastName = &quot;&quot;;</b>
+<b class="fc">&nbsp;		String lastName2 = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (name.contains(&quot;,&quot;)) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			String[] names = name.split(&quot;,&quot;);</b>
+&nbsp;			
+&nbsp;			// trim whitespace on each part of the name
+<b class="fc">&nbsp;			for (int x = 0; x &lt; names.length; x++) {</b>
+<b class="fc">&nbsp;				names[x] = names[x].trim();</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			String[] firstNames = names[1].split(&quot; &quot;);</b>
+<b class="fc">&nbsp;			if (firstNames.length == 2) {</b>
+&nbsp;				// user entered &quot;Smith, John Adam&quot;
+<b class="nc">&nbsp;				lastName = names[0];</b>
+<b class="nc">&nbsp;				firstName = firstNames[0];</b>
+<b class="nc">&nbsp;				middleName = firstNames[1];</b>
+&nbsp;			} else {
+&nbsp;				// user entered &quot;Smith, John&quot;
+<b class="fc">&nbsp;				firstName = names[1];</b>
+<b class="fc">&nbsp;				lastName = names[0];</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (name.contains(&quot; &quot;)) {</b>
+<b class="fc">&nbsp;			String[] names = name.split(&quot; &quot;);</b>
+<b class="fc">&nbsp;			if (names.length == 4) {</b>
+&nbsp;				// user entered &quot;John Adam Smith&quot;
+<b class="fc">&nbsp;				firstName = names[0];</b>
+<b class="fc">&nbsp;				middleName = names[1];</b>
+<b class="fc">&nbsp;				lastName = names[2];</b>
+<b class="fc">&nbsp;				lastName2 = names[3];</b>
+<b class="fc">&nbsp;			} else if (names.length == 3) {</b>
+&nbsp;				// user entered &quot;John Adam Smith&quot;
+<b class="nc">&nbsp;				firstName = names[0];</b>
+<b class="nc">&nbsp;				middleName = names[1];</b>
+<b class="nc">&nbsp;				lastName = names[2];</b>
+&nbsp;			} else {
+&nbsp;				// user entered &quot;John Smith&quot;
+<b class="fc">&nbsp;				firstName = names[0];</b>
+<b class="fc">&nbsp;				lastName = names[1];</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		PersonName pn = new PersonName(firstName, middleName, lastName);</b>
+<b class="fc">&nbsp;		pn.setFamilyName2(lastName2);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return pn;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#voidPersonName(org.openmrs.PersonName, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonName voidPersonName(PersonName personName, String voidReason) throws APIException {
+<b class="fc">&nbsp;		return Context.getPersonService().savePersonName(personName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#unvoidPersonName(org.openmrs.PersonName)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonName unvoidPersonName(PersonName personName) throws APIException {
+<b class="fc">&nbsp;		return Context.getPersonService().savePersonName(personName);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#savePersonName(org.openmrs.PersonName)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonName savePersonName(PersonName personName) throws APIException {
+<b class="fc">&nbsp;		ValidateUtil.validate(personName.getPerson());</b>
+<b class="fc">&nbsp;		return dao.savePersonName(personName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipMap(org.openmrs.RelationshipType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Map&lt;Person, List&lt;Person&gt;&gt; getRelationshipMap(RelationshipType relType) throws APIException {
+&nbsp;		
+&nbsp;		// get all relationships with this type
+<b class="fc">&nbsp;		List&lt;Relationship&gt; relationships = Context.getPersonService().getRelationships(null, null, relType);</b>
+&nbsp;		
+&nbsp;		// the map to return
+<b class="fc">&nbsp;		Map&lt;Person, List&lt;Person&gt;&gt; ret = new HashMap&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (relationships != null) {</b>
+<b class="fc">&nbsp;			for (Relationship rel : relationships) {</b>
+<b class="nc">&nbsp;				Person from = rel.getPersonA();</b>
+<b class="nc">&nbsp;				Person to = rel.getPersonB();</b>
+&nbsp;				
+<b class="nc">&nbsp;				List&lt;Person&gt; relList = ret.get(from);</b>
+<b class="nc">&nbsp;				if (relList == null) {</b>
+<b class="nc">&nbsp;					relList = new ArrayList&lt;&gt;();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				relList.add(to);</b>
+&nbsp;				
+<b class="nc">&nbsp;				ret.put(from, relList);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonAttributeTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonAttributeType getPersonAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getPersonAttributeTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Person getPersonByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPersonByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonAddress getPersonAddressByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPersonAddressByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonAttribute getPersonAttributeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPersonAttributeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonName(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonName getPersonName(Integer personNameId) {
+<b class="fc">&nbsp;		return dao.getPersonName(personNameId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonNameByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonName getPersonNameByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPersonNameByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#savePersonMergeLog(PersonMergeLog)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonMergeLog savePersonMergeLog(PersonMergeLog personMergeLog) throws SerializationException, APIException {
+&nbsp;		//verify required fields
+<b class="fc">&nbsp;		if (Context.getSerializationService().getDefaultSerializer() == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;serializer.default.not.found&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		log.debug(&quot;Auditing merging of non-preferred person &quot; + personMergeLog.getLoser().getUuid()</b>
+<b class="fc">&nbsp;		        + &quot; with preferred person &quot; + personMergeLog.getWinner().getId());</b>
+&nbsp;		//populate the mergedData XML from the PersonMergeLogData object
+<b class="fc">&nbsp;		String serialized = Context.getSerializationService().getDefaultSerializer()</b>
+<b class="fc">&nbsp;		        .serialize(personMergeLog.getPersonMergeLogData());</b>
+<b class="fc">&nbsp;		personMergeLog.setSerializedMergedData(serialized);</b>
+<b class="fc">&nbsp;		log.debug(serialized);</b>
+&nbsp;		//save the bean to the database
+<b class="fc">&nbsp;		return dao.savePersonMergeLog(personMergeLog);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getPersonMergeLogByUuid(String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonMergeLog getPersonMergeLogByUuid(String uuid, boolean deserialize)
+&nbsp;	        throws SerializationException, APIException {
+<b class="fc">&nbsp;		if (uuid == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;uuid.cannot.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		PersonMergeLog personMergeLog = dao.getPersonMergeLogByUuid(uuid);</b>
+&nbsp;		//deserialize if requested
+<b class="fc">&nbsp;		if (deserialize) {</b>
+<b class="fc">&nbsp;			deserialize(personMergeLog);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return personMergeLog;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deserializes a List of &lt;code&gt;PersonMErgeLog&lt;/code&gt; objects
+&nbsp;	 *
+&nbsp;	 * @param lst the List of &lt;code&gt; PersonMergeLog&lt;/code&gt; objects to deserialize
+&nbsp;	 * @throws SerializationException
+&nbsp;	 */
+&nbsp;	private void deserializeList(List&lt;PersonMergeLog&gt; lst) throws SerializationException {
+<b class="fc">&nbsp;		for (PersonMergeLog personMergeLog : lst) {</b>
+<b class="fc">&nbsp;			deserialize(personMergeLog);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deserializes a &lt;code&gt;PersonMErgeLog&lt;/code&gt; object
+&nbsp;	 *
+&nbsp;	 * @param personMergeLog the &lt;code&gt; PersonMergeLog&lt;/code&gt; object to deserialize
+&nbsp;	 * @throws SerializationException
+&nbsp;	 */
+&nbsp;	private void deserialize(PersonMergeLog personMergeLog) throws SerializationException {
+<b class="fc">&nbsp;		PersonMergeLogData data = Context.getSerializationService().getDefaultSerializer()</b>
+<b class="fc">&nbsp;		        .deserialize(personMergeLog.getSerializedMergedData(), PersonMergeLogData.class);</b>
+<b class="fc">&nbsp;		personMergeLog.setPersonMergeLogData(data);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllPersonMergeLogs(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PersonMergeLog&gt; getAllPersonMergeLogs(boolean deserialize) throws SerializationException {
+<b class="fc">&nbsp;		List&lt;PersonMergeLog&gt; lst = dao.getAllPersonMergeLogs();</b>
+&nbsp;		//deserialize if requested
+<b class="fc">&nbsp;		if (deserialize) {</b>
+<b class="fc">&nbsp;			deserializeList(lst);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return lst;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getWinningPersonMergeLogs(Person, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PersonMergeLog&gt; getWinningPersonMergeLogs(Person person, boolean deserialize) throws SerializationException {
+<b class="fc">&nbsp;		List&lt;PersonMergeLog&gt; lst = dao.getWinningPersonMergeLogs(person);</b>
+<b class="fc">&nbsp;		if (deserialize) {</b>
+<b class="fc">&nbsp;			deserializeList(lst);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return lst;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getLosingPersonMergeLog(Person, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PersonMergeLog getLosingPersonMergeLog(Person person, boolean deserialize) throws SerializationException {
+<b class="fc">&nbsp;		PersonMergeLog personMergeLog = dao.getLosingPersonMergeLogs(person);</b>
+<b class="fc">&nbsp;		if (deserialize) {</b>
+<b class="fc">&nbsp;			deserialize(personMergeLog);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return personMergeLog;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Relationship getRelationshipByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationshipByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getRelationshipTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public RelationshipType getRelationshipTypeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getRelationshipTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#getAllRelationshipTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;RelationshipType&gt; getAllRelationshipTypes(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllRelationshipTypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#retireRelationshipType(org.openmrs.RelationshipType,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public RelationshipType retireRelationshipType(RelationshipType type, String retiredReason) throws APIException {
+<b class="fc">&nbsp;		if (retiredReason == null || retiredReason.length() &lt; 1) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Relationship.retiring.reason.required&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		type.setRetired(true);</b>
+<b class="fc">&nbsp;		type.setRetiredBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		type.setDateRetired(new Date());</b>
+<b class="fc">&nbsp;		type.setRetireReason(retiredReason);</b>
+<b class="fc">&nbsp;		return Context.getPersonService().saveRelationshipType(type);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#unretireRelationshipType(org.openmrs.RelationshipType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public RelationshipType unretireRelationshipType(RelationshipType relationshipType) {
+<b class="fc">&nbsp;		relationshipType.setRetired(false);</b>
+<b class="fc">&nbsp;		relationshipType.setRetiredBy(null);</b>
+<b class="fc">&nbsp;		relationshipType.setDateRetired(null);</b>
+<b class="fc">&nbsp;		relationshipType.setRetireReason(null);</b>
+<b class="fc">&nbsp;		return Context.getPersonService().saveRelationshipType(relationshipType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#voidPersonAddress(org.openmrs.PersonAddress, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonAddress voidPersonAddress(PersonAddress personAddress, String voidReason) {
+<b class="fc">&nbsp;		return Context.getPersonService().savePersonAddress(personAddress);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#unvoidPersonAddress(org.openmrs.PersonAddress)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonAddress unvoidPersonAddress(PersonAddress personAddress) throws APIException {
+<b class="fc">&nbsp;		return Context.getPersonService().savePersonAddress(personAddress);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PersonService#savePersonAddress(org.openmrs.PersonAddress)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PersonAddress savePersonAddress(PersonAddress personAddress) {
+<b class="fc">&nbsp;		return dao.savePersonAddress(personAddress);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void checkIfPersonAttributeTypesAreLocked() {
+<b class="fc">&nbsp;		String locked = Context.getAdministrationService()</b>
+<b class="fc">&nbsp;		        .getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PERSON_ATRIBUTE_TYPES_LOCKED, &quot;false&quot;);</b>
+<b class="fc">&nbsp;		if (Boolean.valueOf(locked)) {</b>
+<b class="fc">&nbsp;			throw new PersonAttributeTypeLockedException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

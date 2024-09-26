@@ -1,0 +1,304 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AuditableInterceptor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditableInterceptor (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuditableInterceptor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (51/51)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.hibernate.CallbackException;
+&nbsp;import org.hibernate.EmptyInterceptor;
+&nbsp;import org.hibernate.collection.internal.PersistentSet;
+&nbsp;import org.hibernate.type.Type;
+&nbsp;import org.openmrs.Auditable;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class looks for {@link OpenmrsObject} and {@link Auditable} that are being inserted into the
+&nbsp; * database. The creator and dateCreated fields are set when inserting or updating objects and the
+&nbsp; * fields are still null. If the class is an update (instead of an insert) then the changedBy and
+&nbsp; * dateChanged fields are set to the current user and the current time. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This class replaces the logic that was in the AuditableSaveHandler. It is here so that the
+&nbsp; * cascading does NOT happen for dateChanged/changedBy to child OpenmrsObjects (because all handlers
+&nbsp; * recurse on lists of OpenmrsObjects.
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;
+<b class="fc">&nbsp;public class AuditableInterceptor extends EmptyInterceptor {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(AuditableInterceptor.class);</b>
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method is only called when inserting new objects.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if dateCreated was null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if creator was null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if dateCreated and creator was not null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be called when saving OpenmrsObject
+&nbsp;	 * @return true if the object got the dateCreated and creator fields set
+&nbsp;	 * @see org.hibernate.EmptyInterceptor#onSave(java.lang.Object, java.io.Serializable,
+&nbsp;	 *      java.lang.Object[], java.lang.String[], org.hibernate.type.Type[])
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean onSave(Object entity, Serializable id, Object[] entityCurrentState, String[] propertyNames, Type[] types) {
+<b class="fc">&nbsp;		return setCreatorAndDateCreatedIfNull(entity, entityCurrentState, propertyNames);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This class method is only called when flushing an updated dirty object, not inserting objects
+&nbsp;	 *
+&nbsp;	 * @return true if the object got the changedBy and dateChanged fields set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the dateChanged field
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the changedBy field
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be called when saving an Auditable
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not enter into recursion on entity
+&nbsp;	 * @see org.hibernate.EmptyInterceptor#onFlushDirty(java.lang.Object, java.io.Serializable,
+&nbsp;	 *      java.lang.Object[], java.lang.Object[], java.lang.String[], org.hibernate.type.Type[])
+&nbsp;	 */
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
+&nbsp;	        String[] propertyNames, Type[] types) throws CallbackException {
+&nbsp;		boolean objectWasChanged;
+&nbsp;		
+<b class="fc">&nbsp;		objectWasChanged = setCreatorAndDateCreatedIfNull(entity, currentState, propertyNames);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (entity instanceof Auditable &amp;&amp; propertyNames != null) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Setting changed by fields on {}&quot;, entity.getClass());</b>
+&nbsp;			
+<b class="fc">&nbsp;			Map&lt;String, Object&gt; propertyValues = getPropertyValuesToUpdate();</b>
+<b class="fc">&nbsp;			objectWasChanged = changeProperties(currentState, propertyNames, objectWasChanged, propertyValues, false);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return objectWasChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+<b class="fc">&nbsp;		handleCollectionChange(collection);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+<b class="fc">&nbsp;		handleCollectionChange(collection);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+<b class="fc">&nbsp;		handleCollectionChange(collection);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the creator and dateCreated fields to the current user and the current time if they are
+&nbsp;	 * null.
+&nbsp;	 * if is a Person Object, sets the personCreator and personDateCreated fields to the current user and the current time
+&nbsp;	 * if they are null.
+&nbsp;	 *
+&nbsp;	 * @param entity
+&nbsp;	 * @param currentState
+&nbsp;	 * @param propertyNames
+&nbsp;	 * @return true if creator and dateCreated were changed
+&nbsp;	 */
+&nbsp;	private boolean setCreatorAndDateCreatedIfNull(Object entity, Object[] currentState, String[] propertyNames) {
+&nbsp;		
+<b class="fc">&nbsp;		boolean objectWasChanged = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (entity instanceof OpenmrsObject) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Setting creator and dateCreated on {}&quot;, entity);</b>
+&nbsp;			
+<b class="fc">&nbsp;			Map&lt;String, Object&gt; propertyValues = getPropertyValuesToSave();</b>
+<b class="fc">&nbsp;			objectWasChanged = changeProperties(currentState, propertyNames, objectWasChanged, propertyValues, true);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return objectWasChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean changeProperties(Object[] currentState, String[] propertyNames, boolean objectWasChanged,
+&nbsp;	        Map&lt;String, Object&gt; propertyValues, Boolean setNullOnly) {
+&nbsp;		
+<b class="fc">&nbsp;		for (Map.Entry&lt;String, Object&gt; e : propertyValues.entrySet()) {</b>
+<b class="fc">&nbsp;			if (changePropertyValue(currentState, propertyNames, e.getKey(), e.getValue(), setNullOnly)) {</b>
+<b class="fc">&nbsp;				objectWasChanged = true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return objectWasChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Map&lt;String, Object&gt; getPropertyValuesToSave() {
+<b class="fc">&nbsp;		Map&lt;String, Object&gt; propertyValues = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;creator&quot;, Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;dateCreated&quot;, new Date());</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;personCreator&quot;, Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;personDateCreated&quot;, new Date());</b>
+<b class="fc">&nbsp;		return propertyValues;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Map&lt;String, Object&gt; getPropertyValuesToUpdate() {
+<b class="fc">&nbsp;		Map&lt;String, Object&gt; propertyValues = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;changedBy&quot;, Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;dateChanged&quot;, new Date());</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;personChangedBy&quot;, Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		propertyValues.put(&quot;personDateChanged&quot;, new Date());</b>
+<b class="fc">&nbsp;		return propertyValues;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the property to the given value.
+&nbsp;	 *
+&nbsp;	 * @param currentState
+&nbsp;	 * @param propertyNames
+&nbsp;	 * @param propertyToSet
+&nbsp;	 * @param value
+&nbsp;	 * @param setNullOnly
+&nbsp;	 * @return true if the property was changed
+&nbsp;	 */
+&nbsp;	private boolean changePropertyValue(Object[] currentState, String[] propertyNames, String propertyToSet, Object value,
+&nbsp;	        boolean setNullOnly) {
+&nbsp;		
+<b class="fc">&nbsp;		int index = Arrays.asList(propertyNames).indexOf(propertyToSet);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (value == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (index &gt;= 0 &amp;&amp; (currentState[index] == null || !setNullOnly) &amp;&amp; !value.equals(currentState[index])) {</b>
+<b class="fc">&nbsp;			currentState[index] = value;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void handleCollectionChange(Object collection) {
+<b class="fc">&nbsp;		if (collection instanceof PersistentSet) {</b>
+<b class="fc">&nbsp;			PersistentSet persistentCollection = (PersistentSet) collection; </b>
+<b class="fc">&nbsp;			if (&quot;org.openmrs.User.roles&quot;.equals(persistentCollection.getRole())) {</b>
+<b class="fc">&nbsp;				Object owner = persistentCollection.getOwner();</b>
+<b class="fc">&nbsp;				if (owner instanceof User) {</b>
+<b class="fc">&nbsp;					User user = (User) owner;</b>
+<b class="fc">&nbsp;					if (user.getCreator() != null) {</b>
+<b class="fc">&nbsp;						user.setChangedBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;						user.setDateChanged(new Date());</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DropMillisecondsHibernateInterceptor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: DropMillisecondsHibernateInterceptor (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DropMillisecondsHibernateInterceptor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.sql.Time;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.hibernate.EmptyInterceptor;
+&nbsp;import org.hibernate.type.Type;
+&nbsp;import org.openmrs.util.DateUtil;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;/**
+&nbsp; * Prior to MySQL version 5.6 the DATETIME datatype is only precise to the second, and in version 5.6, a column datatype
+&nbsp; * of DATETIME is precise to the second. (To get millisecond precision you&#39;d need to say DATETIME(3).) Thus all the
+&nbsp; * DATETIME fields in all existing OpenMRS installations running on MySQL are precise to the second.
+&nbsp; * &lt;p/&gt;
+&nbsp; * We use java.util.Date in OpenMRS, which has millisecond precision, so when saving an OpenMRS object to the database,
+&nbsp; * date conversion happens. Prior to version 5.6, MySQL used to drop the millisecond component from a DATETIME when
+&nbsp; * saving it. Starting in version 5.6, MySQL &lt;em&gt;rounds&lt;/em&gt; a datetime, e.g. if you save a visit with startDatetime of
+&nbsp; * 2014-02-05 14:35:17.641 it will be stored in the database rounded up to the next second: 2014-02-05 14:35:18.
+&nbsp; * &lt;p/&gt;
+&nbsp; * This can have several undesired effects. Take the following code snippet:
+&nbsp; * &lt;code&gt;
+&nbsp; * Visit v = new Visit();
+&nbsp; * // set Patient, VisitType, etc
+&nbsp; * v.setStartDatetime(new Date());
+&nbsp; * return &quot;redirect:patient.page?ptId=&quot; + v.getPatient().getId()
+&nbsp; * &lt;/code&gt;
+&nbsp; * In the 50% of cases where v.startDatetime was rounded up to the next second, the redirect takes us to the page for
+&nbsp; * a patient who does not have an &quot;active&quot; visit, though they have a future one that will start in less than a second.
+&nbsp; * &lt;p/&gt;
+&nbsp; * To achieve the MySQL 5.5 behavior while running on version 5.6+, we use a hibernate interceptor to drop the
+&nbsp; * millisecond component of dates before writing them to the database.
+&nbsp; * @since 2.0
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class DropMillisecondsHibernateInterceptor extends EmptyInterceptor {</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types) {
+<b class="fc">&nbsp;		return removeMillisecondsFromDateFields(currentState);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+<b class="fc">&nbsp;		return removeMillisecondsFromDateFields(state);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * If any item in fieldValues is a Date with non-zero milliseconds, it is replaced with the Date corresponding to
+&nbsp;	 * the same second, with no milliseconds.
+&nbsp;	 *
+&nbsp;	 * @param fieldValues
+&nbsp;	 * @return whether anything was modified
+&nbsp;	 */
+&nbsp;	private boolean removeMillisecondsFromDateFields(Object[] fieldValues) {
+<b class="fc">&nbsp;		boolean anyChanges = false;</b>
+<b class="fc">&nbsp;		for (int i = fieldValues.length - 1; i &gt;= 0; --i) {</b>
+<b class="fc">&nbsp;			Object candidate = fieldValues[i];</b>
+<b class="fc">&nbsp;			if (!(candidate instanceof Time || candidate instanceof java.sql.Date) &amp;&amp; candidate instanceof Date) {</b>
+<b class="fc">&nbsp;				Date noMilliseconds = DateUtil.truncateToSeconds((Date) candidate);</b>
+<b class="fc">&nbsp;				if (!noMilliseconds.equals(candidate)) {</b>
+<b class="fc">&nbsp;					fieldValues[i] = noMilliseconds;</b>
+<b class="fc">&nbsp;					anyChanges = true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return anyChanges;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

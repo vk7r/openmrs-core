@@ -1,0 +1,1218 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Person</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Person (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Person</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,2%
+  </span>
+  <span class="absValue">
+    (73/80)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,9%
+  </span>
+  <span class="absValue">
+    (238/277)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Person$HibernateProxy$xxHbmJfG</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91,2%
+  </span>
+  <span class="absValue">
+    (73/80)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,9%
+  </span>
+  <span class="absValue">
+    (238/277)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;import javax.persistence.Transient;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.envers.NotAudited;
+&nbsp;import org.hibernate.search.annotations.Analyze;
+&nbsp;import org.hibernate.search.annotations.ContainedIn;
+&nbsp;import org.hibernate.search.annotations.DateBridge;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;import org.hibernate.search.annotations.EncodingType;
+&nbsp;import org.hibernate.search.annotations.Field;
+&nbsp;import org.hibernate.search.annotations.Resolution;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * A Person in the system. This can be either a small person stub, or indicative of an actual
+&nbsp; * Patient in the system. This class holds the generic person things that both the stubs and
+&nbsp; * patients share. Things like birthdate, names, addresses, and attributes are all generified into
+&nbsp; * the person table (and hence this super class)
+&nbsp; * 
+&nbsp; * @see org.openmrs.Patient
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Person extends BaseChangeableOpenmrsData {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 2L;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Person.class);</b>
+&nbsp;	
+&nbsp;	@DocumentId
+&nbsp;	protected Integer personId;
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;PersonAddress&gt; addresses = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	@ContainedIn</b>
+&nbsp;	private Set&lt;PersonName&gt; names = null;
+&nbsp;	
+<b class="fc">&nbsp;	@ContainedIn</b>
+&nbsp;	private Set&lt;PersonAttribute&gt; attributes = null;
+&nbsp;	
+&nbsp;	@Field
+&nbsp;	private String gender;
+&nbsp;	
+&nbsp;
+&nbsp;	@Field(analyze = Analyze.YES)
+&nbsp;	@DateBridge(encoding = EncodingType.STRING, resolution = Resolution.DAY)
+&nbsp;	private Date birthdate;
+&nbsp;	
+&nbsp;	private Date birthtime;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean birthdateEstimated = false;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean deathdateEstimated = false;</b>
+&nbsp;	
+<b class="fc">&nbsp;	@Field</b>
+<b class="fc">&nbsp;	private Boolean dead = false;</b>
+&nbsp;	
+&nbsp;	private Date deathDate;
+&nbsp;	
+&nbsp;	private Concept causeOfDeath;
+&nbsp;	
+&nbsp;	private String causeOfDeathNonCoded;
+&nbsp;
+&nbsp;	private User personCreator;
+&nbsp;	
+&nbsp;	private Date personDateCreated;
+&nbsp;
+&nbsp;	private User personChangedBy;
+&nbsp;	
+&nbsp;	private Date personDateChanged;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean personVoided = false;</b>
+&nbsp;
+&nbsp;	private User personVoidedBy;
+&nbsp;	
+&nbsp;	private Date personDateVoided;
+&nbsp;	
+&nbsp;	private String personVoidReason;
+&nbsp;	
+&nbsp;	@Field
+&nbsp;	@NotAudited
+&nbsp;	private boolean isPatient;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience map from PersonAttributeType.name to PersonAttribute.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This is &quot;cached&quot; for each user upon first load. When an attribute is changed, the cache is
+&nbsp;	 * cleared and rebuilt on next access.
+&nbsp;	 */
+<b class="fc">&nbsp;	@Transient</b>
+&nbsp;	Map&lt;String, PersonAttribute&gt; attributeMap = null;
+&nbsp;	
+<b class="fc">&nbsp;	@Transient</b>
+&nbsp;	private Map&lt;String, PersonAttribute&gt; allAttributeMap = null;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * default empty constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public Person() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This constructor is used to build a new Person object copy from another person object
+&nbsp;	 * (usually a patient or a user subobject). All attributes are copied over to the new object.
+&nbsp;	 * NOTE! All child collection objects are copied as pointers, each individual element is not
+&nbsp;	 * copied. &lt;br&gt;
+&nbsp;	 *
+&nbsp;	 * @param person Person to create this person object from
+&nbsp;	 */
+<b class="fc">&nbsp;	public Person(Person person) {</b>
+<b class="fc">&nbsp;		if (person == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		personId = person.getPersonId();</b>
+<b class="fc">&nbsp;		setUuid(person.getUuid());</b>
+<b class="fc">&nbsp;		addresses = person.getAddresses();</b>
+<b class="fc">&nbsp;		names = person.getNames();</b>
+<b class="fc">&nbsp;		attributes = person.getAttributes();</b>
+&nbsp;		
+<b class="fc">&nbsp;		gender = person.getGender();</b>
+<b class="fc">&nbsp;		birthdate = person.getBirthdate();</b>
+<b class="fc">&nbsp;		birthtime = person.getBirthDateTime();</b>
+<b class="fc">&nbsp;		birthdateEstimated = person.getBirthdateEstimated();</b>
+<b class="fc">&nbsp;		deathdateEstimated = person.getDeathdateEstimated();</b>
+<b class="fc">&nbsp;		dead = person.getDead();</b>
+<b class="fc">&nbsp;		deathDate = person.getDeathDate();</b>
+<b class="fc">&nbsp;		causeOfDeath = person.getCauseOfDeath();</b>
+<b class="fc">&nbsp;		causeOfDeathNonCoded = person.getCauseOfDeathNonCoded();</b>
+&nbsp;		// base creator/voidedBy/changedBy info is not copied here
+&nbsp;		// because that is specific to and will be recreated
+&nbsp;		// by the subobject upon save
+&nbsp;		
+<b class="fc">&nbsp;		setPersonCreator(person.getPersonCreator());</b>
+<b class="fc">&nbsp;		setPersonDateCreated(person.getPersonDateCreated());</b>
+<b class="fc">&nbsp;		setPersonChangedBy(person.getPersonChangedBy());</b>
+<b class="fc">&nbsp;		setPersonDateChanged(person.getPersonDateChanged());</b>
+<b class="fc">&nbsp;		setPersonVoided(person.getPersonVoided());</b>
+<b class="fc">&nbsp;		setPersonVoidedBy(person.getPersonVoidedBy());</b>
+<b class="fc">&nbsp;		setPersonDateVoided(person.getPersonDateVoided());</b>
+<b class="fc">&nbsp;		setPersonVoidReason(person.getPersonVoidReason());</b>
+&nbsp;		
+<b class="fc">&nbsp;		setPatient(person.getIsPatient());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor taking in the primary key personId value
+&nbsp;	 * 
+&nbsp;	 * @param personId Integer internal id for this person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set person id
+&nbsp;	 */
+<b class="fc">&nbsp;	public Person(Integer personId) {</b>
+<b class="fc">&nbsp;		this.personId = personId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the personId.
+&nbsp;	 */
+&nbsp;	public Integer getPersonId() {
+<b class="fc">&nbsp;		return personId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param personId The personId to set.
+&nbsp;	 */
+&nbsp;	public void setPersonId(Integer personId) {
+<b class="fc">&nbsp;		this.personId = personId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return person&#39;s gender
+&nbsp;	 */
+&nbsp;	public String getGender() {
+<b class="fc">&nbsp;		return this.gender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param gender person&#39;s gender
+&nbsp;	 */
+&nbsp;	public void setGender(String gender) {
+<b class="fc">&nbsp;		this.gender = gender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return person&#39;s date of birth
+&nbsp;	 */
+&nbsp;	public Date getBirthdate() {
+<b class="fc">&nbsp;		return this.birthdate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param birthdate person&#39;s date of birth
+&nbsp;	 */
+&nbsp;	public void setBirthdate(Date birthdate) {
+<b class="fc">&nbsp;		this.birthdate = birthdate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return true if person&#39;s birthdate is estimated
+&nbsp;	 * @deprecated as of 2.0, use {@link #getBirthdateEstimated()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isBirthdateEstimated() {
+<b class="nc">&nbsp;		return getBirthdateEstimated();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getBirthdateEstimated() {
+<b class="fc">&nbsp;		return birthdateEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param birthdateEstimated true if person&#39;s birthdate is estimated
+&nbsp;	 */
+&nbsp;	public void setBirthdateEstimated(Boolean birthdateEstimated) {
+<b class="fc">&nbsp;		this.birthdateEstimated = birthdateEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getDeathdateEstimated() {
+<b class="fc">&nbsp;		return this.deathdateEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param deathdateEstimated true if person&#39;s deathdate is estimated
+&nbsp;	 */
+&nbsp;	public void setDeathdateEstimated(Boolean deathdateEstimated) {
+<b class="fc">&nbsp;		this.deathdateEstimated = deathdateEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param birthtime person&#39;s time of birth
+&nbsp;	 */
+&nbsp;	public void setBirthtime(Date birthtime) {
+<b class="fc">&nbsp;		this.birthtime = birthtime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return person&#39;s time of birth with the date portion set to the date from person&#39;s birthdate
+&nbsp;	 */
+&nbsp;	public Date getBirthDateTime() {
+<b class="fc">&nbsp;		if (birthdate != null &amp;&amp; birthtime != null) {</b>
+<b class="fc">&nbsp;			String birthDateString = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;).format(birthdate);</b>
+<b class="fc">&nbsp;			String birthTimeString = new SimpleDateFormat(&quot;HH:mm:ss&quot;).format(birthtime);</b>
+&nbsp;			
+&nbsp;			try {
+<b class="fc">&nbsp;				return new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;).parse(birthDateString + &quot; &quot; + birthTimeString);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (ParseException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to parse birth date string&quot;, e);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return person&#39;s time of birth.
+&nbsp;	 */
+&nbsp;	public Date getBirthtime() {
+<b class="fc">&nbsp;		return this.birthtime;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the death status.
+&nbsp;	 * @deprecated as of 2.0, use {@link #getDead()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isDead() {
+<b class="nc">&nbsp;		return getDead();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the death status.
+&nbsp;	 */
+&nbsp;	public Boolean getDead() {
+<b class="fc">&nbsp;		return dead;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dead The dead to set.
+&nbsp;	 */
+&nbsp;	public void setDead(Boolean dead) {
+<b class="fc">&nbsp;		this.dead = dead;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return date of person&#39;s death
+&nbsp;	 */
+&nbsp;	public Date getDeathDate() {
+<b class="fc">&nbsp;		return this.deathDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param deathDate date of person&#39;s death
+&nbsp;	 */
+&nbsp;	public void setDeathDate(Date deathDate) {
+<b class="fc">&nbsp;		this.deathDate = deathDate;</b>
+<b class="fc">&nbsp;		if (deathDate != null) {</b>
+<b class="fc">&nbsp;			setDead(true);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return cause of person&#39;s death
+&nbsp;	 */
+&nbsp;	public Concept getCauseOfDeath() {
+<b class="fc">&nbsp;		return this.causeOfDeath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param causeOfDeath cause of person&#39;s death
+&nbsp;	 */
+&nbsp;	public void setCauseOfDeath(Concept causeOfDeath) {
+<b class="fc">&nbsp;		this.causeOfDeath = causeOfDeath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method returns the non coded cause of death
+&nbsp;	 * 
+&nbsp;	 * @return non coded cause of death
+&nbsp;	 * @since 2.2.0
+&nbsp;	 */
+&nbsp;	public String getCauseOfDeathNonCoded() {
+<b class="fc">&nbsp;		return this.causeOfDeathNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method sets the non coded cause of death with the value given as parameter
+&nbsp;	 * 
+&nbsp;	 * @param causeOfDeathNonCoded is a String that describes as text the cause of death
+&nbsp;	 * @since 2.2.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null causeOfDeathNonCoded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the attribute causeOfDeathNonCoded with the given parameter
+&nbsp;	 */
+&nbsp;	public void setCauseOfDeathNonCoded(String causeOfDeathNonCoded) {
+<b class="fc">&nbsp;		this.causeOfDeathNonCoded = causeOfDeathNonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return list of known addresses for person
+&nbsp;	 * @see org.openmrs.PersonAddress
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided addresses
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null addresses
+&nbsp;	 */
+&nbsp;	public Set&lt;PersonAddress&gt; getAddresses() {
+<b class="fc">&nbsp;		if (addresses == null) {</b>
+<b class="fc">&nbsp;			addresses = new TreeSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return this.addresses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param addresses Set&amp;lt;PersonAddress&amp;gt; list of known addresses for person
+&nbsp;	 * @see org.openmrs.PersonAddress
+&nbsp;	 */
+&nbsp;	public void setAddresses(Set&lt;PersonAddress&gt; addresses) {
+<b class="fc">&nbsp;		this.addresses = addresses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all known names for person
+&nbsp;	 * @see org.openmrs.PersonName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided names
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null names
+&nbsp;	 */
+&nbsp;	public Set&lt;PersonName&gt; getNames() {
+<b class="fc">&nbsp;		if (names == null) {</b>
+<b class="fc">&nbsp;			names = new TreeSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return this.names;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param names update all known names for person
+&nbsp;	 * @see org.openmrs.PersonName
+&nbsp;	 */
+&nbsp;	public void setNames(Set&lt;PersonName&gt; names) {
+<b class="fc">&nbsp;		this.names = names;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all known attributes for person
+&nbsp;	 * @see org.openmrs.PersonAttribute
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided attributes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null attributes
+&nbsp;	 */
+&nbsp;	public Set&lt;PersonAttribute&gt; getAttributes() {
+<b class="fc">&nbsp;		if (attributes == null) {</b>
+<b class="fc">&nbsp;			attributes = new TreeSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return this.attributes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns only the non-voided attributes for this person
+&nbsp;	 * 
+&nbsp;	 * @return list attributes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not get voided attributes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with null attributes
+&nbsp;	 */
+&nbsp;	public List&lt;PersonAttribute&gt; getActiveAttributes() {
+<b class="fc">&nbsp;		List&lt;PersonAttribute&gt; attrs = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (PersonAttribute attr : getAttributes()) {</b>
+<b class="fc">&nbsp;			if (!attr.getVoided()) {</b>
+<b class="fc">&nbsp;				attrs.add(attr);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return attrs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param attributes update all known attributes for person
+&nbsp;	 * @see org.openmrs.PersonAttribute
+&nbsp;	 */
+&nbsp;	public void setAttributes(Set&lt;PersonAttribute&gt; attributes) {
+<b class="fc">&nbsp;		this.attributes = attributes;</b>
+<b class="fc">&nbsp;		attributeMap = null;</b>
+<b class="fc">&nbsp;		allAttributeMap = null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Convenience methods
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to add the &lt;code&gt;attribute&lt;/code&gt; to this person&#39;s attribute list if the
+&nbsp;	 * attribute doesn&#39;t exist already.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Voids any current attribute with type = &lt;code&gt;newAttribute.getAttributeType()&lt;/code&gt;&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * NOTE: This effectively limits persons to only one attribute of any given type **
+&nbsp;	 * 
+&nbsp;	 * @param newAttribute PersonAttribute to add to the Person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when new attribute exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when new atribute are the same type with same value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void old attribute when new attribute are the same type with different value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove attribute when old attribute are temporary
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not save an attribute with a null value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not save an attribute with a blank string value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void old attribute when a null or blank string value is added
+&nbsp;	 */
+&nbsp;	public void addAttribute(PersonAttribute newAttribute) {
+<b class="fc">&nbsp;		newAttribute.setPerson(this);</b>
+<b class="fc">&nbsp;		boolean newIsNull = !StringUtils.hasText(newAttribute.getValue());</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (PersonAttribute currentAttribute : getActiveAttributes()) {</b>
+<b class="fc">&nbsp;			if (currentAttribute.equals(newAttribute)) {</b>
+&nbsp;				// if we have the same PersonAttributeId, don&#39;t add the new attribute
+&nbsp;				return;
+<b class="fc">&nbsp;			} else if (currentAttribute.getAttributeType().equals(newAttribute.getAttributeType())) {</b>
+<b class="fc">&nbsp;				if (currentAttribute.getValue() != null &amp;&amp; currentAttribute.getValue().equals(newAttribute.getValue())) {</b>
+&nbsp;					// this person already has this attribute
+&nbsp;					return;
+&nbsp;				}
+&nbsp;				
+&nbsp;				// if the to-be-added attribute isn&#39;t already voided itself
+&nbsp;				// and if we have the same type, different value
+<b class="fc">&nbsp;				if (!newAttribute.getVoided() || newIsNull) {</b>
+<b class="fc">&nbsp;					if (currentAttribute.getCreator() != null) {</b>
+<b class="fc">&nbsp;						currentAttribute.voidAttribute(&quot;New value: &quot; + newAttribute.getValue());</b>
+&nbsp;					} else {
+&nbsp;						// remove the attribute if it was just temporary (didn&#39;t have a creator
+&nbsp;						// attached to it yet)
+<b class="nc">&nbsp;						removeAttribute(currentAttribute);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		attributeMap = null;</b>
+<b class="fc">&nbsp;		allAttributeMap = null;</b>
+<b class="fc">&nbsp;		if (!OpenmrsUtil.collectionContains(attributes, newAttribute) &amp;&amp; !newIsNull) {</b>
+<b class="fc">&nbsp;			attributes.add(newAttribute);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the &lt;code&gt;attribute&lt;/code&gt; from this person&#39;s attribute list if the
+&nbsp;	 * attribute exists already.
+&nbsp;	 * 
+&nbsp;	 * @param attribute
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when person attribute is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when person attribute is not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove attribute when exist
+&nbsp;	 */
+&nbsp;	public void removeAttribute(PersonAttribute attribute) {
+<b class="fc">&nbsp;		if (attributes != null &amp;&amp; attributes.remove(attribute)) {</b>
+<b class="fc">&nbsp;			attributeMap = null;</b>
+<b class="fc">&nbsp;			allAttributeMap = null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience Method to return the first non-voided person attribute matching a person
+&nbsp;	 * attribute type. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Returns null if this person has no non-voided {@link PersonAttribute} with the given
+&nbsp;	 * {@link PersonAttributeType}, the given {@link PersonAttributeType} is null, or this person
+&nbsp;	 * has no attributes.
+&nbsp;	 * 
+&nbsp;	 * @param pat the PersonAttributeType to look for (can be a stub, see
+&nbsp;	 *            {@link PersonAttributeType#equals(Object)} for how its compared)
+&nbsp;	 * @return PersonAttribute that matches the given type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when attribute type is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return voided attribute
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when existing PersonAttributeType is voided
+&nbsp;	 */
+&nbsp;	public PersonAttribute getAttribute(PersonAttributeType pat) {
+<b class="fc">&nbsp;		if (pat != null) {</b>
+<b class="fc">&nbsp;			for (PersonAttribute attribute : getAttributes()) {</b>
+<b class="fc">&nbsp;				if (pat.equals(attribute.getAttributeType()) &amp;&amp; !attribute.getVoided()) {</b>
+<b class="nc">&nbsp;					return attribute;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get this person&#39;s first attribute that has a PersonAttributeType.name
+&nbsp;	 * equal to &lt;code&gt;attributeName&lt;/code&gt;.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Returns null if this person has no non-voided {@link PersonAttribute} with the given type
+&nbsp;	 * name, the given name is null, or this person has no attributes.
+&nbsp;	 * 
+&nbsp;	 * @param attributeName the name string to match on
+&nbsp;	 * @return PersonAttribute whose {@link PersonAttributeType#getName()} matchs the given name
+&nbsp;	 *         string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return person attribute based on attributeName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if AttributeName is voided
+&nbsp;	 */
+&nbsp;	public PersonAttribute getAttribute(String attributeName) {
+<b class="fc">&nbsp;		if (attributeName != null) {</b>
+<b class="fc">&nbsp;			for (PersonAttribute attribute : getAttributes()) {</b>
+<b class="fc">&nbsp;				PersonAttributeType type = attribute.getAttributeType();</b>
+<b class="fc">&nbsp;				if (type != null &amp;&amp; attributeName.equals(type.getName()) &amp;&amp; !attribute.getVoided()) {</b>
+<b class="fc">&nbsp;					return attribute;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get this person&#39;s first attribute that has a PersonAttributeTypeId
+&nbsp;	 * equal to &lt;code&gt;attributeTypeId&lt;/code&gt;.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Returns null if this person has no non-voided {@link PersonAttribute} with the given type id
+&nbsp;	 * or this person has no attributes.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * The given id cannot be null.
+&nbsp;	 * 
+&nbsp;	 * @param attributeTypeId the id of the {@link PersonAttributeType} to look for
+&nbsp;	 * @return PersonAttribute whose {@link PersonAttributeType#getId()} equals the given Integer id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return PersonAttribute based on attributeTypeId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when existing personAttribute with matching attribute type id is voided
+&nbsp;	 */
+&nbsp;	public PersonAttribute getAttribute(Integer attributeTypeId) {
+<b class="fc">&nbsp;		for (PersonAttribute attribute : getActiveAttributes()) {</b>
+<b class="fc">&nbsp;			if (attributeTypeId.equals(attribute.getAttributeType().getPersonAttributeTypeId())) {</b>
+<b class="fc">&nbsp;				return attribute;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get all of this person&#39;s attributes that have a
+&nbsp;	 * PersonAttributeType.name equal to &lt;code&gt;attributeName&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param attributeName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all PersonAttributes with matching attributeType names
+&nbsp;	 */
+&nbsp;	public List&lt;PersonAttribute&gt; getAttributes(String attributeName) {
+<b class="fc">&nbsp;		List&lt;PersonAttribute&gt; ret = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (PersonAttribute attribute : getActiveAttributes()) {</b>
+<b class="fc">&nbsp;			PersonAttributeType type = attribute.getAttributeType();</b>
+<b class="fc">&nbsp;			if (type != null &amp;&amp; attributeName.equals(type.getName())) {</b>
+<b class="fc">&nbsp;				ret.add(attribute);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get all of this person&#39;s attributes that have a PersonAttributeType.id
+&nbsp;	 * equal to &lt;code&gt;attributeTypeId&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param attributeTypeId
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when matching personAttribute by id is voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return list of person attributes based on AttributeTypeId
+&nbsp;	 */
+&nbsp;	public List&lt;PersonAttribute&gt; getAttributes(Integer attributeTypeId) {
+<b class="fc">&nbsp;		List&lt;PersonAttribute&gt; ret = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (PersonAttribute attribute : getActiveAttributes()) {</b>
+<b class="fc">&nbsp;			if (attributeTypeId.equals(attribute.getAttributeType().getPersonAttributeTypeId())) {</b>
+<b class="fc">&nbsp;				ret.add(attribute);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get all of this person&#39;s attributes that have a PersonAttributeType
+&nbsp;	 * equal to &lt;code&gt;personAttributeType&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param personAttributeType
+&nbsp;	 */
+&nbsp;	public List&lt;PersonAttribute&gt; getAttributes(PersonAttributeType personAttributeType) {
+<b class="nc">&nbsp;		List&lt;PersonAttribute&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (PersonAttribute attribute : getAttributes()) {</b>
+<b class="nc">&nbsp;			if (personAttributeType.equals(attribute.getAttributeType()) &amp;&amp; !attribute.getVoided()) {</b>
+<b class="nc">&nbsp;				ret.add(attribute);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get this person&#39;s active attributes in map form: &amp;lt;String,
+&nbsp;	 * PersonAttribute&amp;gt;.
+&nbsp;	 */
+&nbsp;	public Map&lt;String, PersonAttribute&gt; getAttributeMap() {
+<b class="nc">&nbsp;		if (attributeMap != null) {</b>
+<b class="nc">&nbsp;			return attributeMap;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Current Person Attributes: \n{}&quot;, printAttributes());</b>
+&nbsp;		
+<b class="nc">&nbsp;		attributeMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (PersonAttribute attribute : getActiveAttributes()) {</b>
+<b class="nc">&nbsp;			attributeMap.put(attribute.getAttributeType().getName(), attribute);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return attributeMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get all of this person&#39;s attributes (including voided ones) in map
+&nbsp;	 * form: &amp;lt;String, PersonAttribute&amp;gt;.
+&nbsp;	 * 
+&nbsp;	 * @return All person&#39;s attributes in map form
+&nbsp;	 * @since 1.12
+&nbsp;	 */
+&nbsp;	public Map&lt;String, PersonAttribute&gt; getAllAttributeMap() {
+<b class="nc">&nbsp;		if (allAttributeMap != null) {</b>
+<b class="nc">&nbsp;			return allAttributeMap;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Current Person Attributes: \n{}&quot;, printAttributes());</b>
+&nbsp;		
+<b class="nc">&nbsp;		allAttributeMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (PersonAttribute attribute : getAttributes()) {</b>
+<b class="nc">&nbsp;			allAttributeMap.put(attribute.getAttributeType().getName(), attribute);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return allAttributeMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for viewing all of the person&#39;s current attributes
+&nbsp;	 * 
+&nbsp;	 * @return Returns a string with all the attributes
+&nbsp;	 */
+&nbsp;	public String printAttributes() {
+<b class="nc">&nbsp;		StringBuilder s = new StringBuilder(&quot;&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (PersonAttribute attribute : getAttributes()) {</b>
+<b class="nc">&nbsp;			s.append(attribute.getAttributeType()).append(&quot; : &quot;).append(attribute.getValue()).append(&quot; : voided? &quot;)</b>
+<b class="nc">&nbsp;			        .append(attribute.getVoided()).append(&quot;\n&quot;);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return s.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to add the &lt;code&gt;name&lt;/code&gt; to this person&#39;s name list if the name
+&nbsp;	 * doesn&#39;t exist already.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 */
+&nbsp;	public void addName(PersonName name) {
+<b class="fc">&nbsp;		if (name != null) {</b>
+<b class="fc">&nbsp;			name.setPerson(this);</b>
+<b class="fc">&nbsp;			if (names == null) {</b>
+<b class="fc">&nbsp;				names = new TreeSet&lt;&gt;();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!OpenmrsUtil.collectionContains(names, name)) {</b>
+<b class="fc">&nbsp;				names.add(name);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method remove the &lt;code&gt;name&lt;/code&gt; from this person&#39;s name list if the name
+&nbsp;	 * exists already.
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 */
+&nbsp;	public void removeName(PersonName name) {
+<b class="fc">&nbsp;		if (names != null) {</b>
+<b class="fc">&nbsp;			names.remove(name);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to add the &lt;code&gt;address&lt;/code&gt; to this person&#39;s address list if the
+&nbsp;	 * address doesn&#39;t exist already.
+&nbsp;	 * 
+&nbsp;	 * @param address
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not add a person address with blank fields
+&nbsp;	 */
+&nbsp;	public void addAddress(PersonAddress address) {
+<b class="fc">&nbsp;		if (address != null) {</b>
+<b class="fc">&nbsp;			address.setPerson(this);</b>
+<b class="fc">&nbsp;			if (addresses == null) {</b>
+<b class="fc">&nbsp;				addresses = new TreeSet&lt;&gt;();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!OpenmrsUtil.collectionContains(addresses, address) &amp;&amp; !address.isBlank()) {</b>
+<b class="fc">&nbsp;				addresses.add(address);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to remove the &lt;code&gt;address&lt;/code&gt; from this person&#39;s address list if the
+&nbsp;	 * address exists already.
+&nbsp;	 * 
+&nbsp;	 * @param address
+&nbsp;	 */
+&nbsp;	public void removeAddress(PersonAddress address) {
+<b class="fc">&nbsp;		if (addresses != null) {</b>
+<b class="fc">&nbsp;			addresses.remove(address);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the {@link PersonName} object that is marked as &quot;preferred&quot;. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * If two names are marked as preferred (or no names), the database ordering comes into effect
+&nbsp;	 * and the one that was created most recently will be returned. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This method will never return a voided name, even if it is marked as preferred. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Null is returned if this person has no names or all voided names.
+&nbsp;	 * 
+&nbsp;	 * @return the &quot;preferred&quot; person name.
+&nbsp;	 * @see #getNames()
+&nbsp;	 * @see PersonName#getPreferred()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get preferred and not-voided person name if exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get not-voided person name if preferred address does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get voided person address if person is voided and not-voided address does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if person is not-voided and have voided names
+&nbsp;	 */
+&nbsp;	public PersonName getPersonName() {
+&nbsp;		// normally the DAO layer returns these in the correct order, i.e. preferred and non-voided first, but it&#39;s possible that someone
+&nbsp;		// has fetched a Person, changed their names around, and then calls this method, so we have to be careful.
+<b class="fc">&nbsp;		if (getNames() != null &amp;&amp; !getNames().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (PersonName name : getNames()) {</b>
+<b class="fc">&nbsp;				if (name.getPreferred() &amp;&amp; !name.getVoided()) {</b>
+<b class="fc">&nbsp;					return name;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			for (PersonName name : getNames()) {</b>
+<b class="fc">&nbsp;				if (!name.getVoided()) {</b>
+<b class="fc">&nbsp;					return name;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (getVoided()) {</b>
+<b class="fc">&nbsp;				return getNames().iterator().next();</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the given name attribute on this person&#39;s preferred PersonName
+&nbsp;	 * 
+&nbsp;	 * @return String given name of the person
+&nbsp;	 */
+&nbsp;	public String getGivenName() {
+<b class="fc">&nbsp;		PersonName personName = getPersonName();</b>
+<b class="fc">&nbsp;		if (personName == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return personName.getGivenName();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the middle name attribute on this person&#39;s preferred PersonName
+&nbsp;	 * 
+&nbsp;	 * @return String middle name of the person
+&nbsp;	 */
+&nbsp;	public String getMiddleName() {
+<b class="fc">&nbsp;		PersonName personName = getPersonName();</b>
+<b class="fc">&nbsp;		if (personName == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return personName.getMiddleName();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the family name attribute on this person&#39;s preferred PersonName
+&nbsp;	 * 
+&nbsp;	 * @return String family name of the person
+&nbsp;	 */
+&nbsp;	public String getFamilyName() {
+<b class="fc">&nbsp;		PersonName personName = getPersonName();</b>
+<b class="fc">&nbsp;		if (personName == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return personName.getFamilyName();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the {@link PersonAddress} object that is marked as &quot;preferred&quot;. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * If two addresses are marked as preferred (or no addresses), the database ordering comes into
+&nbsp;	 * effect and the one that was created most recently will be returned. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This method will never return a voided address, even if it is marked as preferred. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Null is returned if this person has no addresses or all voided addresses.
+&nbsp;	 * 
+&nbsp;	 * @return the &quot;preferred&quot; person address.
+&nbsp;	 * @see #getAddresses()
+&nbsp;	 * @see PersonAddress#getPreferred()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get preferred and not-voided person address if exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get not-voided person address if preferred address does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get voided person address if person is voided and not-voided address does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if person is not-voided and have voided address
+&nbsp;	 */
+&nbsp;	public PersonAddress getPersonAddress() {
+&nbsp;		// normally the DAO layer returns these in the correct order, i.e. preferred and non-voided first, but it&#39;s possible that someone
+&nbsp;		// has fetched a Person, changed their addresses around, and then calls this method, so we have to be careful.
+<b class="fc">&nbsp;		if (getAddresses() != null &amp;&amp; !getAddresses().isEmpty()) {</b>
+<b class="fc">&nbsp;			for (PersonAddress addr : getAddresses()) {</b>
+<b class="fc">&nbsp;				if (addr.getPreferred() &amp;&amp; !addr.getVoided()) {</b>
+<b class="fc">&nbsp;					return addr;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			for (PersonAddress addr : getAddresses()) {</b>
+<b class="fc">&nbsp;				if (!addr.getVoided()) {</b>
+<b class="fc">&nbsp;					return addr;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (getVoided()) {</b>
+<b class="fc">&nbsp;				return getAddresses().iterator().next();</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to calculate this person&#39;s age based on the birthdate For a person who
+&nbsp;	 * lived 1990 to 2000, age would be -5 in 1985, 5 in 1995, 10 in 2000, and 10 2010.
+&nbsp;	 * 
+&nbsp;	 * @return Returns age as an Integer.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get correct age after death
+&nbsp;	 */
+&nbsp;	public Integer getAge() {
+<b class="fc">&nbsp;		return getAge(null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method: calculates the person&#39;s age on a given date based on the birthdate
+&nbsp;	 * 
+&nbsp;	 * @param onDate (null defaults to today)
+&nbsp;	 * @return int value of the person&#39;s age
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age before birthday
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age on birthday with no minutes defined
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age on birthday with minutes defined
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age after birthday
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age after death
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age with given date after death
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age with given date before death
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get age with given date before birth
+&nbsp;	 */
+&nbsp;	public Integer getAge(Date onDate) {
+<b class="fc">&nbsp;		if (birthdate == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Use default end date as today.
+<b class="fc">&nbsp;		Calendar today = Calendar.getInstance();</b>
+&nbsp;		// But if given, use the given date.
+<b class="fc">&nbsp;		if (onDate != null) {</b>
+<b class="fc">&nbsp;			today.setTime(onDate);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// If date given is after date of death then use date of death as end date
+<b class="fc">&nbsp;		if (getDeathDate() != null &amp;&amp; today.getTime().after(getDeathDate())) {</b>
+<b class="fc">&nbsp;			today.setTime(getDeathDate());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Calendar bday = Calendar.getInstance();</b>
+<b class="fc">&nbsp;		bday.setTime(birthdate);</b>
+&nbsp;		
+<b class="fc">&nbsp;		int age = today.get(Calendar.YEAR) - bday.get(Calendar.YEAR);</b>
+&nbsp;		
+&nbsp;		// Adjust age when today&#39;s date is before the person&#39;s birthday
+<b class="fc">&nbsp;		int todaysMonth = today.get(Calendar.MONTH);</b>
+<b class="fc">&nbsp;		int bdayMonth = bday.get(Calendar.MONTH);</b>
+<b class="fc">&nbsp;		int todaysDay = today.get(Calendar.DAY_OF_MONTH);</b>
+<b class="fc">&nbsp;		int bdayDay = bday.get(Calendar.DAY_OF_MONTH);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (todaysMonth &lt; bdayMonth) {</b>
+<b class="nc">&nbsp;			age--;</b>
+<b class="fc">&nbsp;		} else if (todaysMonth == bdayMonth &amp;&amp; todaysDay &lt; bdayDay) {</b>
+&nbsp;			// we&#39;re only comparing on month and day, not minutes, etc
+<b class="fc">&nbsp;			age--;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return age;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method: sets a person&#39;s birth date from an age as of the given date Also sets
+&nbsp;	 * flag indicating that the birth date is inexact. This sets the person&#39;s birth date to January
+&nbsp;	 * 1 of the year that matches this age and date
+&nbsp;	 * 
+&nbsp;	 * @param age (the age to set)
+&nbsp;	 * @param ageOnDate (null defaults to today)
+&nbsp;	 */
+&nbsp;	public void setBirthdateFromAge(int age, Date ageOnDate) {
+<b class="fc">&nbsp;		Calendar c = Calendar.getInstance();</b>
+<b class="fc">&nbsp;		c.setTime(ageOnDate == null ? new Date() : ageOnDate);</b>
+<b class="fc">&nbsp;		c.set(Calendar.DATE, 1);</b>
+<b class="fc">&nbsp;		c.set(Calendar.MONTH, Calendar.JANUARY);</b>
+<b class="fc">&nbsp;		c.add(Calendar.YEAR, -1 * age);</b>
+<b class="fc">&nbsp;		setBirthdate(c.getTime());</b>
+<b class="fc">&nbsp;		setBirthdateEstimated(true);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	public User getPersonChangedBy() {
+<b class="fc">&nbsp;		return personChangedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.personChangedBy = changedBy;</b>
+<b class="fc">&nbsp;		this.setChangedBy(changedBy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getPersonDateChanged() {
+<b class="fc">&nbsp;		return personDateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.personDateChanged = dateChanged;</b>
+<b class="fc">&nbsp;		this.setDateChanged(dateChanged);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public User getPersonCreator() {
+<b class="fc">&nbsp;		return personCreator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonCreator(User creator) {
+<b class="fc">&nbsp;		this.personCreator = creator;</b>
+<b class="fc">&nbsp;		this.setCreator(creator);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getPersonDateCreated() {
+<b class="fc">&nbsp;		return personDateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.personDateCreated = dateCreated;</b>
+<b class="fc">&nbsp;		this.setDateCreated(dateCreated);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getPersonDateVoided() {
+<b class="fc">&nbsp;		return personDateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonDateVoided(Date dateVoided) {
+<b class="fc">&nbsp;		this.personDateVoided = dateVoided;</b>
+<b class="fc">&nbsp;		this.setDateVoided(dateVoided);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonVoided(Boolean voided) {
+<b class="fc">&nbsp;		this.personVoided = voided;</b>
+<b class="fc">&nbsp;		this.setVoided(voided);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getPersonVoided() {
+<b class="fc">&nbsp;		return personVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of 2.0, use {@link #getPersonVoided()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isPersonVoided() {
+<b class="nc">&nbsp;		return getPersonVoided();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public User getPersonVoidedBy() {
+<b class="fc">&nbsp;		return personVoidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonVoidedBy(User voidedBy) {
+<b class="fc">&nbsp;		this.personVoidedBy = voidedBy;</b>
+<b class="fc">&nbsp;		this.setVoidedBy(voidedBy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getPersonVoidReason() {
+<b class="fc">&nbsp;		return personVoidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonVoidReason(String voidReason) {
+<b class="fc">&nbsp;		this.personVoidReason = voidReason;</b>
+<b class="fc">&nbsp;		this.setVoidReason(voidReason);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return true/false whether this person is a patient or not
+&nbsp;	 * @deprecated as of 2.0, use {@link #getIsPatient()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	@NotAudited
+&nbsp;	public boolean isPatient() {
+<b class="fc">&nbsp;		return getIsPatient();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@NotAudited
+&nbsp;	public boolean getIsPatient() {
+<b class="fc">&nbsp;		return isPatient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This should only be set by the database layer by looking at whether a row exists in the
+&nbsp;	 * patient table
+&nbsp;	 * 
+&nbsp;	 * @param isPatient whether this person is a patient or not
+&nbsp;	 */
+&nbsp;	protected void setPatient(boolean isPatient) {
+<b class="fc">&nbsp;		this.isPatient = isPatient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;Person(personId=&quot; + personId + &quot;)&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getPersonId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setPersonId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

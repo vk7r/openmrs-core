@@ -1,0 +1,378 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CustomDatatypeUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.customdatatype</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomDatatypeUtil (org.openmrs.customdatatype)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomDatatypeUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,7%
+  </span>
+  <span class="absValue">
+    (13/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67,9%
+  </span>
+  <span class="absValue">
+    (53/78)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.customdatatype;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.ConceptDatatype;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.attribute.Attribute;
+&nbsp;import org.openmrs.attribute.AttributeType;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Helper methods for dealing with custom datatypes and their handlers
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;public class CustomDatatypeUtil {
+&nbsp;
+&nbsp;	private CustomDatatypeUtil() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(CustomDatatypeUtil.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param descriptor
+&nbsp;	 * @return a configured datatype appropriate for descriptor
+&nbsp;	 */
+&nbsp;	public static CustomDatatype&lt;?&gt; getDatatype(CustomValueDescriptor descriptor) {
+<b class="fc">&nbsp;		return getDatatype(descriptor.getDatatypeClassname(), descriptor.getDatatypeConfig());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param datatypeClassname
+&nbsp;	 * @param datatypeConfig
+&nbsp;	 * @return a configured datatype with the given classname and configuration
+&nbsp;	 */
+&nbsp;	public static CustomDatatype&lt;?&gt; getDatatype(String datatypeClassname, String datatypeConfig) {
+&nbsp;		try {
+<b class="fc">&nbsp;			Class dtClass = Context.loadClass(datatypeClassname);</b>
+<b class="fc">&nbsp;			CustomDatatype&lt;?&gt; ret = (CustomDatatype&lt;?&gt;) Context.getDatatypeService().getDatatype(dtClass, datatypeConfig);</b>
+<b class="fc">&nbsp;			if (ret == null) {</b>
+<b class="nc">&nbsp;				throw new CustomDatatypeException(&quot;Can&#39;t find datatype: &quot; + datatypeClassname);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return ret;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception ex) {</b>
+<b class="fc">&nbsp;			throw new CustomDatatypeException(&quot;Error loading &quot; + datatypeClassname + &quot; and configuring it with &quot;</b>
+&nbsp;			        + datatypeConfig, ex);
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param descriptor
+&nbsp;	 * @return a configured datatype appropriate for descriptor
+&nbsp;	 */
+&nbsp;	public static CustomDatatype&lt;?&gt; getDatatypeOrDefault(CustomValueDescriptor descriptor) {
+&nbsp;		try {
+<b class="fc">&nbsp;			return getDatatype(descriptor);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (CustomDatatypeException ex) {</b>
+<b class="nc">&nbsp;			return getDatatype(OpenmrsConstants.DEFAULT_CUSTOM_DATATYPE, null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param descriptor
+&nbsp;	 * @return a configured datatype handler appropriate for descriptor
+&nbsp;	 */
+&nbsp;	public static CustomDatatypeHandler getHandler(CustomValueDescriptor descriptor) {
+<b class="fc">&nbsp;		return getHandler(getDatatypeOrDefault(descriptor), descriptor.getPreferredHandlerClassname(), descriptor</b>
+<b class="fc">&nbsp;		        .getHandlerConfig());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dt the datatype that this handler should be for
+&nbsp;	 * @param preferredHandlerClassname
+&nbsp;	 * @param handlerConfig
+&nbsp;	 * @return a configured datatype handler with the given classname and configuration
+&nbsp;	 */
+&nbsp;	public static CustomDatatypeHandler getHandler(CustomDatatype&lt;?&gt; dt, String preferredHandlerClassname,
+&nbsp;	        String handlerConfig) {
+<b class="fc">&nbsp;		if (preferredHandlerClassname != null) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Class&lt;? extends CustomDatatypeHandler&gt; clazz = (Class&lt;? extends CustomDatatypeHandler&gt;) Context</b>
+<b class="fc">&nbsp;				        .loadClass(preferredHandlerClassname);</b>
+<b class="fc">&nbsp;				CustomDatatypeHandler handler = clazz.newInstance();</b>
+<b class="fc">&nbsp;				if (handlerConfig != null) {</b>
+<b class="nc">&nbsp;					handler.setHandlerConfiguration(handlerConfig);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				return handler;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (Exception ex) {</b>
+<b class="fc">&nbsp;				log.warn(&quot;Failed to instantiate and configure preferred handler with class &quot; + preferredHandlerClassname</b>
+&nbsp;				        + &quot; and config &quot; + handlerConfig, ex);
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if we couldn&#39;t get the preferred handler (or none was specified) we get the default one by datatype
+<b class="fc">&nbsp;		return Context.getDatatypeService().getHandler(dt, handlerConfig);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts a simple String-based configuration to a serialized form.
+&nbsp;	 * Utility method for property-style configuration implementations.
+&nbsp;	 *
+&nbsp;	 * @param simpleConfig
+&nbsp;	 * @return serialized form
+&nbsp;	 */
+&nbsp;	public static String serializeSimpleConfiguration(Map&lt;String, String&gt; simpleConfig) {
+<b class="fc">&nbsp;		if (simpleConfig == null || simpleConfig.size() == 0) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+&nbsp;		try {
+<b class="fc">&nbsp;			return Context.getSerializationService().getDefaultSerializer().serialize(simpleConfig);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SerializationException ex) {</b>
+<b class="nc">&nbsp;			throw new APIException(ex);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deserializes a simple String-based configuration from the serialized form used by
+&nbsp;	 * {@link #serializeSimpleConfiguration(Map)}
+&nbsp;	 * Utility method for property-style configuration implementations.
+&nbsp;	 *
+&nbsp;	 * @param serializedConfig
+&nbsp;	 * @return deserialized configuration
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; deserialize a configuration serialized by the corresponding serialize method
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public static Map&lt;String, String&gt; deserializeSimpleConfiguration(String serializedConfig) {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(serializedConfig)) {</b>
+<b class="nc">&nbsp;			return Collections.emptyMap();</b>
+&nbsp;		}
+&nbsp;		try {
+<b class="fc">&nbsp;			return Context.getSerializationService().getDefaultSerializer().deserialize(serializedConfig, Map.class);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SerializationException ex) {</b>
+<b class="nc">&nbsp;			throw new APIException(ex);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Uses the appropriate datatypes to convert all values in the input map to their valueReference equivalents.
+&nbsp;	 * This is a convenience method for calling XyzService.getXyz(..., attributeValues, ...).
+&nbsp;	 *
+&nbsp;	 * @param datatypeValues
+&nbsp;	 * @return a map similar to the input parameter, but with typed values converted to their reference equivalents
+&nbsp;	 */
+&nbsp;	public static &lt;T extends AttributeType&lt;?&gt;, U&gt; Map&lt;T, String&gt; getValueReferences(Map&lt;T, U&gt; datatypeValues) {
+<b class="fc">&nbsp;		Map&lt;T, String&gt; serializedAttributeValues = null;</b>
+<b class="fc">&nbsp;		if (datatypeValues != null) {</b>
+<b class="fc">&nbsp;			serializedAttributeValues = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (Map.Entry&lt;T, U&gt; e : datatypeValues.entrySet()) {</b>
+<b class="fc">&nbsp;				T vat = e.getKey();</b>
+<b class="fc">&nbsp;				CustomDatatype&lt;U&gt; customDatatype = (CustomDatatype&lt;U&gt;) getDatatype(vat);</b>
+&nbsp;				String valueReference;
+&nbsp;				try {
+<b class="fc">&nbsp;					valueReference = customDatatype.getReferenceStringForValue(e.getValue());</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (UnsupportedOperationException ex) {</b>
+<b class="nc">&nbsp;					throw new APIException(&quot;CustomDatatype.error.cannot.search&quot;, new Object[] { customDatatype.getClass() });</b>
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;				serializedAttributeValues.put(vat, valueReference);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return serializedAttributeValues;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return fully-qualified classnames of all registered datatypes
+&nbsp;	 */
+&nbsp;	public static List&lt;String&gt; getDatatypeClassnames() {
+<b class="nc">&nbsp;		List&lt;String&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (Class&lt;?&gt; c : Context.getDatatypeService().getAllDatatypeClasses()) {</b>
+<b class="nc">&nbsp;			ret.add(c.getName());</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return full-qualified classnames of all registered handlers
+&nbsp;	 */
+&nbsp;	public static List&lt;String&gt; getHandlerClassnames() {
+<b class="nc">&nbsp;		List&lt;String&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (Class&lt;?&gt; c : Context.getDatatypeService().getAllHandlerClasses()) {</b>
+<b class="nc">&nbsp;			ret.add(c.getName());</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param handler
+&nbsp;	 * @param datatype
+&nbsp;	 * @return whether or not handler is compatible with datatype
+&nbsp;	 */
+&nbsp;	public static boolean isCompatibleHandler(CustomDatatypeHandler handler, CustomDatatype&lt;?&gt; datatype) {
+<b class="fc">&nbsp;		List&lt;Class&lt;? extends CustomDatatypeHandler&gt;&gt; handlerClasses = Context.getDatatypeService().getHandlerClasses(</b>
+<b class="fc">&nbsp;		    (Class&lt;? extends CustomDatatype&lt;?&gt;&gt;) datatype.getClass());</b>
+<b class="fc">&nbsp;		return handlerClasses.contains(handler.getClass());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * To be called by service save methods for customizable implementations.
+&nbsp;	 * Iterates over all attributes and calls save on the {@link ConceptDatatype} for any dirty ones.
+&nbsp;	 *
+&nbsp;	 * @param customizable
+&nbsp;	 */
+&nbsp;	public static void saveAttributesIfNecessary(Customizable&lt;?&gt; customizable) {
+&nbsp;		// TODO decide whether we can move this into a SingleCustomValueSaveHandler instead of leaving it here to be called by each Customizable service&#39;s save method
+<b class="fc">&nbsp;		for (Attribute attr : customizable.getAttributes()) {</b>
+<b class="fc">&nbsp;			saveIfDirty(attr);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Calls the save method on value&#39;s {@link ConceptDatatype} if necessary
+&nbsp;	 *
+&nbsp;	 * @param value
+&nbsp;	 */
+&nbsp;	public static void saveIfDirty(SingleCustomValue&lt;?&gt; value) {
+<b class="fc">&nbsp;		if (value.isDirty()) {</b>
+<b class="fc">&nbsp;			CustomDatatype datatype = CustomDatatypeUtil.getDatatype(value.getDescriptor());</b>
+<b class="fc">&nbsp;			if (value.getValue() == null) {</b>
+<b class="nc">&nbsp;				throw new InvalidCustomValueException(value.getClass() + &quot; with type=&quot; + value.getDescriptor()</b>
+&nbsp;				        + &quot; cannot be null&quot;);
+&nbsp;			}
+<b class="fc">&nbsp;			String existingValueReference = null;</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				existingValueReference = value.getValueReference();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (NotYetPersistedException ex) {</b>
+&nbsp;				// this is expected
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			String newValueReference = datatype.save(value.getValue(), existingValueReference);</b>
+<b class="fc">&nbsp;			value.setValueReferenceInternal(newValueReference);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates a {@link SingleCustomValue}
+&nbsp;	 *
+&nbsp;	 * @param value
+&nbsp;	 * @return true is value is valid, according to its configured datatype
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public static &lt;T, D extends CustomValueDescriptor&gt; boolean validate(SingleCustomValue&lt;D&gt; value) {
+&nbsp;		try {
+<b class="fc">&nbsp;			CustomDatatype&lt;T&gt; datatype = (CustomDatatype&lt;T&gt;) getDatatype(value.getDescriptor());</b>
+<b class="fc">&nbsp;			datatype.validate((T) value.getValue());</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

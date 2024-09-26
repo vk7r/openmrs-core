@@ -1,0 +1,300 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SqlDiffFileParser</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: SqlDiffFileParser (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SqlDiffFileParser</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,2%
+  </span>
+  <span class="absValue">
+    (30/65)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.SortedMap;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.jar.JarFile;
+&nbsp;import java.util.zip.ZipEntry;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class will parse an xml sql diff file
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public class SqlDiffFileParser {
+&nbsp;
+&nbsp;	private SqlDiffFileParser() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(SqlDiffFileParser.class);</b>
+&nbsp;	
+&nbsp;	private static final String SQLDIFF_CHANGELOG_FILENAME = &quot;sqldiff.xml&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the diff map. Return a sorted map&amp;lt;version, sql statements&amp;gt;
+&nbsp;	 *
+&nbsp;	 * @return SortedMap&amp;lt;String, String&amp;gt;
+&nbsp;	 * @throws ModuleException
+&nbsp;	 */
+&nbsp;	public static SortedMap&lt;String, String&gt; getSqlDiffs(Module module) throws ModuleException {
+<b class="fc">&nbsp;		if (module == null) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(&quot;Module cannot be null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		SortedMap&lt;String, String&gt; map = new TreeMap&lt;&gt;(new VersionComparator());</b>
+&nbsp;		
+&nbsp;		InputStream diffStream;
+&nbsp;		
+&nbsp;		// get the diff stream
+<b class="fc">&nbsp;		JarFile jarfile = null;</b>
+&nbsp;		try {
+&nbsp;			try {
+<b class="fc">&nbsp;				jarfile = new JarFile(module.getFile());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (IOException e) {</b>
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Unable to get jar file&quot;, module.getName(), e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			diffStream = ModuleUtil.getResourceFromApi(jarfile, module.getModuleId(), module.getVersion(),</b>
+&nbsp;			    SQLDIFF_CHANGELOG_FILENAME);
+<b class="fc">&nbsp;			if (diffStream == null) {</b>
+&nbsp;				// Try the old way. Loading from the root of the omod
+<b class="nc">&nbsp;				ZipEntry diffEntry = jarfile.getEntry(SQLDIFF_CHANGELOG_FILENAME);</b>
+<b class="nc">&nbsp;				if (diffEntry == null) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;No sqldiff.xml found for module: &quot; + module.getName());</b>
+<b class="nc">&nbsp;					return map;</b>
+&nbsp;				} else {
+&nbsp;					try {
+<b class="nc">&nbsp;						diffStream = jarfile.getInputStream(diffEntry);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (IOException e) {</b>
+<b class="nc">&nbsp;						throw new ModuleException(&quot;Unable to get sql diff file stream&quot;, module.getName(), e);</b>
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+&nbsp;			try {
+&nbsp;				// turn the diff stream into an xml document
+&nbsp;				Document diffDoc;
+&nbsp;				try {
+<b class="fc">&nbsp;					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;					DocumentBuilder db = dbf.newDocumentBuilder();</b>
+&nbsp;
+&nbsp;					// When asked to resolve external entities (such as a DTD) we return an InputSource
+&nbsp;					// with no data at the end, causing the parser to ignore the DTD.
+<b class="fc">&nbsp;					db.setEntityResolver((publicId, systemId) -&gt; new InputSource(new StringReader(&quot;&quot;)));</b>
+<b class="fc">&nbsp;					diffDoc = db.parse(diffStream);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					throw new ModuleException(&quot;Error parsing diff sqldiff.xml file&quot;, module.getName(), e);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+<b class="fc">&nbsp;				Element rootNode = diffDoc.getDocumentElement();</b>
+&nbsp;				
+<b class="fc">&nbsp;				String diffVersion = rootNode.getAttribute(&quot;version&quot;);</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (!validConfigVersions().contains(diffVersion)) {</b>
+<b class="nc">&nbsp;					throw new ModuleException(&quot;Invalid config version: &quot; + diffVersion, module.getModuleId());</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				NodeList diffNodes = getDiffNodes(rootNode, diffVersion);</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (diffNodes != null &amp;&amp; diffNodes.getLength() &gt; 0) {</b>
+<b class="nc">&nbsp;					int i = 0;</b>
+<b class="nc">&nbsp;					while (i &lt; diffNodes.getLength()) {</b>
+<b class="nc">&nbsp;						Element el = (Element) diffNodes.item(i++);</b>
+<b class="nc">&nbsp;						String version = getElement(el, diffVersion, &quot;version&quot;);</b>
+<b class="nc">&nbsp;						String sql = getElement(el, diffVersion, &quot;sql&quot;);</b>
+<b class="nc">&nbsp;						map.put(version, sql);</b>
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (ModuleException e) {</b>
+<b class="nc">&nbsp;				if (diffStream != null) {</b>
+&nbsp;					try {
+<b class="nc">&nbsp;						diffStream.close();</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (IOException io) {</b>
+<b class="nc">&nbsp;						log.error(&quot;Error while closing config stream for module: &quot; + module.getModuleId(), io);</b>
+<b class="nc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				// rethrow the moduleException
+<b class="nc">&nbsp;				throw e;</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			try {</b>
+<b class="fc">&nbsp;				if (jarfile != null) {</b>
+<b class="fc">&nbsp;					jarfile.close();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (IOException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Unable to close jarfile: &quot; + jarfile.getName());</b>
+<b class="fc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return map;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Generic method to get a module tag
+&nbsp;	 *
+&nbsp;	 * @param element
+&nbsp;	 * @param version
+&nbsp;	 * @param tag
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private static String getElement(Element element, String version, String tag) {
+<b class="nc">&nbsp;		if (element.getElementsByTagName(tag).getLength() &gt; 0) {</b>
+<b class="nc">&nbsp;			return element.getElementsByTagName(tag).item(0).getTextContent();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of the valid sqldiff versions
+&nbsp;	 *
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private static List&lt;String&gt; validConfigVersions() {
+<b class="fc">&nbsp;		List&lt;String&gt; versions = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		versions.add(&quot;1.0&quot;);</b>
+<b class="fc">&nbsp;		return versions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds the nodes that contain diff information
+&nbsp;	 *
+&nbsp;	 * @param element
+&nbsp;	 * @param version
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private static NodeList getDiffNodes(Element element, String version) {
+<b class="fc">&nbsp;		NodeList diffNodes = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (&quot;1.0&quot;.equals(version)) {</b>
+<b class="fc">&nbsp;			diffNodes = element.getElementsByTagName(&quot;diff&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return diffNodes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

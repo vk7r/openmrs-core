@@ -1,0 +1,136 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Rule</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic</a>
+</div>
+
+<h1>Coverage Summary for Class: Rule (org.openmrs.logic)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Rule</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.logic.result.Result;
+&nbsp;import org.openmrs.logic.result.Result.Datatype;
+&nbsp;import org.openmrs.logic.rule.RuleParameterInfo;
+&nbsp;
+&nbsp;/**
+&nbsp; * Base class for all logic rules.
+&nbsp; */
+&nbsp;public interface Rule {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Evaluate rule for a given patient and applying the given criteria.
+&nbsp;	 * 
+&nbsp;	 * @param context the context this rule is being evaluated in
+&nbsp;	 * @param patientId id of the patient for whom rule is to be calculated
+&nbsp;	 * @param parameters parameters passed to this rule
+&nbsp;	 * @return result of the rule for the given patient with given criteria applied
+&nbsp;	 * @throws LogicException TODO
+&nbsp;	 */
+&nbsp;	public Result eval(LogicContext context, Integer patientId, Map&lt;String, Object&gt; parameters) throws LogicException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the list of arguments.
+&nbsp;	 * 
+&nbsp;	 * @return list of arguments or null if no arguments
+&nbsp;	 */
+&nbsp;	public Set&lt;RuleParameterInfo&gt; getParameterList();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a list of dependencies (tokens for rules upon which this rule may depend).
+&nbsp;	 * 
+&nbsp;	 * @return tokens for all rules that may be called by this rule
+&nbsp;	 */
+&nbsp;	// TODO: it would be better to be able to query for dependency on both rules
+&nbsp;	// and/or data source keys
+&nbsp;	public String[] getDependencies();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the time (in seconds) during which the Rule&#39;s results are considered to be valid. This
+&nbsp;	 * is used to prevent the use of invalid (old) items from a cache
+&nbsp;	 * 
+&nbsp;	 * @return duration (in seconds) the results are considered valid for this rule
+&nbsp;	 */
+&nbsp;	public int getTTL();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the default datatype that the rule returns, when supplied with a given token. While
+&nbsp;	 * results are loosely typed, this method allows rules to declare a default datatype to simplify
+&nbsp;	 * user interfaces and defaults when working with rules.
+&nbsp;	 * 
+&nbsp;	 * @return datatype
+&nbsp;	 */
+&nbsp;	public Datatype getDefaultDatatype();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

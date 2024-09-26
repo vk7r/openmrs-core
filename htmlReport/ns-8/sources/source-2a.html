@@ -1,0 +1,382 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonLuceneQuery</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonLuceneQuery (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonLuceneQuery</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (12/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,5%
+  </span>
+  <span class="absValue">
+    (77/86)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.hibernate.search.LuceneQuery;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides common queries for HibernatePatientDAO and HibernatePersonDAO.
+&nbsp; *
+&nbsp; * @see HibernatePatientDAO
+&nbsp; * @see HibernatePersonDAO
+&nbsp; *
+&nbsp; * @since 2.1.0
+&nbsp; */
+&nbsp;public class PersonLuceneQuery {
+&nbsp;
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	static final String THREE_NAME_QUERY = &quot;((givenNameSoundex:n1^6 OR givenNameSoundex:n2^2 OR givenNameSoundex:n3) OR &quot; +
+&nbsp;		&quot;(middleNameSoundex:n1^2 OR middleNameSoundex:n2^6 OR middleNameSoundex:n3^1) OR &quot; +
+&nbsp;		&quot;(familyNameSoundex:n1^1 OR familyNameSoundex:n2^2 OR familyNameSoundex:n3^6) OR &quot; +
+&nbsp;		&quot;(familyName2Soundex:n1^1 OR familyName2Soundex:n2^2 OR familyName2Soundex:n3^6))&quot;;
+&nbsp;	
+&nbsp;	static final String TWO_NAME_QUERY = &quot;(( givenNameSoundex:n1^8 OR givenNameSoundex:n2^4) OR &quot;
+&nbsp;		+ &quot;(middleNameSoundex:n1^4 OR middleNameSoundex:n2^8) OR &quot;
+&nbsp;		+ &quot;(familyNameSoundex:n1^4 OR familyNameSoundex:n2^8) OR &quot;
+&nbsp;		+ &quot;(familyNameSoundex:n1^4 OR familyNameSoundex:n2^8))&quot;;
+&nbsp;	
+&nbsp;	
+<b class="fc">&nbsp;	public PersonLuceneQuery(SessionFactory sessionFactory) {</b>
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPersonNameQuery(String query, boolean includeVoided) {
+<b class="nc">&nbsp;		return getPersonNameQuery(query, false, includeVoided, false, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPatientNameQuery(String query, boolean includeVoided) {
+<b class="nc">&nbsp;		return getPersonNameQuery(query, false, includeVoided, true, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPersonNameQuery(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="nc">&nbsp;		return getPersonNameQuery(query, false, includeVoided, false, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPatientNameQuery(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="fc">&nbsp;		return getPersonNameQuery(query, false, includeVoided, true, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPersonNameQueryWithOrParser(String query, boolean includeVoided) {
+<b class="fc">&nbsp;		return getPersonNameQuery(query, true, includeVoided, false, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPatientNameQueryWithOrParser(String query, boolean includeVoided) {
+<b class="nc">&nbsp;		return getPersonNameQuery(query, true, includeVoided, true, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPersonNameQueryWithOrParser(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="nc">&nbsp;		return getPersonNameQuery(query, true, includeVoided, false, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getPatientNameQueryWithOrParser(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="nc">&nbsp;		return getPersonNameQuery(query, true, includeVoided, true, skipSame);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method creates a Lucene search query for a Person based on a soundex search on the first name
+&nbsp;	 *
+&nbsp;	 * @param n1 the first part of the name to be searched for
+&nbsp;	 * @param n2 the second part of the name to be searched
+&nbsp;	 * @param n3 the third part of the name to be searched
+&nbsp;	 * @param birthyear the birthyear the searched person should have 
+&nbsp;	 * @param includeVoided is true if voided person should be matched
+&nbsp;	 * @param gender the gender of the person to search  
+&nbsp;	 * @return the LuceneQuery that returns Persons with a soundex representation of the firstName and other defined search criteria
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getSoundexPersonNameSearchOnThreeNames(String n1, String n2, String n3,  Integer birthyear, boolean includeVoided, String gender) {
+&nbsp;		
+<b class="fc">&nbsp;		String threeNameQuery =  THREE_NAME_QUERY.replace(&quot;n1&quot;, LuceneQuery.escapeQuery(n1))</b>
+<b class="fc">&nbsp;			.replace(&quot;n2&quot;, LuceneQuery.escapeQuery(n2))</b>
+<b class="fc">&nbsp;			.replace(&quot;n3&quot;, LuceneQuery.escapeQuery(n3));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return getSoundexPersonNameQuery(threeNameQuery, birthyear, includeVoided, gender);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method creates a Lucene search query for a Person based on a soundex search 
+&nbsp;	 *
+&nbsp;	 * @param searchName1 the first part of the name to be searched for
+&nbsp;	 * @param searchName2 the second part of the name to be searched
+&nbsp;	 * @param birthyear the birthyear the searched person should have 
+&nbsp;	 * @param includeVoided is true if voided person should be matched
+&nbsp;	 * @param gender the gender of the person to search  
+&nbsp;	 * @return the LuceneQuery that returns Persons with a soundex representation of the defined names and the other defined search criteria
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getSoundexPersonNameSearchOnTwoNames(String searchName1, String searchName2,  Integer birthyear, boolean includeVoided, String gender) {
+&nbsp;		
+<b class="fc">&nbsp;		String threeNameQuery =  TWO_NAME_QUERY.replace(&quot;n1&quot;, LuceneQuery.escapeQuery(searchName1))</b>
+<b class="fc">&nbsp;			.replace(&quot;n2&quot;, LuceneQuery.escapeQuery(searchName2));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return getSoundexPersonNameQuery(threeNameQuery, birthyear, includeVoided, gender);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method creates a Lucene search query for a Person based on a soundex search on n&gt;3 names
+&nbsp;	 *
+&nbsp;	 * @param searchNames an array of names that should be searched for
+&nbsp;	 * @param birthyear the birthyear the searched person should have 
+&nbsp;	 * @param includeVoided is true if voided person should be matched
+&nbsp;	 * @param gender the gender of the person to search  
+&nbsp;	 * @return the LuceneQuery that returns Persons with a soundex representation of the defined names and the other defined search criteria
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getSoundexPersonNameSearchOnNNames(String[] searchNames, Integer birthyear, boolean includeVoided, String gender) {
+<b class="fc">&nbsp;		List&lt;String&gt; fields = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		fields.addAll(Arrays.asList(&quot;familyNameSoundex&quot;, &quot;familyName2Soundex&quot;, &quot;middleNameSoundex&quot;, &quot;givenNameSoundex&quot;));</b>
+<b class="fc">&nbsp;		List&lt;String&gt; queryPart = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for(String name : searchNames) {</b>
+<b class="fc">&nbsp;			for(String field : fields) {</b>
+<b class="fc">&nbsp;				queryPart.add(field + &quot;:&#39;&quot; + name + &quot;&#39;&quot;);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		String query = &quot;(&quot; + String.join(&quot; OR &quot;, queryPart)  +&quot; )&quot;;</b>
+<b class="fc">&nbsp;		return buildSoundexLuceneQuery(query, fields, birthyear, includeVoided, gender);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The method creates a Lucene search query for a Person based on a soundex search on the givenName, familyNames and middleName
+&nbsp;	 *  
+&nbsp;	 * @param query the query that should be executed on the names
+&nbsp;	 * @param birthyear the birthyear the searched person should have
+&nbsp;	 * @param includeVoided is true if voided person should be matched
+&nbsp;	 * @param gender the gender of the person to search
+&nbsp;	 * @return the LuceneQuery that returns Persons with a soundex representation of the givenName, familyNames and middleName
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;PersonName&gt; getSoundexPersonNameQuery(String query, Integer birthyear, boolean includeVoided, String gender) {
+<b class="fc">&nbsp;		List&lt;String&gt; fields = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		fields.addAll(Arrays.asList(&quot;familyNameSoundex&quot;, &quot;familyName2Soundex&quot;, &quot;middleNameSoundex&quot;, &quot;givenNameSoundex&quot;));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return buildSoundexLuceneQuery(query, fields, birthyear, includeVoided, gender);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method builds the actual LuceneQuery for searching persons based on a query that is executed on the fields
+&nbsp;	 * 
+&nbsp;	 * @param query the lucene search query that should be executed on the fields
+&nbsp;	 * @param fields the fields that should be searched
+&nbsp;	 * @param birthyear the birthyear the searched person should have
+&nbsp;	 * @param includeVoided true if voided person should be executed 
+&nbsp;	 * @param gender of the person to match
+&nbsp;	 * @return the LuceneQuery that is build based on the parameters
+&nbsp;	 */
+&nbsp;	private LuceneQuery&lt;PersonName&gt; buildSoundexLuceneQuery(String query, List&lt;String&gt; fields, Integer birthyear, boolean includeVoided, String gender) {
+<b class="fc">&nbsp;		String completeQuery = query;</b>
+<b class="fc">&nbsp;		if(birthyear != 0) {</b>
+&nbsp;			// birthdate inside the birthyear range or is null
+&nbsp;			// https://stackoverflow.com/questions/17221736/whats-wrong-with-this-solr-range-filter-query/17225534#17225534
+<b class="fc">&nbsp;			String dateQuery = &quot; AND (person.birthdate: [&quot; + (birthyear - 1) + &quot; TO &quot; + (birthyear + 1) + &quot;] OR ( -person.birthdate:([* TO *])  AND *:*))&quot;;</b>
+<b class="fc">&nbsp;			completeQuery+= dateQuery;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		LuceneQuery&lt;PersonName&gt; luceneQuery = LuceneQuery</b>
+<b class="fc">&nbsp;			.newQuery(PersonName.class, sessionFactory.getCurrentSession(), completeQuery, fields, LuceneQuery.MatchType.SOUNDEX).useOrQueryParser();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!includeVoided) {</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;voided&quot;, false);</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;person.voided&quot;, false);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if(gender != null) {</b>
+<b class="fc">&nbsp;			String[] searchedGenders = new String[] {gender.toLowerCase()};</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;person.gender&quot;, searchedGenders);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return luceneQuery;</b>
+&nbsp;	}
+&nbsp;		
+&nbsp;		
+&nbsp;	private LuceneQuery&lt;PersonName&gt; getPersonNameQuery(String query, boolean orQueryParser, boolean includeVoided, boolean patientsOnly, LuceneQuery&lt;?&gt; skipSame) {
+<b class="fc">&nbsp;		List&lt;String&gt; fields = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		fields.addAll(Arrays.asList(&quot;givenNameExact&quot;, &quot;middleNameExact&quot;, &quot;familyNameExact&quot;, &quot;familyName2Exact&quot;));</b>
+<b class="fc">&nbsp;		fields.addAll(Arrays.asList(&quot;givenNameStart&quot;, &quot;middleNameStart&quot;, &quot;familyNameStart&quot;, &quot;familyName2Start&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;		String matchMode = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_MODE);</b>
+<b class="fc">&nbsp;		if (OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_ANYWHERE.equals(matchMode)) {</b>
+<b class="fc">&nbsp;			fields.addAll(Arrays.asList(&quot;givenNameAnywhere&quot;, &quot;middleNameAnywhere&quot;, &quot;familyNameAnywhere&quot;, &quot;familyName2Anywhere&quot;));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		LuceneQuery&lt;PersonName&gt; luceneQuery = LuceneQuery</b>
+<b class="fc">&nbsp;				.newQuery(PersonName.class, sessionFactory.getCurrentSession(), query, fields);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (orQueryParser) {</b>
+<b class="fc">&nbsp;			luceneQuery.useOrQueryParser();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!includeVoided) {</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;voided&quot;, false);</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;person.voided&quot;, false);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (patientsOnly) {</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;person.isPatient&quot;, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (skipSame != null) {</b>
+<b class="fc">&nbsp;			luceneQuery.skipSame(&quot;person.personId&quot;, skipSame);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			luceneQuery.skipSame(&quot;person.personId&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return luceneQuery;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonAttribute&gt; getPersonAttributeQuery(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="nc">&nbsp;		return getPersonAttributeQuery(query, false, includeVoided, false, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonAttribute&gt; getPatientAttributeQuery(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="fc">&nbsp;		return getPersonAttributeQuery(query, false, includeVoided, true, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonAttribute&gt; getPersonAttributeQueryWithOrParser(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="fc">&nbsp;		return getPersonAttributeQuery(query, true, includeVoided, false, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;PersonAttribute&gt; getPatientAttributeQueryWithOrParser(String query, boolean includeVoided, LuceneQuery&lt;?&gt; skipSame) {
+<b class="nc">&nbsp;		return getPersonAttributeQuery(query, true, includeVoided, true, skipSame);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private LuceneQuery&lt;PersonAttribute&gt; getPersonAttributeQuery(String query, boolean orQueryParser, boolean includeVoided, boolean patientsOnly, LuceneQuery&lt;?&gt; skipSame) {
+<b class="fc">&nbsp;		List&lt;String&gt; fields = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		fields.add(&quot;valuePhrase&quot;); //will position whole phrase match higher</b>
+<b class="fc">&nbsp;		fields.add(&quot;valueExact&quot;);</b>
+<b class="fc">&nbsp;		String matchMode = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_MODE);</b>
+<b class="fc">&nbsp;		if (OpenmrsConstants.GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_ANYWHERE.equals(matchMode)) {</b>
+<b class="fc">&nbsp;			fields.add(&quot;valueStart&quot;); //will position &quot;starts with&quot; match higher</b>
+<b class="fc">&nbsp;			fields.add(&quot;valueAnywhere&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		LuceneQuery&lt;PersonAttribute&gt; luceneQuery = LuceneQuery</b>
+<b class="fc">&nbsp;				.newQuery(PersonAttribute.class, sessionFactory.getCurrentSession(), query, fields);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (orQueryParser) {</b>
+<b class="fc">&nbsp;			luceneQuery.useOrQueryParser();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!includeVoided){</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;voided&quot;, false);</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;person.voided&quot;, false);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		luceneQuery.include(&quot;attributeType.searchable&quot;, true);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (patientsOnly) {</b>
+<b class="fc">&nbsp;			luceneQuery.include(&quot;person.isPatient&quot;, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (skipSame != null) {</b>
+<b class="fc">&nbsp;			luceneQuery.skipSame(&quot;person.personId&quot;, skipSame);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			luceneQuery.skipSame(&quot;person.personId&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return luceneQuery;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

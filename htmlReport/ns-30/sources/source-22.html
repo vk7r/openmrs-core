@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > RoleEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.propertyeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: RoleEditor (org.openmrs.propertyeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RoleEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65%
+  </span>
+  <span class="absValue">
+    (13/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.propertyeditor;
+&nbsp;
+&nbsp;import java.beans.PropertyEditorSupport;
+&nbsp;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.api.UserService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Allows for serializing/deserializing an object to a string so that Spring knows how to pass
+&nbsp; * an object back and forth through an html form or other medium. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * In version 1.9, added ability for this to also retrieve objects by uuid
+&nbsp; *
+&nbsp; * @see Role
+&nbsp; */
+&nbsp;public class RoleEditor extends PropertyEditorSupport {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(RoleEditor.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public RoleEditor() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set using name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set using uuid
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAsText(String text) throws IllegalArgumentException {
+<b class="fc">&nbsp;		UserService es = Context.getUserService();</b>
+<b class="fc">&nbsp;		if (StringUtils.hasText(text)) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Role r = es.getRole(text);</b>
+<b class="fc">&nbsp;				setValue(r);</b>
+&nbsp;				//when a role is not found, no exception is generated. throw one to execute the catch block
+<b class="fc">&nbsp;				if (r == null) {</b>
+<b class="fc">&nbsp;					throw new Exception();</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;			catch (Exception ex) {</b>
+<b class="fc">&nbsp;				Role r = es.getRoleByUuid(text);</b>
+<b class="fc">&nbsp;				setValue(r);</b>
+<b class="fc">&nbsp;				if (r == null) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Error setting text: &quot; + text, ex);</b>
+<b class="nc">&nbsp;					throw new IllegalArgumentException(&quot;Role not found: &quot; + ex.getMessage());</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			setValue(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getAsText() {
+<b class="nc">&nbsp;		Role r = (Role) getValue();</b>
+<b class="nc">&nbsp;		if (r == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return r.getRole();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

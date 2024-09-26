@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > TaskFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler</a>
+</div>
+
+<h1>Coverage Summary for Class: TaskFactory (org.openmrs.scheduler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TaskFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    56,2%
+  </span>
+  <span class="absValue">
+    (9/16)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler;
+&nbsp;
+&nbsp;import org.openmrs.scheduler.tasks.TaskThreadedInitializationWrapper;
+&nbsp;import org.openmrs.util.OpenmrsClassLoader;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; */
+&nbsp;public class TaskFactory {
+&nbsp;	
+&nbsp;	/** Singleton instance of the schedulable factory */
+<b class="fc">&nbsp;	private static final TaskFactory factory = new TaskFactory();</b>
+&nbsp;	
+&nbsp;	/** Logger */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(TaskFactory.class);</b>
+&nbsp;	
+&nbsp;	/** Private constructor */
+<b class="fc">&nbsp;	private TaskFactory() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets an instance of the schedulable factory
+&nbsp;	 */
+&nbsp;	public static TaskFactory getInstance() {
+<b class="fc">&nbsp;		return factory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a new instance of Schedulable used to run tasks. By default the returned task will be
+&nbsp;	 * the given task wrapped with the {@link TaskThreadedInitializationWrapper} class so that the
+&nbsp;	 * {@link Task#initialize(TaskDefinition)} method runs in a new thread.
+&nbsp;	 *
+&nbsp;	 * @param taskDefinition
+&nbsp;	 * @return the created Task
+&nbsp;	 * @throws SchedulerException
+&nbsp;	 */
+&nbsp;	public Task createInstance(TaskDefinition taskDefinition) throws SchedulerException {
+&nbsp;		try {
+&nbsp;			
+&nbsp;			// Retrieve the appropriate class
+<b class="fc">&nbsp;			Class&lt;?&gt; taskClass = OpenmrsClassLoader.getInstance().loadClass(taskDefinition.getTaskClass());</b>
+&nbsp;			
+&nbsp;			// Create a new instance of the schedulable class 
+<b class="fc">&nbsp;			Task task = new TaskThreadedInitializationWrapper((Task) taskClass.newInstance());</b>
+&nbsp;			
+<b class="fc">&nbsp;			log.debug(&quot;initializing {}&quot;, taskClass.getName());</b>
+&nbsp;			// Initialize the schedulable object
+<b class="fc">&nbsp;			task.initialize(taskDefinition);</b>
+&nbsp;			
+<b class="fc">&nbsp;			return task;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassNotFoundException cnfe) {</b>
+<b class="nc">&nbsp;			log.error(&quot;OpenmrsClassLoader could not load class: {}. Probably due to a module not being loaded&quot;, taskDefinition.getTaskClass());</b>
+<b class="nc">&nbsp;			log.debug(&quot;Full error trace of ClassNotFoundException&quot;, cnfe);</b>
+<b class="nc">&nbsp;			throw new SchedulerException(&quot;could not load class&quot;, cnfe);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Error creating new task for class {}&quot;, taskDefinition.getTaskClass(), e);</b>
+&nbsp;			
+<b class="nc">&nbsp;			throw new SchedulerException(&quot;error creating new task for class &quot; + taskDefinition.getTaskClass(), e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

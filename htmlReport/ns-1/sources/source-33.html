@@ -1,0 +1,673 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DrugOrder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: DrugOrder (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DrugOrder</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,8%
+  </span>
+  <span class="absValue">
+    (46/48)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,5%
+  </span>
+  <span class="absValue">
+    (109/113)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DrugOrder$HibernateProxy$DoKVkWA2</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    95,8%
+  </span>
+  <span class="absValue">
+    (46/48)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,5%
+  </span>
+  <span class="absValue">
+    (109/113)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import static org.openmrs.Order.Action.DISCONTINUE;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * DrugOrder
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class DrugOrder extends Order {
+&nbsp;
+&nbsp;	public static final long serialVersionUID = 72232L;
+&nbsp;
+&nbsp;	// Fields
+&nbsp;
+&nbsp;	private Double dose;
+&nbsp;
+&nbsp;	private Concept doseUnits;
+&nbsp;
+&nbsp;	private OrderFrequency frequency;
+&nbsp;
+<b class="fc">&nbsp;	private Boolean asNeeded = false;</b>
+&nbsp;
+&nbsp;	private Double quantity;
+&nbsp;
+&nbsp;	private Concept quantityUnits;
+&nbsp;
+&nbsp;	private Drug drug;
+&nbsp;
+&nbsp;	private String asNeededCondition;
+&nbsp;
+<b class="fc">&nbsp;	private Class&lt;? extends DosingInstructions&gt; dosingType = SimpleDosingInstructions.class;</b>
+&nbsp;
+&nbsp;	private Integer numRefills;
+&nbsp;
+&nbsp;	private String dosingInstructions;
+&nbsp;
+&nbsp;	private Integer duration;
+&nbsp;
+&nbsp;	private Concept durationUnits;
+&nbsp;
+&nbsp;	private Concept route;
+&nbsp;
+&nbsp;	private String brandName;
+&nbsp;
+<b class="fc">&nbsp;	private Boolean dispenseAsWritten = Boolean.FALSE;</b>
+&nbsp;
+&nbsp;	private String drugNonCoded;
+&nbsp;
+&nbsp;	// Constructors
+&nbsp;
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public DrugOrder() {</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public DrugOrder(Integer orderId) {</b>
+<b class="fc">&nbsp;		this.setOrderId(orderId);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Order#copy()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy all drug order fields
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DrugOrder copy() {
+<b class="fc">&nbsp;		return copyHelper(new DrugOrder());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Order#copyHelper(Order)
+&nbsp;	 */
+&nbsp;	protected DrugOrder copyHelper(DrugOrder target) {
+<b class="fc">&nbsp;		super.copyHelper(target);</b>
+<b class="fc">&nbsp;		target.setDose(getDose());</b>
+<b class="fc">&nbsp;		target.setDoseUnits(getDoseUnits());</b>
+<b class="fc">&nbsp;		target.setFrequency(getFrequency());</b>
+<b class="fc">&nbsp;		target.setAsNeeded(getAsNeeded());</b>
+<b class="fc">&nbsp;		target.setAsNeededCondition(getAsNeededCondition());</b>
+<b class="fc">&nbsp;		target.setQuantity(getQuantity());</b>
+<b class="fc">&nbsp;		target.setQuantityUnits(getQuantityUnits());</b>
+<b class="fc">&nbsp;		target.setDrug(getDrug());</b>
+<b class="fc">&nbsp;		target.setDosingType(getDosingType());</b>
+<b class="fc">&nbsp;		target.setDosingInstructions(getDosingInstructions());</b>
+<b class="fc">&nbsp;		target.setDuration(getDuration());</b>
+<b class="fc">&nbsp;		target.setDurationUnits(getDurationUnits());</b>
+<b class="fc">&nbsp;		target.setNumRefills(getNumRefills());</b>
+<b class="fc">&nbsp;		target.setRoute(getRoute());</b>
+<b class="fc">&nbsp;		target.setBrandName(getBrandName());</b>
+<b class="fc">&nbsp;		target.setDispenseAsWritten(getDispenseAsWritten());</b>
+<b class="fc">&nbsp;		target.setDrugNonCoded(getDrugNonCoded());</b>
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isDrugOrder() {
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Property accessors
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the doseUnits of this drug order
+&nbsp;	 *
+&nbsp;	 * @return doseUnits
+&nbsp;	 */
+&nbsp;	public Concept getDoseUnits() {
+<b class="fc">&nbsp;		return this.doseUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the doseUnits of this drug order
+&nbsp;	 *
+&nbsp;	 * @param doseUnits
+&nbsp;	 */
+&nbsp;	public void setDoseUnits(Concept doseUnits) {
+<b class="fc">&nbsp;		this.doseUnits = doseUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the frequency
+&nbsp;	 *
+&nbsp;	 * @return frequency
+&nbsp;	 * @since 1.10 (signature changed)
+&nbsp;	 */
+&nbsp;	public OrderFrequency getFrequency() {
+<b class="fc">&nbsp;		return this.frequency;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the frequency
+&nbsp;	 *
+&nbsp;	 * @param frequency
+&nbsp;	 * @since 1.10 (signature changed)
+&nbsp;	 */
+&nbsp;	public void setFrequency(OrderFrequency frequency) {
+<b class="fc">&nbsp;		this.frequency = frequency;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns true/false whether the drug is a &quot;pro re nata&quot; drug
+&nbsp;	 *
+&nbsp;	 * @return Boolean
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Boolean getAsNeeded() {
+<b class="fc">&nbsp;		return asNeeded;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param asNeeded the value to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setAsNeeded(Boolean asNeeded) {
+<b class="fc">&nbsp;		this.asNeeded = asNeeded;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the quantity
+&nbsp;	 *
+&nbsp;	 * @return quantity
+&nbsp;	 */
+&nbsp;	public Double getQuantity() {
+<b class="fc">&nbsp;		return this.quantity;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the quantity
+&nbsp;	 *
+&nbsp;	 * @param quantity
+&nbsp;	 */
+&nbsp;	public void setQuantity(Double quantity) {
+<b class="fc">&nbsp;		this.quantity = quantity;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.10
+&nbsp;	 * @return concept
+&nbsp;	 */
+&nbsp;	public Concept getQuantityUnits() {
+<b class="fc">&nbsp;		return quantityUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param quantityUnits
+&nbsp;	 */
+&nbsp;	public void setQuantityUnits(Concept quantityUnits) {
+<b class="fc">&nbsp;		this.quantityUnits = quantityUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the drug
+&nbsp;	 *
+&nbsp;	 * @return drug
+&nbsp;	 */
+&nbsp;	public Drug getDrug() {
+<b class="fc">&nbsp;		return this.drug;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the drug
+&nbsp;	 *
+&nbsp;	 * @param drug
+&nbsp;	 */
+&nbsp;	public void setDrug(Drug drug) {
+<b class="fc">&nbsp;		this.drug = drug;</b>
+<b class="fc">&nbsp;		if (drug != null &amp;&amp; getConcept() == null) {</b>
+<b class="fc">&nbsp;			setConcept(drug.getConcept());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the asNeededCondition
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public String getAsNeededCondition() {
+<b class="fc">&nbsp;		return asNeededCondition;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param asNeededCondition the asNeededCondition to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setAsNeededCondition(String asNeededCondition) {
+<b class="fc">&nbsp;		this.asNeededCondition = asNeededCondition;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the route
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Concept getRoute() {
+<b class="fc">&nbsp;		return route;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the route
+&nbsp;	 *
+&nbsp;	 * @param route
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setRoute(Concept route) {
+<b class="fc">&nbsp;		this.route = route;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setDose(Double dose) {
+<b class="fc">&nbsp;		this.dose = dose;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Double getDose() {
+<b class="fc">&nbsp;		return dose;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the dosingType
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Class&lt;? extends DosingInstructions&gt; getDosingType() {
+<b class="fc">&nbsp;		return dosingType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the dosingType
+&nbsp;	 *
+&nbsp;	 * @param dosingType the dosingType to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDosingType(Class&lt;? extends DosingInstructions&gt; dosingType) {
+<b class="fc">&nbsp;		this.dosingType = dosingType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the dosingInstructions instance
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public DosingInstructions getDosingInstructionsInstance() {
+&nbsp;		try {
+<b class="fc">&nbsp;			DosingInstructions instructions = getDosingType().newInstance();</b>
+<b class="fc">&nbsp;			return instructions.getDosingInstructions(this);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InstantiationException | IllegalAccessException e) {</b>
+<b class="nc">&nbsp;			throw new IllegalStateException(e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets numRefills
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Integer getNumRefills() {
+<b class="fc">&nbsp;		return numRefills;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets numRefills
+&nbsp;	 *
+&nbsp;	 * @param numRefills the numRefills to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setNumRefills(Integer numRefills) {
+<b class="fc">&nbsp;		this.numRefills = numRefills;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the dosingInstructions
+&nbsp;	 *
+&nbsp;	 * @param dosingInstructions to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDosingInstructions(String dosingInstructions) {
+<b class="fc">&nbsp;		this.dosingInstructions = dosingInstructions;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the dosingInstructions
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public String getDosingInstructions() {
+<b class="fc">&nbsp;		return this.dosingInstructions;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the duration of a Drug Order
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Integer getDuration() {
+<b class="fc">&nbsp;		return duration;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the duration of a Drug Order
+&nbsp;	 *
+&nbsp;	 * @param duration to set
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDuration(Integer duration) {
+<b class="fc">&nbsp;		this.duration = duration;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets durationUnits of a Drug Order
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Concept getDurationUnits() {
+<b class="fc">&nbsp;		return durationUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the durationUnits of a Drug Order
+&nbsp;	 *
+&nbsp;	 * @param durationUnits
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDurationUnits(Concept durationUnits) {
+<b class="fc">&nbsp;		this.durationUnits = durationUnits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the brandName
+&nbsp;	 *
+&nbsp;	 * @return brandName
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public String getBrandName() {
+<b class="fc">&nbsp;		return brandName;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the brandName
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param brandName the brandName to set to
+&nbsp;	 */
+&nbsp;	public void setBrandName(String brandName) {
+<b class="fc">&nbsp;		this.brandName = brandName;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return true or false
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public Boolean getDispenseAsWritten() {
+<b class="fc">&nbsp;		return dispenseAsWritten;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param dispenseAsWritten
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDispenseAsWritten(Boolean dispenseAsWritten) {
+<b class="fc">&nbsp;		this.dispenseAsWritten = dispenseAsWritten;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.Order#cloneForDiscontinuing()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set all the relevant fields
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DrugOrder cloneForDiscontinuing() {
+<b class="fc">&nbsp;		DrugOrder newOrder = new DrugOrder();</b>
+<b class="fc">&nbsp;		newOrder.setCareSetting(getCareSetting());</b>
+<b class="fc">&nbsp;		newOrder.setConcept(getConcept());</b>
+<b class="fc">&nbsp;		newOrder.setAction(DISCONTINUE);</b>
+<b class="fc">&nbsp;		newOrder.setPreviousOrder(this);</b>
+<b class="fc">&nbsp;		newOrder.setPatient(getPatient());</b>
+<b class="fc">&nbsp;		newOrder.setDrug(getDrug());</b>
+<b class="fc">&nbsp;		newOrder.setOrderType(getOrderType());</b>
+<b class="fc">&nbsp;		newOrder.setDrugNonCoded(getDrugNonCoded());</b>
+<b class="fc">&nbsp;		return newOrder;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a DrugOrder for revision from this order, sets the previousOrder, action field and
+&nbsp;	 * other drug order fields.
+&nbsp;	 *
+&nbsp;	 * @return the newly created order
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set all the relevant fields
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the relevant fields for a DC order
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DrugOrder cloneForRevision() {
+<b class="fc">&nbsp;		return cloneForRevisionHelper(new DrugOrder());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see Order#cloneForRevisionHelper(Order)
+&nbsp;	 */
+&nbsp;	protected DrugOrder cloneForRevisionHelper(DrugOrder target) {
+<b class="fc">&nbsp;		super.cloneForRevisionHelper(target);</b>
+<b class="fc">&nbsp;		target.setDose(getDose());</b>
+<b class="fc">&nbsp;		target.setDoseUnits(getDoseUnits());</b>
+<b class="fc">&nbsp;		target.setFrequency(getFrequency());</b>
+<b class="fc">&nbsp;		target.setAsNeeded(getAsNeeded());</b>
+<b class="fc">&nbsp;		target.setAsNeededCondition(getAsNeededCondition());</b>
+<b class="fc">&nbsp;		target.setQuantity(getQuantity());</b>
+<b class="fc">&nbsp;		target.setQuantityUnits(getQuantityUnits());</b>
+<b class="fc">&nbsp;		target.setDrug(getDrug());</b>
+<b class="fc">&nbsp;		target.setDosingType(getDosingType());</b>
+<b class="fc">&nbsp;		target.setDosingInstructions(getDosingInstructions());</b>
+<b class="fc">&nbsp;		target.setDuration(getDuration());</b>
+<b class="fc">&nbsp;		target.setDurationUnits(getDurationUnits());</b>
+<b class="fc">&nbsp;		target.setRoute(getRoute());</b>
+<b class="fc">&nbsp;		target.setNumRefills(getNumRefills());</b>
+<b class="fc">&nbsp;		target.setBrandName(getBrandName());</b>
+<b class="fc">&nbsp;		target.setDispenseAsWritten(getDispenseAsWritten());</b>
+<b class="fc">&nbsp;		target.setDrugNonCoded(getDrugNonCoded());</b>
+&nbsp;
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets autoExpireDate based on duration.
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delegate calculation to dosingInstructions
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not calculate for discontinue action
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not calculate if autoExpireDate already set
+&nbsp;	 */
+&nbsp;	public void setAutoExpireDateBasedOnDuration() {
+<b class="fc">&nbsp;		if (DISCONTINUE != getAction() &amp;&amp; getAutoExpireDate() == null) {</b>
+<b class="fc">&nbsp;			setAutoExpireDate(getDosingInstructionsInstance().getAutoExpireDate(this));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		String prefix = DISCONTINUE == getAction() ? &quot;DC &quot; : &quot;&quot;;</b>
+<b class="fc">&nbsp;		return prefix + &quot;DrugOrder(&quot; + getDose() + getDoseUnits() + &quot; of &quot;</b>
+<b class="fc">&nbsp;		        + (isNonCodedDrug() ? getDrugNonCoded() : (getDrug() != null ? getDrug().getName() : &quot;[no drug]&quot;)) + &quot; from &quot; + getDateActivated() + &quot; to &quot;</b>
+<b class="fc">&nbsp;		        + (isDiscontinuedRightNow() ? getDateStopped() : getAutoExpireDate()) + &quot;)&quot;;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set dosing instructions to drug order
+&nbsp;	 *
+&nbsp;	 * @param di dosing instruction object to fetch data
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void setDosing(DosingInstructions di) {
+<b class="nc">&nbsp;		di.setDosingInstructions(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Checks whether orderable of this drug order is same as other order
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 * @param otherOrder the other order to match on
+&nbsp;	 * @return true if the drugs match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the other order is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the other order is not a drug order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if both drugs are null and the concepts are different
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the concepts match and only this has a drug
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the concepts match and only the other has a drug
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the concepts match and drugs are different and not null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if both drugs are null and the concepts match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the drugs match
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean hasSameOrderableAs(Order otherOrder) {
+<b class="fc">&nbsp;        if (!super.hasSameOrderableAs(otherOrder)) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!(otherOrder instanceof DrugOrder)) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        DrugOrder otherDrugOrder = (DrugOrder) otherOrder;</b>
+&nbsp;
+<b class="fc">&nbsp;        if (isNonCodedDrug() || otherDrugOrder.isNonCodedDrug()) {</b>
+<b class="fc">&nbsp;            return OpenmrsUtil.nullSafeEqualsIgnoreCase(this.getDrugNonCoded(), otherDrugOrder.getDrugNonCoded());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return OpenmrsUtil.nullSafeEquals(this.getDrug(), otherDrugOrder.getDrug());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.12
+&nbsp;	 * @return drugNonCoded
+&nbsp;	 */
+&nbsp;	public String getDrugNonCoded() {
+<b class="fc">&nbsp;		return drugNonCoded;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.12
+&nbsp;	 * sets drugNonCoded
+&nbsp;	 */
+&nbsp;	public void setDrugNonCoded(String drugNonCoded) {
+<b class="fc">&nbsp;		this.drugNonCoded = StringUtils.isNotBlank(drugNonCoded) ? drugNonCoded.trim() : drugNonCoded;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.12
+&nbsp;	 * return true if a drug is non coded
+&nbsp;	 */
+&nbsp;	public boolean isNonCodedDrug() {
+<b class="fc">&nbsp;		return StringUtils.isNotBlank(this.drugNonCoded);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

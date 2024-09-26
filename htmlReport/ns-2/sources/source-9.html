@@ -1,0 +1,142 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Handler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.annotation</a>
+</div>
+
+<h1>Coverage Summary for Class: Handler (org.openmrs.annotation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Handler</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.annotation;
+&nbsp;
+&nbsp;import java.lang.annotation.Documented;
+&nbsp;import java.lang.annotation.ElementType;
+&nbsp;import java.lang.annotation.Inherited;
+&nbsp;import java.lang.annotation.Retention;
+&nbsp;import java.lang.annotation.RetentionPolicy;
+&nbsp;import java.lang.annotation.Target;
+&nbsp;
+&nbsp;/**
+&nbsp; * This annotation serves as a general mechanism for providing metadata about a class that serves as
+&nbsp; * a &#39;Handler&#39; for another class or classes. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This is generally useful for situations where a &lt;em&gt;Handler&lt;/em&gt; class has a method that is only
+&nbsp; * valid for certain implementations of a given class, but for which it is not desirable to restrict
+&nbsp; * this method to a given type. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * As an example, take {@link org.springframework.validation.Validator} class and implementations.
+&nbsp; * As currently designed, a Validator takes in an open-ended Object to validate:
+&nbsp; * &lt;code&gt;public void validate(Object obj, Errors errors)&lt;/code&gt; &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * To provide more context around what type of objects may successfully be passed in here for
+&nbsp; * validation, a Validator also requires implementation of:
+&nbsp; * &lt;code&gt;public boolean supports(Class c)&lt;/code&gt; &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * The weakness of this approach is that the classes that this Validator supports are not exposed.
+&nbsp; * You must first have a class to Validate and check whether it is supported. It would be preferable
+&nbsp; * if each Validator exposed as class metadata the type of Objects that it was capable of
+&nbsp; * Validating. Then, via reflection, much more could be determined about the appropriate Validator
+&nbsp; * for a given object than is currently possible. This is the problem that this annotation aims to
+&nbsp; * solve. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * The use of this method would therefore be as follows:&lt;br&gt;
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * {@literal @}Handler( supports = { Order.class } )
+&nbsp; * public class OrderValidator implements Validator { ... } 
+&nbsp; * &lt;/pre&gt;
+&nbsp; */
+&nbsp;@Target( { ElementType.TYPE })
+&nbsp;@Retention(RetentionPolicy.RUNTIME)
+&nbsp;@Inherited
+&nbsp;@Documented
+&nbsp;public @interface Handler {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A list of Classes that this Handler can handle.
+&nbsp;	 * 
+&nbsp;	 * @return list of classes
+&nbsp;	 */
+&nbsp;	public Class&lt;?&gt;[] supports() default {};
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Provides a means for specifying the relative order of this Handler against another Handler of
+&nbsp;	 * the same type. For example, if two handlers are registered as capable of handling a
+&nbsp;	 * {@link org.openmrs.customdatatype.datatype.DateDatatype} class, and one handler had an order of
+&nbsp;	 * 100 and the other had an order of 50, the
+&nbsp;	 * consuming code could utilize this information to determine which handler is preferred. By
+&nbsp;	 * convention, the handler with the lowest order generally gains precedence.
+&nbsp;	 * 
+&nbsp;	 * @return an int specifying the relative order of this Handler
+&nbsp;	 */
+&nbsp;	public int order() default Integer.MAX_VALUE;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

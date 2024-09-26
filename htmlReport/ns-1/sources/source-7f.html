@@ -1,0 +1,246 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Address</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Address (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Address</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines the standard fields for an Address in OpenMRS
+&nbsp; * @since 1.7.2
+&nbsp; */
+&nbsp;public interface Address {
+&nbsp;	
+&nbsp;	public String getAddress1();
+&nbsp;	
+&nbsp;	public void setAddress1(String address1);
+&nbsp;	
+&nbsp;	public String getAddress2();
+&nbsp;	
+&nbsp;	public void setAddress2(String address2);
+&nbsp;	
+&nbsp;	public String getAddress3();
+&nbsp;	
+&nbsp;	public void setAddress3(String address3);
+&nbsp;	
+&nbsp;	public String getAddress4();
+&nbsp;	
+&nbsp;	public void setAddress4(String address4);
+&nbsp;	
+&nbsp;	public String getAddress5();
+&nbsp;	
+&nbsp;	public void setAddress5(String address5);
+&nbsp;	
+&nbsp;	public String getAddress6();
+&nbsp;	
+&nbsp;	public void setAddress6(String address6);
+&nbsp;	
+&nbsp;	public String getCityVillage();
+&nbsp;	
+&nbsp;	public void setCityVillage(String cityVillage);
+&nbsp;	
+&nbsp;	public String getStateProvince();
+&nbsp;	
+&nbsp;	public void setStateProvince(String stateProvince);
+&nbsp;	
+&nbsp;	public String getCountyDistrict();
+&nbsp;	
+&nbsp;	public void setCountyDistrict(String countyDistrict);
+&nbsp;	
+&nbsp;	public String getPostalCode();
+&nbsp;	
+&nbsp;	public void setPostalCode(String postalCode);
+&nbsp;	
+&nbsp;	public String getCountry();
+&nbsp;	
+&nbsp;	public void setCountry(String country);
+&nbsp;	
+&nbsp;	public String getLatitude();
+&nbsp;	
+&nbsp;	public void setLatitude(String latitude);
+&nbsp;	
+&nbsp;	public String getLongitude();
+&nbsp;	
+&nbsp;	public void setLongitude(String longitude);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address7
+&nbsp;	 */
+&nbsp;	String getAddress7();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address7
+&nbsp;	 */
+&nbsp;	void setAddress7(String address7);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address8
+&nbsp;	 */
+&nbsp;	String getAddress8();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address8
+&nbsp;	 */
+&nbsp;	void setAddress8(String address8);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address9
+&nbsp;	 */
+&nbsp;	String getAddress9();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address9
+&nbsp;	 */
+&nbsp;	void setAddress9(String address9);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address10
+&nbsp;	 */
+&nbsp;	String getAddress10();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address10
+&nbsp;	 */
+&nbsp;	void setAddress10(String address10);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address11
+&nbsp;	 */
+&nbsp;	String getAddress11();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address11
+&nbsp;	 */
+&nbsp;	void setAddress11(String address11);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address12
+&nbsp;	 */
+&nbsp;	String getAddress12();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address12
+&nbsp;	 */
+&nbsp;	void setAddress12(String address12);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address13
+&nbsp;	 */
+&nbsp;	String getAddress13();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address13
+&nbsp;	 */
+&nbsp;	void setAddress13(String address13);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address14
+&nbsp;	 */
+&nbsp;	String getAddress14();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address14
+&nbsp;	 */
+&nbsp;	void setAddress14(String address14);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @return the address15
+&nbsp;	 */
+&nbsp;	String getAddress15();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param address15
+&nbsp;	 */
+&nbsp;	void setAddress15(String address15);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

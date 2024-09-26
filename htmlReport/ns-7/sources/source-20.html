@@ -1,0 +1,124 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsObjectDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsObjectDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsObjectDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import org.openmrs.BaseOpenmrsObject;
+&nbsp;
+&nbsp;/**
+&nbsp; * Generic interface for all OpenMrs DAOs
+&nbsp; * @since 1.10
+&nbsp; *
+&nbsp; */
+&nbsp;public interface OpenmrsObjectDAO&lt;T extends BaseOpenmrsObject&gt; {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtains an object matching a given identifier
+&nbsp;	 * 
+&nbsp;	 * @param id the metadata identifier
+&nbsp;	 * @return the matching metadata object
+&nbsp;	 */
+&nbsp;	T getById(Serializable id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Obtains an object matching a given UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the matching metadata object
+&nbsp;	 */
+&nbsp;	T getByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely deletes a persistent from the database
+&nbsp;	 * 
+&nbsp;	 * @param persistent
+&nbsp;	 *            The persistent to delete
+&nbsp;	 */
+&nbsp;	void delete(T persistent);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save or update a persistent in the database
+&nbsp;	 * 
+&nbsp;	 * @param newOrPersisted
+&nbsp;	 *            The persistent to save or update
+&nbsp;	 * @return the persistent that was saved or updated
+&nbsp;	 */
+&nbsp;	T saveOrUpdate(T newOrPersisted);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

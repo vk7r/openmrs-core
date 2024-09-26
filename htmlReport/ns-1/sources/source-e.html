@@ -1,0 +1,227 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseFormRecordableOpenmrsData</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseFormRecordableOpenmrsData (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseFormRecordableOpenmrsData</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (30/30)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; * 
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.MappedSuperclass;
+&nbsp;
+&nbsp;/**
+&nbsp; * Base implementation of FormRecordable that bridges between a saved BaseChangeableOpenmrsData entity and the path in a form where it was recorded.
+&nbsp; * 
+&nbsp; * @since 2.4.0
+&nbsp; */
+&nbsp;@MappedSuperclass
+<b class="fc">&nbsp;public abstract class BaseFormRecordableOpenmrsData extends BaseChangeableOpenmrsData implements FormRecordable {</b>
+&nbsp;
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;
+&nbsp;	protected static final String FORM_NAMESPACE_PATH_SEPARATOR = &quot;^&quot;;
+&nbsp;
+&nbsp;	protected static final int FORM_NAMESPACE_PATH_MAX_LENGTH = 255;
+&nbsp;
+&nbsp;	@Column(name = &quot;form_namespace_and_path&quot;)
+&nbsp;	protected String formNamespaceAndPath;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.FormRecordable#getFormFieldNamespace()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getFormFieldNamespace() {
+<b class="fc">&nbsp;		return BaseFormRecordableOpenmrsData.getFormFieldNamespace(formNamespaceAndPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.FormRecordable#getFormFieldPath()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getFormFieldPath() {
+<b class="fc">&nbsp;		return BaseFormRecordableOpenmrsData.getFormFieldPath(formNamespaceAndPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.FormRecordable#setFormField(String,String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFormField(String namespace, String formFieldPath) {
+<b class="fc">&nbsp;		formNamespaceAndPath = BaseFormRecordableOpenmrsData.getFormNamespaceAndPath(namespace, formFieldPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return Returns the formNamespaceAndPath.
+&nbsp;	 */
+&nbsp;	public String getFormNamespaceAndPath() {
+<b class="fc">&nbsp;		return formNamespaceAndPath;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Setter method
+&nbsp;	 * @param formNamespaceAndPath
+&nbsp;	 */
+&nbsp;	public void setFormNamespaceAndPath(String formNamespaceAndPath) {
+<b class="fc">&nbsp;		this.formNamespaceAndPath = formNamespaceAndPath;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	//The only reason i have added these three static methods below, is to be reused
+&nbsp;	//by domain objects like Order, which cannot use this as their base class.
+&nbsp;	public static String getFormFieldNamespace(String formNamespaceAndPath) {
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(formNamespaceAndPath)) {</b>
+&nbsp;			//Only the path was specified
+<b class="fc">&nbsp;			if (formNamespaceAndPath.startsWith(FORM_NAMESPACE_PATH_SEPARATOR)) {</b>
+<b class="fc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return formNamespaceAndPath.substring(0, formNamespaceAndPath.indexOf(FORM_NAMESPACE_PATH_SEPARATOR));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return formNamespaceAndPath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String getFormFieldPath(String formNamespaceAndPath) {
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(formNamespaceAndPath)) {</b>
+&nbsp;			//Only the namespace was specified
+<b class="fc">&nbsp;			if (formNamespaceAndPath.endsWith(FORM_NAMESPACE_PATH_SEPARATOR)) {</b>
+<b class="fc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return formNamespaceAndPath.substring(formNamespaceAndPath.indexOf(FORM_NAMESPACE_PATH_SEPARATOR) + 1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return formNamespaceAndPath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String getFormNamespaceAndPath(String namespace, String formFieldPath) {
+<b class="fc">&nbsp;		if (namespace == null &amp;&amp; formFieldPath == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		String nsAndPathTemp = &quot;&quot;;</b>
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(namespace) &amp;&amp; StringUtils.isNotBlank(formFieldPath)) {</b>
+<b class="fc">&nbsp;			nsAndPathTemp = namespace + FORM_NAMESPACE_PATH_SEPARATOR + formFieldPath;</b>
+<b class="fc">&nbsp;		} else if (StringUtils.isNotBlank(namespace)) {</b>
+<b class="fc">&nbsp;			nsAndPathTemp = namespace + FORM_NAMESPACE_PATH_SEPARATOR;</b>
+<b class="fc">&nbsp;		} else if (StringUtils.isNotBlank(formFieldPath)) {</b>
+<b class="fc">&nbsp;			nsAndPathTemp = FORM_NAMESPACE_PATH_SEPARATOR + formFieldPath;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (nsAndPathTemp.length() &gt; FORM_NAMESPACE_PATH_MAX_LENGTH) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;BaseFormRecordableOpenmrsData.namespaceAndPathTooLong&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (StringUtils.countMatches(nsAndPathTemp, FORM_NAMESPACE_PATH_SEPARATOR) &gt; 1) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;BaseFormRecordableOpenmrsData.namespaceAndPathNotContainSeparator&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return nsAndPathTemp;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

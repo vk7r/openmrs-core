@@ -1,0 +1,167 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Operator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic.op</a>
+</div>
+
+<h1>Coverage Summary for Class: Operator (org.openmrs.logic.op)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Operator</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/21)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic.op;
+&nbsp;
+&nbsp;/**
+&nbsp; * An operator used within a logical expression.
+&nbsp; */
+&nbsp;public interface Operator {
+&nbsp;	
+&nbsp;	// comparison operators
+<b class="nc">&nbsp;	public static final Operator CONTAINS = ComparisonOperator.CONTAINS;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator EQUALS = ComparisonOperator.EQUALS;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator WITHIN = ComparisonOperator.WITHIN;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator GT = ComparisonOperator.GT;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator GTE = ComparisonOperator.GTE;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator LT = ComparisonOperator.LT;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator LTE = ComparisonOperator.LTE;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator BEFORE = ComparisonOperator.BEFORE;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator AFTER = ComparisonOperator.AFTER;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator IN = ComparisonOperator.IN;</b>
+&nbsp;	
+&nbsp;	// weird operator
+<b class="nc">&nbsp;	public static final Operator ASOF = new AsOf();</b>
+&nbsp;	
+&nbsp;	// logical operators
+<b class="nc">&nbsp;	public static final Operator AND = LogicalOperator.AND;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator OR = LogicalOperator.OR;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator NOT = LogicalOperator.NOT;</b>
+&nbsp;	
+&nbsp;	// transform operators
+<b class="nc">&nbsp;	public static final Operator LAST = TransformOperator.LAST;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator FIRST = TransformOperator.FIRST;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator DISTINCT = TransformOperator.DISTINCT;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator EXISTS = TransformOperator.EXISTS;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator NOT_EXISTS = TransformOperator.NOT_EXISTS;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator COUNT = TransformOperator.COUNT;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public static final Operator AVERAGE = TransformOperator.AVERAGE;</b>
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

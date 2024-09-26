@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DateOrDatetimeEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.propertyeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: DateOrDatetimeEditor (org.openmrs.propertyeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DateOrDatetimeEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (14/16)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.propertyeditor;
+&nbsp;
+&nbsp;import java.beans.PropertyEditorSupport;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * Allows a java.util.Date to be converted to/from a String. It tries both Date and Date+Time formats
+&nbsp; * but it does not permit partial dates. 
+&nbsp; */
+<b class="fc">&nbsp;public class DateOrDatetimeEditor extends PropertyEditorSupport {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.beans.PropertyEditorSupport#setAsText(java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle date and time
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on partial date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on partial date and time
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAsText(String asString) throws IllegalArgumentException {
+<b class="fc">&nbsp;		if (StringUtils.isEmpty(asString)) {</b>
+<b class="nc">&nbsp;			setValue(null);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		try {
+&nbsp;			// first try date+time
+<b class="fc">&nbsp;			setValue(Context.getDateTimeFormat().parse(asString));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (ParseException dateTimeEx) {</b>
+&nbsp;			// next try just date
+&nbsp;			try {
+<b class="fc">&nbsp;				setValue(Context.getDateFormat().parse(asString));</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (ParseException dateEx) {</b>
+&nbsp;				// those were the only two options, so we fail
+<b class="fc">&nbsp;				throw new IllegalArgumentException(dateTimeEx);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.beans.PropertyEditorSupport#getAsText()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; print date without time
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; print date and time with time
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAsText() {
+<b class="fc">&nbsp;		Date date = (Date) getValue();</b>
+<b class="fc">&nbsp;		if (date == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (&quot;0000&quot;.equals(new SimpleDateFormat(&quot;HmsS&quot;).format(date))) {</b>
+<b class="fc">&nbsp;			return Context.getDateFormat().format(date);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return Context.getDateTimeFormat().format(date);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,656 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > TimerSchedulerServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler.timer</a>
+</div>
+
+<h1>Coverage Summary for Class: TimerSchedulerServiceImpl (org.openmrs.scheduler.timer)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TimerSchedulerServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25,9%
+  </span>
+  <span class="absValue">
+    (7/27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    22,5%
+  </span>
+  <span class="absValue">
+    (36/160)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler.timer;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.SortedMap;
+&nbsp;import java.util.Timer;
+&nbsp;import java.util.TreeMap;
+&nbsp;import java.util.WeakHashMap;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.impl.BaseOpenmrsService;
+&nbsp;import org.openmrs.scheduler.SchedulerConstants;
+&nbsp;import org.openmrs.scheduler.SchedulerException;
+&nbsp;import org.openmrs.scheduler.SchedulerService;
+&nbsp;import org.openmrs.scheduler.SchedulerUtil;
+&nbsp;import org.openmrs.scheduler.Task;
+&nbsp;import org.openmrs.scheduler.TaskDefinition;
+&nbsp;import org.openmrs.scheduler.TaskFactory;
+&nbsp;import org.openmrs.scheduler.db.SchedulerDAO;
+&nbsp;import org.openmrs.util.OpenmrsMemento;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.orm.ObjectRetrievalFailureException;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Simple scheduler service that uses JDK timer to trigger and execute scheduled tasks.
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class TimerSchedulerServiceImpl extends BaseOpenmrsService implements SchedulerService {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Logger
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(TimerSchedulerServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Registered task list
+&nbsp;	 */
+<b class="fc">&nbsp;	private Set&lt;TaskDefinition&gt; registeredTasks = new HashSet&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Scheduled Task Map
+&nbsp;	 */
+<b class="fc">&nbsp;	private static Map&lt;Integer, TimerSchedulerTask&gt; scheduledTasks = new WeakHashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A single timer used to keep track of all scheduled tasks. The Timer&#39;s associated thread
+&nbsp;	 * should run as a daemon. A deamon thread is called for if the timer will be used to schedule
+&nbsp;	 * repeating &quot;maintenance activities&quot;, which must be performed as long as the application is
+&nbsp;	 * running, but should not prolong the lifetime of the application.
+&nbsp;	 *
+&nbsp;	 * @see java.util.Timer#Timer(boolean)
+&nbsp;	 */
+<b class="fc">&nbsp;	private Map&lt;TaskDefinition, Timer&gt; taskDefinitionTimerMap = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global data access object context
+&nbsp;	 */
+&nbsp;	private SchedulerDAO schedulerDAO;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the scheduler data access object.
+&nbsp;	 */
+&nbsp;	public SchedulerDAO getSchedulerDAO() {
+<b class="fc">&nbsp;		return this.schedulerDAO;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the scheduler data access object.
+&nbsp;	 */
+&nbsp;	public void setSchedulerDAO(SchedulerDAO dao) {
+<b class="fc">&nbsp;		this.schedulerDAO = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Start up hook for the scheduler and all of its scheduled tasks.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void onStartup() {
+<b class="nc">&nbsp;		log.debug(&quot;Starting scheduler service ...&quot;);</b>
+&nbsp;		
+&nbsp;		// Get all of the tasks in the database
+<b class="nc">&nbsp;		Collection&lt;TaskDefinition&gt; taskDefinitions = getSchedulerDAO().getTasks();</b>
+&nbsp;		
+&nbsp;		// Iterate through the tasks and start them if their startOnStartup flag is true
+<b class="nc">&nbsp;		if (taskDefinitions != null) {</b>
+<b class="nc">&nbsp;			for (TaskDefinition taskDefinition : taskDefinitions) {</b>
+&nbsp;				try {
+&nbsp;					// If the task is configured to start on startup, we schedule it to run
+&nbsp;					// Otherwise it needs to be started manually.
+<b class="nc">&nbsp;					if (taskDefinition.getStartOnStartup()) {</b>
+<b class="nc">&nbsp;						scheduleTask(taskDefinition);</b>
+&nbsp;					}
+&nbsp;					
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Failed to schedule task for class &quot; + taskDefinition.getTaskClass(), e);</b>
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setScheduledTasks(Map&lt;Integer, TimerSchedulerTask&gt; scheduledTasks) {
+<b class="nc">&nbsp;		if (scheduledTasks != null) {</b>
+<b class="nc">&nbsp;			TimerSchedulerServiceImpl.scheduledTasks = scheduledTasks;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			TimerSchedulerServiceImpl.scheduledTasks = new WeakHashMap&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Shutdown hook for the scheduler and all of its scheduled tasks.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void onShutdown() {
+<b class="nc">&nbsp;		log.debug(&quot;Gracefully shutting down scheduler service ...&quot;);</b>
+&nbsp;		// gracefully shutdown all tasks and remove all references to the timers, scheduler
+&nbsp;		try {
+<b class="nc">&nbsp;			shutdownAllTasks();</b>
+<b class="nc">&nbsp;			cancelAllTimers(); // Just a precaution - this shouldn&#39;t be necessary if shutdownAllTasks() does its job</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (APIException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Failed to stop all tasks due to API exception&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			setScheduledTasks(null);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to stop all tasks in the {@link #taskDefinitionTimerMap}
+&nbsp;	 */
+&nbsp;	private void cancelAllTimers() {
+<b class="nc">&nbsp;		for (Timer timer : taskDefinitionTimerMap.values()) {</b>
+<b class="nc">&nbsp;			timer.cancel();</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Shutdown all running tasks.
+&nbsp;	 */
+&nbsp;	public void shutdownAllTasks() {
+&nbsp;		
+&nbsp;		// iterate over this (copied) list of tasks and stop them all
+<b class="nc">&nbsp;		for (TaskDefinition task : getScheduledTasks()) {</b>
+&nbsp;			try {
+&nbsp;				
+<b class="nc">&nbsp;				shutdownTask(task);</b>
+&nbsp;				
+&nbsp;			}
+<b class="nc">&nbsp;			catch (SchedulerException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to stop task &quot; + task.getTaskClass() + &quot; due to Scheduler exception&quot;, e);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (APIException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to stop task &quot; + task.getTaskClass() + &quot; due to API exception&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the {@link Timer} that is assigned to the given {@link TaskDefinition} object. If a Timer
+&nbsp;	 * doesn&#39;t exist yet, one is created, added to {@link #taskDefinitionTimerMap} and then returned
+&nbsp;	 *
+&nbsp;	 * @param taskDefinition the {@link TaskDefinition} to look for
+&nbsp;	 * @return the {@link Timer} associated with the given {@link TaskDefinition}
+&nbsp;	 */
+&nbsp;	private Timer getTimer(TaskDefinition taskDefinition) {
+&nbsp;		Timer timer;
+<b class="fc">&nbsp;		if (taskDefinitionTimerMap.containsKey(taskDefinition)) {</b>
+<b class="nc">&nbsp;			timer = taskDefinitionTimerMap.get(taskDefinition);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			timer = new Timer(true);</b>
+<b class="fc">&nbsp;			taskDefinitionTimerMap.put(taskDefinition, timer);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return timer;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Schedule the given task according to the given schedule.
+&nbsp;	 *
+&nbsp;	 * @param taskDefinition the task to be scheduled
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should handle zero repeat interval
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Task scheduleTask(TaskDefinition taskDefinition) throws SchedulerException {
+<b class="fc">&nbsp;		Task clientTask = null;</b>
+<b class="fc">&nbsp;		if (taskDefinition != null) {</b>
+&nbsp;			
+&nbsp;			// Cancel any existing timer tasks for the same task definition
+&nbsp;			// TODO Make sure this is the desired behavior 
+&nbsp;			// TODO Do we ever want the same task definition to run more than once?
+<b class="fc">&nbsp;			TimerSchedulerTask schedulerTask = scheduledTasks.get(taskDefinition.getId());</b>
+<b class="fc">&nbsp;			if (schedulerTask != null) {</b>
+<b class="nc">&nbsp;				log.info(&quot;Shutting down the existing instance of this task to avoid conflicts!!&quot;);</b>
+<b class="nc">&nbsp;				schedulerTask.shutdown();</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			try {
+&nbsp;				
+&nbsp;				// Create new task from task definition 
+<b class="fc">&nbsp;				clientTask = TaskFactory.getInstance().createInstance(taskDefinition);</b>
+&nbsp;				
+&nbsp;				// if we were unable to get a class, just quit
+<b class="fc">&nbsp;				if (clientTask != null) {</b>
+&nbsp;					
+<b class="fc">&nbsp;					schedulerTask = new TimerSchedulerTask(clientTask);</b>
+<b class="fc">&nbsp;					taskDefinition.setTaskInstance(clientTask);</b>
+&nbsp;					
+&nbsp;					// Once this method is called, the timer is set to start at the given start time.
+&nbsp;					// NOTE:  We need to adjust the repeat interval as the JDK Timer expects time in milliseconds and 
+&nbsp;					// we record by seconds.  
+&nbsp;					
+<b class="fc">&nbsp;					long repeatInterval = 0;</b>
+<b class="fc">&nbsp;					if (taskDefinition.getRepeatInterval() != null) {</b>
+<b class="fc">&nbsp;						repeatInterval = taskDefinition.getRepeatInterval() * SchedulerConstants.SCHEDULER_MILLIS_PER_SECOND;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (taskDefinition.getStartTime() != null) {</b>
+&nbsp;						// Need to calculate the &quot;next execution time&quot; because the scheduled time is most likely in the past
+&nbsp;						// and the JDK timer will run the task X number of times from the start time until now to catch up.
+<b class="fc">&nbsp;						Date nextTime = SchedulerUtil.getNextExecution(taskDefinition);</b>
+&nbsp;						
+&nbsp;						// Start task at fixed rate at given future date and repeat as directed 							
+<b class="fc">&nbsp;						log.info(&quot;Starting task ... the task will execute for the first time at &quot; + nextTime);</b>
+&nbsp;						
+<b class="fc">&nbsp;						if (repeatInterval &gt; 0) {</b>
+&nbsp;							// Schedule the task to run at a fixed rate
+<b class="nc">&nbsp;							getTimer(taskDefinition).scheduleAtFixedRate(schedulerTask, nextTime, repeatInterval);</b>
+&nbsp;						} else {
+&nbsp;							// Schedule the task to be non-repeating
+<b class="fc">&nbsp;							getTimer(taskDefinition).schedule(schedulerTask, nextTime);</b>
+&nbsp;						}
+&nbsp;						
+<b class="fc">&nbsp;					} else if (repeatInterval &gt; 0) {</b>
+&nbsp;						// Start task on repeating schedule, delay for SCHEDULER_DEFAULT_DELAY seconds	
+<b class="nc">&nbsp;						log.info(&quot;Delaying start time by &quot; + SchedulerConstants.SCHEDULER_DEFAULT_DELAY + &quot; seconds&quot;);</b>
+<b class="nc">&nbsp;						getTimer(taskDefinition).scheduleAtFixedRate(schedulerTask,</b>
+&nbsp;						    SchedulerConstants.SCHEDULER_DEFAULT_DELAY, repeatInterval);
+&nbsp;					} else {
+&nbsp;						// schedule for single execution, starting now
+<b class="nc">&nbsp;						log.info(&quot;Starting one-shot task&quot;);</b>
+<b class="nc">&nbsp;						getTimer(taskDefinition).schedule(schedulerTask, new Date());</b>
+&nbsp;					}
+&nbsp;					
+&nbsp;					// Update task that has been started
+<b class="fc">&nbsp;					log.debug(&quot;Registering timer for task &quot; + taskDefinition.getId());</b>
+&nbsp;					
+&nbsp;					//  Add the new timer to the scheduler running task list  
+<b class="fc">&nbsp;					scheduledTasks.put(taskDefinition.getId(), schedulerTask);</b>
+&nbsp;					
+&nbsp;					// Update the timer status in the database
+<b class="fc">&nbsp;					taskDefinition.setStarted(true);</b>
+<b class="fc">&nbsp;					saveTaskDefinition(taskDefinition);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to schedule task &quot; + taskDefinition.getName(), e);</b>
+<b class="nc">&nbsp;				throw new SchedulerException(&quot;Failed to schedule task&quot;, e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return clientTask;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Stops a running task.
+&nbsp;	 *
+&nbsp;	 * @param taskDefinition the task to be stopped
+&nbsp;	 * @see org.openmrs.scheduler.SchedulerService#shutdownTask(TaskDefinition)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void shutdownTask(TaskDefinition taskDefinition) throws SchedulerException {
+<b class="nc">&nbsp;		if (taskDefinition != null) {</b>
+&nbsp;			
+&nbsp;			// Remove the task from the scheduled tasks and shutdown the timer
+<b class="nc">&nbsp;			TimerSchedulerTask schedulerTask = scheduledTasks.remove(taskDefinition.getId());</b>
+<b class="nc">&nbsp;			if (schedulerTask != null) {</b>
+<b class="nc">&nbsp;				schedulerTask.shutdown(); // Stops the timer and tells the timer task to release its resources </b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// Update task that has been started
+<b class="nc">&nbsp;			taskDefinition.setStarted(false);</b>
+<b class="nc">&nbsp;			saveTaskDefinition(taskDefinition);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Loop over all currently started tasks and cycle them. This should be done after the
+&nbsp;	 * classloader has been changed (e.g. during module start/stop)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void rescheduleAllTasks() throws SchedulerException {
+<b class="nc">&nbsp;		for (TaskDefinition task : getScheduledTasks()) {</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				rescheduleTask(task);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (SchedulerException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to restart task: &quot; + task.getName(), e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.scheduler.SchedulerService#rescheduleTask(org.openmrs.scheduler.TaskDefinition)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Task rescheduleTask(TaskDefinition taskDefinition) throws SchedulerException {
+<b class="nc">&nbsp;		shutdownTask(taskDefinition);</b>
+<b class="nc">&nbsp;		return scheduleTask(taskDefinition);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Register a new task by adding it to our task map with an empty schedule map.
+&nbsp;	 *
+&nbsp;	 * @param definition task to register
+&nbsp;	 */
+&nbsp;	public void registerTask(TaskDefinition definition) {
+<b class="nc">&nbsp;		registeredTasks.add(definition);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all scheduled tasks.
+&nbsp;	 *
+&nbsp;	 * @return all scheduled tasks
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;TaskDefinition&gt; getScheduledTasks() {
+&nbsp;		// The real list of scheduled tasks is kept up-to-date in the scheduledTasks map
+&nbsp;		// TODO change the index for the scheduledTasks map to be the TaskDefinition rather than the ID
+<b class="nc">&nbsp;		List&lt;TaskDefinition&gt; list = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		if (scheduledTasks != null) {</b>
+<b class="nc">&nbsp;			Set&lt;Integer&gt; taskIds = scheduledTasks.keySet();</b>
+<b class="nc">&nbsp;			for (Integer id : taskIds) {</b>
+<b class="nc">&nbsp;				TaskDefinition task = getTask(id);</b>
+<b class="nc">&nbsp;				log.debug(&quot;Adding scheduled task &quot; + id + &quot; to list (&quot; + task.getRepeatInterval() + &quot;)&quot;);</b>
+<b class="nc">&nbsp;				list.add(task);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return list;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all registered tasks.
+&nbsp;	 *
+&nbsp;	 * @return all registerd tasks
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Collection&lt;TaskDefinition&gt; getRegisteredTasks() {
+<b class="nc">&nbsp;		return getSchedulerDAO().getTasks();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the task with the given identifier.
+&nbsp;	 *
+&nbsp;	 * @param id the identifier of the task
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public TaskDefinition getTask(Integer id) {
+<b class="nc">&nbsp;		log.debug(&quot;get task {}&quot;, id);</b>
+<b class="nc">&nbsp;		return getSchedulerDAO().getTask(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the task with the given name.
+&nbsp;	 *
+&nbsp;	 * @param name name of the task
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public TaskDefinition getTaskByName(String name) {
+<b class="nc">&nbsp;		log.debug(&quot;get task {}&quot;, name);</b>
+<b class="nc">&nbsp;		TaskDefinition foundTask = null;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			foundTask = getSchedulerDAO().getTaskByName(name);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ObjectRetrievalFailureException orfe) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;getTaskByName(&quot; + name + &quot;) failed, because: &quot; + orfe);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return foundTask;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save a task in the database.
+&nbsp;	 *
+&nbsp;	 * @param task the &lt;code&gt;TaskDefinition&lt;/code&gt; to save
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void saveTaskDefinition(TaskDefinition task) {
+<b class="fc">&nbsp;		if (task.getId() != null) {</b>
+<b class="nc">&nbsp;			getSchedulerDAO().updateTask(task);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			getSchedulerDAO().createTask(task);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete the task with the given identifier.
+&nbsp;	 *
+&nbsp;	 * @param id the identifier of the task
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteTask(Integer id) {
+&nbsp;		
+<b class="nc">&nbsp;		TaskDefinition task = getTask(id);</b>
+<b class="nc">&nbsp;		if (task.getStarted()) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Scheduler.timer.task.delete&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// delete the task
+<b class="nc">&nbsp;		getSchedulerDAO().deleteTask(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get system variables.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public SortedMap&lt;String, String&gt; getSystemVariables() {
+<b class="nc">&nbsp;		SortedMap&lt;String, String&gt; systemVariables = new TreeMap&lt;&gt;();</b>
+&nbsp;		// scheduler username and password can be found in the global properties
+&nbsp;		// TODO Look into java.util.concurrent.TimeUnit class.  
+&nbsp;		// TODO Remove this from global properties.  This is a constant value that should never change.  
+<b class="nc">&nbsp;		systemVariables.put(&quot;SCHEDULER_MILLIS_PER_SECOND&quot;, String.valueOf(SchedulerConstants.SCHEDULER_MILLIS_PER_SECOND));</b>
+<b class="nc">&nbsp;		return systemVariables;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves and stops all active tasks
+&nbsp;	 *
+&nbsp;	 * @return OpenmrsMemento
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OpenmrsMemento saveToMemento() {
+&nbsp;		
+<b class="nc">&nbsp;		Set&lt;Integer&gt; tasks = new HashSet&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (TaskDefinition task : getScheduledTasks()) {</b>
+<b class="nc">&nbsp;			tasks.add(task.getId());</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				shutdownTask(task);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (SchedulerException e) {</b>
+&nbsp;				// just swallow exceptions
+<b class="nc">&nbsp;				log.debug(&quot;Failed to stop task while saving memento &quot; + task.getName(), e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		TimerSchedulerMemento memento = new TimerSchedulerMemento(tasks);</b>
+<b class="nc">&nbsp;		memento.saveErrorTasks();</b>
+&nbsp;		
+<b class="nc">&nbsp;		return memento;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public void restoreFromMemento(OpenmrsMemento memento) {
+&nbsp;		
+<b class="nc">&nbsp;		if (memento != null &amp;&amp; memento instanceof TimerSchedulerMemento) {</b>
+<b class="nc">&nbsp;			TimerSchedulerMemento timerMemento = (TimerSchedulerMemento) memento;</b>
+&nbsp;			
+<b class="nc">&nbsp;			Set&lt;Integer&gt; taskIds = (HashSet&lt;Integer&gt;) timerMemento.getState();</b>
+&nbsp;			
+&nbsp;			// try to start all of the tasks that were stopped right before this restore
+<b class="nc">&nbsp;			for (Integer taskId : taskIds) {</b>
+<b class="nc">&nbsp;				TaskDefinition task = getTask(taskId);</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					scheduleTask(task);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+&nbsp;					// essentially swallow exceptions
+<b class="nc">&nbsp;					log.debug(&quot;EXPECTED ERROR IF STOPPING THIS TASK&#39;S MODULE: Unable to start task &quot; + taskId, e);</b>
+&nbsp;					
+&nbsp;					// save this errored task and try again next time we restore
+<b class="nc">&nbsp;					timerMemento.addErrorTask(taskId);</b>
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.scheduler.SchedulerService#getStatus(java.lang.Integer) TODO
+&nbsp;	 *      internationalization of string status messages
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getStatus(Integer id) {
+&nbsp;		
+&nbsp;		// Get the scheduled timer task
+<b class="nc">&nbsp;		TimerSchedulerTask scheduledTask = scheduledTasks.get(id);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (scheduledTask != null) {</b>
+<b class="nc">&nbsp;			if (scheduledTask.scheduledExecutionTime() &gt; 0) {</b>
+<b class="nc">&nbsp;				return &quot;Scheduled to execute at &quot; + new Date(scheduledTask.scheduledExecutionTime());</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				return &quot;Currently executing&quot;;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return &quot;Not Running&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void scheduleIfNotRunning(TaskDefinition taskDef) {
+<b class="nc">&nbsp;		Task task = taskDef.getTaskInstance();</b>
+<b class="nc">&nbsp;		if (task == null) {</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				scheduleTask(taskDef);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (SchedulerException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to schedule task, because:&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		} else if (!task.isExecuting()) {</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				rescheduleTask(taskDef);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (SchedulerException e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Failed to re-schedule task, because:&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.scheduler.SchedulerService#getTaskByUuid(java.lang.String)
+&nbsp;	 *
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public TaskDefinition getTaskByUuid(String uuid) {
+<b class="nc">&nbsp;		return getSchedulerDAO().getTaskByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

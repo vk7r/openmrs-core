@@ -1,0 +1,96 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ChangeSetExecutorCallback</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.liquibase</a>
+</div>
+
+<h1>Coverage Summary for Class: ChangeSetExecutorCallback (org.openmrs.liquibase)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ChangeSetExecutorCallback</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.liquibase;
+&nbsp;
+&nbsp;import liquibase.changelog.ChangeSet;
+&nbsp;import org.openmrs.util.DatabaseUpdater;
+&nbsp;
+&nbsp;/**
+&nbsp; * Interface used for callbacks when updating the database. Implement this interface and pass it to
+&nbsp; * {@link DatabaseUpdater#executeChangelog(String, ChangeSetExecutorCallback)}
+&nbsp; */
+&nbsp;public interface ChangeSetExecutorCallback {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method is called after each changeset is executed.
+&nbsp;	 *
+&nbsp;	 * @param changeSet          the liquibase changeset that was just run
+&nbsp;	 * @param numChangeSetsToRun the total number of changesets in the current file
+&nbsp;	 */
+&nbsp;	void executing(ChangeSet changeSet, int numChangeSetsToRun);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

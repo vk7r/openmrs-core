@@ -1,0 +1,176 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonVoidHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonVoidHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonVoidHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;import org.openmrs.api.UserService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class sets the personVoid* attributes on the given {@link Person} object when a void* method
+&nbsp; * is called with this class. This differs from the {@link BaseVoidHandler} because the Person
+&nbsp; * object contains personVoided* attributes instead of the normal voided attributes
+&nbsp; *
+&nbsp; * @see RequiredDataAdvice
+&nbsp; * @see UnvoidHandler
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;@Handler(supports = Person.class)
+<b class="fc">&nbsp;public class PersonVoidHandler implements VoidHandler&lt;Person&gt; {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets all personVoid* attributes to the given parameters.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.api.handler.RequiredDataHandler#handle(org.openmrs.OpenmrsObject,
+&nbsp;	 *      org.openmrs.User, java.util.Date, java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the personVoided bit
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the personVoidReason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set personVoidedBy
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set personVoidedBy if non null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set personDateVoided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set personDateVoided if non null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set the personVoidReason if already personVoided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire users
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void handle(Person person, User voidingUser, Date voidedDate, String voidReason) {
+&nbsp;		
+&nbsp;		// skip over all work if the object is already voided
+<b class="fc">&nbsp;		if (!person.getPersonVoided()) {</b>
+<b class="fc">&nbsp;			if (person.getPersonId() != null) {</b>
+&nbsp;				// Skip if person is not persisted
+<b class="fc">&nbsp;				UserService us = Context.getUserService();</b>
+<b class="fc">&nbsp;				for (User user : us.getUsersByPerson(person, false)) {</b>
+<b class="fc">&nbsp;					us.retireUser(user, voidReason);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			person.setPersonVoided(true);</b>
+<b class="fc">&nbsp;			person.setPersonVoidReason(voidReason);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (person.getPersonVoidedBy() == null) {</b>
+<b class="fc">&nbsp;				person.setPersonVoidedBy(voidingUser);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (person.getPersonDateVoided() == null) {</b>
+<b class="fc">&nbsp;				person.setPersonDateVoided(voidedDate);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

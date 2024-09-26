@@ -1,0 +1,339 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Field</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Field (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Field</td>
+<td class="coverageStat">
+  <span class="percent">
+    82,6%
+  </span>
+  <span class="absValue">
+    (19/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,4%
+  </span>
+  <span class="absValue">
+    (21/29)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Field$HibernateProxy$QJEleb4g</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    82,6%
+  </span>
+  <span class="absValue">
+    (19/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,4%
+  </span>
+  <span class="absValue">
+    (21/29)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * Field
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Field extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 4454L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private Integer fieldId;
+&nbsp;	
+&nbsp;	private FieldType fieldType;
+&nbsp;	
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	private String tableName;
+&nbsp;	
+&nbsp;	private String attributeName;
+&nbsp;	
+&nbsp;	private String defaultValue;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean selectMultiple = false;</b>
+&nbsp;	
+&nbsp;	private Set&lt;FieldAnswer&gt; answers;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Field() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public Field(Integer fieldId) {</b>
+<b class="fc">&nbsp;		this.fieldId = fieldId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the fieldId.
+&nbsp;	 */
+&nbsp;	public Integer getFieldId() {
+<b class="fc">&nbsp;		return fieldId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param fieldId The fieldId to set.
+&nbsp;	 */
+&nbsp;	public void setFieldId(Integer fieldId) {
+<b class="fc">&nbsp;		this.fieldId = fieldId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the fieldType.
+&nbsp;	 */
+&nbsp;	public FieldType getFieldType() {
+<b class="fc">&nbsp;		return fieldType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param fieldType The fieldType to set.
+&nbsp;	 */
+&nbsp;	public void setFieldType(FieldType fieldType) {
+<b class="fc">&nbsp;		this.fieldType = fieldType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the concept.
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept The concept to set.
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the tableName.
+&nbsp;	 */
+&nbsp;	public String getTableName() {
+<b class="fc">&nbsp;		return tableName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param tableName The tableName to set.
+&nbsp;	 */
+&nbsp;	public void setTableName(String tableName) {
+<b class="fc">&nbsp;		this.tableName = tableName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the attributeName.
+&nbsp;	 */
+&nbsp;	public String getAttributeName() {
+<b class="fc">&nbsp;		return attributeName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param attributeName The attributeName to set.
+&nbsp;	 */
+&nbsp;	public void setAttributeName(String attributeName) {
+<b class="fc">&nbsp;		this.attributeName = attributeName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the default value.
+&nbsp;	 */
+&nbsp;	public String getDefaultValue() {
+<b class="fc">&nbsp;		return defaultValue;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param defaultValue The defaultValue to set.
+&nbsp;	 */
+&nbsp;	public void setDefaultValue(String defaultValue) {
+<b class="fc">&nbsp;		this.defaultValue = defaultValue;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated as of 2.0, use {@link #getSelectMultiple()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isSelectMultiple() {
+<b class="fc">&nbsp;		return getSelectMultiple();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the selectMultiple.
+&nbsp;	 */
+&nbsp;	public Boolean getSelectMultiple() {
+<b class="fc">&nbsp;		return selectMultiple;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param selectMultiple The selectMultiple to set.
+&nbsp;	 */
+&nbsp;	public void setSelectMultiple(Boolean selectMultiple) {
+<b class="fc">&nbsp;		this.selectMultiple = selectMultiple;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the fieldAnswers.
+&nbsp;	 */
+&nbsp;	public Set&lt;FieldAnswer&gt; getAnswers() {
+<b class="fc">&nbsp;		return answers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param fieldAnswers The fieldAnswers to set.
+&nbsp;	 */
+&nbsp;	public void setAnswers(Set&lt;FieldAnswer&gt; fieldAnswers) {
+<b class="nc">&nbsp;		this.answers = fieldAnswers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a field answer to the list of field answers
+&nbsp;	 *
+&nbsp;	 * @param fieldAnswer FieldAnswer to be added
+&nbsp;	 */
+&nbsp;	public void addAnswer(FieldAnswer fieldAnswer) {
+<b class="nc">&nbsp;		if (answers == null) {</b>
+<b class="nc">&nbsp;			answers = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (!answers.contains(fieldAnswer) &amp;&amp; fieldAnswer != null) {</b>
+<b class="nc">&nbsp;			answers.add(fieldAnswer);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a field answer from the list of field answers
+&nbsp;	 *
+&nbsp;	 * @param fieldAnswer FieldAnswer to be removed
+&nbsp;	 */
+&nbsp;	public void removeAnswer(FieldAnswer fieldAnswer) {
+<b class="nc">&nbsp;		if (answers != null) {</b>
+<b class="nc">&nbsp;			answers.remove(fieldAnswer);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getFieldId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setFieldId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseOpenmrsObject</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseOpenmrsObject (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseOpenmrsObject</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.MappedSuperclass;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.builder.ToStringBuilder;
+&nbsp;import org.apache.commons.lang3.builder.ToStringStyle;
+&nbsp;import org.hibernate.Hibernate;
+&nbsp;
+&nbsp;/**
+&nbsp; * This is the base implementation of the {@link OpenmrsObject} interface.&lt;br&gt;
+&nbsp; * It implements the uuid variable that all objects are expected to have.
+&nbsp; */
+&nbsp;@MappedSuperclass
+<b class="fc">&nbsp;public abstract class BaseOpenmrsObject implements Serializable, OpenmrsObject {</b>
+&nbsp;	
+<b class="fc">&nbsp;	@Column(name = &quot;uuid&quot;, unique = true, nullable = false, length = 38, updatable = false)</b>
+<b class="fc">&nbsp;	private String uuid = UUID.randomUUID().toString();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getUuid()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getUuid() {
+<b class="fc">&nbsp;		return uuid;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUuid(String uuid) {
+<b class="fc">&nbsp;		this.uuid = uuid;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a hash code based on the &lt;code&gt;uuid&lt;/code&gt; field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If the &lt;code&gt;uuid&lt;/code&gt; field is &lt;code&gt;null&lt;/code&gt;, it delegates to
+&nbsp;	 * {@link Object#hashCode()}.
+&nbsp;	 *
+&nbsp;	 * @see java.lang.Object#hashCode()
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if uuid is null
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		if (getUuid() == null) {</b>
+<b class="fc">&nbsp;			return super.hashCode();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return getUuid().hashCode();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns &lt;code&gt;true&lt;/code&gt; if and only if &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; refer to the same
+&nbsp;	 * object (&lt;code&gt;x == y&lt;/code&gt; has the value &lt;code&gt;true&lt;/code&gt;) or both have the same
+&nbsp;	 * &lt;code&gt;uuid&lt;/code&gt; (&lt;code&gt;((x.uuid != null) &amp;amp;&amp;amp; x.uuid.equals(y.uuid))&lt;/code&gt; has the value
+&nbsp;	 * &lt;code&gt;true&lt;/code&gt;).
+&nbsp;	 *
+&nbsp;	 * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given obj is not instance of BaseOpenmrsObject
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given obj is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if given obj has null uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if uuid is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if objects are the same
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if uuids are equal
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object obj) {
+<b class="fc">&nbsp;		if (this == obj) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!(obj instanceof BaseOpenmrsObject)) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		BaseOpenmrsObject other = (BaseOpenmrsObject) obj;</b>
+&nbsp;		// Need to call getUuid to make sure the hibernate proxy objects return the correct uuid.
+&nbsp;		// The private member may not be set for a hibernate proxy.
+<b class="fc">&nbsp;		if (getUuid() == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		//In case of hibernate proxy objects we need to get real classes
+<b class="fc">&nbsp;		Class&lt;?&gt; thisClass = Hibernate.getClass(this);</b>
+<b class="fc">&nbsp;		Class&lt;?&gt; objClass = Hibernate.getClass(obj);</b>
+<b class="fc">&nbsp;		if (!(thisClass.isAssignableFrom(objClass) || objClass.isAssignableFrom(thisClass))){</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return getUuid().equals(other.getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a string equal to the value of: &lt;blockquote&gt;ClassName{hashCode=...,
+&nbsp;	 * uuid=...}&lt;/blockquote&gt;
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * If the &lt;code&gt;uuid&lt;/code&gt; field is &lt;code&gt;null&lt;/code&gt;, it returns: &lt;blockquote&gt;
+&nbsp;	 * ClassName{hashCode=...} &lt;/blockquote&gt;
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include hashCode if uuid is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include uuid if not null
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(&quot;hashCode&quot;,</b>
+<b class="fc">&nbsp;		    Integer.toHexString(hashCode())).append(&quot;uuid&quot;, getUuid()).build();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DiagnosisDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: DiagnosisDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">DiagnosisDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Diagnosis;
+&nbsp;import org.openmrs.DiagnosisAttribute;
+&nbsp;import org.openmrs.DiagnosisAttributeType;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;
+&nbsp;/**
+&nbsp; * This interface defines database methods for diagnosis objects.
+&nbsp; *
+&nbsp; * @since 2.2
+&nbsp; */
+&nbsp;public interface DiagnosisDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves the diagnosis
+&nbsp;	 *
+&nbsp;	 * @param diagnosis the diagnosis to save
+&nbsp;	 * @return the saved diagnosis
+&nbsp;	 * @throws DAOException exception thrown if error occurs while saving the diagnosis
+&nbsp;	 */
+&nbsp;	Diagnosis saveDiagnosis(Diagnosis diagnosis) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a diagnosis from database using the diagnosis id
+&nbsp;	 *
+&nbsp;	 * @param diagnosisId the id of the diagnosis to look for
+&nbsp;	 * @return the diagnosis with the given diagnosis id
+&nbsp;	 * @throws DAOException exception thrown if error occurs while getting the diagnosis
+&nbsp;	 */
+&nbsp;	Diagnosis getDiagnosisById(Integer diagnosisId) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the diagnosis attached to the specified UUID.
+&nbsp;	 *
+&nbsp;	 * @param uuid the uuid to search for in the database.
+&nbsp;	 * @return the diagnosis associated with the UUID.
+&nbsp;	 */
+&nbsp;	Diagnosis getDiagnosisByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Deletes a diagnosis
+&nbsp;	 *
+&nbsp;	 * @param diagnosis the diagnosis to delete
+&nbsp;	 * @throws DAOException exception thrown if error occurs while deleting the diagnosis
+&nbsp;	 */
+&nbsp;	void deleteDiagnosis(Diagnosis diagnosis) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosesByEncounter(Encounter, boolean, boolean)
+&nbsp;	 */
+&nbsp;	List&lt;Diagnosis&gt; getDiagnosesByEncounter(Encounter encounter, boolean primaryOnly, boolean confirmedOnly);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosesByVisit(Visit, boolean, boolean)
+&nbsp;	 */
+&nbsp;	List&lt;Diagnosis&gt; getDiagnosesByVisit(Visit visit, boolean primaryOnly, boolean confirmedOnly);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets all active diagnoses related to the specified patient.
+&nbsp;	 *
+&nbsp;	 * @param patient the patient whose active diagnoses are being queried.
+&nbsp;	 * @param fromDate the start date for the check of active diagnosis
+&nbsp;	 *                    
+&nbsp;	 * @return all active diagnoses associated with the specified patient.
+&nbsp;	 */
+&nbsp;	List&lt;Diagnosis&gt; getActiveDiagnoses(Patient patient, Date fromDate);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getAllDiagnosisAttributeTypes()
+&nbsp;	 */
+&nbsp;	List&lt;DiagnosisAttributeType&gt; getAllDiagnosisAttributeTypes() throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosisAttributeTypeById(Integer)
+&nbsp;	 */
+&nbsp;	DiagnosisAttributeType getDiagnosisAttributeTypeById(Integer id) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosisAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	DiagnosisAttributeType getDiagnosisAttributeTypeByUuid(String uuid) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#saveDiagnosisAttributeType(DiagnosisAttributeType)
+&nbsp;	 */
+&nbsp;	DiagnosisAttributeType saveDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#deleteDiagnosisAttributeType(DiagnosisAttributeType)
+&nbsp;	 */
+&nbsp;	void deleteDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.DiagnosisService#getDiagnosisAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	DiagnosisAttribute getDiagnosisAttributeByUuid(String uuid) throws DAOException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DatabaseUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: DatabaseUtil (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DatabaseUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62%
+  </span>
+  <span class="absValue">
+    (49/79)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.ResultSetMetaData;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility class that provides database related methods
+&nbsp; *
+&nbsp; * @since 1.6
+&nbsp; */
+&nbsp;public class DatabaseUtil {
+&nbsp;
+&nbsp;	private DatabaseUtil() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(DatabaseUtil.class);</b>
+&nbsp;
+&nbsp;	public static final String ORDER_ENTRY_UPGRADE_SETTINGS_FILENAME = &quot;order_entry_upgrade_settings.txt&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Executes the passed SQL query, enforcing select only if that parameter is set Load the jdbc
+&nbsp;	 * driver class for the database which is specified by the connectionUrl and connectionDriver
+&nbsp;	 * parameters &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This is only needed when loading up a jdbc connection manually for the first time. This is
+&nbsp;	 * not needed by most users and development practices with the openmrs API.
+&nbsp;	 *
+&nbsp;	 * @param connectionUrl the connection url for the database, such as
+&nbsp;	 * &quot;jdbc:mysql://localhost:3306/...&quot;
+&nbsp;	 * @param connectionDriver the database driver class name, such as &quot;com.mysql.cj.jdbc.Driver&quot;
+&nbsp;	 * @throws ClassNotFoundException
+&nbsp;	 */
+&nbsp;	public static String loadDatabaseDriver(String connectionUrl, String connectionDriver) throws ClassNotFoundException {
+<b class="nc">&nbsp;		if (StringUtils.hasText(connectionDriver)) {</b>
+<b class="nc">&nbsp;			Class.forName(connectionDriver);</b>
+<b class="nc">&nbsp;			log.debug(&quot;set user defined Database driver class: &quot; + connectionDriver);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			if (connectionUrl.contains(&quot;mysql&quot;)) {</b>
+<b class="nc">&nbsp;				Class.forName(&quot;com.mysql.cj.jdbc.Driver&quot;);</b>
+<b class="nc">&nbsp;				connectionDriver = &quot;com.mysql.cj.jdbc.Driver&quot;;</b>
+<b class="nc">&nbsp;			} else if (connectionUrl.contains(&quot;hsqldb&quot;)) {</b>
+<b class="nc">&nbsp;				Class.forName(&quot;org.hsqldb.jdbcDriver&quot;);</b>
+<b class="nc">&nbsp;				connectionDriver = &quot;org.hsqldb.jdbcDriver&quot;;</b>
+<b class="nc">&nbsp;			} else if (connectionUrl.contains(&quot;postgresql&quot;)) {</b>
+<b class="nc">&nbsp;				Class.forName(&quot;org.postgresql.Driver&quot;);</b>
+<b class="nc">&nbsp;				connectionDriver = &quot;org.postgresql.Driver&quot;;</b>
+<b class="nc">&nbsp;			} else if (connectionUrl.contains(&quot;oracle&quot;)) {</b>
+<b class="nc">&nbsp;				Class.forName(&quot;oracle.jdbc.driver.OracleDriver&quot;);</b>
+<b class="nc">&nbsp;				connectionDriver = &quot;oracle.jdbc.driver.OracleDriver&quot;;</b>
+<b class="nc">&nbsp;			} else if (connectionUrl.contains(&quot;jtds&quot;)) {</b>
+<b class="nc">&nbsp;				Class.forName(&quot;net.sourceforge.jtds.jdbc.Driver&quot;);</b>
+<b class="nc">&nbsp;				connectionDriver = &quot;net.sourceforge.jtds.jdbc.Driver&quot;;</b>
+<b class="nc">&nbsp;			} else if (connectionUrl.contains(&quot;sqlserver&quot;)) {</b>
+<b class="nc">&nbsp;				Class.forName(&quot;com.microsoft.jdbc.sqlserver.SQLServerDriver&quot;);</b>
+<b class="nc">&nbsp;				connectionDriver = &quot;com.microsoft.jdbc.sqlserver.SQLServerDriver&quot;;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		log.info(&quot;Set database driver class as &quot; + connectionDriver);</b>
+<b class="nc">&nbsp;		return connectionDriver;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes the passed SQL query, enforcing select only if that parameter is set for given Session
+&nbsp;	 */
+&nbsp;	public static List&lt;List&lt;Object&gt;&gt; executeSQL(Session session, String sql, boolean selectOnly) throws DAOException {
+<b class="fc">&nbsp;		sql = sql.trim();</b>
+<b class="fc">&nbsp;		boolean dataManipulation = checkQueryForManipulationCommands(sql, selectOnly);</b>
+&nbsp;		
+<b class="fc">&nbsp;		final List&lt;List&lt;Object&gt;&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		final String query = sql;</b>
+<b class="fc">&nbsp;		final boolean sessionDataManipulation = dataManipulation;</b>
+&nbsp;		
+<b class="fc">&nbsp;		session.doWork(conn -&gt; populateResultsFromSQLQuery(conn, query, sessionDataManipulation, result));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes the passed SQL query, enforcing select only if that parameter is set for given Connection
+&nbsp;	 */
+&nbsp;	public static List&lt;List&lt;Object&gt;&gt; executeSQL(Connection conn, String sql, boolean selectOnly) throws DAOException {
+<b class="fc">&nbsp;		sql = sql.trim();</b>
+<b class="fc">&nbsp;		boolean dataManipulation = checkQueryForManipulationCommands(sql, selectOnly);</b>
+<b class="fc">&nbsp;		List&lt;List&lt;Object&gt;&gt; result = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		populateResultsFromSQLQuery(conn, sql, dataManipulation, result);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static boolean checkQueryForManipulationCommands(String sql, boolean selectOnly) {
+<b class="fc">&nbsp;		boolean dataManipulation = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		String sqlLower = sql.toLowerCase();</b>
+<b class="fc">&nbsp;		if (sqlLower.startsWith(&quot;insert&quot;) || sqlLower.startsWith(&quot;update&quot;) || sqlLower.startsWith(&quot;delete&quot;)</b>
+<b class="fc">&nbsp;		        || sqlLower.startsWith(&quot;alter&quot;) || sqlLower.startsWith(&quot;drop&quot;) || sqlLower.startsWith(&quot;create&quot;)</b>
+<b class="fc">&nbsp;		        || sqlLower.startsWith(&quot;rename&quot;)) {</b>
+<b class="fc">&nbsp;			dataManipulation = true;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (selectOnly &amp;&amp; dataManipulation) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;Illegal command(s) found in query string&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dataManipulation;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static void populateResultsFromSQLQuery(Connection conn, String sql, boolean dataManipulation,
+&nbsp;	        List&lt;List&lt;Object&gt;&gt; results) {
+<b class="fc">&nbsp;		PreparedStatement ps = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			ps = conn.prepareStatement(sql);</b>
+<b class="fc">&nbsp;			if (dataManipulation) {</b>
+<b class="fc">&nbsp;				Integer i = ps.executeUpdate();</b>
+<b class="fc">&nbsp;				List&lt;Object&gt; row = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;				row.add(i);</b>
+<b class="fc">&nbsp;				results.add(row);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				ResultSet resultSet = ps.executeQuery();</b>
+&nbsp;				
+<b class="fc">&nbsp;				ResultSetMetaData rmd = resultSet.getMetaData();</b>
+<b class="fc">&nbsp;				int columnCount = rmd.getColumnCount();</b>
+&nbsp;				
+<b class="fc">&nbsp;				while (resultSet.next()) {</b>
+<b class="fc">&nbsp;					List&lt;Object&gt; rowObjects = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;					for (int x = 1; x &lt;= columnCount; x++) {</b>
+<b class="fc">&nbsp;						rowObjects.add(resultSet.getObject(x));</b>
+&nbsp;					}
+<b class="fc">&nbsp;					results.add(rowObjects);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Error while running sql: &quot; + sql, e);</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Error while running sql: &quot; + sql + &quot; . Message: &quot; + e.getMessage(), e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (ps != null) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					ps.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Error generated while closing statement&quot;, e);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all unique values excluding nulls in the specified column and table
+&nbsp;	 *
+&nbsp;	 * @param columnName the column
+&nbsp;	 * @param tableName  the table
+&nbsp;	 * @param connection
+&nbsp;	 * @return set of unique values
+&nbsp;	 * @throws Exception
+&nbsp;	 */
+&nbsp;	public static &lt;T&gt; Set&lt;T&gt; getUniqueNonNullColumnValues(String columnName, String tableName, Class&lt;T&gt; type,
+&nbsp;	        Connection connection) throws Exception {
+<b class="fc">&nbsp;		Set&lt;T&gt; uniqueValues = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		final String alias = &quot;unique_values&quot;;</b>
+<b class="fc">&nbsp;		String select = &quot;SELECT DISTINCT &quot; + columnName + &quot; AS &quot; + alias + &quot; FROM &quot; + tableName + &quot; WHERE &quot; + columnName</b>
+&nbsp;		        + &quot; IS NOT NULL&quot;;
+<b class="fc">&nbsp;		List&lt;List&lt;Object&gt;&gt; rows = DatabaseUtil.executeSQL(connection, select, true);</b>
+<b class="fc">&nbsp;		for (List&lt;Object&gt; row : rows) {</b>
+&nbsp;			//There can only be one column since we are selecting one
+<b class="fc">&nbsp;			uniqueValues.add((T) row.get(0));</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return uniqueValues;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

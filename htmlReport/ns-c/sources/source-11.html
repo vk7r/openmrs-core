@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientDataVoidHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientDataVoidHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientDataVoidHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;import org.openmrs.api.EncounterService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class deals with {@link Patient} objects when they are voided via a void* method in an
+&nbsp; * Openmrs Service. This handler is automatically called by the {@link RequiredDataAdvice} AOP
+&nbsp; * class. &lt;br&gt;
+&nbsp; * The handler voids all the encounters(including their associated observations) and orders
+&nbsp; * associated with the specified patient object
+&nbsp; * 
+&nbsp; * @see RequiredDataHandler
+&nbsp; * @see VoidHandler
+&nbsp; * @see Patient
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = Patient.class)
+<b class="fc">&nbsp;public class PatientDataVoidHandler implements VoidHandler&lt;Patient&gt; {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.handler.VoidHandler#handle(org.openmrs.Voidable, org.openmrs.User,
+&nbsp;	 *      java.util.Date, java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void the orders encounters and observations associated with the patient
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void handle(Patient patient, User voidingUser, Date voidedDate, String voidReason) {
+&nbsp;		//void all the encounters associated with this patient
+<b class="fc">&nbsp;		EncounterService es = Context.getEncounterService();</b>
+<b class="fc">&nbsp;		List&lt;Encounter&gt; encounters = es.getEncountersByPatient(patient);</b>
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(encounters)) {</b>
+<b class="fc">&nbsp;			for (Encounter encounter : encounters) {</b>
+<b class="fc">&nbsp;				if (!encounter.getVoided()) {</b>
+&nbsp;					// EncounterServiceImpl.voidEncounter and the requiredDataAdvice will set dateVoided to current date 
+&nbsp;					//if it is null, we need to set it now to match the patient&#39;s date voided so that the unvoid 
+&nbsp;					//handler&#39;s logic doesn&#39;t fail when comparing dates while unvoiding encounters that were voided 
+&nbsp;					//with the patient
+<b class="fc">&nbsp;					encounter.setDateVoided(patient.getDateVoided());</b>
+<b class="fc">&nbsp;					es.voidEncounter(encounter, voidReason);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Context.addProxyPrivilege(PrivilegeConstants.EDIT_COHORTS);</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			Context.getCohortService().notifyPatientVoided(patient);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			Context.removeProxyPrivilege(PrivilegeConstants.EDIT_COHORTS);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

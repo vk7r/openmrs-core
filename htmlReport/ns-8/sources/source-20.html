@@ -1,0 +1,345 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateUtil (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,9%
+  </span>
+  <span class="absValue">
+    (51/58)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Join;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import javax.persistence.criteria.Subquery;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.Hibernate;
+&nbsp;import org.hibernate.ScrollMode;
+&nbsp;import org.hibernate.ScrollableResults;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.hibernate.dialect.Dialect;
+&nbsp;import org.hibernate.dialect.HSQLDialect;
+&nbsp;import org.hibernate.dialect.PostgreSQL82Dialect;
+&nbsp;import org.hibernate.engine.spi.SessionFactoryImplementor;
+&nbsp;import org.hibernate.proxy.HibernateProxy;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.LocationAttribute;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.attribute.AttributeType;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class holds common methods and utilities that are used across the hibernate related classes
+&nbsp; */
+&nbsp;public class HibernateUtil {
+&nbsp;
+&nbsp;	private HibernateUtil() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HibernateUtil.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static Dialect dialect = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static Boolean isHSQLDialect = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static Boolean isPostgreSQLDialect = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check and cache whether the currect dialect is HSQL or not. This is needed because some
+&nbsp;	 * queries are different if in the hsql world as opposed to the mysql/postgres world
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 * @return true/false whether we&#39;re in hsql right now or not
+&nbsp;	 */
+&nbsp;	public static boolean isHSQLDialect(SessionFactory sessionFactory) {
+&nbsp;		
+<b class="fc">&nbsp;		if (isHSQLDialect == null) {</b>
+&nbsp;			// check and cache the dialect
+<b class="fc">&nbsp;			isHSQLDialect = HSQLDialect.class.getName().equals(getDialect(sessionFactory).getClass().getName());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return isHSQLDialect;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check and cache whether the currect dialect is PostgreSQL or not. This is needed because some
+&nbsp;	 * behaviors of PostgreSQL and MySQL are different and need to be handled separately.
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 * @return true/false whether we&#39;re in postgresql right now or not
+&nbsp;	 */
+&nbsp;	public static boolean isPostgreSQLDialect(SessionFactory sessionFactory) {
+&nbsp;		
+<b class="nc">&nbsp;		if (isPostgreSQLDialect == null) {</b>
+&nbsp;			// check and cache the dialect
+<b class="nc">&nbsp;			isPostgreSQLDialect = PostgreSQL82Dialect.class.getName()</b>
+<b class="nc">&nbsp;			        .equals(getDialect(sessionFactory).getClass().getName());</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return isPostgreSQLDialect;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fetch the current Dialect of the given SessionFactory
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory SessionFactory to pull the dialect from
+&nbsp;	 * @return Dialect of sql that this connection/session is using
+&nbsp;	 */
+&nbsp;	public static Dialect getDialect(SessionFactory sessionFactory) {
+&nbsp;		
+&nbsp;		// return cached dialect
+<b class="fc">&nbsp;		if (dialect != null) {</b>
+<b class="nc">&nbsp;			return dialect;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		SessionFactoryImplementor implementor = (SessionFactoryImplementor) sessionFactory;</b>
+<b class="fc">&nbsp;		dialect = implementor.getDialect();</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Getting dialect for session: {}&quot;, dialect);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dialect;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see HibernateUtil#escapeSqlWildcards(String, Connection)
+&nbsp;	 */
+&nbsp;	public static String escapeSqlWildcards(final String oldString, SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().doReturningWork(connection -&gt; escapeSqlWildcards(oldString, connection));</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Escapes all sql wildcards in the given string, returns the same string if it doesn&#39;t contain
+&nbsp;	 * any sql wildcards
+&nbsp;	 *
+&nbsp;	 * @param oldString the string in which to escape the sql wildcards
+&nbsp;	 * @param connection The underlying database connection
+&nbsp;	 * @return the string with sql wildcards escaped if any found otherwise the original string is
+&nbsp;	 *         returned
+&nbsp;	 */
+&nbsp;	public static String escapeSqlWildcards(String oldString, Connection connection) {
+&nbsp;		
+&nbsp;		//replace all sql wildcards if any
+<b class="fc">&nbsp;		if (!StringUtils.isBlank(oldString)) {</b>
+<b class="fc">&nbsp;			String escapeCharacter = &quot;&quot;;</b>
+&nbsp;			
+&nbsp;			try {
+&nbsp;				//get the database specific escape character from the metadata
+<b class="fc">&nbsp;				escapeCharacter = connection.getMetaData().getSearchStringEscape();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (SQLException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Error generated&quot;, e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			//insert an escape character before each sql wildcard in the search phrase
+<b class="fc">&nbsp;			return StringUtils.replaceEach(oldString, new String[] { &quot;%&quot;, &quot;_&quot;, &quot;*&quot;, &quot;&#39;&quot; }, new String[] {</b>
+&nbsp;			        escapeCharacter + &quot;%&quot;, escapeCharacter + &quot;_&quot;, escapeCharacter + &quot;*&quot;, &quot;&#39;&#39;&quot; });
+&nbsp;		} else {
+<b class="fc">&nbsp;			return oldString;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Constructs a list of predicates for attribute value criteria for use in a JPA Criteria query.
+&nbsp;	 *
+&nbsp;	 * @param cb The CriteriaBuilder used to construct the CriteriaQuery
+&nbsp;	 * @param locationRoot The root of the CriteriaQuery for the Location entity
+&nbsp;	 * @param serializedAttributeValues A map of AttributeType to serialized attribute values
+&nbsp;	 * @param &lt;AT&gt; The type of the attribute
+&nbsp;	 * @return A list of Predicate objects for use in a CriteriaQuery
+&nbsp;	 */
+&nbsp;	public static &lt;AT extends AttributeType&gt; List&lt;Predicate&gt; getAttributePredicate(CriteriaBuilder cb,
+&nbsp;	        Root&lt;Location&gt; locationRoot, Map&lt;AT, String&gt; serializedAttributeValues) {
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Map.Entry&lt;AT, String&gt; entry : serializedAttributeValues.entrySet()) {</b>
+<b class="fc">&nbsp;			Subquery&lt;Integer&gt; subquery = cb.createQuery().subquery(Integer.class);</b>
+<b class="fc">&nbsp;			Root&lt;Location&gt; locationSubRoot = subquery.from(Location.class);</b>
+<b class="fc">&nbsp;			Join&lt;Location, LocationAttribute&gt; attributeJoin = locationSubRoot.join(&quot;attributes&quot;);</b>
+&nbsp;			
+<b class="fc">&nbsp;			Predicate[] attributePredicates = new Predicate[] { cb.equal(attributeJoin.get(&quot;attributeType&quot;), entry.getKey()),</b>
+<b class="fc">&nbsp;			        cb.equal(attributeJoin.get(&quot;valueReference&quot;), entry.getValue()),</b>
+<b class="fc">&nbsp;			        cb.isFalse(attributeJoin.get(&quot;voided&quot;)) };</b>
+&nbsp;			
+<b class="fc">&nbsp;			subquery.select(locationSubRoot.get(&quot;locationId&quot;)).where(attributePredicates);</b>
+<b class="fc">&nbsp;			predicates.add(cb.in(locationRoot.get(&quot;locationId&quot;)).value(subquery));</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return predicates;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets an object as an instance of its persistent type if it is a hibernate proxy otherwise
+&nbsp;	 * returns the same passed in object
+&nbsp;	 * 
+&nbsp;	 * @param persistentObject the object to unproxy
+&nbsp;	 * @return the unproxied object
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public static &lt;T&gt; T getRealObjectFromProxy(T persistentObject) {
+<b class="fc">&nbsp;		if (persistentObject == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (persistentObject instanceof HibernateProxy) {</b>
+<b class="fc">&nbsp;			Hibernate.initialize(persistentObject);</b>
+<b class="fc">&nbsp;			persistentObject = (T) ((HibernateProxy) persistentObject).getHibernateLazyInitializer().getImplementation();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return persistentObject;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Retrieves a unique entity by its UUID.
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory the session factory to create sessions.
+&nbsp;	 * @param entityClass the class of the entity to retrieve.
+&nbsp;	 * @param uuid the UUID of the entity.
+&nbsp;	 * @return the entity if found, null otherwise.
+&nbsp;	 * @throws DAOException if there&#39;s an issue in data access.
+&nbsp;	 */
+&nbsp;	public static &lt;T&gt; T getUniqueEntityByUUID(SessionFactory sessionFactory, Class&lt;T&gt; entityClass, String uuid) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;T&gt; query = cb.createQuery(entityClass);</b>
+<b class="fc">&nbsp;		Root&lt;T&gt; root = query.from(entityClass);</b>
+&nbsp;
+<b class="fc">&nbsp;		query.where(cb.equal(root.get(&quot;uuid&quot;), uuid));</b>
+<b class="fc">&nbsp;		return session.createQuery(query).uniqueResult();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a ScrollableResults instance for the given entity type with the specified fetch size.
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory the session factory to create sessions.
+&nbsp;	 * @param type the class type of the entity for which the ScrollableResults is created.
+&nbsp;	 * @param fetchSize the number of rows to fetch in a batch.
+&nbsp;	 * @return ScrollableResults instance for batch processing.
+&nbsp;	 */
+&nbsp;	public static &lt;T&gt; ScrollableResults getScrollableResult(SessionFactory sessionFactory, Class&lt;T&gt; type, int fetchSize) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;T&gt; criteriaQuery = criteriaBuilder.createQuery(type);</b>
+<b class="fc">&nbsp;		Root&lt;T&gt; root = criteriaQuery.from(type);</b>
+<b class="fc">&nbsp;		criteriaQuery.select(root);</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(criteriaQuery)</b>
+<b class="fc">&nbsp;			.setFetchSize(fetchSize)</b>
+<b class="fc">&nbsp;			.scroll(ScrollMode.FORWARD_ONLY);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

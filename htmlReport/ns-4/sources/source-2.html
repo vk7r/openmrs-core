@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > APIException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: APIException (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">APIException</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents often fatal errors that occur within the API infrastructure. All service methods
+&nbsp; * should be marked as possibly throwing this exception. The preferred methods to use in this
+&nbsp; * exception is the {@link #APIException(String, Throwable)} or the {@link #APIException(String)}
+&nbsp; */
+&nbsp;public class APIException extends RuntimeException {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 12121212L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default empty constructor. If at all possible, don&#39;t use this one, but use the
+&nbsp;	 * {@link #APIException(String)} constructor to specify a helpful message to the end user
+&nbsp;	 */
+<b class="fc">&nbsp;	public APIException() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * General constructor to give the end user a helpful message that relates to why this error
+&nbsp;	 * occurred.
+&nbsp;	 * 
+&nbsp;	 * @param message helpful message string for the end user
+&nbsp;	 */
+&nbsp;	public APIException(String message) {
+<b class="fc">&nbsp;		super(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * General constructor to give the end user a helpful message and to also propagate the parent
+&nbsp;	 * error exception message.
+&nbsp;	 * 
+&nbsp;	 * @param message helpful message string for the end user
+&nbsp;	 * @param cause the parent exception cause that this APIException is wrapping around
+&nbsp;	 */
+&nbsp;	public APIException(String message, Throwable cause) {
+<b class="fc">&nbsp;		super(message, cause);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor used to simply chain a parent exception cause to an APIException. Preference
+&nbsp;	 * should be given to the {@link #APIException(String, Throwable)} constructor if at all
+&nbsp;	 * possible instead of this one.
+&nbsp;	 * 
+&nbsp;	 * @param cause the parent exception cause that this APIException is wrapping around
+&nbsp;	 */
+&nbsp;	public APIException(Throwable cause) {
+<b class="fc">&nbsp;		super(cause);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor to give the end user a helpful message that relates to why this error occurred.
+&nbsp;	 * 
+&nbsp;	 * @param messageKey message code to retrieve
+&nbsp;	 * @param parameters message parameters
+&nbsp;	 */
+&nbsp;	public APIException(String messageKey, Object[] parameters) {
+<b class="fc">&nbsp;		super(Context.getMessageSourceService().getMessage(messageKey, parameters, Context.getLocale()));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor to give the end user a helpful message and to also propagate the parent
+&nbsp;	 * error exception message..
+&nbsp;	 *
+&nbsp;	 * @param messageKey message code to retrieve
+&nbsp;	 * @param parameters message parameters
+&nbsp;	 * @param cause the parent exception cause that this APIException is wrapping around   
+&nbsp;	 */
+&nbsp;	public APIException(String messageKey, Object[] parameters, Throwable cause) {
+<b class="fc">&nbsp;		super(Context.getMessageSourceService().getMessage(messageKey, parameters, Context.getLocale()), cause);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

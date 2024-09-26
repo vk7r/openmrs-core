@@ -1,0 +1,196 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LocationValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: LocationValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LocationValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95%
+  </span>
+  <span class="absValue">
+    (19/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validates the Location object.
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; **/
+&nbsp;@Handler(supports = { Location.class }, order = 50)
+<b class="fc">&nbsp;public class LocationValidator extends BaseCustomizableValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determines if the command object being submitted is a valid type
+&nbsp;	 * 
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return c.equals(Location.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks the form object for any inconsistencies/errors
+&nbsp;	 * 
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if name is null or empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if retired and retireReason is null or empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set retired to false if retireReason is null or empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if all fields are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if retired location is given retired reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if parent location creates a loop
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if name is exist in non retired locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) {
+<b class="fc">&nbsp;		Location location = (Location) obj;</b>
+<b class="fc">&nbsp;		if (location == null) {</b>
+<b class="nc">&nbsp;			errors.rejectValue(&quot;location&quot;, &quot;error.general&quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			ValidationUtils.rejectIfEmptyOrWhitespace(errors, &quot;name&quot;, &quot;error.name&quot;);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (location.getRetired() &amp;&amp; !StringUtils.hasLength(location.getRetireReason())) {</b>
+<b class="fc">&nbsp;				location.setRetired(false); // so that the jsp page displays</b>
+&nbsp;				// properly again
+<b class="fc">&nbsp;				errors.rejectValue(&quot;retireReason&quot;, &quot;error.null&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			Location exist = Context.getLocationService().getLocation(location.getName());</b>
+<b class="fc">&nbsp;			if (exist != null &amp;&amp; !exist.getRetired() &amp;&amp; !OpenmrsUtil.nullSafeEquals(location.getUuid(), exist.getUuid())) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;name&quot;, &quot;location.duplicate.name&quot;);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// Traverse all the way up (down?) to the root and check if it
+&nbsp;			// equals the root.
+<b class="fc">&nbsp;			Location root = location;</b>
+<b class="fc">&nbsp;			while (root.getParentLocation() != null) {</b>
+<b class="fc">&nbsp;				root = root.getParentLocation();</b>
+<b class="fc">&nbsp;				if (root.equals(location)) { // Have gone in a circle</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;parentLocation&quot;, &quot;Location.parentLocation.error&quot;);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;			ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;name&quot;, &quot;description&quot;, &quot;address1&quot;, &quot;address2&quot;,</b>
+&nbsp;			    &quot;cityVillage&quot;, &quot;stateProvince&quot;, &quot;country&quot;, &quot;postalCode&quot;, &quot;latitude&quot;, &quot;longitude&quot;, &quot;countyDistrict&quot;,
+&nbsp;			    &quot;address3&quot;, &quot;address4&quot;, &quot;address5&quot;, &quot;address6&quot;, &quot;address7&quot;, &quot;address8&quot;, &quot;address9&quot;, &quot;address10&quot;,
+&nbsp;			    &quot;address11&quot;, &quot;address12&quot;, &quot;address13&quot;, &quot;address14&quot;, &quot;address15&quot;, &quot;retireReason&quot;);
+<b class="fc">&nbsp;			super.validateAttributes(location, errors, Context.getLocationService().getAllLocationAttributeTypes());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

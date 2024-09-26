@@ -1,0 +1,183 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CheckDrugOrderUnitAndFrequencyTextNotMappedToConcepts</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: CheckDrugOrderUnitAndFrequencyTextNotMappedToConcepts (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CheckDrugOrderUnitAndFrequencyTextNotMappedToConcepts</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (18/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.util.DatabaseUtil;
+&nbsp;import org.openmrs.util.UpgradeUtil;
+&nbsp;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomPreconditionErrorException;
+&nbsp;import liquibase.exception.CustomPreconditionFailedException;
+&nbsp;import liquibase.precondition.CustomPrecondition;
+&nbsp;
+&nbsp;/**
+&nbsp; * This changesets finds all free text drug order dose units and frequencies and checks that they
+&nbsp; * are all mapped to concepts ids via the OpenmrsConstants#GP_ORDER_ENTRY_UNITS_TO_CONCEPTS_MAPPINGS
+&nbsp; * global property prior to upgrading to version 1.10. It MUST be the first 1.10.x changeset to be
+&nbsp; * executed
+&nbsp; */
+<b class="fc">&nbsp;public class CheckDrugOrderUnitAndFrequencyTextNotMappedToConcepts implements CustomPrecondition {</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void check(Database database) throws CustomPreconditionFailedException, CustomPreconditionErrorException {
+<b class="fc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			Set&lt;String&gt; doseUnits = DatabaseUtil.getUniqueNonNullColumnValues(&quot;units&quot;, &quot;drug_order&quot;, String.class,</b>
+<b class="fc">&nbsp;			    connection.getUnderlyingConnection());</b>
+<b class="fc">&nbsp;			Set&lt;String&gt; unmappedDoseUnits = getUnMappedText(doseUnits, connection);</b>
+<b class="fc">&nbsp;			if (!unmappedDoseUnits.isEmpty()) {</b>
+<b class="nc">&nbsp;				throw new CustomPreconditionFailedException(</b>
+&nbsp;				        &quot;Upgrade failed because of the following unmapped drug order dose units that were found: [&quot;
+<b class="nc">&nbsp;				                + StringUtils.join(unmappedDoseUnits, &quot;, &quot;)</b>
+&nbsp;				                + &quot;]. Please make sure you have mapped all free text dose units and &quot;
+&nbsp;				                + &quot;frequencies via the global property named orderEntry.unitsToConceptsMappings&quot;
+&nbsp;				                + &quot; or use 1.10 upgrade helper module to map them&quot;);
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			Set&lt;String&gt; frequencies = DatabaseUtil.getUniqueNonNullColumnValues(&quot;frequency&quot;, &quot;drug_order&quot;, String.class,</b>
+<b class="fc">&nbsp;			    connection.getUnderlyingConnection());</b>
+<b class="fc">&nbsp;			Set&lt;String&gt; unmappedFrequencies = getUnMappedText(frequencies, connection);</b>
+<b class="fc">&nbsp;			if (!unmappedFrequencies.isEmpty()) {</b>
+<b class="nc">&nbsp;				throw new CustomPreconditionFailedException(</b>
+&nbsp;				        &quot;Upgrade failed because of the following unmapped drug order frequencies that were found: [&quot;
+<b class="nc">&nbsp;				                + StringUtils.join(unmappedFrequencies, &quot;, &quot;)</b>
+&nbsp;				                + &quot;]. Please make sure you have mapped all free text dose units and &quot;
+&nbsp;				                + &quot;frequencies via the global property named orderEntry.unitsToConceptsMappings&quot;
+&nbsp;				                + &quot; or use 1.10 upgrade helper module to map them&quot;);
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			throw new CustomPreconditionErrorException(&quot;An error occurred while checking for unmapped free text drug &quot;</b>
+&nbsp;			        + &quot;order dose units and frequencies&quot;, e);
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Set&lt;String&gt; getUnMappedText(Set&lt;String&gt; textList, JdbcConnection connection) {
+<b class="fc">&nbsp;		Set&lt;String&gt; unmappedText = new HashSet&lt;&gt;(textList.size());</b>
+<b class="fc">&nbsp;		for (String text : textList) {</b>
+<b class="fc">&nbsp;			if (StringUtils.isBlank(text) || UpgradeUtil.getConceptIdForUnits(text) != null) {</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			unmappedText.add(text);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return unmappedText;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

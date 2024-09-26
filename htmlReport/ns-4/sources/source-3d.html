@@ -1,0 +1,361 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CohortService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: CohortService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">CohortService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.CohortMembership;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.CohortDAO;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * API methods related to Cohorts and CohortDefinitions
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;A Cohort is a list of patient ids.&lt;/li&gt;
+&nbsp; * &lt;li&gt;A CohortDefinition is a search strategy which can be used to arrive at a cohort. Therefore,
+&nbsp; * the patients returned by running a CohortDefinition can be different depending on the data that
+&nbsp; * is stored elsewhere in the database.&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.Cohort
+&nbsp; */
+&nbsp;public interface CohortService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the CohortDAO for this service to use
+&nbsp;	 * 
+&nbsp;	 * @param dao
+&nbsp;	 */
+&nbsp;	public void setCohortDAO(CohortDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save a cohort to the database (create if new, or update if changed) This method will throw an
+&nbsp;	 * exception if any patientIds in the Cohort don&#39;t exist.
+&nbsp;	 * 
+&nbsp;	 * @param cohort the cohort to be saved to the database
+&nbsp;	 * @return The cohort that was passed in
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new cohorts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing cohort
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.ADD_COHORTS, PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	public Cohort saveCohort(Cohort cohort) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids the given cohort, deleting it from the perspective of the typical end user.
+&nbsp;	 * 
+&nbsp;	 * @param cohort the cohort to delete
+&nbsp;	 * @param reason the reason this cohort is being retired
+&nbsp;	 * @return The cohort that was passed in
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if reason is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if reason is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void cohort
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not change an already voided cohort
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.DELETE_COHORTS })
+&nbsp;	public Cohort voidCohort(Cohort cohort, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a Cohort from the database (not reversible)
+&nbsp;	 * 
+&nbsp;	 * @param cohort the Cohort to completely remove from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete cohort from database
+&nbsp;	 */
+&nbsp;	public Cohort purgeCohort(Cohort cohort) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a Cohort by its database primary key
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 * @return the Cohort with the given primary key, or null if none exists
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get cohort by id
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public Cohort getCohort(Integer id) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a non voided Cohort by its name
+&nbsp;	 *
+&nbsp;	 * @param name
+&nbsp;	 * @return the Cohort with the given name, or null if none exists
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get cohort given a name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the nonvoided cohort if two exist with same name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only get non voided cohorts by name
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public Cohort getCohortByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated use {@link #getCohortByName(String)}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public Cohort getCohort(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all Cohorts (not including voided ones)
+&nbsp;	 * 
+&nbsp;	 * @return All Cohorts in the database (not including voided ones)
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all nonvoided cohorts in database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return any voided cohorts
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public List&lt;Cohort&gt; getAllCohorts() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all Cohorts, possibly including the voided ones
+&nbsp;	 * 
+&nbsp;	 * @param includeVoided whether or not to include voided Cohorts
+&nbsp;	 * @return All Cohorts, maybe including the voided ones
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all cohorts and voided
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public List&lt;Cohort&gt; getAllCohorts(boolean includeVoided) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns Cohorts whose names match the given string. Returns an empty list in the case of no
+&nbsp;	 * results. Returns all Cohorts in the case of null or empty input
+&nbsp;	 * 
+&nbsp;	 * @param nameFragment
+&nbsp;	 * @return list of cohorts matching the name fragment
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; never return null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match cohorts by partial name
+&nbsp;	 */
+&nbsp;	public List&lt;Cohort&gt; getCohorts(String nameFragment) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @deprecated use {@link #getCohortsContainingPatientId(Integer)}
+&nbsp;	 *
+&nbsp;	 * Find all Cohorts that contain the given patient. (Not including voided Cohorts)
+&nbsp;	 * 
+&nbsp;	 * @param patient patient used to find the cohorts
+&nbsp;	 * @return All non-voided Cohorts that contain the given patient
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return voided cohorts
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return cohorts that have given patient
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public List&lt;Cohort&gt; getCohortsContainingPatient(Patient patient) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all Cohorts that contain the given patientId right now. (Not including voided Cohorts, or ended memberships)
+&nbsp;	 *
+&nbsp;	 * @param patientId patient id used to find the cohorts
+&nbsp;	 * @return All non-voided Cohorts that contain the given patientId
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public List&lt;Cohort&gt; getCohortsContainingPatientId(Integer patientId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a new patient to a Cohort. If the patient is not already in the Cohort, then they are
+&nbsp;	 * added, and the Cohort is saved, marking it as changed.
+&nbsp;	 * 
+&nbsp;	 * @param cohort the cohort to receive the given patient
+&nbsp;	 * @param patient the patient to insert into the cohort
+&nbsp;	 * @return The cohort that was passed in with the new patient in it
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add a patient and save the cohort
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add a patient and insert the cohort to database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if cohort already contains patient
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	public Cohort addPatientToCohort(Cohort cohort, Patient patient) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a patient from a Cohort, by voiding their membership. (Has no effect if the patient is not in the cohort.)
+&nbsp;	 * (This behavior is provided for consistency with the pre-2.1.0 API, which didn&#39;t track cohort membership dates.)
+&nbsp;	 *
+&nbsp;	 * @deprecated since 2.1.0 you should explicitly call either {@link #endCohortMembership(CohortMembership, Date)} or {@link #voidCohortMembership(CohortMembership, String)}
+&nbsp;	 *
+&nbsp;	 * @param cohort the cohort containing the given patient
+&nbsp;	 * @param patient the patient to remove from the given cohort
+&nbsp;	 * @return The cohort that was passed in with the patient removed
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if cohort doesn&#39;t contain patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save cohort after removing patient
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	public Cohort removePatientFromCohort(Cohort cohort, Patient patient) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get Cohort by its UUID
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return cohort or null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public Cohort getCohortByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get CohortMembership by its UUID
+&nbsp;	 * @param uuid
+&nbsp;	 * @return cohort membership or null
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	public CohortMembership getCohortMembershipByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a CohortMembership from its parent Cohort
+&nbsp;	 *
+&nbsp;	 * @since 2.1.0
+&nbsp;	 * @param cohortMembership membership that will be removed from cohort
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	void purgeCohortMembership(CohortMembership cohortMembership);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Marks the specified CohortMembership as voided
+&nbsp;	 * 
+&nbsp;	 * @param cohortMembership the CohortMembership to void
+&nbsp;	 * @param reason void reason
+&nbsp;	 * @return the voided CohortMembership
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	CohortMembership voidCohortMembership(CohortMembership cohortMembership, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Ends the specified CohortMembership i.e. sets its end date to the current date
+&nbsp;	 * 
+&nbsp;	 * @param cohortMembership the CohortMembership to end
+&nbsp;	 * @param onDate when to end the membership (optional, defaults to now)
+&nbsp;	 * @return the ended CohortMembership
+&nbsp;	 * @since 2.1.0
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	CohortMembership endCohortMembership(CohortMembership cohortMembership, Date onDate);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * NOTE: CLIENT CODE SHOULD NEVER CALL THIS METHOD. TREAT THIS AS AN INTERNAL METHOD WHICH MAY CHANGE WITHOUT WARNING.
+&nbsp;	 *
+&nbsp;	 * Used to notify this service that a patient has been voided, and therefore we should void all cohort memberships
+&nbsp;	 * that refer to that patient
+&nbsp;	 *
+&nbsp;	 * @since 2.1.0
+&nbsp;	 * @param patient patient that was voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void the membership for the patient that was passed in
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	void notifyPatientVoided(Patient patient);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * NOTE: CLIENT CODE SHOULD NEVER CALL THIS METHOD. TREAT THIS AS AN INTERNAL METHOD WHICH MAY CHANGE WITHOUT WARNING.
+&nbsp;	 *
+&nbsp;	 * Used to notify this service that a patient has been unvoided, and therefore we should unvoid all cohort
+&nbsp;	 * memberships that were automatically voided with the patient
+&nbsp;	 *
+&nbsp;	 * @since 2.1.0
+&nbsp;	 * @param patient patient that was unvoided
+&nbsp;	 * @param originallyVoidedBy
+&nbsp;	 * @param originalDateVoided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid the membership for the patient that was passed in
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_COHORTS })
+&nbsp;	void notifyPatientUnvoided(Patient patient, User originallyVoidedBy, Date originalDateVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets memberships for the given patient, optionally active on a specific date
+&nbsp;	 *
+&nbsp;	 * @since 2.1.0
+&nbsp;	 * @param patientId
+&nbsp;	 * @param activeOnDate
+&nbsp;	 * @param includeVoided
+&nbsp;	 * @return matching memberships
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_PATIENT_COHORTS })
+&nbsp;	List&lt;CohortMembership&gt; getCohortMemberships(Integer patientId, Date activeOnDate, boolean includeVoided);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

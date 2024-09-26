@@ -1,0 +1,315 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UserValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: UserValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,5%
+  </span>
+  <span class="absValue">
+    (47/55)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;import java.util.regex.PatternSyntaxException;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.validator.routines.EmailValidator;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validates attributes on the User object
+&nbsp; *
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;@Handler(supports = { User.class }, order = 50)
+<b class="fc">&nbsp;public class UserValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	/** Logger for this class and subclasses */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(UserValidator.class);</b>
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private PersonValidator personValidator;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Determines if the command object being submitted is a valid type
+&nbsp;	 *
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; clazz) {
+<b class="fc">&nbsp;		return User.class.isAssignableFrom(clazz);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks the form object for any inconsistencies/errors
+&nbsp;	 *
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if retired and retireReason is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if retired and retireReason is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if retired and retireReason is whitespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if all required fields have proper values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if email as username enabled and email invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if email as username disabled and email provided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw NPE when user is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) {
+<b class="fc">&nbsp;		User user = (User) obj;</b>
+<b class="fc">&nbsp;		if (user == null) {</b>
+<b class="fc">&nbsp;			errors.reject(&quot;error.general&quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (user.getRetired() &amp;&amp; StringUtils.isBlank(user.getRetireReason())) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;retireReason&quot;, &quot;error.null&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (user.getPerson() == null) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;person&quot;, &quot;error.null&quot;);</b>
+&nbsp;			} else {
+&nbsp;				// check that required person details are filled out
+<b class="fc">&nbsp;				Person person = user.getPerson();</b>
+<b class="fc">&nbsp;				if (person.getGender() == null) {</b>
+<b class="nc">&nbsp;					errors.rejectValue(&quot;person.gender&quot;, &quot;error.null&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (person.getDead() == null) {</b>
+<b class="nc">&nbsp;					errors.rejectValue(&quot;person.dead&quot;, &quot;error.null&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (person.getVoided() == null) {</b>
+<b class="nc">&nbsp;					errors.rejectValue(&quot;person.voided&quot;, &quot;error.null&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (person.getPersonName() == null || StringUtils.isEmpty(person.getPersonName().getFullName())) {</b>
+<b class="nc">&nbsp;					errors.rejectValue(&quot;person&quot;, &quot;Person.names.length&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				errors.pushNestedPath(&quot;person&quot;);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					personValidator.validate(person, errors);</b>
+&nbsp;				} finally {
+<b class="fc">&nbsp;					errors.popNestedPath();</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;					
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			AdministrationService as = Context.getAdministrationService();</b>
+&nbsp;			boolean emailAsUsername;
+&nbsp;			try {
+<b class="fc">&nbsp;				Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);</b>
+<b class="fc">&nbsp;				emailAsUsername = Boolean.parseBoolean(as.getGlobalProperty(</b>
+&nbsp;				    OpenmrsConstants.GLOBAL_PROPERTY_USER_REQUIRE_EMAIL_AS_USERNAME, &quot;false&quot;));
+&nbsp;			}
+&nbsp;			finally {
+<b class="fc">&nbsp;				Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (emailAsUsername) {</b>
+<b class="fc">&nbsp;				boolean isValidUserName = isUserNameAsEmailValid(user.getUsername());</b>
+<b class="fc">&nbsp;				if (!isValidUserName) {</b>
+<b class="nc">&nbsp;					errors.rejectValue(&quot;username&quot;, &quot;error.username.email&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				boolean isValidUserName = isUserNameValid(user.getUsername());</b>
+<b class="fc">&nbsp;				if (!isValidUserName) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;username&quot;, &quot;error.username.pattern&quot;);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(user.getEmail())) {</b>
+<b class="fc">&nbsp;				if (!isEmailValid(user.getEmail())) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;email&quot;, &quot;error.email.invalid&quot;);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					User existingUser = Context.getUserService().getUserByUsernameOrEmail(user.getEmail());</b>
+<b class="fc">&nbsp;					if (existingUser != null &amp;&amp; !existingUser.equals(user)) {</b>
+<b class="fc">&nbsp;						if (user.getEmail().equalsIgnoreCase(existingUser.getEmail())) {</b>
+<b class="fc">&nbsp;							errors.rejectValue(&quot;email&quot;, &quot;error.email.alreadyInUse&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;username&quot;, &quot;systemId&quot;, &quot;retireReason&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to check the given username against the regular expression. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * A valid username will have following: &lt;ul&gt;&lt;li&gt;Begins with Alphanumeric characters &lt;li&gt;only
+&nbsp;	 * followed by more alphanumeric characters (may include . - _) &lt;li&gt;can be at most 50 characters
+&nbsp;	 * &lt;li&gt;minimum 2 chars case-insensitive Examples: &lt;li&gt;The following username will pass
+&nbsp;	 * validation: A123_.-XYZ9&lt;/ul&gt;
+&nbsp;	 *
+&nbsp;	 * @param username the username string to check
+&nbsp;	 * @return true if the username is ok
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate username with only alpha numerics
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate username with alpha dash and underscore
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate username with alpha dash underscore and dot
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate username with exactly max size name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate username with less than minimumLength
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate username with invalid character
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate username with more than maximum size
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate when username is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate when username is the empty string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not validate when username is whitespace only
+&nbsp;	 */
+&nbsp;	public boolean isUserNameValid(String username) {
+&nbsp;		//Initialize reg ex for userName pattern
+&nbsp;		// ^ = start of line
+&nbsp;		// \w = [a-zA-Z_0-9]
+&nbsp;		// \Q = quote everything until \E 
+&nbsp;		// $ = end of line
+&nbsp;		// complete meaning = 2-50 characters, the first must be a letter, digit, or _, and the rest may also be - or .
+<b class="fc">&nbsp;		String expression = &quot;^[\\w][\\Q_\\E\\w-\\.]{1,49}$&quot;;</b>
+&nbsp;		// empty usernames are allowed
+<b class="fc">&nbsp;		if (StringUtils.isEmpty(username)) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+&nbsp;			//Make the comparison case-insensitive.
+<b class="fc">&nbsp;			Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);</b>
+<b class="fc">&nbsp;			Matcher matcher = pattern.matcher(username);</b>
+<b class="fc">&nbsp;			return matcher.matches();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (PatternSyntaxException pex) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Username Pattern Syntax exception in UserValidator&quot;, pex);</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns true if the given username is a valid e-mail.
+&nbsp;	 *
+&nbsp;	 * @param username
+&nbsp;	 * @return true if valid
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if email invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if email valid
+&nbsp;	 */
+&nbsp;	public boolean isUserNameAsEmailValid(String username) {
+<b class="fc">&nbsp;		return EmailValidator.getInstance().isValid(username);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return true if email is valid or false otherwise
+&nbsp;	 * @param email
+&nbsp;	 */
+&nbsp;	private boolean isEmailValid(String email) {
+<b class="fc">&nbsp;		return EmailValidator.getInstance().isValid(email);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,280 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FieldAnswer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: FieldAnswer (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FieldAnswer</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">FieldAnswer$HibernateProxy$lhLojWuz</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import javax.persistence.Transient;
+&nbsp;
+&nbsp;/**
+&nbsp; * FieldAnswer
+&nbsp; * 
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;field_answer&quot;)
+&nbsp;@Audited
+&nbsp;public class FieldAnswer extends BaseOpenmrsObject {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 5656L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@Column(name = &quot;date_created&quot;, length = 19)
+&nbsp;	private Date dateCreated;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;answer_id&quot;)
+&nbsp;	@Id
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;creator&quot;, nullable = false)
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;field_id&quot;)
+&nbsp;	@Id
+&nbsp;	private Field field;
+&nbsp;	
+&nbsp;	@Transient
+&nbsp;	private boolean dirty;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="nc">&nbsp;	public FieldAnswer() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return boolean whether or not this fieldAnswer has been modified
+&nbsp;	 *
+&nbsp;	 * @deprecated as of 2.0, use {@link #getDirty()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public boolean isDirty() {
+<b class="nc">&nbsp;		return getDirty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return boolean whether or not this fieldAnswer has been modified
+&nbsp;	 */
+&nbsp;	public boolean getDirty() {
+<b class="nc">&nbsp;		return dirty;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setClean() {
+<b class="nc">&nbsp;		dirty = false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	/**
+&nbsp;	 * @return Returns the concept.
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="nc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept The concept to set.
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="nc">&nbsp;		this.dirty = true;</b>
+<b class="nc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	public User getCreator() {
+<b class="nc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	public void setCreator(User creator) {
+<b class="nc">&nbsp;		this.dirty = true;</b>
+<b class="nc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	public Date getDateCreated() {
+<b class="nc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="nc">&nbsp;		this.dirty = true;</b>
+<b class="nc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the field.
+&nbsp;	 */
+&nbsp;	public Field getField() {
+<b class="nc">&nbsp;		return field;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param field The field to set.
+&nbsp;	 */
+&nbsp;	public void setField(Field field) {
+<b class="nc">&nbsp;		this.dirty = true;</b>
+<b class="nc">&nbsp;		this.field = field;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

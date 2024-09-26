@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateOpenmrsMetadataDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateOpenmrsMetadataDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateOpenmrsMetadataDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/27)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.persistence.Query;
+&nbsp;import javax.persistence.TypedQuery;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.openmrs.BaseOpenmrsMetadata;
+&nbsp;import org.openmrs.api.db.OpenmrsMetadataDAO;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract class implementing basic data access methods for BaseOpenmrsMetadata persistents
+&nbsp; *
+&nbsp; * @since 1.10
+&nbsp; *
+&nbsp; * @param &lt;T&gt;
+&nbsp; */
+&nbsp;public class HibernateOpenmrsMetadataDAO&lt;T extends BaseOpenmrsMetadata&gt; extends HibernateOpenmrsObjectDAO&lt;T&gt; implements OpenmrsMetadataDAO&lt;T&gt; {
+&nbsp;	
+&nbsp;	public HibernateOpenmrsMetadataDAO(Class&lt;T&gt; mappedClass) {
+<b class="nc">&nbsp;		super();</b>
+<b class="nc">&nbsp;		this.mappedClass = mappedClass;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OpenmrsMetadataDAO#getAll(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;T&gt; getAll(boolean includeRetired) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;T&gt; cq = cb.createQuery(mappedClass);</b>
+<b class="nc">&nbsp;		Root&lt;T&gt; root = cq.from(mappedClass);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OpenmrsMetadataDAO#getAll(boolean, java.lang.Integer, java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;T&gt; getAll(boolean includeRetired, Integer firstResult, Integer maxResults) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;T&gt; cq = cb.createQuery(mappedClass);</b>
+<b class="nc">&nbsp;		Root&lt;T&gt; root = cq.from(mappedClass);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		TypedQuery&lt;T&gt; query = session.createQuery(cq);</b>
+<b class="nc">&nbsp;		if (firstResult != null) {</b>
+<b class="nc">&nbsp;			query.setFirstResult(firstResult);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (maxResults != null) {</b>
+<b class="nc">&nbsp;			query.setMaxResults(maxResults);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.OpenmrsMetadataDAO#getAllCount(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int getAllCount(boolean includeRetired) {
+&nbsp;		
+<b class="nc">&nbsp;		String hql = &quot;select count(*)&quot; + &quot; from &quot; + mappedClass;</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			hql += &quot; where retired = false&quot;;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(hql);</b>
+&nbsp;		
+<b class="nc">&nbsp;		Number count = JpaUtils.getSingleResultOrNull(query);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return count == null ? 0 : count.intValue();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

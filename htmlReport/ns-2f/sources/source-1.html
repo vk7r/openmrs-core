@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonMergeLog</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.person</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonMergeLog (org.openmrs.person)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonMergeLog</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PersonMergeLog$HibernateProxy$29cJpvbW</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.person;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.BaseChangeableOpenmrsData;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.api.PersonService;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class represents the audit of a merge of two persons. It provides as much details as
+&nbsp; * possible to allow potential recovery from an erroneous merge. The preferred &lt;code&gt;Person&lt;/code&gt;
+&nbsp; * is represented by {@link #getWinner()}, the non-preferred &lt;code&gt;Person&lt;/code&gt; by
+&nbsp; * {@link #getLoser()} and the the &lt;code&gt;User&lt;/code&gt; who performed the merged by
+&nbsp; * {@link #getCreator()}. The details of the merge is represented in XML and stored in
+&nbsp; * {@link #getPersonMergeLogData()}.
+&nbsp; * 
+&nbsp; * @see PersonMergeLogData
+&nbsp; * @see PersonService#savePersonMergeLog(PersonMergeLog)
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Audited
+<b class="fc">&nbsp;public class PersonMergeLog extends BaseChangeableOpenmrsData {</b>
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The unique identifier of the person merge log entity
+&nbsp;	 */
+&nbsp;	private Integer personMergeLogId;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The object representing the preferred person of the merge
+&nbsp;	 */
+&nbsp;	private Person winner;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The object representing the non-preferred person of the merge
+&nbsp;	 */
+&nbsp;	private Person loser;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * serialized data representing the details of the merge
+&nbsp;	 */
+&nbsp;	private String serializedMergedData;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * object representing the deserialized form of the merge data. This field is not directly
+&nbsp;	 * mapped to the database.
+&nbsp;	 */
+&nbsp;	private transient PersonMergeLogData personMergeLogData;
+&nbsp;	
+&nbsp;	public Integer getPersonMergeLogId() {
+<b class="fc">&nbsp;		return personMergeLogId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonMergeLogId(Integer personMergeLogId) {
+<b class="fc">&nbsp;		this.personMergeLogId = personMergeLogId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Person getWinner() {
+<b class="fc">&nbsp;		return winner;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setWinner(Person winner) {
+<b class="fc">&nbsp;		this.winner = winner;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Person getLoser() {
+<b class="fc">&nbsp;		return loser;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setLoser(Person loser) {
+<b class="fc">&nbsp;		this.loser = loser;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getSerializedMergedData() {
+<b class="fc">&nbsp;		return serializedMergedData;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setSerializedMergedData(String serializedMergedData) {
+<b class="fc">&nbsp;		this.serializedMergedData = serializedMergedData;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public PersonMergeLogData getPersonMergeLogData() {
+<b class="fc">&nbsp;		return personMergeLogData;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPersonMergeLogData(PersonMergeLogData personMergeLogData) {
+<b class="fc">&nbsp;		this.personMergeLogData = personMergeLogData;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setPersonMergeLogId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getPersonMergeLogId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

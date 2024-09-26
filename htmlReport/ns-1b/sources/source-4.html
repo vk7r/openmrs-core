@@ -1,0 +1,305 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsLoggingUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logging</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsLoggingUtil (org.openmrs.logging)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsLoggingUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    59,7%
+  </span>
+  <span class="absValue">
+    (37/62)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logging;
+&nbsp;
+&nbsp;import java.nio.file.Paths;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.logging.log4j.Level;
+&nbsp;import org.apache.logging.log4j.LogManager;
+&nbsp;import org.apache.logging.log4j.core.Appender;
+&nbsp;import org.apache.logging.log4j.core.Logger;
+&nbsp;import org.apache.logging.log4j.core.LoggerContext;
+&nbsp;import org.apache.logging.log4j.core.appender.AbstractFileAppender;
+&nbsp;import org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender;
+&nbsp;import org.apache.logging.log4j.core.appender.FileAppender;
+&nbsp;import org.apache.logging.log4j.core.appender.MemoryMappedFileAppender;
+&nbsp;import org.apache.logging.log4j.core.appender.RandomAccessFileAppender;
+&nbsp;import org.apache.logging.log4j.core.appender.RollingFileAppender;
+&nbsp;import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
+&nbsp;import org.apache.logging.log4j.core.config.LoggerConfig;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility methods related to logging.
+&nbsp; * In general, module-level code should likely only call {@link #getMemoryAppender()} and
+&nbsp; * {@link #getOpenmrsLogLocation()}, however, the methods to update loggers are also exposed if necessary.
+&nbsp; *
+&nbsp; * @since 2.4.4, 2.5.1, 2.6.0
+&nbsp; */
+&nbsp;public final class OpenmrsLoggingUtil {
+&nbsp;	
+<b class="fc">&nbsp;	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OpenmrsLoggingUtil.class);</b>
+&nbsp;	
+&nbsp;	private OpenmrsLoggingUtil() {
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the in-memory log appender. This method needed to be added as it is much more difficult to
+&nbsp;	 * get a specific appender in the Log4J2 architecture. This method is called in places where we need
+&nbsp;	 * to display logging message.
+&nbsp;	 *
+&nbsp;	 * @since 2.4.4, 2.5.1, 2.6.0
+&nbsp;	 */
+&nbsp;	@Logging(ignore = true)
+&nbsp;	public static MemoryAppender getMemoryAppender() {
+<b class="nc">&nbsp;		MemoryAppender memoryAppender = ((LoggerContext) LogManager.getContext(true)).getConfiguration()</b>
+<b class="nc">&nbsp;			.getAppender(OpenmrsConstants.MEMORY_APPENDER_NAME);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (memoryAppender != null &amp;&amp; !memoryAppender.isStarted()) {</b>
+<b class="nc">&nbsp;			memoryAppender.start();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return memoryAppender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the location of the OpenMRS log file.
+&nbsp;	 * &lt;p/&gt;
+&nbsp;	 * &lt;strong&gt;Warning:&lt;/strong&gt; the result of this call can return null if either the file appender uses a name other than
+&nbsp;	 * {@link OpenmrsConstants#LOG_OPENMRS_FILE_APPENDER} or if the appender with that name is not one of the default log4j2
+&nbsp;	 * file appending types.
+&nbsp;	 *
+&nbsp;	 * @return the path to the OpenMRS log file
+&nbsp;	 * */
+&nbsp;	public static String getOpenmrsLogLocation() {
+<b class="nc">&nbsp;		Appender fileAppender = ((LoggerContext) LogManager.getRootLogger()).getConfiguration()</b>
+<b class="nc">&nbsp;			.getAppender(OpenmrsConstants.LOG_OPENMRS_FILE_APPENDER);</b>
+&nbsp;		
+<b class="nc">&nbsp;		String fileName = null;</b>
+<b class="nc">&nbsp;		if (fileAppender instanceof AbstractOutputStreamAppender) {</b>
+<b class="nc">&nbsp;			if (fileAppender instanceof RollingFileAppender) {</b>
+<b class="nc">&nbsp;				fileName = ((RollingFileAppender) fileAppender).getFileName();</b>
+<b class="nc">&nbsp;			} else if (fileAppender instanceof FileAppender) {</b>
+<b class="nc">&nbsp;				fileName = ((FileAppender) fileAppender).getFileName();</b>
+<b class="nc">&nbsp;			} else if (fileAppender instanceof MemoryMappedFileAppender) {</b>
+<b class="nc">&nbsp;				fileName = ((MemoryMappedFileAppender) fileAppender).getFileName();</b>
+<b class="nc">&nbsp;			} else if (fileAppender instanceof RollingRandomAccessFileAppender) {</b>
+<b class="nc">&nbsp;				fileName = ((RollingRandomAccessFileAppender) fileAppender).getFileName();</b>
+<b class="nc">&nbsp;			} else if (fileAppender instanceof RandomAccessFileAppender) {</b>
+<b class="nc">&nbsp;				fileName = ((RandomAccessFileAppender) fileAppender).getFileName();</b>
+<b class="nc">&nbsp;			} else if (fileAppender instanceof AbstractFileAppender) {</b>
+<b class="nc">&nbsp;				fileName = ((AbstractFileAppender&lt;?&gt;) fileAppender).getFileName();</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return fileName == null ? null : Paths.get(&quot;&quot;, fileName).toAbsolutePath().toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the org.openmrs Log4J logger&#39;s level if global property log.level.openmrs (
+&nbsp;	 * OpenmrsConstants.GLOBAL_PROPERTY_LOG_LEVEL ) exists. Valid values for global property are
+&nbsp;	 * trace, debug, info, warn, error or fatal.
+&nbsp;	 */
+&nbsp;	@Logging(ignore = true)
+&nbsp;	public static void applyLogLevels() {
+<b class="fc">&nbsp;		String logLevel = Context.getAdministrationService()</b>
+<b class="fc">&nbsp;			.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOG_LEVEL, &quot;&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		synchronized (OpenmrsLoggingUtil.class) {</b>
+<b class="fc">&nbsp;			for (String level : logLevel.split(&quot;,&quot;)) {</b>
+<b class="fc">&nbsp;				String[] classAndLevel = level.split(&quot;:&quot;);</b>
+<b class="fc">&nbsp;				if (classAndLevel.length == 0) {</b>
+<b class="nc">&nbsp;					break;</b>
+<b class="fc">&nbsp;				} else if (classAndLevel.length == 1) {</b>
+<b class="fc">&nbsp;					applyLogLevelInternal(OpenmrsConstants.LOG_CLASS_DEFAULT, classAndLevel[0].trim());</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					applyLogLevelInternal(classAndLevel[0].trim(), classAndLevel[1].trim());</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+&nbsp;			// DO NOT USE LogManager#getContext() here as this might reset the logger context
+<b class="fc">&nbsp;			((Logger) LogManager.getRootLogger()).getContext().updateLoggers();</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the log4j log level for class &lt;code&gt;logClass&lt;/code&gt; to &lt;code&gt;logLevel&lt;/code&gt;.
+&nbsp;	 *
+&nbsp;	 * @param logClass optional string giving the class level to change. Defaults to
+&nbsp;	 *                 {@link OpenmrsConstants#LOG_CLASS_DEFAULT} . Should be something like org.openmrs.___
+&nbsp;	 * @param logLevel one of &lt;tt&gt;OpenmrsConstants.LOG_LEVEL_*&lt;/tt&gt; constants
+&nbsp;	 */
+&nbsp;	public static void applyLogLevel(String logClass, String logLevel) {
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(logLevel)) {</b>
+<b class="fc">&nbsp;			synchronized (OpenmrsLoggingUtil.class) {</b>
+<b class="fc">&nbsp;				applyLogLevelInternal(logClass, logLevel);</b>
+&nbsp;				// DO NOT USE LogManager#getContext() here as this might reset the logger context
+<b class="fc">&nbsp;				((Logger) LogManager.getRootLogger()).getContext().updateLoggers();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method is the implementation of applying a level to a logger. It is intended to be called in an
+&nbsp;	 * already synchronized context. Note these changes will only be applied once a call to
+&nbsp;	 * {@link LoggerContext#updateLoggers()} is made.
+&nbsp;	 *
+&nbsp;	 * @param logClass optional string giving the class level to change. Defaults to
+&nbsp;	 *                 *            OpenmrsConstants.LOG_CLASS_DEFAULT . Should be something like org.openmrs.___
+&nbsp;	 * @param logLevel one of OpenmrsConstants.LOG_LEVEL_* constants
+&nbsp;	 */
+&nbsp;	private static void applyLogLevelInternal(String logClass, String logLevel) {
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(logLevel)) {</b>
+&nbsp;			// the default log class is org.openmrs.api
+<b class="fc">&nbsp;			if (StringUtils.isEmpty(logClass)) {</b>
+<b class="fc">&nbsp;				logClass = OpenmrsConstants.LOG_CLASS_DEFAULT;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// DO NOT USE LogManager#getContext() here as this will reset the logger context
+<b class="fc">&nbsp;			LoggerContext context = ((Logger) LogManager.getRootLogger()).getContext();</b>
+<b class="fc">&nbsp;			LoggerConfig configuration = context.getConfiguration().getLoggerConfig(logClass);</b>
+&nbsp;			
+<b class="fc">&nbsp;			logLevel = logLevel.toLowerCase();</b>
+<b class="fc">&nbsp;			switch (logLevel) {</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_TRACE:
+<b class="fc">&nbsp;					configuration.setLevel(Level.TRACE);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_DEBUG:
+<b class="fc">&nbsp;					configuration.setLevel(Level.DEBUG);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_INFO:
+<b class="fc">&nbsp;					configuration.setLevel(Level.INFO);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_WARN:
+<b class="fc">&nbsp;					configuration.setLevel(Level.WARN);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_ERROR:
+<b class="fc">&nbsp;					configuration.setLevel(Level.ERROR);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case OpenmrsConstants.LOG_LEVEL_FATAL:
+<b class="fc">&nbsp;					configuration.setLevel(Level.FATAL);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				default:
+<b class="fc">&nbsp;					log.warn(&quot;Log level {} is invalid. &quot; +</b>
+&nbsp;						&quot;Valid values are trace, debug, info, warn, error or fatal&quot;, logLevel);
+&nbsp;					break;
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Reloads the logging configuration
+&nbsp;	 */
+&nbsp;	public static void reloadLoggingConfiguration() {
+&nbsp;		// Works, but it might be necessary to verify this in the future
+<b class="nc">&nbsp;		((LoggerContext) LogManager.getContext(true)).reconfigure();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

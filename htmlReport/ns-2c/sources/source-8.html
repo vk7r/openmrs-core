@@ -1,0 +1,295 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VisitSearchCriteriaBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.parameter</a>
+</div>
+
+<h1>Coverage Summary for Class: VisitSearchCriteriaBuilder (org.openmrs.parameter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VisitSearchCriteriaBuilder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (7/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (14/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.parameter;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.VisitAttributeType;
+&nbsp;import org.openmrs.VisitType;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * A builder class for constructing instances of {@link VisitSearchCriteria}.
+&nbsp; * This builder allows for the flexible creation of {@link VisitSearchCriteria}
+&nbsp; * objects by providing a simple interface to set various fields.
+&nbsp; * 
+&nbsp; * @since 2.6.8
+&nbsp; * @since 2.7.0
+&nbsp; */
+&nbsp;public class VisitSearchCriteriaBuilder {
+&nbsp;	
+&nbsp;	private Collection&lt;VisitType&gt; visitTypes;
+&nbsp;	private Collection&lt;Patient&gt; patients;
+&nbsp;	private Collection&lt;Location&gt; locations;
+&nbsp;	private Collection&lt;Concept&gt; indications;
+&nbsp;	private Date minStartDatetime;
+&nbsp;	private Date maxStartDatetime;
+&nbsp;	private Date minEndDatetime;
+&nbsp;	private Date maxEndDatetime;
+&nbsp;	private Map&lt;VisitAttributeType, String&gt; serializedAttributeValues;
+<b class="fc">&nbsp;	private boolean includeInactive = true;</b>
+<b class="fc">&nbsp;	private boolean includeVoided = false;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructs a new {@link VisitSearchCriteriaBuilder} instance.
+&nbsp;	 */
+<b class="fc">&nbsp;	public VisitSearchCriteriaBuilder() {}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the visit types to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param visitTypes the collection of {@link VisitType} to include.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder visitTypes(Collection&lt;VisitType&gt; visitTypes) {
+<b class="nc">&nbsp;		this.visitTypes = visitTypes;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the patients to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param patients the collection of {@link Patient} to include.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder patients(Collection&lt;Patient&gt; patients) {
+<b class="nc">&nbsp;		this.patients = patients;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets a single patient to include in the search criteria.
+&nbsp;	 * 
+&nbsp;	 * @param patient the {@link Patient} to include.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder patient(Patient patient){
+<b class="fc">&nbsp;		this.patients = Collections.singletonList(patient);</b>
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the locations to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param locations the collection of {@link Location} to include.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder locations(Collection&lt;Location&gt; locations) {
+<b class="nc">&nbsp;		this.locations = locations;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the indications to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param indications the collection of {@link Concept} to include.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder indications(Collection&lt;Concept&gt; indications) {
+<b class="nc">&nbsp;		this.indications = indications;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the minimum start datetime for visits to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param minStartDatetime the minimum start {@link Date}.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder minStartDatetime(Date minStartDatetime) {
+<b class="nc">&nbsp;		this.minStartDatetime = minStartDatetime;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the maximum start datetime for visits to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param maxStartDatetime the maximum start {@link Date}.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder maxStartDatetime(Date maxStartDatetime) {
+<b class="fc">&nbsp;		this.maxStartDatetime = maxStartDatetime;</b>
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the minimum end datetime for visits to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param minEndDatetime the minimum end {@link Date}.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder minEndDatetime(Date minEndDatetime) {
+<b class="fc">&nbsp;		this.minEndDatetime = minEndDatetime;</b>
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the maximum end datetime for visits to include in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param maxEndDatetime the maximum end {@link Date}.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder maxEndDatetime(Date maxEndDatetime) {
+<b class="nc">&nbsp;		this.maxEndDatetime = maxEndDatetime;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the serialized attribute values to filter visits by in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param serializedAttributeValues a map of {@link VisitAttributeType} to their corresponding serialized values.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder serializedAttributeValues(Map&lt;VisitAttributeType, String&gt; serializedAttributeValues) {
+<b class="nc">&nbsp;		this.serializedAttributeValues = serializedAttributeValues;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets whether inactive visits should be included in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param includeInactive true to include inactive visits, false otherwise.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder includeInactive(boolean includeInactive) {
+<b class="fc">&nbsp;		this.includeInactive = includeInactive;</b>
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets whether voided visits should be included in the search criteria.
+&nbsp;	 *
+&nbsp;	 * @param includeVoided true to include voided visits, false otherwise.
+&nbsp;	 * @return the current instance of {@link VisitSearchCriteriaBuilder} for method chaining.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteriaBuilder includeVoided(boolean includeVoided) {
+<b class="fc">&nbsp;		this.includeVoided = includeVoided;</b>
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Builds and returns a {@link VisitSearchCriteria} instance based on the current state of the builder.
+&nbsp;	 *
+&nbsp;	 * @return a new instance of {@link VisitSearchCriteria}.
+&nbsp;	 */
+&nbsp;	public VisitSearchCriteria build() {
+<b class="fc">&nbsp;		return new VisitSearchCriteria(visitTypes, patients, locations, indications, minStartDatetime, maxStartDatetime,</b>
+&nbsp;			minEndDatetime, maxEndDatetime, serializedAttributeValues, includeInactive, includeVoided);
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

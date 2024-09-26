@@ -1,0 +1,318 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderSetServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderSetServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderSetServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,2%
+  </span>
+  <span class="absValue">
+    (33/37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.OrderSet;
+&nbsp;import org.openmrs.OrderSetAttribute;
+&nbsp;import org.openmrs.OrderSetAttributeType;
+&nbsp;import org.openmrs.OrderSetMember;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.OrderSetService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.OrderSetDAO;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+<b class="fc">&nbsp;public class OrderSetServiceImpl extends BaseOpenmrsService implements OrderSetService {</b>
+&nbsp;	
+&nbsp;	protected OrderSetDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#setOrderSetDAO(org.openmrs.api.db.OrderSetDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setOrderSetDAO(OrderSetDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public OrderSet saveOrderSet(OrderSet orderSet) throws APIException {
+<b class="fc">&nbsp;		return saveOrderSetInternal(orderSet);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#retireOrderSet(OrderSet, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public OrderSet retireOrderSet(OrderSet orderSet, String retireReason) throws APIException {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(retireReason)) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;retire reason cannot be empty or null&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		for (OrderSetMember orderSetMember : orderSet.getOrderSetMembers()) {</b>
+<b class="fc">&nbsp;			orderSet.retireOrderSetMember(orderSetMember);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return saveOrderSetInternal(orderSet);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#unretireOrderSet(OrderSet)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public OrderSet unretireOrderSet(OrderSet orderSet) throws APIException {
+<b class="nc">&nbsp;		return saveOrderSetInternal(orderSet);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#saveOrderSet(OrderSet)
+&nbsp;	 */
+&nbsp;	private synchronized OrderSet saveOrderSetInternal(OrderSet orderSet) throws APIException {
+<b class="fc">&nbsp;		if (CollectionUtils.isEmpty(orderSet.getOrderSetMembers())) {</b>
+&nbsp;			// Why do we have to do this?
+<b class="nc">&nbsp;			CustomDatatypeUtil.saveAttributesIfNecessary(orderSet);</b>
+<b class="nc">&nbsp;			return dao.save(orderSet);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		for (OrderSetMember orderSetMember : orderSet.getOrderSetMembers()) {</b>
+<b class="fc">&nbsp;			if (null == orderSetMember.getOrderSet()) {</b>
+<b class="fc">&nbsp;				orderSetMember.setOrderSet(orderSet);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		for (OrderSetMember orderSetMember : orderSet.getOrderSetMembers()) {</b>
+<b class="fc">&nbsp;			if (orderSetMember.getRetired()) {</b>
+<b class="fc">&nbsp;				orderSetMember.setRetiredBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;				orderSetMember.setDateRetired(new Date());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// Why do we have to do this?
+<b class="fc">&nbsp;		CustomDatatypeUtil.saveAttributesIfNecessary(orderSet);</b>
+<b class="fc">&nbsp;		return dao.save(orderSet);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSets(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;OrderSet&gt; getOrderSets(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getOrderSets(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSet(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSet getOrderSet(Integer orderSetId) throws APIException {
+<b class="fc">&nbsp;		return dao.getOrderSetById(orderSetId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSetByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSet getOrderSetByUuid(String orderSetUuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getOrderSetByUniqueUuid(orderSetUuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSetMemberByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSetMember getOrderSetMemberByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getOrderSetMemberByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getAllOrderSetAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;OrderSetAttributeType&gt; getAllOrderSetAttributeTypes() {
+<b class="fc">&nbsp;		return dao.getAllOrderSetAttributeTypes();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSetAttributeType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSetAttributeType getOrderSetAttributeType(Integer id) {
+<b class="fc">&nbsp;		return dao.getOrderSetAttributeType(id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSetAttributeTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSetAttributeType getOrderSetAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getOrderSetAttributeTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#saveOrderSetAttributeType(org.openmrs.OrderSetAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public OrderSetAttributeType saveOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType) {
+<b class="fc">&nbsp;		return dao.saveOrderSetAttributeType(orderSetAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#retireOrderSetAttributeType(org.openmrs.OrderSetAttributeType,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public OrderSetAttributeType retireOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType,
+&nbsp;			String reason) {
+<b class="fc">&nbsp;		return dao.saveOrderSetAttributeType(orderSetAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#unretireOrderSetAttributeType(org.openmrs.OrderSetAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public OrderSetAttributeType unretireOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType) {
+<b class="fc">&nbsp;		return Context.getOrderSetService().saveOrderSetAttributeType(orderSetAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#purgeOrderSetAttributeType(org.openmrs.OrderSetAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = false)
+&nbsp;	public void purgeOrderSetAttributeType(OrderSetAttributeType orderSetAttributeType) {
+<b class="fc">&nbsp;		dao.deleteOrderSetAttributeType(orderSetAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSetAttributeTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSetAttributeType getOrderSetAttributeTypeByName(String name) {
+<b class="fc">&nbsp;		return dao.getOrderSetAttributeTypeByName(name);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderSetService#getOrderSetAttributeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public OrderSetAttribute getOrderSetAttributeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getOrderSetAttributeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

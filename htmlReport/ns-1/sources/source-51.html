@@ -1,0 +1,340 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderSet (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,2%
+  </span>
+  <span class="absValue">
+    (15/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,4%
+  </span>
+  <span class="absValue">
+    (32/35)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OrderSet$HibernateProxy$Wr9OOBFo</td>
+  </tr>
+  <tr>
+    <td class="name">OrderSet$Operator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    89,5%
+  </span>
+  <span class="absValue">
+    (17/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,9%
+  </span>
+  <span class="absValue">
+    (34/37)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents the grouping of orders into a set,
+&nbsp; * so as to give decision support for the doctors
+&nbsp; * 
+&nbsp; * @since 1.12
+&nbsp; */
+&nbsp;@Audited
+<b class="fc">&nbsp;public class OrderSet extends BaseCustomizableMetadata&lt;OrderSetAttribute&gt; {</b>
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 72232L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Restrictions put on saving an orderSet.
+&nbsp;	 * ALL: All the members of the orderSet need to be selected for saving
+&nbsp;	 * ONE: Only one of the member of the orderSet needs to be selected for saving
+&nbsp;	 * ANY: Any of the members of the orderSet can be selected for saving
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum Operator {</b>
+<b class="fc">&nbsp;		ALL, ONE, ANY</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Integer orderSetId;
+&nbsp;	
+&nbsp;	private Operator operator;
+&nbsp;	
+&nbsp;	private List&lt;OrderSetMember&gt; orderSetMembers;
+&nbsp;	
+&nbsp;	private Concept category;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the orderSetId
+&nbsp;	 *
+&nbsp;	 * @return the orderSetId
+&nbsp;	 */
+&nbsp;	public Integer getOrderSetId() {
+<b class="fc">&nbsp;		return orderSetId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the orderSetId
+&nbsp;	 *
+&nbsp;	 * @param orderSetId the orderSetId to set
+&nbsp;	 */
+&nbsp;	public void setOrderSetId(Integer orderSetId) {
+<b class="fc">&nbsp;		this.orderSetId = orderSetId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the operator
+&nbsp;	 *
+&nbsp;	 * @return the operator
+&nbsp;	 */
+&nbsp;	public Operator getOperator() {
+<b class="fc">&nbsp;		return operator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the operator
+&nbsp;	 *
+&nbsp;	 * @param operator the operator to set
+&nbsp;	 */
+&nbsp;	public void setOperator(Operator operator) {
+<b class="fc">&nbsp;		this.operator = operator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the orderSetMembers
+&nbsp;	 *
+&nbsp;	 * @return the orderSetMembers
+&nbsp;	 */
+&nbsp;	public List&lt;OrderSetMember&gt; getOrderSetMembers() {
+<b class="fc">&nbsp;		if (orderSetMembers == null) {</b>
+<b class="nc">&nbsp;			orderSetMembers = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return orderSetMembers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the orderSetMembers
+&nbsp;	 *
+&nbsp;	 * @param orderSetMembers the orderSetMembers to set
+&nbsp;	 */
+&nbsp;	public void setOrderSetMembers(List&lt;OrderSetMember&gt; orderSetMembers) {
+<b class="fc">&nbsp;		this.orderSetMembers = orderSetMembers;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the category
+&nbsp;	 *
+&nbsp;	 * @return the category
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public Concept getCategory () {
+<b class="fc">&nbsp;		return category;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the category
+&nbsp;	 *
+&nbsp;	 * @param category category to set
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public void setCategory(Concept category) {
+<b class="fc">&nbsp;		this.category = category;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds an orderSetMember to the existing list of orderSetMembers
+&nbsp;	 * 
+&nbsp;	 * @param orderSetMember the new orderSetMember to be added
+&nbsp;	 * @param position the position where it is to be added, if position is null it adds to the last position 
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public void addOrderSetMember(OrderSetMember orderSetMember, Integer position) {
+<b class="fc">&nbsp;		Integer listIndex = findListIndexForGivenPosition(position);</b>
+<b class="fc">&nbsp;		orderSetMember.setOrderSet(this);</b>
+<b class="fc">&nbsp;		getOrderSetMembers().add(listIndex, orderSetMember);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Integer findListIndexForGivenPosition(Integer position) {
+<b class="fc">&nbsp;		Integer size = getOrderSetMembers().size();</b>
+<b class="fc">&nbsp;		if (position != null) {</b>
+<b class="fc">&nbsp;			if (position &lt; 0 &amp;&amp; position &gt;= (-1 - size)) {</b>
+<b class="fc">&nbsp;				position = position + size + 1;</b>
+<b class="fc">&nbsp;			} else if (position &gt; size) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;Cannot add a member which is out of range of the list&quot;);</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			position = size;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return position;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds an orderSetMember to the existing list of orderSetMembers
+&nbsp;	 *
+&nbsp;	 * @param orderSetMember the new orderSetMember to be added at the end of the current list of order set members
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public void addOrderSetMember(OrderSetMember orderSetMember) {
+<b class="nc">&nbsp;		this.addOrderSetMember(orderSetMember, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getOrderSetId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setOrderSetId(id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fetches the list of orderSetMembers that are not retired
+&nbsp;	 *
+&nbsp;	 * @return the orderSetMembers that are not retired
+&nbsp;	 */
+&nbsp;	public List&lt;OrderSetMember&gt; getUnRetiredOrderSetMembers() {
+<b class="fc">&nbsp;		List&lt;OrderSetMember&gt; osm = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (OrderSetMember orderSetMember : getOrderSetMembers()) {</b>
+<b class="fc">&nbsp;			if (!orderSetMember.getRetired()) {</b>
+<b class="fc">&nbsp;				osm.add(orderSetMember);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return osm;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Removes and orderSetMember from a list of existing orderSetMembers
+&nbsp;	 *
+&nbsp;	 * @param orderSetMember that is to be removed
+&nbsp;	 */
+&nbsp;	public void removeOrderSetMember(OrderSetMember orderSetMember) {
+<b class="fc">&nbsp;		if (getOrderSetMembers().contains(orderSetMember)) {</b>
+<b class="fc">&nbsp;			getOrderSetMembers().remove(orderSetMember);</b>
+<b class="fc">&nbsp;			orderSetMember.setOrderSet(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Retires an orderSetMember
+&nbsp;	 *
+&nbsp;	 * @param orderSetMember to be retired
+&nbsp;	 */
+&nbsp;	public void retireOrderSetMember(OrderSetMember orderSetMember) {
+<b class="fc">&nbsp;		orderSetMember.setRetired(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

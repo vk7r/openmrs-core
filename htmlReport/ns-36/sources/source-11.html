@@ -1,0 +1,337 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HandlerUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: HandlerUtil (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HandlerUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (39/42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">HandlerUtil$Key</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,6%
+  </span>
+  <span class="absValue">
+    (16/23)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (55/65)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.WeakHashMap;
+&nbsp;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.context.ApplicationListener;
+&nbsp;import org.springframework.context.event.ContextRefreshedEvent;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility class that provides useful methods for working with classes that are annotated with the
+&nbsp; * {@link Handler} annotation
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class HandlerUtil implements ApplicationListener&lt;ContextRefreshedEvent&gt; {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HandlerUtil.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static volatile Map&lt;Key, List&lt;?&gt;&gt; cachedHandlers = new WeakHashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	private static class Key {
+&nbsp;		
+&nbsp;		public final Class&lt;?&gt; handlerType;
+&nbsp;		
+&nbsp;		public final Class&lt;?&gt; type;
+&nbsp;		
+<b class="fc">&nbsp;		public Key(Class&lt;?&gt; handlerType, Class&lt;?&gt; type) {</b>
+<b class="fc">&nbsp;			this.handlerType = handlerType;</b>
+<b class="fc">&nbsp;			this.type = type;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public int hashCode() {
+<b class="fc">&nbsp;			final int prime = 31;</b>
+<b class="fc">&nbsp;			int result = 1;</b>
+<b class="fc">&nbsp;			result = prime * result + ((handlerType == null) ? 0 : handlerType.hashCode());</b>
+<b class="fc">&nbsp;			result = prime * result + ((type == null) ? 0 : type.hashCode());</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public boolean equals(Object obj) {
+<b class="fc">&nbsp;			if (this == obj) {</b>
+<b class="nc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (obj == null) {</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (getClass() != obj.getClass()) {</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			Key other = (Key) obj;</b>
+<b class="fc">&nbsp;			if (handlerType == null) {</b>
+<b class="nc">&nbsp;				if (other.handlerType != null) {</b>
+<b class="nc">&nbsp;					return false;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			} else if (!handlerType.equals(other.handlerType)) {</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (type == null) {</b>
+<b class="nc">&nbsp;				return other.type == null;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				return type.equals(other.type);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void clearCachedHandlers() {
+<b class="fc">&nbsp;		cachedHandlers = new WeakHashMap&lt;&gt;();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a List of all registered components from the Context that are of the passed
+&nbsp;	 * handlerType and one or more of the following is true:
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;The handlerType is annotated as a {@link Handler} that supports the passed type&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;The passed type is null - this effectively returns all components of the passed
+&nbsp;	 * handlerType&lt;/li&gt;
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * The returned handlers are ordered in the list based upon the order property.
+&nbsp;	 * 
+&nbsp;	 * @param handlerType Indicates the type of class to return
+&nbsp;	 * @param type Indicates the type that the given handlerType must support (or null for any)
+&nbsp;	 * @return a List of all matching Handlers for the given parameters, ordered by Handler#order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a list of all classes that can handle the passed type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return classes registered in a module
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return an empty list if no classes can handle the passed type
+&nbsp;	 */
+&nbsp;	public static &lt;H, T&gt; List&lt;H&gt; getHandlersForType(Class&lt;H&gt; handlerType, Class&lt;T&gt; type) {
+<b class="fc">&nbsp;		List&lt;?&gt; list = cachedHandlers.get(new Key(handlerType, type));</b>
+<b class="fc">&nbsp;		if (list != null) {</b>
+<b class="fc">&nbsp;			return (List&lt;H&gt;) list;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;H&gt; handlers = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+&nbsp;		// First get all registered components of the passed class
+<b class="fc">&nbsp;		log.debug(&quot;Getting handlers of type &quot; + handlerType + (type == null ? &quot;&quot; : &quot; for class &quot; + type.getName()));</b>
+<b class="fc">&nbsp;		for (H handler : Context.getRegisteredComponents(handlerType)) {</b>
+<b class="fc">&nbsp;			Handler handlerAnnotation = handler.getClass().getAnnotation(Handler.class);</b>
+&nbsp;			// Only consider those that have been annotated as Handlers
+<b class="fc">&nbsp;			if (handlerAnnotation != null) {</b>
+&nbsp;				// If no type is passed in return all handlers
+<b class="fc">&nbsp;				if (type == null) {</b>
+<b class="fc">&nbsp;					log.debug(&quot;Found handler &quot; + handler.getClass());</b>
+<b class="fc">&nbsp;					handlers.add(handler);</b>
+&nbsp;				}
+&nbsp;				// Otherwise, return all handlers that support the passed type
+&nbsp;				else {
+<b class="fc">&nbsp;					for (int i = 0; i &lt; handlerAnnotation.supports().length; i++) {</b>
+<b class="fc">&nbsp;						Class&lt;?&gt; clazz = handlerAnnotation.supports()[i];</b>
+<b class="fc">&nbsp;						if (clazz.isAssignableFrom(type)) {</b>
+<b class="fc">&nbsp;							log.debug(&quot;Found handler: &quot; + handler.getClass());</b>
+<b class="fc">&nbsp;							handlers.add(handler);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// Return the list of handlers based on the order specified in the Handler annotation
+<b class="fc">&nbsp;		handlers.sort(Comparator.comparing(o -&gt; getOrderOfHandler(o.getClass())));</b>
+&nbsp;		
+<b class="fc">&nbsp;		Map&lt;Key, List&lt;?&gt;&gt; newCachedHandlers = new WeakHashMap&lt;&gt;(cachedHandlers);</b>
+<b class="fc">&nbsp;		newCachedHandlers.put(new Key(handlerType, type), handlers);</b>
+<b class="fc">&nbsp;		cachedHandlers = newCachedHandlers;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return handlers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves the preferred Handler for a given handlerType and type. A &lt;em&gt;preferred&lt;/em&gt;
+&nbsp;	 * handler is the Handler that has the lowest defined &lt;em&gt;order&lt;/em&gt; attribute in it&#39;s
+&nbsp;	 * annotation. If multiple Handlers are found for the passed parameters at the lowest specified
+&nbsp;	 * order, then an APIException is thrown.
+&nbsp;	 * 
+&nbsp;	 * @param handlerType the class that is an annotated {@link Handler} to retrieve
+&nbsp;	 * @param type the class that the annotated {@link Handler} must support
+&nbsp;	 * @return the class of the passed handlerType with the lowest configured order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the preferred handler for the passed handlerType and type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw a APIException if no handler is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw a APIException if multiple preferred handlers are found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should return patient validator for patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; should return person validator for person
+&nbsp;	 */
+&nbsp;	public static &lt;H, T&gt; H getPreferredHandler(Class&lt;H&gt; handlerType, Class&lt;T&gt; type) {
+&nbsp;		
+<b class="fc">&nbsp;		if (handlerType == null || type == null) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;You must specify both a handlerType and a type&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		List&lt;H&gt; handlers = getHandlersForType(handlerType, type);</b>
+<b class="fc">&nbsp;		if (handlers == null || handlers.isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;handler.type.not.found&quot;, new Object[] { handlerType, type });</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (handlers.size() &gt; 1) {</b>
+<b class="fc">&nbsp;			int order1 = getOrderOfHandler(handlers.get(0).getClass());</b>
+<b class="fc">&nbsp;			int order2 = getOrderOfHandler(handlers.get(1).getClass());</b>
+<b class="fc">&nbsp;			if (order1 == order2) {</b>
+<b class="nc">&nbsp;				throw new APIException(&quot;handler.type.multiple&quot;, new Object[] { handlerType, type });</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return handlers.get(0);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method to return the order attribute of the {@link Handler} annotation on the passed
+&nbsp;	 * class. If the passed class does not have a {@link Handler} annotation, a RuntimeException is
+&nbsp;	 * thrown
+&nbsp;	 * 
+&nbsp;	 * @param handlerClass
+&nbsp;	 * @return the order attribute value
+&nbsp;	 */
+&nbsp;	public static Integer getOrderOfHandler(Class&lt;?&gt; handlerClass) {
+<b class="fc">&nbsp;		Handler annotation = handlerClass.getAnnotation(Handler.class);</b>
+<b class="fc">&nbsp;		if (annotation == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;class.not.annotated.as.handler&quot;, new Object[] { handlerClass });</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return annotation.order();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void onApplicationEvent(ContextRefreshedEvent event) {
+<b class="fc">&nbsp;		clearCachedHandlers();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

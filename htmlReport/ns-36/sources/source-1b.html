@@ -1,0 +1,938 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsClassLoader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsClassLoader (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsClassLoader</td>
+<td class="coverageStat">
+  <span class="percent">
+    52%
+  </span>
+  <span class="absValue">
+    (13/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40,9%
+  </span>
+  <span class="absValue">
+    (121/296)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OpenmrsClassLoader$OpenmrsClassLoaderHolder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">OpenmrsClassLoader$OpenmrsURLConnection</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    55,2%
+  </span>
+  <span class="absValue">
+    (16/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41,5%
+  </span>
+  <span class="absValue">
+    (125/301)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.lang.ref.WeakReference;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;import java.lang.reflect.Modifier;
+&nbsp;import java.net.URI;
+&nbsp;import java.net.URISyntaxException;
+&nbsp;import java.net.URL;
+&nbsp;import java.net.URLClassLoader;
+&nbsp;import java.net.URLConnection;
+&nbsp;import java.sql.Driver;
+&nbsp;import java.sql.DriverManager;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Enumeration;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.WeakHashMap;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.module.ModuleClassLoader;
+&nbsp;import org.openmrs.module.ModuleFactory;
+&nbsp;import org.openmrs.module.ModuleUtil;
+&nbsp;import org.openmrs.scheduler.SchedulerException;
+&nbsp;import org.openmrs.scheduler.SchedulerService;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import net.sf.ehcache.CacheManager;
+&nbsp;
+&nbsp;/**
+&nbsp; * This classloader knows about the current ModuleClassLoaders and will attempt to load classes from
+&nbsp; * them if needed
+&nbsp; */
+&nbsp;public class OpenmrsClassLoader extends URLClassLoader {
+&nbsp;	
+<b class="fc">&nbsp;	private static Logger log = LoggerFactory.getLogger(OpenmrsClassLoader.class);</b>
+&nbsp;	
+&nbsp;	private static File libCacheFolder;
+&nbsp;	
+<b class="fc">&nbsp;	private static boolean libCacheFolderInitialized = false;</b>
+&nbsp;	
+&nbsp;	// placeholder to hold mementos to restore
+<b class="fc">&nbsp;	private static Map&lt;String, OpenmrsMemento&gt; mementos = new WeakHashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Holds all classes that has been requested from this class loader. We use weak references so that
+&nbsp;	 * module classes can be garbage collected when modules are unloaded.
+&nbsp;	 */
+<b class="fc">&nbsp;	private Map&lt;String, WeakReference&lt;Class&lt;?&gt;&gt;&gt; cachedClasses = new ConcurrentHashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// suffix of the OpenMRS required library cache folder
+&nbsp;	private static final String LIBCACHESUFFIX = &quot;.openmrs-lib-cache&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates the instance for the OpenmrsClassLoader
+&nbsp;	 */
+&nbsp;	public OpenmrsClassLoader(ClassLoader parent) {
+<b class="fc">&nbsp;		super(new URL[0], parent);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (parent instanceof OpenmrsClassLoader) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;Parent must not be OpenmrsClassLoader nor null&quot;);</b>
+<b class="fc">&nbsp;		} else if (parent instanceof ModuleClassLoader) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;Parent must not be ModuleClassLoader&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		OpenmrsClassLoaderHolder.INSTANCE = this;</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Creating new OpenmrsClassLoader instance with parent: {}&quot;, parent);</b>
+&nbsp;		
+&nbsp;		//disable caching so the jars aren&#39;t locked
+&nbsp;		//if performance is effected, this can be disabled in favor of
+&nbsp;		//copying all opened jars to a temp location
+&nbsp;		//(ala org.apache.catalina.loader.WebappClassLoader antijarlocking)
+<b class="fc">&nbsp;		URLConnection urlConnection = new OpenmrsURLConnection();</b>
+<b class="fc">&nbsp;		urlConnection.setDefaultUseCaches(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Normal constructor. Sets this class as the parent classloader
+&nbsp;	 */
+&nbsp;	public OpenmrsClassLoader() {
+<b class="fc">&nbsp;		this(OpenmrsClassLoader.class.getClassLoader());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Private class to hold the one classloader used throughout openmrs. This is an alternative to
+&nbsp;	 * storing the instance object on {@link OpenmrsClassLoader} itself so that garbage collection
+&nbsp;	 * can happen correctly.
+&nbsp;	 */
+<b class="fc">&nbsp;	private static class OpenmrsClassLoaderHolder {</b>
+&nbsp;
+&nbsp;		private OpenmrsClassLoaderHolder() {
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		private static OpenmrsClassLoader INSTANCE = null;</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the static/singular instance of the module class loader
+&nbsp;	 *
+&nbsp;	 * @return OpenmrsClassLoader
+&nbsp;	 */
+&nbsp;	public static OpenmrsClassLoader getInstance() {
+<b class="fc">&nbsp;		if (OpenmrsClassLoaderHolder.INSTANCE == null) {</b>
+<b class="fc">&nbsp;			OpenmrsClassLoaderHolder.INSTANCE = new OpenmrsClassLoader();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return OpenmrsClassLoaderHolder.INSTANCE;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * It attempts to load classes from the module class loaders first and then
+&nbsp;	 * tries the web container class loader (parent class loader).
+&nbsp;	 * 
+&nbsp;	 * @see java.lang.ClassLoader#loadClass(java.lang.String, boolean)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; load class from cache second time
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not load class from cache if class loader has been disposed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; load class from parent first
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; load class if two module class loaders have same packages
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public synchronized Class&lt;?&gt; loadClass(String name, final boolean resolve) throws ClassNotFoundException {
+&nbsp;		// Check if the class has already been requested from this class loader
+<b class="fc">&nbsp;		Class&lt;?&gt; c = getCachedClass(name);</b>
+<b class="fc">&nbsp;		if (c == null) {</b>
+&nbsp;			// We do not try to load classes using this.findClass on purpose.
+&nbsp;			// All classes are loaded by web container or by module class loaders.
+&nbsp;			
+&nbsp;			// First try loading from modules such that we allow modules to load
+&nbsp;			// different versions of the same libraries that may already be used
+&nbsp;			// by core or the web container. An example is the chartsearch module
+&nbsp;			// which uses different versions of lucene and solr from core
+<b class="fc">&nbsp;			String packageName = StringUtils.substringBeforeLast(name, &quot;.&quot;);</b>
+<b class="fc">&nbsp;			Set&lt;ModuleClassLoader&gt; moduleClassLoaders = ModuleFactory.getModuleClassLoadersForPackage(packageName);</b>
+<b class="fc">&nbsp;			for (ModuleClassLoader moduleClassLoader : moduleClassLoaders) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					c = moduleClassLoader.loadClass(name);</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				catch (ClassNotFoundException e) {</b>
+&nbsp;					// Continue trying...
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (c == null) {</b>
+&nbsp;				// Finally try loading from web container
+<b class="fc">&nbsp;				c = getParent().loadClass(name);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			cacheClass(name, c);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (resolve) {</b>
+<b class="nc">&nbsp;			resolveClass(c);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return c;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Class&lt;?&gt; getCachedClass(String name) {
+<b class="fc">&nbsp;		WeakReference&lt;Class&lt;?&gt;&gt; ref = cachedClasses.get(name);</b>
+<b class="fc">&nbsp;		if (ref != null) {</b>
+<b class="fc">&nbsp;			Class&lt;?&gt; loadedClass = ref.get();</b>
+<b class="fc">&nbsp;			if (loadedClass == null || loadedClass.getClassLoader() == null) {</b>
+&nbsp;				// Class has been garbage collected
+<b class="fc">&nbsp;				cachedClasses.remove(name);</b>
+<b class="fc">&nbsp;				loadedClass = null;</b>
+<b class="fc">&nbsp;			} else if (loadedClass.getClassLoader() instanceof ModuleClassLoader) {</b>
+<b class="fc">&nbsp;				ModuleClassLoader moduleClassLoader = (ModuleClassLoader) loadedClass.getClassLoader();</b>
+<b class="fc">&nbsp;				if (moduleClassLoader.isDisposed()) {</b>
+&nbsp;					// Class has been unloaded
+<b class="fc">&nbsp;					cachedClasses.remove(name);</b>
+<b class="fc">&nbsp;					loadedClass = null;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			return loadedClass;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void cacheClass(String name, Class&lt;?&gt; clazz) {
+<b class="fc">&nbsp;		cachedClasses.put(name, new WeakReference&lt;&gt;(clazz));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.net.URLClassLoader#findResource(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public URL findResource(final String name) {
+<b class="fc">&nbsp;		log.trace(&quot;finding resource: {}&quot;, name);</b>
+&nbsp;		
+&nbsp;		URL result;
+<b class="fc">&nbsp;		for (ModuleClassLoader classLoader : ModuleFactory.getModuleClassLoaders()) {</b>
+<b class="fc">&nbsp;			result = classLoader.findResource(name);</b>
+<b class="fc">&nbsp;			if (result != null) {</b>
+<b class="nc">&nbsp;				return result;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// look for the resource in the parent
+<b class="fc">&nbsp;		result = super.findResource(name);</b>
+&nbsp;		
+&nbsp;		// expand the jar url if necessary
+<b class="fc">&nbsp;		if (result != null &amp;&amp; &quot;jar&quot;.equals(result.getProtocol()) &amp;&amp; name.contains(&quot;openmrs&quot;)) {</b>
+<b class="nc">&nbsp;			result = expandURL(result, getLibCacheFolder());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.net.URLClassLoader#findResources(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Enumeration&lt;URL&gt; findResources(final String name) throws IOException {
+<b class="fc">&nbsp;		Set&lt;URI&gt; results = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (ModuleClassLoader classLoader : ModuleFactory.getModuleClassLoaders()) {</b>
+<b class="fc">&nbsp;			Enumeration&lt;URL&gt; urls = classLoader.findResources(name);</b>
+<b class="fc">&nbsp;			while (urls.hasMoreElements()) {</b>
+<b class="fc">&nbsp;				URL result = urls.nextElement();</b>
+<b class="fc">&nbsp;				if (result != null) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						results.add(result.toURI());</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;						throwInvalidURI(result, e);</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Enumeration&lt;URL&gt; en = super.findResources(name); en.hasMoreElements();) {</b>
+<b class="nc">&nbsp;			URL url = en.nextElement();</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				results.add(url.toURI());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;				throwInvalidURI(url, e);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;URL&gt; resources = new ArrayList&lt;&gt;(results.size());</b>
+<b class="fc">&nbsp;		for (URI result : results) {</b>
+<b class="fc">&nbsp;			resources.add(result.toURL());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return Collections.enumeration(resources);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void throwInvalidURI(URL url, Exception e) throws IOException {
+<b class="nc">&nbsp;		throw new IOException(url.getPath() + &quot; is not a valid URI&quot;, e);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Searches all known module classloaders first, then parent classloaders
+&nbsp;	 *
+&nbsp;	 * @see java.lang.ClassLoader#getResourceAsStream(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public InputStream getResourceAsStream(String file) {
+<b class="fc">&nbsp;		for (ModuleClassLoader classLoader : ModuleFactory.getModuleClassLoaders()) {</b>
+<b class="fc">&nbsp;			InputStream result = classLoader.getResourceAsStream(file);</b>
+<b class="fc">&nbsp;			if (result != null) {</b>
+<b class="fc">&nbsp;				return result;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return super.getResourceAsStream(file);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Searches all known module classloaders first, then parent classloaders
+&nbsp;	 *
+&nbsp;	 * @see java.lang.ClassLoader#getResources(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Enumeration&lt;URL&gt; getResources(String packageName) throws IOException {
+<b class="fc">&nbsp;		Set&lt;URI&gt; results = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (ModuleClassLoader classLoader : ModuleFactory.getModuleClassLoaders()) {</b>
+<b class="fc">&nbsp;			Enumeration&lt;URL&gt; urls = classLoader.getResources(packageName);</b>
+<b class="fc">&nbsp;			while (urls.hasMoreElements()) {</b>
+<b class="fc">&nbsp;				URL result = urls.nextElement();</b>
+<b class="fc">&nbsp;				if (result != null) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						results.add(result.toURI());</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;						throwInvalidURI(result, e);</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Enumeration&lt;URL&gt; en = super.getResources(packageName); en.hasMoreElements();) {</b>
+<b class="fc">&nbsp;			URL url = en.nextElement();</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				results.add(url.toURI());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (URISyntaxException e) {</b>
+<b class="nc">&nbsp;				throwInvalidURI(url, e);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;URL&gt; resources = new ArrayList&lt;&gt;(results.size());</b>
+<b class="fc">&nbsp;		for (URI result : results) {</b>
+<b class="fc">&nbsp;			resources.add(result.toURL());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return Collections.enumeration(resources);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return &quot;Openmrs&quot; + super.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Destroy the current instance of the classloader. Note**: After calling this and after the new
+&nbsp;	 * service is set up, All classes using this instance should be flushed. This would allow all
+&nbsp;	 * java classes that were loaded by the old instance variable to be gc&#39;d and modules to load in
+&nbsp;	 * new java classes
+&nbsp;	 *
+&nbsp;	 * @see #flushInstance()
+&nbsp;	 */
+&nbsp;	public static void destroyInstance() {
+&nbsp;		
+&nbsp;		// remove all thread references to this class
+&nbsp;		// Walk up all the way to the root thread group
+<b class="nc">&nbsp;		ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();</b>
+&nbsp;		ThreadGroup parent;
+<b class="nc">&nbsp;		while ((parent = rootGroup.getParent()) != null) {</b>
+<b class="nc">&nbsp;			rootGroup = parent;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		log.info(&quot;this classloader hashcode: {}&quot;, OpenmrsClassLoaderHolder.INSTANCE.hashCode());</b>
+&nbsp;		
+&nbsp;		//Shut down and remove all cache managers.
+<b class="nc">&nbsp;		List&lt;CacheManager&gt; knownCacheManagers = CacheManager.ALL_CACHE_MANAGERS;</b>
+<b class="nc">&nbsp;		while (!knownCacheManagers.isEmpty()) {</b>
+<b class="nc">&nbsp;			CacheManager cacheManager = CacheManager.ALL_CACHE_MANAGERS.get(0);</b>
+&nbsp;			try {
+&nbsp;				//This shuts down and removes the cache manager.
+<b class="nc">&nbsp;				cacheManager.shutdown();</b>
+&nbsp;				
+&nbsp;				//Just in case the the timer does not stop, set the cacheManager 
+&nbsp;				//timer to null because it references this class loader.
+<b class="nc">&nbsp;				Field field = cacheManager.getClass().getDeclaredField(&quot;cacheManagerTimer&quot;);</b>
+<b class="nc">&nbsp;				field.setAccessible(true);</b>
+<b class="nc">&nbsp;				field.set(cacheManager, null);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception ex) {</b>
+<b class="nc">&nbsp;				log.error(ex.getMessage(), ex);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		OpenmrsClassScanner.destroyInstance();</b>
+&nbsp;		
+<b class="nc">&nbsp;		OpenmrsClassLoaderHolder.INSTANCE = null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the class loader, for all threads referencing a destroyed openmrs class loader, 
+&nbsp;	 * to the current one.
+&nbsp;	 */
+&nbsp;	public static void setThreadsToNewClassLoader() {
+&nbsp;		//Give ownership of all threads loaded by the old class loader to the new one.
+&nbsp;		//Examples of such threads are: Keep-Alive-Timer, MySQL Statement Cancellation Timer, etc
+&nbsp;		//That way they will no longer hold onto the destroyed OpenmrsClassLoader and hence
+&nbsp;		//allow it to be garbage collected after a spring application context refresh, when a new one is created.
+<b class="nc">&nbsp;		Set&lt;Thread&gt; threadSet = Thread.getAllStackTraces().keySet();</b>
+<b class="nc">&nbsp;		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);</b>
+<b class="nc">&nbsp;		for (Thread thread : threadArray) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			ClassLoader classLoader = thread.getContextClassLoader();</b>
+&nbsp;			
+&nbsp;			//Some threads have a null class loader reference. e.g Finalizer, Reference Handler, etc
+<b class="nc">&nbsp;			if (classLoader == null) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//Threads referencing the current class loader are good.
+<b class="nc">&nbsp;			if (classLoader == getInstance()) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//For threads referencing any destroyed class loader, point them to the new one.
+<b class="nc">&nbsp;			if (classLoader instanceof OpenmrsClassLoader) {</b>
+<b class="nc">&nbsp;				thread.setContextClassLoader(getInstance());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	// List all threads and recursively list all subgroup
+&nbsp;	private static List&lt;Thread&gt; listThreads(ThreadGroup group, String indent) {
+<b class="nc">&nbsp;		List&lt;Thread&gt; threadToReturn = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.error(indent + &quot;Group[&quot; + group.getName() + &quot;:&quot; + group.getClass() + &quot;]&quot;);</b>
+<b class="nc">&nbsp;		int nt = group.activeCount();</b>
+<b class="nc">&nbsp;		Thread[] threads = new Thread[nt * 2 + 10]; //nt is not accurate</b>
+<b class="nc">&nbsp;		nt = group.enumerate(threads, false);</b>
+&nbsp;		
+&nbsp;		// List every thread in the group
+<b class="nc">&nbsp;		for (int i = 0; i &lt; nt; i++) {</b>
+<b class="nc">&nbsp;			Thread t = threads[i];</b>
+<b class="nc">&nbsp;			log.error(indent</b>
+&nbsp;			        + &quot;  Thread[&quot;
+<b class="nc">&nbsp;			        + t.getName()</b>
+&nbsp;			        + &quot;:&quot;
+<b class="nc">&nbsp;			        + t.getClass()</b>
+&nbsp;			        + &quot;:&quot;
+<b class="nc">&nbsp;			        + (t.getContextClassLoader() == null ? &quot;null cl&quot; : t.getContextClassLoader().getClass().getName() + &quot; &quot;</b>
+<b class="nc">&nbsp;			                + t.getContextClassLoader().hashCode()) + &quot;]&quot;);</b>
+<b class="nc">&nbsp;			threadToReturn.add(t);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Recursively list all subgroups
+<b class="nc">&nbsp;		int ng = group.activeGroupCount();</b>
+<b class="nc">&nbsp;		ThreadGroup[] groups = new ThreadGroup[ng * 2 + 10];</b>
+<b class="nc">&nbsp;		ng = group.enumerate(groups, false);</b>
+&nbsp;		
+<b class="nc">&nbsp;		for (int i = 0; i &lt; ng; i++) {</b>
+<b class="nc">&nbsp;			threadToReturn.addAll(listThreads(groups[i], indent + &quot;  &quot;));</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return threadToReturn;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void onShutdown() {
+&nbsp;		
+&nbsp;		//Since we are shutting down, stop all threads that reference the openmrs class loader.
+<b class="nc">&nbsp;		Set&lt;Thread&gt; threadSet = Thread.getAllStackTraces().keySet();</b>
+<b class="nc">&nbsp;		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);</b>
+<b class="nc">&nbsp;		for (Thread thread : threadArray) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			ClassLoader classLoader = thread.getContextClassLoader();</b>
+&nbsp;			
+&nbsp;			//Threads like Finalizer, Reference Handler, etc have null class loader reference.
+<b class="nc">&nbsp;			if (classLoader == null) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			if (classLoader instanceof OpenmrsClassLoader) {</b>
+&nbsp;				try {
+&nbsp;					//Set to WebappClassLoader just in case stopping fails.
+<b class="nc">&nbsp;					thread.setContextClassLoader(classLoader.getParent());</b>
+&nbsp;					
+&nbsp;					//Stopping the current thread will halt all current cleanup.
+&nbsp;					//So do not ever ever even attempt stopping it. :)
+<b class="nc">&nbsp;					if (thread == Thread.currentThread()) {</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					log.info(&quot;onShutdown Stopping thread: {}&quot;, thread.getName());</b>
+<b class="nc">&nbsp;					thread.stop();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception ex) {</b>
+<b class="nc">&nbsp;					log.error(ex.getMessage(), ex);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		clearReferences();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This clears any references this classloader might have that will prevent garbage collection. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Borrowed from Tomcat&#39;s WebappClassLoader#clearReferences() (not javadoc linked intentionally) &lt;br&gt;
+&nbsp;	 * The only difference between this and Tomcat&#39;s implementation is that this one only acts on
+&nbsp;	 * openmrs objects and also clears out static java.* packages. Tomcat acts on all objects and
+&nbsp;	 * does not clear our static java.* objects.
+&nbsp;	 *
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	protected static void clearReferences() {
+&nbsp;		
+&nbsp;		// Unregister any JDBC drivers loaded by this classloader
+<b class="nc">&nbsp;		Enumeration&lt;Driver&gt; drivers = DriverManager.getDrivers();</b>
+<b class="nc">&nbsp;		while (drivers.hasMoreElements()) {</b>
+<b class="nc">&nbsp;			Driver driver = drivers.nextElement();</b>
+<b class="nc">&nbsp;			if (driver.getClass().getClassLoader() == getInstance()) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					DriverManager.deregisterDriver(driver);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;SQL driver deregistration failed&quot;, e);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// Null out any static or final fields from loaded classes,
+&nbsp;		// as a workaround for apparent garbage collection bugs
+<b class="nc">&nbsp;		for (WeakReference&lt;Class&lt;?&gt;&gt; refClazz : getInstance().cachedClasses.values()) {</b>
+<b class="nc">&nbsp;			if (refClazz == null) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			Class&lt;?&gt; clazz = refClazz.get();</b>
+<b class="nc">&nbsp;			if (clazz != null &amp;&amp; clazz.getName().contains(&quot;openmrs&quot;)) { // only clean up openmrs classes</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					Field[] fields = clazz.getDeclaredFields();</b>
+<b class="nc">&nbsp;					for (Field field : fields) {</b>
+<b class="nc">&nbsp;						int mods = field.getModifiers();</b>
+<b class="nc">&nbsp;						if (field.getType().isPrimitive() || (field.getName().contains(&quot;$&quot;))) {</b>
+<b class="nc">&nbsp;							continue;</b>
+&nbsp;						}
+<b class="nc">&nbsp;						if (Modifier.isStatic(mods)) {</b>
+&nbsp;							try {
+&nbsp;								// do not clear the log field on this class yet
+<b class="nc">&nbsp;								if (clazz.equals(OpenmrsClassLoader.class) &amp;&amp; &quot;log&quot;.equals(field.getName())) {</b>
+<b class="nc">&nbsp;									continue;</b>
+&nbsp;								}
+<b class="nc">&nbsp;								field.setAccessible(true);</b>
+<b class="nc">&nbsp;								if (Modifier.isFinal(mods)) {</b>
+<b class="nc">&nbsp;									if (!(field.getType().getName().startsWith(&quot;javax.&quot;))) {</b>
+<b class="nc">&nbsp;										nullInstance(field.get(null));</b>
+&nbsp;									}
+&nbsp;								} else {
+<b class="nc">&nbsp;									field.set(null, null);</b>
+<b class="nc">&nbsp;									log.debug(&quot;Set field {} to null in class {}&quot;, field.getName(), clazz.getName());</b>
+&nbsp;								}
+&nbsp;							}
+<b class="nc">&nbsp;							catch (Exception t) {</b>
+<b class="nc">&nbsp;								log.debug(&quot;Could not set field {} to null in class {}&quot;, field.getName(), clazz.getName(), t);</b>
+<b class="nc">&nbsp;							}</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception t) {</b>
+<b class="nc">&nbsp;					log.debug(&quot;Could not clean fields for class {}&quot;, clazz.getName(), t);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// now we can clear the log field on this class
+<b class="nc">&nbsp;		OpenmrsClassLoader.log = null;</b>
+&nbsp;		
+<b class="nc">&nbsp;		getInstance().cachedClasses.clear();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used by {@link #clearReferences()} upon application close. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Borrowed from Tomcat&#39;s WebappClassLoader.
+&nbsp;	 *
+&nbsp;	 * @param instance the object whose fields need to be nulled out
+&nbsp;	 */
+&nbsp;	protected static void nullInstance(Object instance) {
+<b class="nc">&nbsp;		if (instance == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="nc">&nbsp;		Field[] fields = instance.getClass().getDeclaredFields();</b>
+<b class="nc">&nbsp;		for (Field field : fields) {</b>
+<b class="nc">&nbsp;			int mods = field.getModifiers();</b>
+<b class="nc">&nbsp;			if (field.getType().isPrimitive() || (field.getName().contains(&quot;$&quot;))) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			try {
+<b class="nc">&nbsp;				field.setAccessible(true);</b>
+<b class="nc">&nbsp;				if (!(Modifier.isStatic(mods) &amp;&amp; Modifier.isFinal(mods))) {</b>
+<b class="nc">&nbsp;					Object value = field.get(instance);</b>
+<b class="nc">&nbsp;					if (null != value) {</b>
+<b class="nc">&nbsp;						Class&lt;?&gt; valueClass = value.getClass();</b>
+<b class="nc">&nbsp;						if (!loadedByThisOrChild(valueClass)) {</b>
+<b class="nc">&nbsp;							log.debug(</b>
+&nbsp;							    &quot;Not setting field {} to null in object of class {} because the referenced object was of type {} which was not loaded by this WebappClassLoader.&quot;,
+<b class="nc">&nbsp;							    field.getName(), instance.getClass().getName(), valueClass.getName());</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							field.set(instance, null);</b>
+<b class="nc">&nbsp;							log.debug(&quot;Set field {} to null in class {}&quot;, field.getName(), instance.getClass().getName());</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				} 
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;Could not set field {} to null in object instance of class {}&quot;, field.getName(),</b>
+<b class="nc">&nbsp;				    instance.getClass().getName(), e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determine whether a class was loaded by this class loader or one of its child class loaders. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Borrowed from Tomcat&#39;s WebappClassLoader
+&nbsp;	 */
+&nbsp;	protected static boolean loadedByThisOrChild(Class&lt;?&gt; clazz) {
+<b class="nc">&nbsp;		boolean result = false;</b>
+<b class="nc">&nbsp;		for (ClassLoader classLoader = clazz.getClassLoader(); null != classLoader; classLoader = classLoader.getParent()) {</b>
+<b class="nc">&nbsp;			if (classLoader.equals(getInstance())) {</b>
+<b class="nc">&nbsp;				result = true;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method should be called before destroying the instance
+&nbsp;	 *
+&nbsp;	 * @see #destroyInstance()
+&nbsp;	 */
+&nbsp;	public static void saveState() {
+&nbsp;		try {
+<b class="nc">&nbsp;			String key = SchedulerService.class.getName();</b>
+<b class="nc">&nbsp;			if (!Context.isRefreshingContext()) {</b>
+<b class="nc">&nbsp;				mementos.put(key, Context.getSchedulerService().saveToMemento());</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception t) {</b>
+&nbsp;			// pass
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method should be called after restoring the instance
+&nbsp;	 *
+&nbsp;	 * @see #destroyInstance()
+&nbsp;	 * @see #saveState()
+&nbsp;	 */
+&nbsp;	public static void restoreState() {
+&nbsp;		try {
+<b class="nc">&nbsp;			String key = SchedulerService.class.getName();</b>
+<b class="nc">&nbsp;			Context.getSchedulerService().restoreFromMemento(mementos.get(key));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (APIException e) {</b>
+&nbsp;			// pass
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		mementos.clear();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * All objects depending on the old classloader should be restarted here Should be called after
+&nbsp;	 * destoryInstance() and after the service is restarted
+&nbsp;	 *
+&nbsp;	 * @see #destroyInstance()
+&nbsp;	 */
+&nbsp;	public static void flushInstance() {
+&nbsp;		try {
+<b class="nc">&nbsp;			SchedulerService service = null;</b>
+&nbsp;			try {
+<b class="nc">&nbsp;				service = Context.getSchedulerService();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (APIException e2) {</b>
+&nbsp;				// if there isn&#39;t a scheduler service yet, ignore error
+<b class="nc">&nbsp;				log.warn(&quot;Unable to get scheduler service&quot;, e2);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			if (service != null) {</b>
+<b class="nc">&nbsp;				service.rescheduleAllTasks();</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SchedulerException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Failed to restart scheduler tasks&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the temporary &quot;work&quot; directory for expanded jar files
+&nbsp;	 *
+&nbsp;	 * @return temporary location for storing the libraries
+&nbsp;	 */
+&nbsp;	public static File getLibCacheFolder() {
+&nbsp;		// cache the location for all calls until OpenMRS is restarted
+<b class="fc">&nbsp;		if (libCacheFolder != null) {</b>
+<b class="fc">&nbsp;			return libCacheFolderInitialized ? libCacheFolder : null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		synchronized (ModuleClassLoader.class) {</b>
+<b class="fc">&nbsp;			libCacheFolder = new File(OpenmrsUtil.getApplicationDataDirectory(), LIBCACHESUFFIX);</b>
+&nbsp;			
+<b class="fc">&nbsp;			log.debug(&quot;libraries cache folder is {}&quot;, libCacheFolder);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (libCacheFolder.exists()) {</b>
+&nbsp;				// clean up and empty the folder if it exists (and is not locked)
+&nbsp;				try {
+<b class="nc">&nbsp;					OpenmrsUtil.deleteDirectory(libCacheFolder);</b>
+&nbsp;					
+<b class="nc">&nbsp;					libCacheFolder.mkdirs();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (IOException io) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Unable to delete: {}&quot;, libCacheFolder.getName());</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			} else {
+&nbsp;				// otherwise just create the dir structure
+<b class="fc">&nbsp;				libCacheFolder.mkdirs();</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// mark the lock and entire library cache to be deleted when the jvm exits
+<b class="fc">&nbsp;			libCacheFolder.deleteOnExit();</b>
+&nbsp;			
+&nbsp;			// mark the lib cache folder as ready
+<b class="fc">&nbsp;			libCacheFolderInitialized = true;</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return libCacheFolder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Expand the given URL into the given folder
+&nbsp;	 *
+&nbsp;	 * @param result URL of the file to expand
+&nbsp;	 * @param folder File (directory) to place the expanded file
+&nbsp;	 * @return the URL at the expanded location
+&nbsp;	 */
+&nbsp;	public static URL expandURL(URL result, File folder) {
+<b class="fc">&nbsp;		String extForm = result.toExternalForm();</b>
+&nbsp;		// trim out &quot;jar:file:/ and ascii spaces&quot;
+<b class="fc">&nbsp;		if (OpenmrsConstants.UNIX_BASED_OPERATING_SYSTEM) {</b>
+<b class="nc">&nbsp;			extForm = extForm.replaceFirst(&quot;jar:file:&quot;, &quot;&quot;).replaceAll(&quot;%20&quot;, &quot; &quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			extForm = extForm.replaceFirst(&quot;jar:file:/&quot;, &quot;&quot;).replaceAll(&quot;%20&quot;, &quot; &quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;url external form: {}&quot;, extForm);</b>
+&nbsp;		
+<b class="fc">&nbsp;		int i = extForm.indexOf(&quot;!&quot;);</b>
+<b class="fc">&nbsp;		String jarPath = extForm.substring(0, i);</b>
+<b class="fc">&nbsp;		String filePath = extForm.substring(i + 2); // skip over both the &#39;!&#39; and the &#39;/&#39;</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;jarPath: {}&quot;, jarPath);</b>
+<b class="fc">&nbsp;		log.debug(&quot;filePath: {}&quot;, filePath);</b>
+&nbsp;		
+<b class="fc">&nbsp;		File file = new File(folder, filePath);</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;absolute path: {}&quot;, file.getAbsolutePath());</b>
+&nbsp;		
+&nbsp;		try {
+&nbsp;			// if the file has been expanded already, return that
+<b class="fc">&nbsp;			if (file.exists()) {</b>
+<b class="fc">&nbsp;				return file.toURI().toURL();</b>
+&nbsp;			} else {
+&nbsp;				// expand the url and return a url to the temp file
+<b class="fc">&nbsp;				File jarFile = new File(jarPath);</b>
+<b class="fc">&nbsp;				if (!jarFile.exists()) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Cannot find jar at: {} for url: {}&quot;, jarFile, result);</b>
+<b class="nc">&nbsp;					return null;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				ModuleUtil.expandJar(jarFile, folder, filePath, true);</b>
+<b class="fc">&nbsp;				return file.toURI().toURL();</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException io) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Unable to expand url: {}&quot;, result, io);</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This class exists solely so OpenmrsClassLoader can call the (should be static) method
+&nbsp;	 * &lt;code&gt;URLConnection.setDefaultUseCaches(Boolean)&lt;/code&gt;. This causes jars opened to not be
+&nbsp;	 * locked (and allows for the webapp to be reloadable).
+&nbsp;	 */
+&nbsp;	private class OpenmrsURLConnection extends URLConnection {
+&nbsp;		
+<b class="fc">&nbsp;		public OpenmrsURLConnection() {</b>
+<b class="fc">&nbsp;			super(null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public void connect() throws IOException {
+&nbsp;			
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

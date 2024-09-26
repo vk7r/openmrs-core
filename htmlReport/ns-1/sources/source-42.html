@@ -1,0 +1,258 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ImplementationId</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ImplementationId (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImplementationId</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (9/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47,4%
+  </span>
+  <span class="absValue">
+    (9/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;/**
+&nbsp; * Every installation of OpenMRS should get a unique implementation id. If multiple sites use the
+&nbsp; * same dictionary/form setup, than those sites should share the same implementation id. The
+&nbsp; * ImplementationId is stored and verified on the openmrs servers.
+&nbsp; */
+<b class="fc">&nbsp;public class ImplementationId implements java.io.Serializable {</b>
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 3752234110L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private String name;
+&nbsp;	
+&nbsp;	private String description;
+&nbsp;	
+&nbsp;	private String implementationId;
+&nbsp;	
+&nbsp;	private String passphrase;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object o) {
+<b class="nc">&nbsp;		if (o instanceof ImplementationId) {</b>
+<b class="nc">&nbsp;			ImplementationId other = (ImplementationId) o;</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (getImplementationId() != null &amp;&amp; other.getImplementationId() != null) {</b>
+<b class="nc">&nbsp;				return getImplementationId().equals(other.getImplementationId());</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			return this == other;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#hashCode()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		if (getImplementationId() != null) {</b>
+<b class="nc">&nbsp;			return getImplementationId().hashCode() * 342 + 3;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return super.hashCode();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Text describing this implementation. (e.g. Source for the AMPATH program in Kenya. Created by
+&nbsp;	 * Paul Biondich)
+&nbsp;	 *
+&nbsp;	 * @return Returns the description.
+&nbsp;	 */
+&nbsp;	public String getDescription() {
+<b class="fc">&nbsp;		return description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Text describing this implementation. (e.g. Source for the AMPATH program in Kenya. Created by
+&nbsp;	 * Paul Biondich)
+&nbsp;	 *
+&nbsp;	 * @param description The description to set.
+&nbsp;	 */
+&nbsp;	public void setDescription(String description) {
+<b class="fc">&nbsp;		this.description = description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is the unique id for this implementation. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * The implementation id corresponds to the hl7Code of the ConceptSource that this corresponds
+&nbsp;	 * to.&lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Must be limited to 20 characters and numbers. The characters &quot;^&quot; and &quot;|&quot; are not allowed.
+&nbsp;	 *
+&nbsp;	 * @return the implementationId
+&nbsp;	 */
+&nbsp;	public String getImplementationId() {
+<b class="fc">&nbsp;		return implementationId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is the unique id for this implementation. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * The implementation id corresponds to the hl7Code of the ConceptSource that this corresponds
+&nbsp;	 * to. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * Must be limited to 20 characters and numbers. The characters &quot;^&quot; and &quot;|&quot; are not allowed.
+&nbsp;	 *
+&nbsp;	 * @param implementationId the implementationId to set
+&nbsp;	 */
+&nbsp;	public void setImplementationId(String implementationId) {
+<b class="fc">&nbsp;		this.implementationId = implementationId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This text is a long text string that is used to validate who uses an implementation id.
+&nbsp;	 * Multiple installations of openmrs can use the same implementation id, but they must all know
+&nbsp;	 * the passphrase. (Note that if an implementation id is shared, it is assumed that those
+&nbsp;	 * installations are the same implementation).
+&nbsp;	 *
+&nbsp;	 * @return the passphrase
+&nbsp;	 */
+&nbsp;	public String getPassphrase() {
+<b class="fc">&nbsp;		return passphrase;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This text is a long text string that is used to validate who uses an implementation id.
+&nbsp;	 * Multiple installations of openmrs can use the same implementation id, but they must all know
+&nbsp;	 * the passphrase. (Note that if an implementation id is shared, it is assumed that those
+&nbsp;	 * installations are the same implementation).
+&nbsp;	 *
+&nbsp;	 * @param passphrase the passphrase to set
+&nbsp;	 */
+&nbsp;	public void setPassphrase(String passphrase) {
+<b class="fc">&nbsp;		this.passphrase = passphrase;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A descriptive name for this implementation (e.g. AMRS installation in Eldoret, Kenya)
+&nbsp;	 *
+&nbsp;	 * @return Returns the name.
+&nbsp;	 */
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A descriptive name for this implementation (e.g. AMRS installation in Eldoret, Kenya)
+&nbsp;	 *
+&nbsp;	 * @param name The concept source name to set.
+&nbsp;	 */
+&nbsp;	public void setName(String name) {
+<b class="fc">&nbsp;		this.name = name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return &quot;Impl Id: &quot; + getImplementationId() + &quot; name: &quot; + getName() + &quot; desc: &quot; + getDescription();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

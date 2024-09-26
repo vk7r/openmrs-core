@@ -1,0 +1,287 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > UpdateFileParser</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: UpdateFileParser (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UpdateFileParser</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,2%
+  </span>
+  <span class="absValue">
+    (46/54)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.io.StringReader;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;import org.xml.sax.InputSource;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class will parse an xml update.rdf file
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public class UpdateFileParser {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(UpdateFileParser.class);</b>
+&nbsp;	
+&nbsp;	private String content;
+&nbsp;	
+&nbsp;	// these properties store the &#39;best fit&#39; (most recent update that will fit with the current code version)
+<b class="fc">&nbsp;	private String moduleId = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private String currentVersion = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private String downloadURL = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor
+&nbsp;	 *
+&nbsp;	 * @param s String to parse (Contents of update.rdf file)
+&nbsp;	 */
+<b class="fc">&nbsp;	public UpdateFileParser(String s) {</b>
+<b class="fc">&nbsp;		this.content = s;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parse the contents of the update.rdf file.
+&nbsp;	 *
+&nbsp;	 * @throws ModuleException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set properties from xml file
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set properties using the newest update
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set properties using updates ahead of current openmrs version
+&nbsp;	 */
+&nbsp;	public void parse() throws ModuleException {
+<b class="fc">&nbsp;		StringReader stringReader = null;</b>
+&nbsp;		try {
+&nbsp;			Document updateDoc;
+&nbsp;			try {
+<b class="fc">&nbsp;				stringReader = new StringReader(content);</b>
+<b class="fc">&nbsp;				InputSource inputSource = new InputSource(stringReader);</b>
+<b class="fc">&nbsp;				inputSource.setSystemId(&quot;./&quot;);</b>
+&nbsp;				
+<b class="fc">&nbsp;				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;				DocumentBuilder db = dbf.newDocumentBuilder();</b>
+&nbsp;				
+&nbsp;				// Disable resolution of external entities. See TRUNK-3942 
+<b class="fc">&nbsp;				db.setEntityResolver((publicId, systemId) -&gt; new InputSource(new StringReader(&quot;&quot;)));</b>
+&nbsp;				
+<b class="fc">&nbsp;				updateDoc = db.parse(inputSource);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Unable to parse content&quot;);</b>
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Error parsing update.rdf file: &quot; + content, e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			Element rootNode = updateDoc.getDocumentElement();</b>
+&nbsp;			
+<b class="fc">&nbsp;			String configVersion = rootNode.getAttribute(&quot;configVersion&quot;);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (!validConfigVersions().contains(configVersion)) {</b>
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Invalid configVersion: &#39;&quot; + configVersion + &quot;&#39; found In content: &quot; + content);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (&quot;1.0&quot;.equals(configVersion)) {</b>
+&nbsp;				// the only update in the xml file is the &#39;best fit&#39;
+<b class="fc">&nbsp;				this.moduleId = getElement(rootNode, configVersion, &quot;moduleId&quot;);</b>
+<b class="fc">&nbsp;				this.currentVersion = getElement(rootNode, configVersion, &quot;currentVersion&quot;);</b>
+<b class="fc">&nbsp;				this.downloadURL = getElement(rootNode, configVersion, &quot;downloadURL&quot;);</b>
+<b class="fc">&nbsp;			} else if (&quot;1.1&quot;.equals(configVersion)) {</b>
+&nbsp;				
+<b class="fc">&nbsp;				this.moduleId = rootNode.getAttribute(&quot;moduleId&quot;);</b>
+&nbsp;				
+<b class="fc">&nbsp;				NodeList nodes = rootNode.getElementsByTagName(&quot;update&quot;);</b>
+&nbsp;				// default to the lowest version possible
+<b class="fc">&nbsp;				this.currentVersion = &quot;&quot;;</b>
+&nbsp;				
+&nbsp;				// loop over all &#39;update&#39; tags
+<b class="fc">&nbsp;				for (int i = 0; i &lt; nodes.getLength(); i++) {</b>
+<b class="fc">&nbsp;					Element currentNode = (Element) nodes.item(i);</b>
+<b class="fc">&nbsp;					String currentVersion = getElement(currentNode, configVersion, &quot;currentVersion&quot;);</b>
+&nbsp;					// if the currently saved version is less than the current tag
+<b class="fc">&nbsp;					if (ModuleUtil.compareVersion(this.currentVersion, currentVersion) &lt; 0) {</b>
+<b class="fc">&nbsp;						String requireOpenMRSVersion = getElement(currentNode, configVersion, &quot;requireOpenMRSVersion&quot;);</b>
+&nbsp;						// if the openmrs code version is compatible, this node is a winner
+<b class="fc">&nbsp;						if (requireOpenMRSVersion == null</b>
+<b class="fc">&nbsp;						        || ModuleUtil.matchRequiredVersions(OpenmrsConstants.OPENMRS_VERSION_SHORT,</b>
+&nbsp;						            requireOpenMRSVersion)) {
+<b class="fc">&nbsp;							this.currentVersion = currentVersion;</b>
+<b class="fc">&nbsp;							this.downloadURL = getElement(currentNode, configVersion, &quot;downloadURL&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ModuleException e) {</b>
+&nbsp;			// rethrow the moduleException
+<b class="nc">&nbsp;			throw e;</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (stringReader != null) {</b>
+<b class="fc">&nbsp;				stringReader.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Generic method to get a module tag
+&nbsp;	 *
+&nbsp;	 * @param element
+&nbsp;	 * @param version
+&nbsp;	 * @param tag
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private static String getElement(Element element, String version, String tag) {
+<b class="fc">&nbsp;		if (element.getElementsByTagName(tag).getLength() &gt; 0) {</b>
+<b class="fc">&nbsp;			return element.getElementsByTagName(tag).item(0).getTextContent();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return &quot;&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of the valid sqldiff versions
+&nbsp;	 *
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private static List&lt;String&gt; validConfigVersions() {
+<b class="fc">&nbsp;		List&lt;String&gt; versions = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		versions.add(&quot;1.0&quot;);</b>
+<b class="fc">&nbsp;		versions.add(&quot;1.1&quot;);</b>
+<b class="fc">&nbsp;		return versions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the downloadURL
+&nbsp;	 */
+&nbsp;	public String getDownloadURL() {
+<b class="fc">&nbsp;		return downloadURL;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the moduleId
+&nbsp;	 */
+&nbsp;	public String getModuleId() {
+<b class="fc">&nbsp;		return moduleId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the version
+&nbsp;	 */
+&nbsp;	public String getCurrentVersion() {
+<b class="fc">&nbsp;		return currentVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,188 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VoidSaveHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: VoidSaveHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VoidSaveHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.Voidable;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;
+&nbsp;/**
+&nbsp; * This handler makes sure the when a voided object is saved with the voided bit set to true, the
+&nbsp; * other required values (like dateVoided and voidedBy) are filled in. It also makes sure the voided
+&nbsp; * attributes are cleared out if the voided bit is set to false. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * The {@link RequiredDataAdvice} class uses AOP around each method in every service to check to see
+&nbsp; * if its a save* method. If it is a save* method, and the object being saved implements
+&nbsp; * {@link Voidable}, this class is called to handle setting the {@link Voidable#setVoidedBy(User)},
+&nbsp; * and {@link Voidable#setDateVoided(Date)} if not set already. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Note: The {@link RequiredDataAdvice} class will loop over child collections on this
+&nbsp; * {@link Voidable} that are themselves a {@link Voidable} and voidedBy/dateVoided are set, but
+&nbsp; * &lt;b&gt;ONLY IF&lt;/b&gt; the voided bit was set on them as well. Using the associated void* method in the
+&nbsp; * service on the parent instance is preferred so that all child objects are indeed voided.
+&nbsp; * 
+&nbsp; * @see RequiredDataAdvice
+&nbsp; * @see SaveHandler
+&nbsp; * @see RequiredDataAdvice
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;@Handler(supports = Voidable.class)
+<b class="fc">&nbsp;public class VoidSaveHandler implements SaveHandler&lt;Voidable&gt; {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method does not set &quot;voided&quot; to true, but rather only sets the voidedBy/dateVoided if
+&nbsp;	 * they are null and voided==true. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * If voided is set to false, the voided attributes are cleared nullified.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.api.handler.RequiredDataHandler#handle(org.openmrs.OpenmrsObject,
+&nbsp;	 *      org.openmrs.User, java.util.Date, java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set the voided bit
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set the voidReason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set voided by
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set voided by if non null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set dateVoided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set dateVoided if non null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set the dateVoided if voided is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set voidReason to null if voided is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set dateVoided to null if voided is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set voidedBy to null if voided is true
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void handle(Voidable voidableObject, User currentUser, Date currentDate, String notUsed) {
+&nbsp;		
+&nbsp;		// void reason is not set here, it should be set prior to this method
+&nbsp;		
+&nbsp;		// only set the values if the user saved this object and set the voided bit
+<b class="fc">&nbsp;		if (voidableObject.getVoided()) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (voidableObject.getVoidedBy() == null) {</b>
+<b class="fc">&nbsp;				voidableObject.setVoidedBy(currentUser);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (voidableObject.getDateVoided() == null) {</b>
+<b class="fc">&nbsp;				voidableObject.setDateVoided(currentDate);</b>
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			// voided is set to false
+<b class="fc">&nbsp;			voidableObject.setVoidedBy(null);</b>
+<b class="fc">&nbsp;			voidableObject.setDateVoided(null);</b>
+<b class="fc">&nbsp;			voidableObject.setVoidReason(null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

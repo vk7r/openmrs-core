@@ -1,0 +1,723 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Daemon</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.context</a>
+</div>
+
+<h1>Coverage Summary for Class: Daemon (org.openmrs.api.context)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Daemon</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,4%
+  </span>
+  <span class="absValue">
+    (10/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67,1%
+  </span>
+  <span class="absValue">
+    (49/73)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Daemon$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (8/11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Daemon$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Daemon$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (8/11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Daemon$4</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Daemon$5</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (8/11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Daemon$6</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Daemon$DaemonThread</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (21/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68,8%
+  </span>
+  <span class="absValue">
+    (99/144)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.context;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.APIAuthenticationException;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.api.db.ContextDAO;
+&nbsp;import org.openmrs.module.DaemonToken;
+&nbsp;import org.openmrs.module.Module;
+&nbsp;import org.openmrs.module.ModuleException;
+&nbsp;import org.openmrs.module.ModuleFactory;
+&nbsp;import org.openmrs.scheduler.Task;
+&nbsp;import org.openmrs.scheduler.timer.TimerSchedulerTask;
+&nbsp;import org.openmrs.util.OpenmrsSecurityManager;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.context.support.AbstractRefreshableApplicationContext;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class allows certain tasks to run with elevated privileges. Primary use is scheduling and
+&nbsp; * module startup when there is no user to authenticate as.
+&nbsp; */
+&nbsp;public class Daemon {
+&nbsp;
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Daemon.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The uuid defined for the daemon user object
+&nbsp;	 */
+&nbsp;	protected static final String DAEMON_USER_UUID = &quot;A4F30A1B-5EB9-11DF-A648-37A07F9C90FB&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	protected static final ThreadLocal&lt;Boolean&gt; isDaemonThread = new ThreadLocal&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	protected static final ThreadLocal&lt;User&gt; daemonThreadUser = new ThreadLocal&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Protected constructor to override the default constructor to prevent it from being instantiated.
+&nbsp;	 */
+<b class="nc">&nbsp;	protected Daemon() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see #startModule(Module, boolean, AbstractRefreshableApplicationContext)
+&nbsp;	 */
+&nbsp;	public static Module startModule(Module module) throws ModuleException {
+<b class="nc">&nbsp;		return startModule(module, false, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method should not be called directly. The {@link ModuleFactory#startModule(Module)}
+&nbsp;	 * method uses this to start the given module in a new thread that is authenticated as the
+&nbsp;	 * daemon user. &lt;br&gt;
+&nbsp;	 * If a non null application context is passed in, it gets refreshed to make the module&#39;s
+&nbsp;	 * services available
+&nbsp;	 *
+&nbsp;	 * @param module the module to start
+&nbsp;	 * @param isOpenmrsStartup Specifies whether this module is being started at application startup
+&nbsp;	 *            or not
+&nbsp;	 * @param applicationContext the spring application context instance to refresh
+&nbsp;	 * @return the module returned from {@link ModuleFactory#startModuleInternal(Module)}
+&nbsp;	 */
+&nbsp;	public static Module startModule(final Module module, final boolean isOpenmrsStartup,
+&nbsp;	        final AbstractRefreshableApplicationContext applicationContext) throws ModuleException {
+&nbsp;		// create a new thread and execute that task in it
+<b class="fc">&nbsp;		DaemonThread startModuleThread = new DaemonThread() {</b>
+&nbsp;			
+&nbsp;			@Override
+&nbsp;			public void run() {
+<b class="fc">&nbsp;				isDaemonThread.set(true);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					Context.openSession();</b>
+<b class="fc">&nbsp;					returnedObject = ModuleFactory.startModuleInternal(module, isOpenmrsStartup, applicationContext);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					exceptionThrown = e;</b>
+&nbsp;				}
+&nbsp;				finally {
+<b class="nc">&nbsp;					try {</b>
+<b class="fc">&nbsp;						Context.closeSession();</b>
+&nbsp;					} finally {
+<b class="fc">&nbsp;						isDaemonThread.remove();</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;		
+<b class="fc">&nbsp;		startModuleThread.start();</b>
+&nbsp;		
+&nbsp;		// wait for the &quot;startModule&quot; thread to finish
+&nbsp;		try {
+<b class="fc">&nbsp;			startModuleThread.join();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InterruptedException e) {</b>
+&nbsp;			// ignore
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (startModuleThread.exceptionThrown != null) {</b>
+<b class="nc">&nbsp;			if (startModuleThread.exceptionThrown instanceof ModuleException) {</b>
+<b class="nc">&nbsp;				throw (ModuleException) startModuleThread.exceptionThrown;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Unable to start module as Daemon&quot;, startModuleThread.exceptionThrown);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return (Module) startModuleThread.returnedObject;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This method should not be called directly, only {@link ContextDAO#createUser(User, String, List)} can
+&nbsp;	 * legally invoke {@link #createUser(User, String, List)}.
+&nbsp;	 * 
+&nbsp;	 * @param user A new user to be created.
+&nbsp;	 * @param password The password to set for the new user.
+&nbsp;	 * @param roleNames A list of role names to fetch the roles to add to the user.
+&nbsp;	 * @return The newly created user
+&nbsp;	 * 
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only allow the creation of new users, not the edition of existing ones
+&nbsp;	 * 
+&nbsp;	 * @since 2.3.0
+&nbsp;	 */
+&nbsp;	public static User createUser(User user, String password, List&lt;String&gt; roleNames) throws Exception {
+&nbsp;
+&nbsp;		// quick check to make sure we&#39;re only being called by ourselves
+<b class="fc">&nbsp;		Class&lt;?&gt; callerClass = new OpenmrsSecurityManager().getCallerClass(0);</b>
+<b class="fc">&nbsp;		if (!ContextDAO.class.isAssignableFrom(callerClass)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Context.DAO.only&quot;, new Object[] { callerClass.getName() });</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// create a new thread and execute that task in it
+<b class="fc">&nbsp;		DaemonThread createUserThread = new DaemonThread() {</b>
+&nbsp;
+&nbsp;			@Override
+&nbsp;			public void run() {
+<b class="fc">&nbsp;				isDaemonThread.set(true);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					Context.openSession();</b>
+&nbsp;
+<b class="fc">&nbsp;					if ( (user.getId() != null &amp;&amp; Context.getUserService().getUser(user.getId()) != null) || Context.getUserService().getUserByUuid(user.getUuid()) != null || Context.getUserService().getUserByUsername(user.getUsername()) != null || (user.getEmail() != null &amp;&amp; Context.getUserService().getUserByUsernameOrEmail(user.getEmail()) != null) ) {</b>
+<b class="fc">&nbsp;						throw new APIException(&quot;User.creating.already.exists&quot;, new Object[] { user.getDisplayString() });</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (!CollectionUtils.isEmpty(roleNames)) {</b>
+<b class="fc">&nbsp;						List&lt;Role&gt; roles = roleNames.stream().map(roleName -&gt; Context.getUserService().getRole(roleName)).collect(Collectors.toList()); </b>
+<b class="fc">&nbsp;						roles.forEach(user::addRole);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					returnedObject = Context.getUserService().createUser(user, password);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				catch (Exception e) {</b>
+<b class="fc">&nbsp;					exceptionThrown = e;</b>
+&nbsp;				}
+&nbsp;				finally {
+<b class="nc">&nbsp;					try {</b>
+<b class="fc">&nbsp;						Context.closeSession();</b>
+&nbsp;					} finally {
+<b class="fc">&nbsp;						isDaemonThread.remove();</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;
+<b class="fc">&nbsp;		createUserThread.start();</b>
+&nbsp;
+&nbsp;		// wait for the &#39;create user&#39; thread to finish
+&nbsp;		try {
+<b class="fc">&nbsp;			createUserThread.join();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InterruptedException e) {</b>
+&nbsp;			// ignore
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		if (createUserThread.exceptionThrown != null) {</b>
+<b class="fc">&nbsp;			throw createUserThread.exceptionThrown;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return (User) createUserThread.returnedObject;</b>
+&nbsp;	}	
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes the given task in a new thread that is authenticated as the daemon user. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This can only be called from {@link TimerSchedulerTask} during actual task execution
+&nbsp;	 *
+&nbsp;	 * @param task the task to run
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not be called from other methods other than TimerSchedulerTask
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw error if called from a TimerSchedulerTask class
+&nbsp;	 */
+&nbsp;	public static void executeScheduledTask(final Task task) throws Exception {
+&nbsp;		
+&nbsp;		// quick check to make sure we&#39;re only being called by ourselves
+<b class="fc">&nbsp;		Class&lt;?&gt; callerClass = new OpenmrsSecurityManager().getCallerClass(0);</b>
+<b class="fc">&nbsp;		if (!TimerSchedulerTask.class.isAssignableFrom(callerClass)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Scheduler.timer.task.only&quot;, new Object[] { callerClass.getName() });</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// now create a new thread and execute that task in it
+<b class="fc">&nbsp;		DaemonThread executeTaskThread = new DaemonThread() {</b>
+&nbsp;			
+&nbsp;			@Override
+&nbsp;			public void run() {
+<b class="fc">&nbsp;				isDaemonThread.set(true);</b>
+&nbsp;				
+&nbsp;				try {
+<b class="fc">&nbsp;					Context.openSession();</b>
+<b class="fc">&nbsp;					TimerSchedulerTask.execute(task);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					exceptionThrown = e;</b>
+&nbsp;				}
+&nbsp;				finally {
+<b class="nc">&nbsp;					try {</b>
+<b class="fc">&nbsp;						Context.closeSession();</b>
+&nbsp;					} finally {
+<b class="fc">&nbsp;						isDaemonThread.remove();</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;			}
+&nbsp;		};
+&nbsp;		
+<b class="fc">&nbsp;		executeTaskThread.start();</b>
+&nbsp;		
+&nbsp;		// wait for the &quot;executeTaskThread&quot; thread to finish
+&nbsp;		try {
+<b class="fc">&nbsp;			executeTaskThread.join();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InterruptedException e) {</b>
+&nbsp;			// ignore
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (executeTaskThread.exceptionThrown != null) {</b>
+<b class="nc">&nbsp;			throw executeTaskThread.exceptionThrown;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Call this method if you are inside a Daemon thread (for example in a Module activator or a
+&nbsp;	 * scheduled task) and you want to start up a new parallel Daemon thread. You may only call this
+&nbsp;	 * method from a Daemon thread.
+&nbsp;	 *
+&nbsp;	 * @param runnable what to run in a new thread
+&nbsp;	 * @return the newly spawned {@link Thread}
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error if called from a non daemon thread
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw error if called from a daemon thread
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;squid:S1217&quot;)
+&nbsp;	public static Thread runInNewDaemonThread(final Runnable runnable) {
+&nbsp;		// make sure we&#39;re already in a daemon thread
+<b class="fc">&nbsp;		if (!isDaemonThread()) {</b>
+<b class="fc">&nbsp;			throw new APIAuthenticationException(&quot;Only daemon threads can spawn new daemon threads&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// we should consider making DaemonThread public, so the caller can access returnedObject and exceptionThrown
+<b class="fc">&nbsp;		DaemonThread thread = new DaemonThread() {</b>
+&nbsp;			
+&nbsp;			@Override
+&nbsp;			public void run() {
+<b class="fc">&nbsp;				isDaemonThread.set(true);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					Context.openSession();</b>
+&nbsp;					//Suppressing sonar issue &quot;squid:S1217&quot;
+&nbsp;					//We intentionally do not start a new thread yet, rather wrap the run call in a session.
+<b class="fc">&nbsp;					runnable.run();</b>
+&nbsp;				}
+&nbsp;				finally {
+<b class="nc">&nbsp;					try {</b>
+<b class="fc">&nbsp;						Context.closeSession();</b>
+&nbsp;					} finally {
+<b class="fc">&nbsp;						isDaemonThread.remove();</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;		
+<b class="fc">&nbsp;		thread.start();</b>
+<b class="fc">&nbsp;		return thread;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return true if the current thread was started by this class and so is a daemon thread that
+&nbsp;	 *         has all privileges
+&nbsp;	 * @see Context#hasPrivilege(String)
+&nbsp;	 */
+&nbsp;	public static boolean isDaemonThread() {
+<b class="fc">&nbsp;		Boolean b = isDaemonThread.get();</b>
+<b class="fc">&nbsp;		if (b == null) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return b;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Calls the {@link OpenmrsService#onStartup()} method, as a daemon, for an instance
+&nbsp;	 * implementing the {@link OpenmrsService} interface.
+&nbsp;	 *
+&nbsp;	 * @param service instance implementing the {@link OpenmrsService} interface.
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static void runStartupForService(final OpenmrsService service) throws ModuleException {
+&nbsp;		
+<b class="fc">&nbsp;		DaemonThread onStartupThread = new DaemonThread() {</b>
+&nbsp;			
+&nbsp;			@Override
+&nbsp;			public void run() {
+<b class="fc">&nbsp;				isDaemonThread.set(true);</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					Context.openSession();</b>
+<b class="fc">&nbsp;					service.onStartup();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+<b class="nc">&nbsp;					exceptionThrown = e;</b>
+&nbsp;				}
+&nbsp;				finally {
+<b class="nc">&nbsp;					try {</b>
+<b class="fc">&nbsp;						Context.closeSession();</b>
+&nbsp;					} finally {
+<b class="fc">&nbsp;						isDaemonThread.remove();</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;		
+<b class="fc">&nbsp;		onStartupThread.start();</b>
+&nbsp;		
+&nbsp;		// wait for the &quot;onStartup&quot; thread to finish
+&nbsp;		try {
+<b class="fc">&nbsp;			onStartupThread.join();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InterruptedException e) {</b>
+&nbsp;			// ignore
+<b class="nc">&nbsp;			log.error(&quot;Thread was interrupted&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (onStartupThread.exceptionThrown != null) {</b>
+<b class="nc">&nbsp;			if (onStartupThread.exceptionThrown instanceof ModuleException) {</b>
+<b class="nc">&nbsp;				throw (ModuleException) onStartupThread.exceptionThrown;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new ModuleException(&quot;Unable to run onStartup() method as Daemon&quot;, onStartupThread.exceptionThrown);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes the given runnable in a new thread that is authenticated as the daemon user.
+&nbsp;	 *
+&nbsp;	 * @param runnable an object implementing the {@link Runnable} interface.
+&nbsp;	 * @param token the token required to run code as the daemon user
+&nbsp;	 * @return the newly spawned {@link Thread}
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;squid:S1217&quot;)
+&nbsp;	public static Thread runInDaemonThread(final Runnable runnable, DaemonToken token) {
+<b class="nc">&nbsp;		if (!ModuleFactory.isTokenValid(token)) {</b>
+<b class="nc">&nbsp;			throw new ContextAuthenticationException(&quot;Invalid token &quot; + token);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		DaemonThread thread = new DaemonThread() {</b>
+&nbsp;			
+&nbsp;			@Override
+&nbsp;			public void run() {
+<b class="nc">&nbsp;				isDaemonThread.set(true);</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					Context.openSession();</b>
+&nbsp;					//Suppressing sonar issue &quot;squid:S1217&quot;
+&nbsp;					//We intentionally do not start a new thread yet, rather wrap the run call in a session.
+<b class="nc">&nbsp;					runnable.run();</b>
+&nbsp;				}
+&nbsp;				finally {
+<b class="nc">&nbsp;					try {</b>
+<b class="nc">&nbsp;						Context.closeSession();</b>
+&nbsp;					} finally {
+<b class="nc">&nbsp;						isDaemonThread.remove();</b>
+<b class="nc">&nbsp;					}</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;		
+<b class="nc">&nbsp;		thread.start();</b>
+<b class="nc">&nbsp;		return thread;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes the given runnable in a new thread that is authenticated as the daemon user and wait
+&nbsp;	 * for the thread to finish.
+&nbsp;	 *
+&nbsp;	 * @param runnable an object implementing the {@link Runnable} interface.
+&nbsp;	 * @param token the token required to run code as the daemon user
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public static void runInDaemonThreadAndWait(final Runnable runnable, DaemonToken token) {
+<b class="nc">&nbsp;		Thread daemonThread = runInDaemonThread(runnable, token);</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			daemonThread.join();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InterruptedException e) {</b>
+&nbsp;			//Ignore
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Thread class used by the {@link Daemon#startModule(Module)} and
+&nbsp;	 * {@link Daemon#executeScheduledTask(Task)} methods so that the returned object and the
+&nbsp;	 * exception thrown can be returned to calling class
+&nbsp;	 */
+<b class="fc">&nbsp;	protected static class DaemonThread extends Thread {</b>
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * The object returned from the method called in {@link #run()}
+&nbsp;		 */
+<b class="fc">&nbsp;		protected Object returnedObject = null;</b>
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * The exception thrown (if any) by the method called in {@link #run()}
+&nbsp;		 */
+<b class="fc">&nbsp;		protected Exception exceptionThrown = null;</b>
+&nbsp;		
+&nbsp;		/**
+&nbsp;		 * Gets the exception thrown (if any) by the method called in {@link #run()}
+&nbsp;		 *
+&nbsp;		 * @return the thrown exception (if any).
+&nbsp;		 */
+&nbsp;		public Exception getExceptionThrown() {
+<b class="nc">&nbsp;			return exceptionThrown;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether user is Daemon.
+&nbsp;	 * However this is not the preferred method for checking to see if the current thread is a daemon thread,
+&nbsp;	 * 				rather use Daemon.isDeamonThread().
+&nbsp;	 * isDaemonThread is preferred for checking to see if you are in that thread or if the current thread is daemon.
+&nbsp;	 *
+&nbsp;	 * @param user user whom we are checking if daemon
+&nbsp;	 * @return true if user is Daemon
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true for a daemon user
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the user is not a daemon
+&nbsp;	 */
+&nbsp;	public static boolean isDaemonUser(User user) {
+<b class="fc">&nbsp;		return DAEMON_USER_UUID.equals(user.getUuid());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the current thread daemon user or null if not assigned
+&nbsp;	 * @since 2.0.0, 1.12.0, 1.11.6, 1.10.4, 1.9.11
+&nbsp;	 */
+&nbsp;	public static User getDaemonThreadUser() {
+<b class="fc">&nbsp;		if (isDaemonThread()) {</b>
+<b class="fc">&nbsp;			User user = daemonThreadUser.get();</b>
+<b class="fc">&nbsp;			if (user == null) {</b>
+<b class="fc">&nbsp;				user = Context.getContextDAO().getUserByUuid(DAEMON_USER_UUID);</b>
+<b class="fc">&nbsp;				daemonThreadUser.set(user);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return user;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public static String getDaemonUserUuid() {
+<b class="fc">&nbsp;		return DAEMON_USER_UUID;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

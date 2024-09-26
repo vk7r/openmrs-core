@@ -1,0 +1,210 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CodedOrFreeText</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: CodedOrFreeText (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CodedOrFreeText</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import javax.persistence.Embeddable;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;
+&nbsp;/**
+&nbsp; * A Concept object can represent either a question or an answer to a data point. That data point is
+&nbsp; * usually an {@link Obs}. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * ConceptName is the real world term used to express a Concept within the idiom of a particular
+&nbsp; * locale. &lt;br&gt;
+&nbsp; * The purpose of this class therefore is to record information of a single encounter by taking the
+&nbsp; * concept and concept name or a string for a concept that may not be in the database.
+&nbsp; * 
+&nbsp; * @since 2.2
+&nbsp; */
+&nbsp;@Embeddable
+&nbsp;public class CodedOrFreeText {
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	Concept coded;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	ConceptName specificName;
+&nbsp;	
+&nbsp;	String nonCoded;
+&nbsp;	
+<b class="fc">&nbsp;	public CodedOrFreeText() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor with concept, concept name and manually written concept name to save
+&nbsp;	 *
+&nbsp;	 * @param coded the coded concept to set
+&nbsp;	 * @param specificName the specific name of the coded concept to set
+&nbsp;	 * @param nonCoded the manually written string name of the concept to set
+&nbsp;	 */
+<b class="fc">&nbsp;	public CodedOrFreeText(Concept coded, ConceptName specificName, String nonCoded) {</b>
+<b class="fc">&nbsp;		this.coded = coded;</b>
+<b class="fc">&nbsp;		this.specificName = specificName;</b>
+<b class="fc">&nbsp;		this.nonCoded = nonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the coded concept
+&nbsp;	 *
+&nbsp;	 * @return coded concept
+&nbsp;	 */
+&nbsp;	public Concept getCoded() {
+<b class="fc">&nbsp;		return coded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the coded concept
+&nbsp;	 *
+&nbsp;	 * @param coded the coded concept to set.
+&nbsp;	 */
+&nbsp;	public void setCoded(Concept coded) {
+<b class="fc">&nbsp;		this.coded = coded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the specific name of the coded concept
+&nbsp;	 *
+&nbsp;	 * @return specific name of the coded concept.
+&nbsp;	 */
+&nbsp;	public ConceptName getSpecificName() {
+<b class="fc">&nbsp;		return specificName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the specific name
+&nbsp;	 *
+&nbsp;	 * @param specificName the specific name of the coded concept to set.
+&nbsp;	 */
+&nbsp;	public void setSpecificName(ConceptName specificName) {
+<b class="fc">&nbsp;		this.specificName = specificName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the manually written string name of the concept
+&nbsp;	 *
+&nbsp;	 * @return manually written string name of the concept.
+&nbsp;	 */
+&nbsp;	public String getNonCoded() {
+<b class="fc">&nbsp;		return nonCoded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the manually written string concept name
+&nbsp;	 *
+&nbsp;	 * @param nonCoded the manually written string name of the concept to set.
+&nbsp;	 */
+&nbsp;	public void setNonCoded(String nonCoded) {
+<b class="fc">&nbsp;		this.nonCoded = nonCoded;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

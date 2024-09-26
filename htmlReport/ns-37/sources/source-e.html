@@ -1,0 +1,387 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > GenerateUuid</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: GenerateUuid (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GenerateUuid</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,9%
+  </span>
+  <span class="absValue">
+    (53/90)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;/**
+&nbsp; * Generates UUIDs for all rows in all tables in the tableNames parameter. &lt;br/&gt;
+&nbsp; * If run on MySQL, it generates SQL statements using the in-built uuid() MySQL function, otherwise
+&nbsp; * it uses Java&#39;s {@link UUID} class, which is less efficient.&lt;br/&gt;
+&nbsp; * &lt;br/&gt;
+&nbsp; * Expects parameter: &quot;tableNames&quot; : whitespace delimited list of table names to add &lt;br/&gt;
+&nbsp; * Expects parameter: &quot;columnName&quot; : name of the column to change. Default: &quot;uuid&quot; &lt;br/&gt;
+&nbsp; * Expects parameter: &quot;idExceptions&quot; : list of id columns that don&#39;t follow the standard naming
+&nbsp; * convention. Should be a pipe-separated list of key=value, where key is the name an id column
+&nbsp; * would have by convention, and value is the name it actually has. In this example the id of the
+&nbsp; * field_answer table is &#39;field_id&#39; rather than &#39;field_answer_id&#39;, etc:
+&nbsp; * &quot;field_answer_id=field_id|role_id=role|privilege_id=privilege&quot;
+&nbsp; */
+<b class="fc">&nbsp;public class GenerateUuid implements CustomTaskChange {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(GenerateUuid.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Integer TRANSACTION_BATCH_SIZE_LIMIT = 512;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The &quot;tableNames&quot; parameter defined in the liquibase xml changeSet element that is calling this
+&nbsp;	 * class (whitespace separated).
+&nbsp;	 */
+<b class="fc">&nbsp;	private String tableNames = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The &quot;columnName&quot; parameter defined in the liquibase xml changeSet element that is calling this
+&nbsp;	 * class
+&nbsp;	 */
+<b class="fc">&nbsp;	private String columnName = &quot;uuid&quot;;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Key-value pairs of table name ids that don&#39;t follow the convention. The key is what the
+&nbsp;	 * convention would be and the value is what it actually is: &lt;br&gt;
+&nbsp;	 * e.g. &quot;field_answer_id=field_id|role_id=role|privilege_id=privilege&quot;
+&nbsp;	 */
+<b class="fc">&nbsp;	private String idExceptions = &quot;&quot;;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set by the {@link #setUp()} method from the value of the {@link #idExceptions} parameter
+&nbsp;	 */
+<b class="fc">&nbsp;	private Map&lt;String, String&gt; idExceptionsMap = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set by the {@link #setUp()} method from the value of the {@link #tableNames} parameter
+&nbsp;	 */
+<b class="fc">&nbsp;	private String[] tableNamesArray = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The sql statement to select out the ids. Generated in the {@link #setUp()} method.
+&nbsp;	 */
+&nbsp;	private String genericIdSql;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The sql statement to update the rows with the uuids. Generated in the {@link #setUp()} method.
+&nbsp;	 */
+&nbsp;	private String genericUpdateSql;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds UUIDs to all rows for the specified tables. It generates UUIDs using Java and updates one
+&nbsp;	 * row at a time, thus it is not very efficient. When running on the MySQL database, we generate SQL
+&nbsp;	 * statements using the uuid MySQL function, which is much faster.
+&nbsp;	 *
+&nbsp;	 * @see liquibase.change.custom.CustomTaskChange#execute(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="fc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+<b class="fc">&nbsp;		boolean initialAutoCommit = true;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			initialAutoCommit = connection.getAutoCommit();</b>
+<b class="fc">&nbsp;			connection.setAutoCommit(false);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (&quot;mysql&quot;.equals(database.getShortName()) || &quot;mariadb&quot;.equals(database.getShortName())) {</b>
+<b class="nc">&nbsp;				String updateSql = &quot;update %s set &quot; + columnName + &quot; = uuid() where &quot; + columnName + &quot; is null&quot;;</b>
+<b class="nc">&nbsp;				for (String tablename : tableNamesArray) {</b>
+<b class="nc">&nbsp;					String rawSql = String.format(updateSql, tablename);</b>
+&nbsp;					
+<b class="nc">&nbsp;					Statement statement = null;</b>
+&nbsp;					try {
+<b class="nc">&nbsp;						statement = connection.createStatement();</b>
+<b class="nc">&nbsp;						statement.execute(rawSql);</b>
+<b class="nc">&nbsp;						statement.close();</b>
+<b class="nc">&nbsp;						connection.commit();</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (SQLException e) {</b>
+<b class="nc">&nbsp;						throw new CustomChangeException(e);</b>
+&nbsp;					}
+&nbsp;					finally {
+<b class="nc">&nbsp;						if (statement != null) {</b>
+&nbsp;							try {
+<b class="nc">&nbsp;								statement.close();</b>
+&nbsp;							}
+<b class="nc">&nbsp;							catch (SQLException e) {</b>
+<b class="nc">&nbsp;								log.warn(&quot;Failed to close the statement&quot;, e);</b>
+<b class="nc">&nbsp;							}</b>
+&nbsp;						}
+<b class="nc">&nbsp;					}</b>
+&nbsp;					
+&nbsp;				}
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				int transactionBatchSize = 0;</b>
+&nbsp;				// loop over all tables
+<b class="fc">&nbsp;				for (String tableName : tableNamesArray) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						Statement idStatement = null;</b>
+<b class="fc">&nbsp;						PreparedStatement updateStatement = null;</b>
+&nbsp;						try {
+<b class="fc">&nbsp;							String idSql = genericIdSql.replaceAll(&quot;tablename&quot;, tableName);</b>
+<b class="fc">&nbsp;							String updateSql = genericUpdateSql.replaceAll(&quot;tablename&quot;, tableName);</b>
+&nbsp;							
+&nbsp;							// hacky way to deal with tables that don&#39;t follow the tableNam_id convention
+<b class="fc">&nbsp;							for (Map.Entry&lt;String, String&gt; idException : idExceptionsMap.entrySet()) {</b>
+<b class="fc">&nbsp;								idSql = idSql.replaceFirst(idException.getKey(), idException.getValue());</b>
+<b class="fc">&nbsp;								updateSql = updateSql.replaceFirst(idException.getKey(), idException.getValue());</b>
+<b class="fc">&nbsp;							}</b>
+&nbsp;							
+<b class="fc">&nbsp;							idStatement = connection.createStatement();</b>
+<b class="fc">&nbsp;							updateStatement = connection.prepareStatement(updateSql);</b>
+&nbsp;							
+<b class="fc">&nbsp;							ResultSet ids = idStatement.executeQuery(idSql);</b>
+<b class="fc">&nbsp;							while (ids.next()) {</b>
+<b class="nc">&nbsp;								updateStatement.setObject(2, ids.getObject(1)); // set the primary key number</b>
+<b class="nc">&nbsp;								updateStatement.setString(1, UUID.randomUUID().toString()); // set the uuid for this row</b>
+<b class="nc">&nbsp;								updateStatement.executeUpdate();</b>
+&nbsp;								
+<b class="nc">&nbsp;								transactionBatchSize++;</b>
+<b class="nc">&nbsp;								if (transactionBatchSize &gt; TRANSACTION_BATCH_SIZE_LIMIT) {</b>
+<b class="nc">&nbsp;									transactionBatchSize = 0;</b>
+<b class="nc">&nbsp;									connection.commit();</b>
+&nbsp;								}
+&nbsp;							}
+&nbsp;							
+<b class="fc">&nbsp;							idStatement.close();</b>
+<b class="fc">&nbsp;							updateStatement.close();</b>
+&nbsp;						}
+&nbsp;						finally {
+<b class="fc">&nbsp;							if (idStatement != null) {</b>
+&nbsp;								try {
+<b class="fc">&nbsp;									idStatement.close();</b>
+&nbsp;								}
+<b class="nc">&nbsp;								catch (SQLException e) {</b>
+<b class="nc">&nbsp;									log.warn(&quot;Failed to close statement&quot;, e);</b>
+<b class="fc">&nbsp;								}</b>
+&nbsp;							}
+<b class="fc">&nbsp;							if (updateStatement != null) {</b>
+&nbsp;								try {
+<b class="fc">&nbsp;									updateStatement.close();</b>
+&nbsp;								}
+<b class="nc">&nbsp;								catch (SQLException e) {</b>
+<b class="nc">&nbsp;									log.warn(&quot;Failed to close the statement&quot;, e);</b>
+<b class="fc">&nbsp;								}</b>
+&nbsp;							}
+<b class="nc">&nbsp;						}</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;						throw new CustomChangeException(&quot;Unable to set uuid on table: &quot; + tableName, e);</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				connection.commit();</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			connection.setAutoCommit(initialAutoCommit);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			try {</b>
+<b class="fc">&nbsp;				connection.setAutoCommit(initialAutoCommit);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (DatabaseException e) {</b>
+&nbsp;				//silently ignore so that the actual error is not hidden
+<b class="fc">&nbsp;			}</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="fc">&nbsp;		return &quot;Finished adding uuids to all rows in all tables&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor fileOpener) {
+&nbsp;		
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the values of the parameters passed in and set them to the local variables on this class.
+&nbsp;	 *
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(tableNames)) {</b>
+<b class="nc">&nbsp;			throw new SetupException(&quot;At least one table name in the &#39;tableNames&#39; parameter is required&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		tableNamesArray = StringUtils.split(tableNames);</b>
+<b class="fc">&nbsp;		idExceptionsMap = OpenmrsUtil.parseParameterList(idExceptions);</b>
+&nbsp;		
+<b class="fc">&nbsp;		genericIdSql = &quot;select tablename_id from tablename where columnName is null&quot;;</b>
+<b class="fc">&nbsp;		genericIdSql = genericIdSql.replace(&quot;columnName&quot;, columnName);</b>
+&nbsp;		
+<b class="fc">&nbsp;		genericUpdateSql = &quot;update tablename set columnName = ? where tablename_id = ?&quot;;</b>
+<b class="fc">&nbsp;		genericUpdateSql = genericUpdateSql.replace(&quot;columnName&quot;, columnName);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="fc">&nbsp;		return new ValidationErrors();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is called by liquibase to set the parameter &quot;tableNames&quot; onto this change.
+&nbsp;	 *
+&nbsp;	 * @param tableNames the tableNames to set
+&nbsp;	 */
+&nbsp;	public void setTableNames(String tableNames) {
+<b class="fc">&nbsp;		this.tableNames = tableNames;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is called by liquibase to set the parameter &quot;columnName&quot; onto this change.
+&nbsp;	 *
+&nbsp;	 * @param columnName the columnName to set
+&nbsp;	 */
+&nbsp;	public void setColumnName(String columnName) {
+<b class="fc">&nbsp;		this.columnName = columnName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Way to specify the table id columns that don&#39;t follow the table_name.table_name_id pattern
+&nbsp;	 *
+&nbsp;	 * @param idExceptions
+&nbsp;	 */
+&nbsp;	public void setIdExceptions(String idExceptions) {
+<b class="fc">&nbsp;		this.idExceptions = idExceptions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LuceneAnalyzerFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate.search</a>
+</div>
+
+<h1>Coverage Summary for Class: LuceneAnalyzerFactory (org.openmrs.api.db.hibernate.search)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LuceneAnalyzerFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (31/31)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate.search;
+&nbsp;
+&nbsp;import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
+&nbsp;import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+&nbsp;import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
+&nbsp;import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
+&nbsp;import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
+&nbsp;import org.apache.lucene.analysis.ngram.NGramFilterFactory;
+&nbsp;import org.apache.lucene.analysis.standard.ClassicFilterFactory;
+&nbsp;import org.apache.lucene.analysis.phonetic.PhoneticFilterFactory;
+&nbsp;import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+&nbsp;import org.hibernate.search.annotations.Factory;
+&nbsp;import org.hibernate.search.cfg.SearchMapping;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides a Lucene SearchMapping for any objects in openmrs-core.
+&nbsp; * 
+&nbsp; * Objects such as PersonName can use the analyzers provided by this mapping to make their fields searchable.
+&nbsp; * This class defines some default analyzers:
+&nbsp; * 	phraseAnalyzer, which allows searching for an entire phrase, including whitespace
+&nbsp; * 	startAnalyzer, which allows searching for tokens that match at the beginning
+&nbsp; * 	exactAnalyzer, which allows searching for tokens that are identical
+&nbsp; * 	anywhereAnalyzer, which allows searching for text within tokens
+&nbsp; *
+&nbsp; * @since 2.4.0
+&nbsp; */
+<b class="fc">&nbsp;public class LuceneAnalyzerFactory {</b>
+&nbsp;	@Factory
+&nbsp;	public SearchMapping getSearchMapping() {
+<b class="fc">&nbsp;		SearchMapping mapping = new SearchMapping();</b>
+<b class="fc">&nbsp;		mapping</b>
+<b class="fc">&nbsp;			.analyzerDef(LuceneAnalyzers.PHRASE_ANALYZER, KeywordTokenizerFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ClassicFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(LowerCaseFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ASCIIFoldingFilterFactory.class);</b>
+<b class="fc">&nbsp;		mapping.analyzerDef(LuceneAnalyzers.EXACT_ANALYZER, WhitespaceTokenizerFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ClassicFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(LowerCaseFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ASCIIFoldingFilterFactory.class);</b>
+<b class="fc">&nbsp;		mapping.analyzerDef(LuceneAnalyzers.START_ANALYZER, WhitespaceTokenizerFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ClassicFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(LowerCaseFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ASCIIFoldingFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(EdgeNGramFilterFactory.class)</b>
+<b class="fc">&nbsp;			.param(&quot;minGramSize&quot;, &quot;2&quot;)</b>
+<b class="fc">&nbsp;			.param(&quot;maxGramSize&quot;, &quot;20&quot;);</b>
+<b class="fc">&nbsp;		mapping.analyzerDef(LuceneAnalyzers.ANYWHERE_ANALYZER, WhitespaceTokenizerFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ClassicFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(LowerCaseFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ASCIIFoldingFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(NGramFilterFactory.class)</b>
+<b class="fc">&nbsp;			.param(&quot;minGramSize&quot;, &quot;2&quot;)</b>
+<b class="fc">&nbsp;			.param(&quot;maxGramSize&quot;, &quot;20&quot;);</b>
+<b class="fc">&nbsp;		mapping.analyzerDef(LuceneAnalyzers.SOUNDEX_ANALYZER, StandardTokenizerFactory.class)</b>
+<b class="fc">&nbsp;			.filter(ClassicFilterFactory.class) </b>
+<b class="fc">&nbsp;			.filter(LowerCaseFilterFactory.class)</b>
+<b class="fc">&nbsp;			.filter(PhoneticFilterFactory.class)</b>
+<b class="fc">&nbsp;			.param(&quot;encoder&quot;, &quot;Soundex&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return mapping;</b>
+&nbsp;	}
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

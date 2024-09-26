@@ -1,0 +1,2218 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    99,4%
+  </span>
+  <span class="absValue">
+    (165/166)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93%
+  </span>
+  <span class="absValue">
+    (478/514)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;import java.lang.reflect.InvocationTargetException;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.apache.commons.beanutils.BeanUtils;
+&nbsp;import org.apache.commons.collections.CollectionUtils;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.math.NumberUtils;
+&nbsp;import org.hibernate.Hibernate;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptAnswer;
+&nbsp;import org.openmrs.ConceptAttribute;
+&nbsp;import org.openmrs.ConceptAttributeType;
+&nbsp;import org.openmrs.ConceptClass;
+&nbsp;import org.openmrs.ConceptComplex;
+&nbsp;import org.openmrs.ConceptDatatype;
+&nbsp;import org.openmrs.ConceptDescription;
+&nbsp;import org.openmrs.ConceptMap;
+&nbsp;import org.openmrs.ConceptMapType;
+&nbsp;import org.openmrs.ConceptName;
+&nbsp;import org.openmrs.ConceptNameTag;
+&nbsp;import org.openmrs.ConceptNumeric;
+&nbsp;import org.openmrs.ConceptProposal;
+&nbsp;import org.openmrs.ConceptReferenceTerm;
+&nbsp;import org.openmrs.ConceptReferenceTermMap;
+&nbsp;import org.openmrs.ConceptSearchResult;
+&nbsp;import org.openmrs.ConceptSet;
+&nbsp;import org.openmrs.ConceptSource;
+&nbsp;import org.openmrs.ConceptStopWord;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.DrugIngredient;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.AdministrationService;
+&nbsp;import org.openmrs.api.ConceptInUseException;
+&nbsp;import org.openmrs.api.ConceptNameInUseException;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.ConceptStopWordException;
+&nbsp;import org.openmrs.api.ConceptsLockedException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.ConceptDAO;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.openmrs.validator.ValidateUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.cache.annotation.CacheEvict;
+&nbsp;import org.springframework.cache.annotation.Cacheable;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default Implementation of ConceptService service layer classes
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.ConceptService to access these methods
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class ConceptServiceImpl extends BaseOpenmrsService implements ConceptService {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ConceptServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	private ConceptDAO dao;
+&nbsp;	
+&nbsp;	private static Concept trueConcept;
+&nbsp;	
+&nbsp;	private static Concept falseConcept;
+&nbsp;	
+&nbsp;	private static Concept unknownConcept;
+&nbsp;
+&nbsp;	private static final String ERROR_MESSAGE = &quot;Error generated&quot;;
+&nbsp;
+&nbsp;	private static final String CONCEPT_IDS_BY_MAPPING_CACHE_NAME = &quot;conceptIdsByMapping&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#setConceptDAO(org.openmrs.api.db.ConceptDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setConceptDAO(ConceptDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConcept(org.openmrs.Concept)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept with new conceptID if creating new concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the concept with same conceptID if updating existing concept
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; leave preferred name preferred if set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set default preferred name to fully specified first
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set default preferred name to short or index terms
+&nbsp;     * &lt;strong&gt;Should&lt;/strong&gt; force set flag if set members exist
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@CacheEvict(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME, allEntries = true)
+&nbsp;	public Concept saveConcept(Concept concept) throws APIException {
+<b class="fc">&nbsp;		ensureConceptMapTypeIsSet(concept);</b>
+&nbsp;
+<b class="fc">&nbsp;		CustomDatatypeUtil.saveAttributesIfNecessary(concept);</b>
+&nbsp;
+&nbsp;		// make sure the administrator hasn&#39;t turned off concept editing
+<b class="fc">&nbsp;		checkIfLocked();</b>
+<b class="fc">&nbsp;		checkIfDatatypeCanBeChanged(concept);</b>
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;ConceptName&gt; changedConceptNames = null;</b>
+<b class="fc">&nbsp;		Map&lt;String, ConceptName&gt; uuidClonedConceptNameMap = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (concept.getConceptId() != null) {</b>
+<b class="fc">&nbsp;			uuidClonedConceptNameMap = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (ConceptName conceptName : concept.getNames()) {</b>
+&nbsp;				// ignore newly added names
+<b class="fc">&nbsp;				if (conceptName.getConceptNameId() != null) {</b>
+<b class="fc">&nbsp;					ConceptName clone = cloneConceptName(conceptName);</b>
+<b class="fc">&nbsp;					clone.setConceptNameId(null);</b>
+<b class="fc">&nbsp;					uuidClonedConceptNameMap.put(conceptName.getUuid(), clone);</b>
+&nbsp;					
+<b class="fc">&nbsp;					if (hasNameChanged(conceptName)) {</b>
+<b class="fc">&nbsp;						if (changedConceptNames == null) {</b>
+<b class="fc">&nbsp;							changedConceptNames = new ArrayList&lt;&gt;();</b>
+&nbsp;						}
+<b class="fc">&nbsp;						changedConceptNames.add(conceptName);</b>
+&nbsp;					} else {
+&nbsp;						// put back the concept name id
+<b class="fc">&nbsp;						clone.setConceptNameId(conceptName.getConceptNameId());</b>
+&nbsp;						// Use the cloned version
+&nbsp;						try {
+<b class="fc">&nbsp;							BeanUtils.copyProperties(conceptName, clone);</b>
+&nbsp;						}
+<b class="nc">&nbsp;						catch (IllegalAccessException | InvocationTargetException e) {</b>
+<b class="nc">&nbsp;							log.error(ERROR_MESSAGE, e);</b>
+<b class="fc">&nbsp;						}</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (CollectionUtils.isNotEmpty(changedConceptNames)) {</b>
+<b class="fc">&nbsp;			for (ConceptName changedName : changedConceptNames) {</b>
+&nbsp;				// void old concept name
+<b class="fc">&nbsp;				changedName.setVoided(true);</b>
+<b class="fc">&nbsp;				changedName.setDateVoided(new Date());</b>
+<b class="fc">&nbsp;				changedName.setVoidedBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;				changedName.setVoidReason(Context.getMessageSourceService().getMessage(&quot;Concept.name.voidReason.nameChanged&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;				makeVoidedNameSynonym(changedName);</b>
+<b class="fc">&nbsp;				makeLocaleNotPreferred(changedName);</b>
+&nbsp;				
+&nbsp;				// create a new concept name from the matching cloned
+&nbsp;				// conceptName
+<b class="fc">&nbsp;				ConceptName clone = uuidClonedConceptNameMap.get(changedName.getUuid());</b>
+<b class="fc">&nbsp;				clone.setUuid(UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;				clone.setDateCreated(null);</b>
+<b class="fc">&nbsp;				clone.setCreator(null);</b>
+<b class="fc">&nbsp;				concept.addName(clone);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		ensurePreferredNameForLocale(concept);</b>
+<b class="fc">&nbsp;		logConceptChangedData(concept);</b>
+&nbsp;		
+&nbsp;		// force isSet when concept has members
+<b class="fc">&nbsp;		if (!concept.getSet() &amp;&amp; (!concept.getSetMembers().isEmpty())) {</b>
+<b class="fc">&nbsp;			concept.setSet(true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return dao.saveConcept(concept);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void ensureConceptMapTypeIsSet(Concept concept) {
+<b class="fc">&nbsp;		ConceptMapType defaultConceptMapType = null;</b>
+<b class="fc">&nbsp;		for (ConceptMap map : concept.getConceptMappings()) {</b>
+<b class="fc">&nbsp;			if (map.getConceptMapType() == null) {</b>
+<b class="nc">&nbsp;				if (defaultConceptMapType == null) {</b>
+<b class="nc">&nbsp;					defaultConceptMapType = Context.getConceptService().getDefaultConceptMapType();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				map.setConceptMapType(defaultConceptMapType);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void makeVoidedNameSynonym(ConceptName conceptName) {
+&nbsp;		// Helps to avoid having  multiple fully
+&nbsp;		// specified or preferred names in a locale
+&nbsp;		// in case the name is unvoided
+<b class="fc">&nbsp;		if (!conceptName.isSynonym()) {</b>
+<b class="fc">&nbsp;			conceptName.setConceptNameType(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void makeLocaleNotPreferred(ConceptName conceptName) {
+<b class="fc">&nbsp;		if (conceptName.getLocalePreferred()) {</b>
+<b class="fc">&nbsp;			conceptName.setLocalePreferred(false);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void ensurePreferredNameForLocale(Concept concept) {
+&nbsp;		//Ensure if there&#39;s a name for a locale that at least one suitable name is marked preferred in that locale
+&nbsp;		//Order of preference is:
+&nbsp;		// 1) any name that concept.getPreferredName returns
+&nbsp;		// 2) fully specified name
+&nbsp;		// 3) any synonym
+&nbsp;		// short name and index terms are never preferred.
+&nbsp;
+<b class="fc">&nbsp;		Set&lt;Locale&gt; checkedLocales = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (ConceptName n : concept.getNames()) {</b>
+<b class="fc">&nbsp;			Locale locale = n.getLocale();</b>
+<b class="fc">&nbsp;			if (checkedLocales.contains(locale)) {</b>
+<b class="fc">&nbsp;				continue; //we&#39;ve already checked this locale</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			//getPreferredName(locale) returns any name marked preferred,
+&nbsp;			//or the fullySpecifiedName even if not marked preferred
+<b class="fc">&nbsp;			ConceptName possiblePreferredName = concept.getPreferredName(locale);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (possiblePreferredName != null) {</b>
+&nbsp;				//do nothing yet, but stick around to setLocalePreferred(true)
+<b class="fc">&nbsp;			} else if (concept.getFullySpecifiedName(locale) != null) {</b>
+<b class="nc">&nbsp;				possiblePreferredName = concept.getFullySpecifiedName(locale);</b>
+<b class="fc">&nbsp;			} else if (!CollectionUtils.isEmpty(concept.getSynonyms(locale))) {</b>
+<b class="fc">&nbsp;				concept.getSynonyms(locale).iterator().next().setLocalePreferred(true);</b>
+&nbsp;			}
+&nbsp;			//index terms are never used as preferred name
+&nbsp;
+<b class="fc">&nbsp;			if (possiblePreferredName != null) { //there may have been none</b>
+<b class="fc">&nbsp;				possiblePreferredName.setLocalePreferred(true);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			checkedLocales.add(locale);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void logConceptChangedData(Concept concept) {
+<b class="fc">&nbsp;		concept.setDateChanged(new Date());</b>
+<b class="fc">&nbsp;		concept.setChangedBy(Context.getAuthenticatedUser());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveDrug(org.openmrs.Drug)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Drug saveDrug(Drug drug) throws APIException {
+<b class="fc">&nbsp;		checkIfLocked();</b>
+<b class="fc">&nbsp;		return dao.saveDrug(drug);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConcept(Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConcept(Concept concept) throws APIException {
+<b class="fc">&nbsp;		checkIfLocked();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (concept.getConceptId() != null) {</b>
+<b class="fc">&nbsp;			for (ConceptName conceptName : concept.getNames()) {</b>
+<b class="fc">&nbsp;				if (hasAnyObservation(conceptName)) {</b>
+<b class="fc">&nbsp;					throw new ConceptNameInUseException(&quot;Can&#39;t delete concept with id : &quot; + concept.getConceptId()</b>
+<b class="fc">&nbsp;					        + &quot; because it has a name &#39;&quot; + conceptName.getName()</b>
+&nbsp;					        + &quot;&#39; which is being used by some observation(s)&quot;);
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		dao.purgeConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#retireConcept(org.openmrs.Concept, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Concept retireConcept(Concept concept, String reason) throws APIException {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(reason)) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(Context.getMessageSourceService().getMessage(&quot;general.voidReason.empty&quot;));</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// only do this if the concept isn&#39;t retired already
+<b class="fc">&nbsp;		if (!concept.getRetired()) {</b>
+<b class="nc">&nbsp;			checkIfLocked();</b>
+&nbsp;			
+<b class="nc">&nbsp;			concept.setRetired(true);</b>
+<b class="nc">&nbsp;			concept.setRetireReason(reason);</b>
+<b class="nc">&nbsp;			return Context.getConceptService().saveConcept(concept);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#retireDrug(org.openmrs.Drug, java.lang.String)
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Drug retireDrug(Drug drug, String reason) throws APIException {
+<b class="fc">&nbsp;		return dao.saveDrug(drug);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#unretireDrug(org.openmrs.Drug)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Drug unretireDrug(Drug drug) throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().saveDrug(drug);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeDrug(org.openmrs.Drug)
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeDrug(Drug drug) throws APIException {
+<b class="fc">&nbsp;		dao.purgeDrug(drug);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConcept(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConcept(Integer conceptId) throws APIException {
+<b class="fc">&nbsp;		return dao.getConcept(conceptId);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptByReference(String conceptRef)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConceptByReference(String conceptRef) {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(conceptRef)) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Concept cpt = null;</b>
+&nbsp;		//check if input is a valid Uuid
+<b class="fc">&nbsp;		if (isValidUuidFormat(conceptRef)) {</b>
+<b class="fc">&nbsp;			cpt = Context.getConceptService().getConceptByUuid(conceptRef);</b>
+<b class="fc">&nbsp;			if (cpt != null) {</b>
+<b class="fc">&nbsp;				return cpt;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		//handle mapping
+<b class="fc">&nbsp;		int idx = conceptRef.indexOf(&quot;:&quot;);</b>
+<b class="fc">&nbsp;		if (idx &gt;= 0 &amp;&amp; idx &lt; conceptRef.length() - 1) {</b>
+<b class="fc">&nbsp;			String conceptSource = conceptRef.substring(0, idx);</b>
+<b class="fc">&nbsp;			String conceptCode = conceptRef.substring(idx + 1);</b>
+<b class="fc">&nbsp;			cpt = Context.getConceptService().getConceptByMapping(conceptCode, conceptSource);</b>
+<b class="fc">&nbsp;			if (cpt != null) {</b>
+<b class="fc">&nbsp;				return cpt;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		//handle id
+<b class="fc">&nbsp;		int conceptId = NumberUtils.toInt(conceptRef, -1);</b>
+<b class="fc">&nbsp;		if (conceptId &gt;= 0) {</b>
+<b class="fc">&nbsp;			cpt = Context.getConceptService().getConcept(conceptId);</b>
+<b class="fc">&nbsp;			if (cpt != null) {</b>
+<b class="fc">&nbsp;				return cpt;</b>
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			//handle name
+<b class="fc">&nbsp;			cpt = Context.getConceptService().getConceptByName(conceptRef);</b>
+<b class="fc">&nbsp;			if (cpt != null) {</b>
+<b class="fc">&nbsp;				return cpt;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		//handle static constant
+<b class="fc">&nbsp;		if (conceptRef.contains(&quot;.&quot;)) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				return getConceptByReference(evaluateStaticConstant(conceptRef));</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (APIException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Unable to translate &#39;{}&#39; into a concept&quot;, conceptRef, e);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return cpt == null ? null : cpt;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptName(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptName getConceptName(Integer conceptNameId) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptName(conceptNameId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptAnswer(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptAnswer getConceptAnswer(Integer conceptAnswerId) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptAnswer(conceptAnswerId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrug(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Drug getDrug(Integer drugId) throws APIException {
+<b class="fc">&nbsp;		return dao.getDrug(drugId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptNumeric(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptNumeric getConceptNumeric(Integer conceptId) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptNumeric(conceptId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptComplex(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptComplex getConceptComplex(Integer conceptId) {
+<b class="fc">&nbsp;		return dao.getConceptComplex(conceptId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConcepts()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getAllConcepts() throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().getAllConcepts(null, true, true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConcepts(java.lang.String, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getAllConcepts(String sortBy, boolean asc, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		String tmpSortBy = sortBy == null ? &quot;conceptId&quot; : sortBy;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getAllConcepts(tmpSortBy, asc, includeRetired);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByName(String name) throws APIException {
+<b class="fc">&nbsp;		return getConcepts(name, Context.getLocale(), true, null, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConceptByName(String name) {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(name)) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getConceptByName(name);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConcept(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConcept(String conceptIdOrName) {
+&nbsp;		Concept c;
+&nbsp;		Integer conceptId;
+&nbsp;		try {
+<b class="fc">&nbsp;			conceptId = Integer.valueOf(conceptIdOrName);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (NumberFormatException nfe) {</b>
+<b class="fc">&nbsp;			conceptId = null;</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (conceptId != null) {</b>
+<b class="fc">&nbsp;			c = Context.getConceptService().getConcept(conceptId);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			c = Context.getConceptService().getConceptByName(conceptIdOrName);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return c;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Generic getConcepts method (used internally) to get concepts matching a on name
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @param loc
+&nbsp;	 * @param searchOnPhrase
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private List&lt;Concept&gt; getConcepts(String name, Locale loc, boolean searchOnPhrase, List&lt;ConceptClass&gt; classes,
+&nbsp;	        List&lt;ConceptDatatype&gt; datatypes) {
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; tmpClasses = classes == null ? new ArrayList&lt;&gt;() : classes;</b>
+<b class="fc">&nbsp;		List&lt;ConceptDatatype&gt; tmpDatatypes = datatypes == null ? new ArrayList&lt;&gt;() : datatypes;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getConcepts(name, loc, searchOnPhrase, tmpClasses, tmpDatatypes);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrug(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Drug getDrug(String drugNameOrId) {
+&nbsp;		Integer drugId;
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			drugId = Integer.valueOf(drugNameOrId);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (NumberFormatException nfe) {</b>
+<b class="fc">&nbsp;			drugId = null;</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (drugId != null) {</b>
+<b class="nc">&nbsp;			return Context.getConceptService().getDrug(drugId);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			List&lt;Drug&gt; drugs = dao.getDrugs(drugNameOrId, null, false);</b>
+<b class="fc">&nbsp;			if (drugs.size() &gt; 1) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;more than one drug name returned with name:&quot; + drugNameOrId);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (drugs.isEmpty()) {</b>
+<b class="fc">&nbsp;				return null;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return drugs.get(0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllDrugs()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getAllDrugs() {
+<b class="fc">&nbsp;		return Context.getConceptService().getAllDrugs(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllDrugs(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getAllDrugs(boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getDrugs(null, null, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getDrugsByConcept(Concept concept) {
+<b class="fc">&nbsp;		return dao.getDrugs(null, concept, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugs(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getDrugs(String phrase) {
+<b class="fc">&nbsp;		List&lt;Drug&gt; drugs = new ArrayList&lt;&gt;();</b>
+&nbsp;		// trying to treat search phrase as drug id
+&nbsp;		try {
+<b class="fc">&nbsp;			Integer drugId = Integer.parseInt(phrase);</b>
+<b class="fc">&nbsp;			Drug targetDrug = Context.getConceptService().getDrug(drugId);</b>
+&nbsp;			// if drug was found add it to result
+<b class="fc">&nbsp;			if (targetDrug != null) {</b>
+<b class="fc">&nbsp;				drugs.add(targetDrug);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		catch (NumberFormatException e) {</b>
+&nbsp;			// do nothing
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// also try to treat search phrase as drug concept id
+&nbsp;		try {
+<b class="fc">&nbsp;			Integer conceptId = Integer.parseInt(phrase);</b>
+<b class="fc">&nbsp;			Concept targetConcept = Context.getConceptService().getConcept(conceptId);</b>
+<b class="fc">&nbsp;			if (targetConcept != null) {</b>
+<b class="fc">&nbsp;				drugs.addAll(Context.getConceptService().getDrugsByConcept(targetConcept));</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		catch (NumberFormatException e) {</b>
+&nbsp;			// do nothing
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		drugs.addAll(dao.getDrugs(phrase));</b>
+<b class="fc">&nbsp;		return drugs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByClass(org.openmrs.ConceptClass)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByClass(ConceptClass cc) {		
+<b class="fc">&nbsp;		return dao.getConceptsByClass(cc);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptClasses(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptClass&gt; getAllConceptClasses(boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getAllConceptClasses(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptClass(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptClass getConceptClass(Integer i) {
+<b class="fc">&nbsp;		return dao.getConceptClass(i);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptClassByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptClass getConceptClassByName(String name) {
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; ccList = dao.getConceptClasses(name);</b>
+<b class="fc">&nbsp;		if (ccList.size() &gt; 1) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;More than one ConceptClass found with name: &quot; + name);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (ccList.size() == 1) {</b>
+<b class="fc">&nbsp;			return ccList.get(0);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptClasses(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptClass&gt; getAllConceptClasses() throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().getAllConceptClasses(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptClass(org.openmrs.ConceptClass)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptClass saveConceptClass(ConceptClass cc) throws APIException {
+<b class="fc">&nbsp;		return dao.saveConceptClass(cc);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptClass(org.openmrs.ConceptClass)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptClass(ConceptClass cc) {
+<b class="fc">&nbsp;		dao.purgeConceptClass(cc);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptNameTag(org.openmrs.ConceptNameTag)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptNameTag(ConceptNameTag cnt) {
+<b class="fc">&nbsp;		dao.deleteConceptNameTag(cnt);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptDatatypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptDatatype&gt; getAllConceptDatatypes() {
+<b class="fc">&nbsp;		return Context.getConceptService().getAllConceptDatatypes(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptDatatypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptDatatype&gt; getAllConceptDatatypes(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllConceptDatatypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptDatatype(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptDatatype getConceptDatatype(Integer i) {
+<b class="fc">&nbsp;		return dao.getConceptDatatype(i);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptDatatypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptDatatype getConceptDatatypeByName(String name) {
+<b class="fc">&nbsp;		return dao.getConceptDatatypeByName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptSetsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSet&gt; getConceptSetsByConcept(Concept concept) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptSetsByConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByConceptSet(Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByConceptSet(Concept c) {
+<b class="fc">&nbsp;		Set&lt;Integer&gt; alreadySeen = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		List&lt;Concept&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		explodeConceptSetHelper(c, ret, alreadySeen);</b>
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getSetsContainingConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSet&gt; getSetsContainingConcept(Concept concept) {
+<b class="fc">&nbsp;		if (concept.getConceptId() == null) {</b>
+<b class="fc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getSetsContainingConcept(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptProposal(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptProposal getConceptProposal(Integer conceptProposalId) {
+<b class="fc">&nbsp;		return dao.getConceptProposal(conceptProposalId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptProposals(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptProposal&gt; getAllConceptProposals(boolean includeCompleted) {
+<b class="fc">&nbsp;		return dao.getAllConceptProposals(includeCompleted);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptProposals(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptProposal&gt; getConceptProposals(String cp) {
+<b class="fc">&nbsp;		return dao.getConceptProposals(cp);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getProposedConcepts(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getProposedConcepts(String text) {
+<b class="fc">&nbsp;		return dao.getProposedConcepts(text);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptProposal(org.openmrs.ConceptProposal)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptProposal saveConceptProposal(ConceptProposal conceptProposal) throws APIException {
+<b class="fc">&nbsp;		return dao.saveConceptProposal(conceptProposal);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptProposal(org.openmrs.ConceptProposal)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptProposal(ConceptProposal cp) throws APIException {
+<b class="fc">&nbsp;		dao.purgeConceptProposal(cp);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#mapConceptProposalToConcept(ConceptProposal, Concept, Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Concept mapConceptProposalToConcept(ConceptProposal cp, Concept mappedConcept, Locale locale) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (cp.getState().equals(OpenmrsConstants.CONCEPT_PROPOSAL_REJECT)) {</b>
+<b class="fc">&nbsp;			cp.rejectConceptProposal();</b>
+<b class="fc">&nbsp;			Context.getConceptService().saveConceptProposal(cp);</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (mappedConcept == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Concept.mapped.illegal&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ConceptName conceptName = null;</b>
+<b class="fc">&nbsp;		if (cp.getState().equals(OpenmrsConstants.CONCEPT_PROPOSAL_CONCEPT) || StringUtils.isBlank(cp.getFinalText())) {</b>
+<b class="fc">&nbsp;			cp.setState(OpenmrsConstants.CONCEPT_PROPOSAL_CONCEPT);</b>
+<b class="fc">&nbsp;			cp.setFinalText(&quot;&quot;);</b>
+<b class="fc">&nbsp;		} else if (cp.getState().equals(OpenmrsConstants.CONCEPT_PROPOSAL_SYNONYM)) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			checkIfLocked();</b>
+&nbsp;			
+<b class="fc">&nbsp;			String finalText = cp.getFinalText();</b>
+<b class="fc">&nbsp;			conceptName = new ConceptName(finalText, null);</b>
+<b class="fc">&nbsp;			conceptName.setConcept(mappedConcept);</b>
+<b class="fc">&nbsp;			conceptName.setLocale(locale == null ? Context.getLocale() : locale);</b>
+<b class="fc">&nbsp;			conceptName.setDateCreated(new Date());</b>
+<b class="fc">&nbsp;			conceptName.setCreator(Context.getAuthenticatedUser());</b>
+&nbsp;			//If this is pre 1.9
+<b class="fc">&nbsp;			if (conceptName.getUuid() == null) {</b>
+<b class="nc">&nbsp;				conceptName.setUuid(UUID.randomUUID().toString());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			mappedConcept.addName(conceptName);</b>
+<b class="fc">&nbsp;			mappedConcept.setChangedBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;			mappedConcept.setDateChanged(new Date());</b>
+<b class="fc">&nbsp;			ValidateUtil.validate(mappedConcept);</b>
+<b class="fc">&nbsp;            Context.getConceptService().saveConcept(mappedConcept);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		cp.setMappedConcept(mappedConcept);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (cp.getObsConcept() != null) {</b>
+<b class="fc">&nbsp;			Obs ob = new Obs();</b>
+<b class="fc">&nbsp;			ob.setEncounter(cp.getEncounter());</b>
+<b class="fc">&nbsp;			ob.setConcept(cp.getObsConcept());</b>
+<b class="fc">&nbsp;			ob.setValueCoded(cp.getMappedConcept());</b>
+<b class="fc">&nbsp;			if (cp.getState().equals(OpenmrsConstants.CONCEPT_PROPOSAL_SYNONYM)) {</b>
+<b class="fc">&nbsp;				ob.setValueCodedName(conceptName);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			ob.setCreator(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;			ob.setDateCreated(new Date());</b>
+<b class="fc">&nbsp;			ob.setObsDatetime(cp.getEncounter().getEncounterDatetime());</b>
+<b class="fc">&nbsp;			ob.setLocation(cp.getEncounter().getLocation());</b>
+<b class="fc">&nbsp;			ob.setPerson(cp.getEncounter().getPatient());</b>
+<b class="fc">&nbsp;			if (ob.getUuid() == null) {</b>
+<b class="nc">&nbsp;				ob.setUuid(UUID.randomUUID().toString());</b>
+&nbsp;			}
+<b class="fc">&nbsp;            Context.getObsService().saveObs(ob, null);</b>
+<b class="fc">&nbsp;			cp.setObs(ob);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return mappedConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#mapConceptProposalToConcept(org.openmrs.ConceptProposal,
+&nbsp;	 *      org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Concept mapConceptProposalToConcept(ConceptProposal cp, Concept mappedConcept) throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().mapConceptProposalToConcept(cp, mappedConcept, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByAnswer(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByAnswer(Concept concept) throws APIException {
+<b class="fc">&nbsp;		if (concept.getConceptId() == null) {</b>
+<b class="fc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getConceptsByAnswer(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getPrevConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getPrevConcept(Concept c) {
+<b class="fc">&nbsp;		return dao.getPrevConcept(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getNextConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getNextConcept(Concept c) {
+<b class="fc">&nbsp;		return dao.getNextConcept(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#checkIfLocked()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public void checkIfLocked() throws ConceptsLockedException {
+<b class="fc">&nbsp;		String locked = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_CONCEPTS_LOCKED, &quot;false&quot;);
+<b class="fc">&nbsp;		if (&quot;true&quot;.equalsIgnoreCase(locked)) {</b>
+<b class="nc">&nbsp;			throw new ConceptsLockedException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsWithDrugsInFormulary()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsWithDrugsInFormulary() {
+<b class="fc">&nbsp;		return dao.getConceptsWithDrugsInFormulary();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getMaxConceptId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getMaxConceptId() {
+<b class="fc">&nbsp;		return dao.getMaxConceptId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method used by getConceptsInSet(Concept concept)
+&nbsp;	 * 
+&nbsp;	 * @param concept
+&nbsp;	 * @param ret
+&nbsp;	 * @param alreadySeen
+&nbsp;	 */
+&nbsp;	private void explodeConceptSetHelper(Concept concept, Collection&lt;Concept&gt; ret, Collection&lt;Integer&gt; alreadySeen) {
+<b class="fc">&nbsp;		if (alreadySeen.contains(concept.getConceptId())) {</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		alreadySeen.add(concept.getConceptId());</b>
+<b class="fc">&nbsp;		List&lt;ConceptSet&gt; cs = getConceptSetsByConcept(concept);</b>
+<b class="fc">&nbsp;		for (ConceptSet set : cs) {</b>
+<b class="fc">&nbsp;			Concept c = set.getConcept();</b>
+<b class="fc">&nbsp;			if (c.getSet()) {</b>
+<b class="fc">&nbsp;				ret.add(c);</b>
+<b class="fc">&nbsp;				explodeConceptSetHelper(c, ret, alreadySeen);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				ret.add(c);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptNameTagByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptNameTag getConceptNameTagByName(String tagName) {
+<b class="fc">&nbsp;		return dao.getConceptNameTagByName(tagName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getLocalesOfConceptNames()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Set&lt;Locale&gt; getLocalesOfConceptNames() {
+<b class="fc">&nbsp;		return dao.getLocalesOfConceptNames();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptSource(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptSource getConceptSource(Integer conceptSourceId) {
+<b class="fc">&nbsp;		return dao.getConceptSource(conceptSourceId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptSources(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSource&gt; getAllConceptSources(boolean includeRetired) {
+<b class="fc">&nbsp;		return dao.getAllConceptSources(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptSource(org.openmrs.ConceptSource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@CacheEvict(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME, allEntries = true)
+&nbsp;	public ConceptSource purgeConceptSource(ConceptSource cs) throws APIException {
+<b class="fc">&nbsp;		return dao.deleteConceptSource(cs);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#retireConceptSource(org.openmrs.ConceptSource, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptSource retireConceptSource(ConceptSource cs, String reason) throws APIException {
+&nbsp;		// retireReason is automatically set in BaseRetireHandler
+<b class="fc">&nbsp;		return Context.getConceptService().saveConceptSource(cs);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptSource(org.openmrs.ConceptSource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@CacheEvict(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME, allEntries = true)
+&nbsp;	public ConceptSource saveConceptSource(ConceptSource conceptSource) throws APIException {
+<b class="fc">&nbsp;		return dao.saveConceptSource(conceptSource);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptNameTag(org.openmrs.ConceptNameTag)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptNameTag saveConceptNameTag(ConceptNameTag nameTag) {
+<b class="fc">&nbsp;		checkIfLocked();</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveConceptNameTag(nameTag);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#conceptIterator()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Iterator&lt;Concept&gt; conceptIterator() {
+<b class="fc">&nbsp;		return dao.conceptIterator();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConceptByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptClassByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptClass getConceptClassByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptClassByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptAnswer getConceptAnswerByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptAnswerByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptName getConceptNameByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptNameByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public ConceptSet getConceptSetByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptSetByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptSource getConceptSourceByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptSourceByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptDatatypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptDatatype getConceptDatatypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptDatatypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptNumericByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptNumeric getConceptNumericByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptNumericByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptProposalByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptProposal getConceptProposalByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptProposalByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Drug getDrugByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getDrugByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugIngredientByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DrugIngredient getDrugIngredientByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getDrugIngredientByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptDescriptionByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptDescription getConceptDescriptionByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptDescriptionByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptNameTagByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptNameTag getConceptNameTagByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptNameTagByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptNameTags()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptNameTag&gt; getAllConceptNameTags() {
+<b class="fc">&nbsp;		return dao.getAllConceptNameTags();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptNameTag(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptNameTag getConceptNameTag(Integer id) {
+<b class="fc">&nbsp;		return dao.getConceptNameTag(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptByMapping(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConceptByMapping(String code, String sourceName) throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().getConceptByMapping(code, sourceName, true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptByMapping(java.lang.String, java.lang.String,
+&nbsp;	 *      java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getConceptByMapping(String code, String sourceName, Boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		List&lt;Concept&gt; concepts = Context.getConceptService().getConceptsByMapping(code, sourceName, includeRetired);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (concepts.isEmpty()) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		// we want to throw an exception if there is more than one non-retired concept; 
+&nbsp;		// since the getConceptByMapping DAO method returns a list with all non-retired concept
+&nbsp;		// sorted to the front of the list, we can test if there is more than one retired concept
+&nbsp;		// by testing if the second concept in the list is retired or not
+<b class="fc">&nbsp;		else if (concepts.size() &gt; 1 &amp;&amp; !concepts.get(1).getRetired()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Concept.error.multiple.non.retired&quot;, new Object[] { code, sourceName });</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return concepts.get(0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByMapping(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByMapping(String code, String sourceName) throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().getConceptsByMapping(code, sourceName, true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByMapping(java.lang.String, java.lang.String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByMapping(String code, String sourceName, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		List&lt;Concept&gt; concepts = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (Integer conceptId : Context.getConceptService().getConceptIdsByMapping(code, sourceName, includeRetired)) {</b>
+<b class="fc">&nbsp;			concepts.add(getConcept(conceptId));</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return concepts;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptIdsByMapping(java.lang.String, java.lang.String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	@Cacheable(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME)
+&nbsp;	public List&lt;Integer&gt; getConceptIdsByMapping(String code, String sourceName, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptIdsByMapping(code, sourceName, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getFalseConcept()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getFalseConcept() {
+<b class="fc">&nbsp;		if (falseConcept == null) {</b>
+<b class="nc">&nbsp;			setBooleanConcepts();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return falseConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getTrueConcept()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getTrueConcept() {
+<b class="fc">&nbsp;		if (trueConcept == null) {</b>
+<b class="fc">&nbsp;			setBooleanConcepts();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return trueConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getUnknownConcept()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Concept getUnknownConcept() {
+<b class="fc">&nbsp;		if (unknownConcept == null) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Concept unknownConcept = Context.getConceptService().getConcept(</b>
+<b class="fc">&nbsp;					Integer.parseInt(Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;						OpenmrsConstants.GLOBAL_PROPERTY_UNKNOWN_CONCEPT)));
+<b class="fc">&nbsp;				initializeLazyPropertiesForConcept(unknownConcept);</b>
+&nbsp;				
+<b class="fc">&nbsp;				ConceptServiceImpl.setStaticUnknownConcept(unknownConcept);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Concept id for unknown concept should be a number&quot;);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return unknownConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets unknownConcept using static method
+&nbsp;	 *
+&nbsp;	 * @param currentUnknownConcept
+&nbsp;	 */
+&nbsp;	private static void setStaticUnknownConcept(Concept currentUnknownConcept) {
+<b class="fc">&nbsp;		ConceptServiceImpl.unknownConcept = currentUnknownConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the TRUE and FALSE concepts by reading their ids from the global_property table
+&nbsp;	 */
+&nbsp;	private void setBooleanConcepts() {
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			trueConcept = Context.getConceptService().getConcept(</b>
+<b class="fc">&nbsp;			    Integer.parseInt(Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;			        OpenmrsConstants.GLOBAL_PROPERTY_TRUE_CONCEPT)));
+<b class="fc">&nbsp;			initializeLazyPropertiesForConcept(trueConcept);</b>
+&nbsp;			
+<b class="fc">&nbsp;			falseConcept = Context.getConceptService().getConcept(</b>
+<b class="fc">&nbsp;			    Integer.parseInt(Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;			        OpenmrsConstants.GLOBAL_PROPERTY_FALSE_CONCEPT)));
+<b class="fc">&nbsp;			initializeLazyPropertiesForConcept(falseConcept);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Concept ids for boolean concepts should be numbers&quot;);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void initializeLazyPropertiesForConcept(Concept concept) {
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getRetiredBy());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getCreator());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getChangedBy());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getNames());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getAnswers());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getConceptSets());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getDescriptions());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getConceptMappings());</b>
+<b class="fc">&nbsp;		Hibernate.initialize(concept.getAttributes());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptSourceByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptSource getConceptSourceByName(String conceptSourceName) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptSourceByName(conceptSourceName);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptSourceByUniqueId(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptSource getConceptSourceByUniqueId(String uniqueId) throws APIException {
+<b class="fc">&nbsp;		if (uniqueId == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;uniqueId is required&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getConceptSourceByUniqueId(uniqueId);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptSourceByHL7Code(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptSource getConceptSourceByHL7Code(String hl7Code) throws APIException {
+<b class="fc">&nbsp;		if (hl7Code == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;hl7Code is required&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getConceptSourceByHL7Code(hl7Code);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Utility method to check if the concept is already attached to an observation (including
+&nbsp;	 * voided ones) and if the datatype of the concept has changed, an exception indicating that the
+&nbsp;	 * datatype cannot be modified will be reported if the concept is attached to an observation.
+&nbsp;	 * This method will only allow changing boolean concepts to coded.
+&nbsp;	 * 
+&nbsp;	 * @param concept
+&nbsp;	 * @throws ConceptInUseException
+&nbsp;	 */
+&nbsp;	private void checkIfDatatypeCanBeChanged(Concept concept) {
+<b class="fc">&nbsp;		if (concept.getId() != null &amp;&amp; hasAnyObservation(concept) &amp;&amp; hasDatatypeChanged(concept)) {</b>
+&nbsp;			// allow boolean concepts to be converted to coded
+<b class="fc">&nbsp;			if (!(dao.getSavedConceptDatatype(concept).isBoolean() &amp;&amp; concept.getDatatype().isCoded())) {</b>
+<b class="fc">&nbsp;				throw new ConceptInUseException();</b>
+&nbsp;			}
+<b class="fc">&nbsp;			log.debug(&quot;Converting datatype of concept with id {} from Boolean to coded&quot;, concept.getConceptId());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method which loads the previous version of a concept to check if the datatype has
+&nbsp;	 * changed.
+&nbsp;	 * 
+&nbsp;	 * @param concept to be modified
+&nbsp;	 * @return boolean indicating change in the datatype
+&nbsp;	 */
+&nbsp;	private boolean hasDatatypeChanged(Concept concept) {
+<b class="fc">&nbsp;		ConceptDatatype oldConceptDatatype = dao.getSavedConceptDatatype(concept);</b>
+<b class="fc">&nbsp;		return !oldConceptDatatype.equals(concept.getDatatype());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#hasAnyObservation(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public boolean hasAnyObservation(Concept concept) {
+<b class="fc">&nbsp;		List&lt;Concept&gt; concepts = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		concepts.add(concept);</b>
+<b class="fc">&nbsp;		Integer count = Context.getObsService().getObservationCount(null, null, concepts, null, null, null, null, null,</b>
+&nbsp;		    null, true);
+<b class="fc">&nbsp;		return count &gt; 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#convertBooleanConceptToCoded(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void convertBooleanConceptToCoded(Concept conceptToChange) throws APIException {
+<b class="fc">&nbsp;		if (conceptToChange != null) {</b>
+<b class="fc">&nbsp;			if (!conceptToChange.getDatatype().isBoolean()) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;Concept.datatype.invalid&quot;, (Object[]) null);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			conceptToChange.setDatatype(getConceptDatatypeByName(&quot;Coded&quot;));</b>
+<b class="fc">&nbsp;			conceptToChange.addAnswer(new ConceptAnswer(getTrueConcept()));</b>
+<b class="fc">&nbsp;			conceptToChange.addAnswer(new ConceptAnswer(getFalseConcept()));</b>
+<b class="fc">&nbsp;			Context.getConceptService().saveConcept(conceptToChange);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#hasAnyObservation(org.openmrs.ConceptName)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public boolean hasAnyObservation(ConceptName conceptName) throws APIException {
+<b class="fc">&nbsp;		List&lt;ConceptName&gt; conceptNames = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		conceptNames.add(conceptName);</b>
+<b class="fc">&nbsp;		Integer count = Context.getObsService().getObservationCount(conceptNames, true);</b>
+<b class="fc">&nbsp;		return count &gt; 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method which loads the previous version of a conceptName to check if the name
+&nbsp;	 * property of the given conceptName has changed.
+&nbsp;	 * 
+&nbsp;	 * @param conceptName to be modified
+&nbsp;	 * @return boolean indicating change in the name property
+&nbsp;	 */
+&nbsp;	private boolean hasNameChanged(ConceptName conceptName) {
+<b class="fc">&nbsp;		String newName = conceptName.getName();</b>
+<b class="fc">&nbsp;		String oldName = dao.getSavedConceptName(conceptName).getName();</b>
+<b class="fc">&nbsp;		return !oldName.equalsIgnoreCase(newName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a copy of a conceptName
+&nbsp;	 * 
+&nbsp;	 * @param conceptName the conceptName to be cloned
+&nbsp;	 * @return the cloned conceptName
+&nbsp;	 */
+&nbsp;	private ConceptName cloneConceptName(ConceptName conceptName) {
+<b class="fc">&nbsp;		ConceptName copy = new ConceptName();</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			copy = (ConceptName) BeanUtils.cloneBean(conceptName);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			log.warn(ERROR_MESSAGE, e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return copy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#findConceptAnswers(String, Locale, Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSearchResult&gt; findConceptAnswers(String phrase, Locale locale, Concept concept) throws APIException {
+&nbsp;
+<b class="fc">&nbsp;		return getConcepts(phrase, Collections.singletonList(locale), false, null, null, null, null,</b>
+&nbsp;		    concept, null, null);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptStopWords(java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;String&gt; getConceptStopWords(Locale locale) {
+<b class="fc">&nbsp;		return dao.getConceptStopWords(locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptStopWord(org.openmrs.ConceptStopWord)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptStopWord saveConceptStopWord(ConceptStopWord conceptStopWord) throws APIException {
+&nbsp;		try {
+<b class="fc">&nbsp;			return dao.saveConceptStopWord(conceptStopWord);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (DAOException e) {</b>
+<b class="fc">&nbsp;			if (&quot;Duplicate ConceptStopWord Entry&quot;.equalsIgnoreCase(e.getMessage())) {</b>
+<b class="fc">&nbsp;				throw new ConceptStopWordException(&quot;ConceptStopWord.duplicated&quot;, e);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			throw new ConceptStopWordException(&quot;ConceptStopWord.notSaved&quot;, e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#deleteConceptStopWord(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteConceptStopWord(Integer conceptStopWordId) throws APIException {
+&nbsp;		try {
+<b class="fc">&nbsp;			dao.deleteConceptStopWord(conceptStopWordId);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DAOException e) {</b>
+<b class="nc">&nbsp;			if (StringUtils.contains(e.getMessage(), &quot;Concept Stop Word not found or already deleted&quot;)) {</b>
+<b class="nc">&nbsp;				throw new ConceptStopWordException(&quot;ConceptStopWord.error.notfound&quot;, e);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			throw new ConceptStopWordException(&quot;general.cannot.delete&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptStopWords()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptStopWord&gt; getAllConceptStopWords() {
+<b class="fc">&nbsp;		return dao.getAllConceptStopWords();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConcepts(String, List, boolean, List, List, List, List, Concept,
+&nbsp;	 *      Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSearchResult&gt; getConcepts(String phrase, List&lt;Locale&gt; locales, boolean includeRetired,
+&nbsp;	        List&lt;ConceptClass&gt; requireClasses, List&lt;ConceptClass&gt; excludeClasses, List&lt;ConceptDatatype&gt; requireDatatypes,
+&nbsp;	        List&lt;ConceptDatatype&gt; excludeDatatypes, Concept answersToConcept, Integer start, Integer size)
+&nbsp;	        throws APIException {
+&nbsp;
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; tmpRequireClasses = requireClasses == null ? new ArrayList&lt;&gt;() : requireClasses;</b>
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; tmpExcludeClasses = excludeClasses == null ? new ArrayList&lt;&gt;() : excludeClasses;</b>
+<b class="fc">&nbsp;		List&lt;ConceptDatatype&gt; tmpRequireDatatypes = requireDatatypes == null ? new ArrayList&lt;&gt;() : requireDatatypes;</b>
+<b class="fc">&nbsp;		List&lt;ConceptDatatype&gt; tmpExcludeDatatypes = excludeDatatypes == null ? new ArrayList&lt;&gt;() : excludeDatatypes;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getConcepts(phrase, locales, includeRetired, tmpRequireClasses, tmpExcludeClasses, tmpRequireDatatypes,</b>
+&nbsp;		    tmpExcludeDatatypes, answersToConcept, start, size);
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#updateConceptIndex(Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void updateConceptIndex(Concept concept) throws APIException {
+<b class="nc">&nbsp;		Context.updateSearchIndexForObject(concept);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#updateConceptIndexes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@CacheEvict(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME, allEntries = true)
+&nbsp;	public void updateConceptIndexes() throws APIException {
+<b class="fc">&nbsp;		Context.updateSearchIndexForType(ConceptName.class);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getCountOfConcepts(String, List, boolean, List, List, List, List,
+&nbsp;	 *      Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getCountOfConcepts(String phrase, List&lt;Locale&gt; locales, boolean includeRetired,
+&nbsp;	        List&lt;ConceptClass&gt; requireClasses, List&lt;ConceptClass&gt; excludeClasses, List&lt;ConceptDatatype&gt; requireDatatypes,
+&nbsp;	        List&lt;ConceptDatatype&gt; excludeDatatypes, Concept answersToConcept) {
+&nbsp;
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; tmpRequireClasses = requireClasses == null ? new ArrayList&lt;&gt;() : requireClasses;</b>
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; tmpExcludeClasses = excludeClasses == null ? new ArrayList&lt;&gt;() : excludeClasses;</b>
+<b class="fc">&nbsp;		List&lt;ConceptDatatype&gt; tmpRequireDatatypes = requireDatatypes == null ? new ArrayList&lt;&gt;() : requireDatatypes;</b>
+<b class="fc">&nbsp;		List&lt;ConceptDatatype&gt; tmpExcludeDatatypes = excludeDatatypes == null ? new ArrayList&lt;&gt;() : excludeDatatypes;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getCountOfConcepts(phrase, locales, includeRetired, tmpRequireClasses, tmpExcludeClasses, tmpRequireDatatypes,</b>
+&nbsp;		    tmpExcludeDatatypes, answersToConcept);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getCountOfDrugs(String, Concept, boolean, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getCountOfDrugs(String drugName, Concept concept, boolean searchOnPhrase, boolean searchDrugConceptNames,
+&nbsp;	        boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return OpenmrsUtil.convertToInteger(dao.getCountOfDrugs(drugName, concept, searchOnPhrase, searchDrugConceptNames,</b>
+&nbsp;		    includeRetired));
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getDrugs(String, Concept, boolean, boolean, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getDrugs(String drugName, Concept concept, boolean searchOnPhrase, boolean searchDrugConceptNames,
+&nbsp;	        boolean includeRetired, Integer start, Integer length) throws APIException {
+<b class="fc">&nbsp;		return dao.getDrugs(drugName, concept, searchOnPhrase, searchDrugConceptNames, includeRetired, start, length);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConcepts(String, Locale, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSearchResult&gt; getConcepts(String phrase, Locale locale, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		List&lt;Locale&gt; locales = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (locale != null) {</b>
+<b class="fc">&nbsp;			locales.add(locale);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getConceptService().getConcepts(phrase, locales, includeRetired, null, null, null, null, null, null,</b>
+&nbsp;		    null);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugsByIngredient(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getDrugsByIngredient(Concept ingredient) throws APIException {
+<b class="fc">&nbsp;		if (ingredient == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;ingredient is required&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getDrugsByIngredient(ingredient);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConceptMappingsToSource(ConceptSource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptMap&gt; getConceptMappingsToSource(ConceptSource conceptSource) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptMapsBySource(conceptSource);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getActiveConceptMapTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptMapType&gt; getActiveConceptMapTypes() throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().getConceptMapTypes(true, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConceptMapTypes(boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptMapType&gt; getConceptMapTypes(boolean includeRetired, boolean includeHidden) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptMapTypes(includeRetired, includeHidden);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConceptMapType(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptMapType getConceptMapType(Integer conceptMapTypeId) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptMapType(conceptMapTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConceptMapTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptMapType getConceptMapTypeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptMapTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptMapTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptMapType getConceptMapTypeByName(String name) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptMapTypeByName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptMapType(org.openmrs.ConceptMapType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptMapType saveConceptMapType(ConceptMapType conceptMapType) throws APIException {
+<b class="fc">&nbsp;		return dao.saveConceptMapType(conceptMapType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#retireConceptMapType(org.openmrs.ConceptMapType,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptMapType retireConceptMapType(ConceptMapType conceptMapType, String retireReason) throws APIException {
+<b class="fc">&nbsp;		String tmpRetireReason = retireReason;</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(tmpRetireReason)) {</b>
+<b class="fc">&nbsp;			tmpRetireReason = Context.getMessageSourceService().getMessage(&quot;general.default.retireReason&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		conceptMapType.setRetireReason(tmpRetireReason);</b>
+<b class="fc">&nbsp;		return dao.saveConceptMapType(conceptMapType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#unretireConceptMapType(org.openmrs.ConceptMapType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptMapType unretireConceptMapType(ConceptMapType conceptMapType) throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().saveConceptMapType(conceptMapType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptMapType(org.openmrs.ConceptMapType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptMapType(ConceptMapType conceptMapType) throws APIException {
+<b class="fc">&nbsp;		if (dao.isConceptMapTypeInUse(conceptMapType)) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;ConceptMapType.inUse&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		dao.deleteConceptMapType(conceptMapType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getAllConceptReferenceTerms()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getAllConceptReferenceTerms() throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().getConceptReferenceTerms(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getConceptReferenceTerms(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getConceptReferenceTerms(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptReferenceTerms(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptReferenceTerm(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTerm(Integer conceptReferenceTermId) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptReferenceTerm(conceptReferenceTermId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptReferenceTermByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTermByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptReferenceTermByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptReferenceTermByName(java.lang.String,
+&nbsp;	 *      org.openmrs.ConceptSource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTermByName(String name, ConceptSource conceptSource) throws APIException {
+&nbsp;		//On addition of extra attributes to concept maps, terms that were generated from existing maps have 
+&nbsp;		//empty string values for the name property, ignore the search when name is an empty string but allow 
+&nbsp;		//white space characters
+<b class="fc">&nbsp;		if (StringUtils.isBlank(name)) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getConceptReferenceTermByName(name, conceptSource);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptReferenceTermByCode(java.lang.String,
+&nbsp;	 *      org.openmrs.ConceptSource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptReferenceTerm getConceptReferenceTermByCode(String code, ConceptSource conceptSource) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptReferenceTermByCode(code, conceptSource);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getConceptReferenceTermByCode(String code, ConceptSource conceptSource, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptReferenceTermByCode(code, conceptSource, includeRetired);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptReferenceTerm(org.openmrs.ConceptReferenceTerm)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@CacheEvict(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME, allEntries = true)
+&nbsp;	public ConceptReferenceTerm saveConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) throws APIException {
+<b class="fc">&nbsp;		return dao.saveConceptReferenceTerm(conceptReferenceTerm);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#retireConceptReferenceTerm(ConceptReferenceTerm, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptReferenceTerm retireConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm, String retireReason)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		String tmpRetireReason = retireReason;</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(tmpRetireReason)) {</b>
+<b class="fc">&nbsp;			tmpRetireReason = Context.getMessageSourceService().getMessage(&quot;general.default.retireReason&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		conceptReferenceTerm.setRetireReason(tmpRetireReason);</b>
+<b class="fc">&nbsp;		return Context.getConceptService().saveConceptReferenceTerm(conceptReferenceTerm);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#unretireConceptReferenceTerm(org.openmrs.ConceptReferenceTerm)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptReferenceTerm unretireConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) throws APIException {
+<b class="fc">&nbsp;		return Context.getConceptService().saveConceptReferenceTerm(conceptReferenceTerm);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptReferenceTerm(org.openmrs.ConceptReferenceTerm)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@CacheEvict(value = CONCEPT_IDS_BY_MAPPING_CACHE_NAME, allEntries = true)
+&nbsp;	public void purgeConceptReferenceTerm(ConceptReferenceTerm conceptReferenceTerm) throws APIException {
+<b class="fc">&nbsp;		if (dao.isConceptReferenceTermInUse(conceptReferenceTerm)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;ConceptRefereceTerm.inUse&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		dao.deleteConceptReferenceTerm(conceptReferenceTerm);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptReferenceTerms(java.lang.String,
+&nbsp;	 *      org.openmrs.ConceptSource, java.lang.Integer, java.lang.Integer, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptReferenceTerm&gt; getConceptReferenceTerms(String query, ConceptSource conceptSource, Integer start,
+&nbsp;	        Integer length, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		Integer tmpLength = length;</b>
+<b class="fc">&nbsp;		if (tmpLength == null) {</b>
+<b class="fc">&nbsp;			tmpLength = 10000;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getConceptReferenceTerms(query, conceptSource, start, tmpLength, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getCountOfConceptReferenceTerms(String, ConceptSource,
+&nbsp;	 *      boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getCountOfConceptReferenceTerms(String query, ConceptSource conceptSource, boolean includeRetired) {
+<b class="fc">&nbsp;		return OpenmrsUtil.convertToInteger(dao.getCountOfConceptReferenceTerms(query, conceptSource, includeRetired));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getReferenceTermMappingsTo(ConceptReferenceTerm)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptReferenceTermMap&gt; getReferenceTermMappingsTo(ConceptReferenceTerm term) throws APIException {
+<b class="fc">&nbsp;		return dao.getReferenceTermMappingsTo(term);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptsByName(java.lang.String, java.util.Locale,
+&nbsp;	 *      java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Concept&gt; getConceptsByName(String name, Locale locale, Boolean exactLocale) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptsByName(name, locale, exactLocale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDefaultConceptMapType()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptMapType getDefaultConceptMapType() throws APIException {
+&nbsp;		//We need to fetch it in DAO since it must be done in the MANUAL fush mode to prevent pre-mature flushes.
+<b class="fc">&nbsp;		return dao.getDefaultConceptMapType();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#isConceptNameDuplicate(org.openmrs.ConceptName)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isConceptNameDuplicate(ConceptName name) {
+<b class="fc">&nbsp;		return dao.isConceptNameDuplicate(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getDrugs(String, java.util.Locale, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getDrugs(String searchPhrase, Locale locale, boolean exactLocale, boolean includeRetired)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		if (searchPhrase == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;searchPhrase is required&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getDrugs(searchPhrase, locale, exactLocale, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugsByMapping(String, ConceptSource, Collection,
+&nbsp;	 *      boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Drug&gt; getDrugsByMapping(String code, ConceptSource conceptSource,
+&nbsp;	        Collection&lt;ConceptMapType&gt; withAnyOfTheseTypes, boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		Collection&lt;ConceptMapType&gt; tmpWithAnyOfTheseTypes = withAnyOfTheseTypes == null ? Collections.emptyList() : withAnyOfTheseTypes;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (conceptSource == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;ConceptSource.is.required&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return dao.getDrugsByMapping(code, conceptSource, tmpWithAnyOfTheseTypes, includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getDrugByMapping(String, org.openmrs.ConceptSource, java.util.Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Drug getDrugByMapping(String code, ConceptSource conceptSource,
+&nbsp;	        Collection&lt;ConceptMapType&gt; withAnyOfTheseTypesOrOrderOfPreference) throws APIException {
+<b class="fc">&nbsp;		Collection&lt;ConceptMapType&gt; tmpWithAnyOfTheseTypesOrOrderOfPreference = withAnyOfTheseTypesOrOrderOfPreference == null</b>
+<b class="fc">&nbsp;				? Collections.emptyList() : withAnyOfTheseTypesOrOrderOfPreference;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (conceptSource == null) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;ConceptSource.is.required&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return dao.getDrugByMapping(code, conceptSource, tmpWithAnyOfTheseTypesOrOrderOfPreference);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getOrderableConcepts(String, java.util.List, boolean,
+&nbsp;	 *      Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptSearchResult&gt; getOrderableConcepts(String phrase, List&lt;Locale&gt; locales, boolean includeRetired,
+&nbsp;	        Integer start, Integer length) {
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; mappedClasses = getConceptClassesOfOrderTypes();</b>
+<b class="fc">&nbsp;		if (mappedClasses.isEmpty()) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		List&lt;Locale&gt; tmpLocales = locales;</b>
+<b class="fc">&nbsp;		if (tmpLocales == null) {</b>
+<b class="fc">&nbsp;			tmpLocales = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;			tmpLocales.add(Context.getLocale());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return dao.getConcepts(phrase, tmpLocales, false, mappedClasses, Collections.emptyList(), Collections.emptyList(),</b>
+<b class="fc">&nbsp;		    Collections.emptyList(), null, start, length);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see ConceptService#getAllConceptAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptAttributeType&gt; getAllConceptAttributeTypes() {
+<b class="fc">&nbsp;		return dao.getAllConceptAttributeTypes();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#saveConceptAttributeType(ConceptAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptAttributeType saveConceptAttributeType(ConceptAttributeType conceptAttributeType) {
+<b class="fc">&nbsp;		return dao.saveConceptAttributeType(conceptAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptAttributeType(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptAttributeType getConceptAttributeType(Integer id) {
+<b class="fc">&nbsp;		return dao.getConceptAttributeType(id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptAttributeType getConceptAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptAttributeTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#purgeConceptAttributeType(ConceptAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeConceptAttributeType(ConceptAttributeType conceptAttributeType) {
+<b class="fc">&nbsp;		dao.deleteConceptAttributeType(conceptAttributeType);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptAttributeTypes(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;ConceptAttributeType&gt; getConceptAttributeTypes(String name) throws APIException {
+<b class="fc">&nbsp;		return dao.getConceptAttributeTypes(name);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptAttributeTypeByName(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptAttributeType getConceptAttributeTypeByName(String exactName) {
+<b class="fc">&nbsp;		return dao.getConceptAttributeTypeByName(exactName);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#retireConceptAttributeType(ConceptAttributeType, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptAttributeType retireConceptAttributeType(ConceptAttributeType conceptAttributeType, String reason) {
+<b class="fc">&nbsp;		return dao.saveConceptAttributeType(conceptAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#unretireConceptAttributeType(ConceptAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptAttributeType unretireConceptAttributeType(ConceptAttributeType conceptAttributeType) {
+<b class="fc">&nbsp;		return Context.getConceptService().saveConceptAttributeType(conceptAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#getConceptAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public ConceptAttribute getConceptAttributeByUuid(String uuid) {
+<b class="fc">&nbsp;		return dao.getConceptAttributeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.ConceptService#hasAnyConceptAttribute(ConceptAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public boolean hasAnyConceptAttribute(ConceptAttributeType conceptAttributeType) {
+<b class="fc">&nbsp;		return dao.getConceptAttributeCount(conceptAttributeType) &gt; 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/***
+&nbsp;	 * Determines if the passed string is in valid uuid format By OpenMRS standards, a uuid must be 36
+&nbsp;	 * characters in length and not contain whitespace, but we do not enforce that a uuid be in the
+&nbsp;	 * &quot;canonical&quot; form, with alphanumerics seperated by dashes, since the MVP dictionary does not use
+&nbsp;	 * this format (We also are being slightly lenient and accepting uuids that are 37 or 38 characters
+&nbsp;	 * in length, since the uuid data field is 38 characters long)
+&nbsp;	 */
+&nbsp;	public static boolean isValidUuidFormat(String uuid) {
+<b class="fc">&nbsp;		if (uuid.length() &lt; 36 || uuid.length() &gt; 38 || uuid.contains(&quot; &quot;) || uuid.contains(&quot;.&quot;)) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Evaluates the specified Java constant using reflection: if input is org.openmrs.CLASS_NAME.CONSTANT_NAME
+&nbsp;	 * then, output will be CONSTANT_NAME
+&nbsp;	 * @param fqn the fully qualified name of the constant
+&nbsp;	 * @return the constant value or null
+&nbsp;	 */
+&nbsp;	private static String evaluateStaticConstant(String fqn) {
+<b class="fc">&nbsp;		int lastPeriod = fqn.lastIndexOf(&quot;.&quot;);</b>
+<b class="fc">&nbsp;		String clazzName = fqn.substring(0, lastPeriod);</b>
+<b class="fc">&nbsp;		String constantName = fqn.substring(lastPeriod + 1);</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			Class&lt;?&gt; clazz = Context.loadClass(clazzName);</b>
+<b class="fc">&nbsp;			Field constantField = clazz.getDeclaredField(constantName);</b>
+<b class="fc">&nbsp;			constantField.setAccessible(true);</b>
+<b class="fc">&nbsp;			Object val = constantField.get(null);</b>
+<b class="fc">&nbsp;			return val != null ? String.valueOf(val) : null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception ex) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Error while evaluating &quot; + fqn + &quot; as a constant&quot; , ex);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;ConceptClass&gt; getConceptClassesOfOrderTypes() {
+<b class="fc">&nbsp;		List&lt;ConceptClass&gt; mappedClasses = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		AdministrationService administrationService = Context.getAdministrationService();</b>
+<b class="fc">&nbsp;		List&lt;List&lt;Object&gt;&gt; result = administrationService.executeSQL(</b>
+&nbsp;		    &quot;SELECT DISTINCT concept_class_id FROM order_type_class_map&quot;, true);
+<b class="fc">&nbsp;		for (List&lt;Object&gt; temp : result) {</b>
+<b class="fc">&nbsp;			for (Object value : temp) {</b>
+<b class="fc">&nbsp;				if (value != null) {</b>
+<b class="fc">&nbsp;					mappedClasses.add(this.getConceptClass((Integer) value));</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return mappedClasses;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

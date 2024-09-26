@@ -1,0 +1,316 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ServiceOrder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceOrder (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceOrder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (36/36)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ServiceOrder$Laterality</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (40/40)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides properties for several order types like TestOrder , ReferralOrder
+&nbsp; * and others depending on the openmrs implementation use case as need arises
+&nbsp; * 
+&nbsp; * @since 2.5.0
+&nbsp; */
+&nbsp;public abstract class ServiceOrder extends Order {
+&nbsp;
+<b class="fc">&nbsp;	public enum Laterality {</b>
+<b class="fc">&nbsp;		LEFT,</b>
+<b class="fc">&nbsp;		RIGHT,</b>
+<b class="fc">&nbsp;		BILATERAL</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static final long serialVersionUID = 1L;
+&nbsp;
+&nbsp;	public Concept specimenSource;
+&nbsp;
+&nbsp;	private Laterality laterality;
+&nbsp;
+&nbsp;	private String clinicalHistory;
+&nbsp;
+&nbsp;	private OrderFrequency frequency;
+&nbsp;
+&nbsp;	private Integer numberOfRepeats;
+&nbsp;	
+&nbsp;	private Concept location;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Default Constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public ServiceOrder() {</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	protected ServiceOrder copyHelper(ServiceOrder target) {
+<b class="fc">&nbsp;		super.copyHelper(target);</b>
+<b class="fc">&nbsp;		target.specimenSource = getSpecimenSource();</b>
+<b class="fc">&nbsp;		target.laterality = getLaterality();</b>
+<b class="fc">&nbsp;		target.clinicalHistory = getClinicalHistory();</b>
+<b class="fc">&nbsp;		target.frequency = getFrequency();</b>
+<b class="fc">&nbsp;		target.numberOfRepeats = getNumberOfRepeats();</b>
+<b class="fc">&nbsp;		target.location = getLocation();</b>
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return the specimenSource
+&nbsp;	 */
+&nbsp;	public Concept getSpecimenSource() {
+<b class="fc">&nbsp;		return specimenSource;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param specimenSource the specimenSource to set
+&nbsp;	 */
+&nbsp;	public void setSpecimenSource(Concept specimenSource) {
+<b class="fc">&nbsp;		this.specimenSource = specimenSource;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the laterality.
+&nbsp;	 *
+&nbsp;	 * @return the laterality.
+&nbsp;	 */
+&nbsp;	public Laterality getLaterality() {
+<b class="fc">&nbsp;		return laterality;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the laterality.
+&nbsp;	 *
+&nbsp;	 * @param laterality the laterality to set.
+&nbsp;	 */
+&nbsp;	public void setLaterality(ServiceOrder.Laterality laterality) {
+<b class="fc">&nbsp;		this.laterality = laterality;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the clinical history.
+&nbsp;	 *
+&nbsp;	 * @return the clinical history.
+&nbsp;	 */
+&nbsp;	public String getClinicalHistory() {
+<b class="fc">&nbsp;		return clinicalHistory;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the clinical history.
+&nbsp;	 *
+&nbsp;	 * @param clinicalHistory the clinical history to set.
+&nbsp;	 */
+&nbsp;	public void setClinicalHistory(String clinicalHistory) {
+<b class="fc">&nbsp;		this.clinicalHistory = clinicalHistory;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets frequency of a particular order
+&nbsp;	 */
+&nbsp;	public OrderFrequency getFrequency() {
+<b class="fc">&nbsp;		return frequency;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets frequency of a particular order
+&nbsp;	 *
+&nbsp;	 * @param frequency
+&nbsp;	 */
+&nbsp;	public void setFrequency(OrderFrequency frequency) {
+<b class="fc">&nbsp;		this.frequency = frequency;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets numberOfRepeats of a particular order
+&nbsp;	 */
+&nbsp;	public Integer getNumberOfRepeats() {
+<b class="fc">&nbsp;		return numberOfRepeats;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets numberOfRepeats of a particular order
+&nbsp;	 *
+&nbsp;	 * @param numberOfRepeats to set
+&nbsp;	 */
+&nbsp;	public void setNumberOfRepeats(Integer numberOfRepeats) {
+<b class="fc">&nbsp;		this.numberOfRepeats = numberOfRepeats;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a location of the particular order
+&nbsp;	 */
+&nbsp;	public Concept getLocation() {
+<b class="fc">&nbsp;		return location;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets a location of the particular order
+&nbsp;	 *
+&nbsp;	 * @param location to set
+&nbsp;	 */
+&nbsp;	public void setLocation(Concept location) {
+<b class="fc">&nbsp;		this.location = location;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see Order#cloneForRevisionHelper(Order)
+&nbsp;	 */
+&nbsp;	protected ServiceOrder cloneForRevisionHelper(ServiceOrder target) {
+<b class="fc">&nbsp;		super.cloneForRevisionHelper(target);</b>
+<b class="fc">&nbsp;		target.setSpecimenSource(getSpecimenSource());</b>
+<b class="fc">&nbsp;		target.setLaterality(getLaterality());</b>
+<b class="fc">&nbsp;		target.setClinicalHistory(getClinicalHistory());</b>
+<b class="fc">&nbsp;		target.setFrequency(getFrequency());</b>
+<b class="fc">&nbsp;		target.setNumberOfRepeats(getNumberOfRepeats());</b>
+<b class="fc">&nbsp;		target.setLocation(getLocation());</b>
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The purpose of this method is to allow subclasses of a ServiceOrder to delegate a portion of their
+&nbsp;	 * cloneForDiscontinuing() method back to the superclass, in case the base class implementation
+&nbsp;	 * changes.
+&nbsp;	 *
+&nbsp;	 * @param target a particular order that will have the state of &lt;code&gt;this&lt;/code&gt; copied into it
+&nbsp;	 * @return Returns the Order that was passed in, with state copied into it
+&nbsp;	 */
+&nbsp;	protected ServiceOrder cloneForDiscontinuingHelper(ServiceOrder target) {
+<b class="fc">&nbsp;		target.setCareSetting(getCareSetting());</b>
+<b class="fc">&nbsp;		target.setConcept(getConcept());</b>
+<b class="fc">&nbsp;		target.setAction(Action.DISCONTINUE);</b>
+<b class="fc">&nbsp;		target.setPreviousOrder(this);</b>
+<b class="fc">&nbsp;		target.setPatient(getPatient());</b>
+<b class="fc">&nbsp;		target.setOrderType(getOrderType());</b>
+<b class="fc">&nbsp;		return target;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

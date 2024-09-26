@@ -1,0 +1,418 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProgramWorkflow</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ProgramWorkflow (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProgramWorkflow</td>
+<td class="coverageStat">
+  <span class="percent">
+    68%
+  </span>
+  <span class="absValue">
+    (17/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    51,6%
+  </span>
+  <span class="absValue">
+    (33/64)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ProgramWorkflow$HibernateProxy$mZANq3Ig</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    68%
+  </span>
+  <span class="absValue">
+    (17/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    51,6%
+  </span>
+  <span class="absValue">
+    (33/64)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.NaturalStrings;
+&nbsp;
+&nbsp;/**
+&nbsp; * ProgramWorkflow
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ProgramWorkflow extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Properties
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	private Integer programWorkflowId;
+&nbsp;	
+&nbsp;	private Program program;
+&nbsp;	
+&nbsp;	private Concept concept;
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;ProgramWorkflowState&gt; states = new HashSet&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Constructors
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/** Default Constructor */
+<b class="fc">&nbsp;	public ProgramWorkflow() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** Constructor with id */
+<b class="fc">&nbsp;	public ProgramWorkflow(Integer programWorkflowId) {</b>
+<b class="fc">&nbsp;		setProgramWorkflowId(programWorkflowId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Instance methods
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a new {@link ProgramWorkflowState} to this ProgramWorkflow
+&nbsp;	 * 
+&nbsp;	 * @param state - the {@link ProgramWorkflowState} to add
+&nbsp;	 */
+&nbsp;	public void addState(ProgramWorkflowState state) {
+<b class="fc">&nbsp;		state.setProgramWorkflow(this);</b>
+<b class="fc">&nbsp;		getStates().add(state);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a {@link ProgramWorkflowState} from this ProgramWorkflow
+&nbsp;	 * 
+&nbsp;	 * @param state - the {@link ProgramWorkflowState} to remove
+&nbsp;	 */
+&nbsp;	public void removeState(ProgramWorkflowState state) {
+<b class="nc">&nbsp;		if (getStates().contains(state)) {</b>
+<b class="nc">&nbsp;			getStates().remove(state);</b>
+<b class="nc">&nbsp;			state.setProgramWorkflow(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires a {@link ProgramWorkflowState}
+&nbsp;	 * 
+&nbsp;	 * @param state - the {@link ProgramWorkflowState} to retire
+&nbsp;	 */
+&nbsp;	public void retireState(ProgramWorkflowState state) {
+<b class="nc">&nbsp;		state.setRetired(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a {@link ProgramWorkflowState} whose primary key id matches the input parameter
+&nbsp;	 * 
+&nbsp;	 * @param programWorkflowStateId the primary key {@link Integer} id to match
+&nbsp;	 * @return a {@link ProgramWorkflowState} whose identifier matches the passed
+&nbsp;	 *         &lt;code&gt;programWorkflowStateId&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getState(Integer programWorkflowStateId) {
+<b class="fc">&nbsp;		for (ProgramWorkflowState s : getStates()) {</b>
+<b class="fc">&nbsp;			if (s.getProgramWorkflowStateId().equals(programWorkflowStateId)) {</b>
+<b class="fc">&nbsp;				return s;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a {@link ProgramWorkflowState} whose Concept matches the passed concept
+&nbsp;	 * 
+&nbsp;	 * @param concept the Concept to match
+&nbsp;	 * @return Returns a {@link ProgramWorkflowState} whose {@link Concept} matches the passed
+&nbsp;	 *         &lt;code&gt;concept&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getState(Concept concept) {
+<b class="fc">&nbsp;		for (ProgramWorkflowState s : getStates()) {</b>
+<b class="fc">&nbsp;			if (s.getConcept().equals(concept)) {</b>
+<b class="fc">&nbsp;				return s;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a {@link ProgramWorkflowState} whose Concept name matches the passed name in any
+&nbsp;	 * {@link Locale}
+&nbsp;	 * 
+&nbsp;	 * @param name the Concept name to match in any {@link Locale}
+&nbsp;	 * @return a {@link ProgramWorkflowState} whose {@link Concept} name matches the passed
+&nbsp;	 *         &lt;code&gt;name&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getState(String name) {
+<b class="nc">&nbsp;		for (ProgramWorkflowState s : getStates()) {</b>
+<b class="nc">&nbsp;			if (s.getConcept().isNamed(name)) {</b>
+<b class="nc">&nbsp;				return s;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a {@link ProgramWorkflowState} whose {@link Concept} has any {@link ConceptName} that
+&nbsp;	 * matches the given &lt;code&gt;name&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param name the {@link ProgramWorkflowState} name, in any {@link Locale}
+&nbsp;	 * @return a {@link ProgramWorkflowState} which has the passed &lt;code&gt;name&lt;/code&gt; in any
+&nbsp;	 *         {@link Locale}
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getStateByName(String name) {
+<b class="nc">&nbsp;		for (ProgramWorkflowState s : getStates()) {</b>
+<b class="nc">&nbsp;			if (s.getConcept().isNamed(name)) {</b>
+<b class="nc">&nbsp;				return s;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a Set&amp;lt;{@link ProgramWorkflowState}&amp;gt; including all non-retired ProgramWorkflowStates
+&nbsp;	 * and all retired ProgramWorkflowStates in this ProgramWorkflow if &lt;code&gt;includeRetired&lt;/code&gt;
+&nbsp;	 * is true
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired - if false, returns only non-retired {@link ProgramWorkflowState}
+&nbsp;	 *            objects in this ProgramWorkflow
+&nbsp;	 * @return Set&amp;lt;ProgramWorkflowState&amp;gt; - all ProgramWorkflowStates matching input parameters
+&nbsp;	 */
+&nbsp;	public Set&lt;ProgramWorkflowState&gt; getStates(boolean includeRetired) {
+<b class="nc">&nbsp;		Set&lt;ProgramWorkflowState&gt; ret = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (ProgramWorkflowState s : getStates()) {</b>
+<b class="nc">&nbsp;			if (includeRetired || !s.getRetired()) {</b>
+<b class="nc">&nbsp;				ret.add(s);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a Set&amp;lt;{@link ProgramWorkflowState}&amp;gt; including all ProgramWorkflowStates, sorted by
+&nbsp;	 * {@link ConceptName}
+&nbsp;	 * 
+&nbsp;	 * @return Set&amp;lt;ProgramWorkflowState&amp;gt; - all ProgramWorkflowStates, sorted by {@link ConceptName}
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; sort names containing numbers intelligently
+&nbsp;	 */
+&nbsp;	public Set&lt;ProgramWorkflowState&gt; getSortedStates() {
+<b class="fc">&nbsp;		final Comparator&lt;String&gt; naturalComparator = NaturalStrings.getNaturalComparator();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Comparator&lt;ProgramWorkflowState&gt; stateComparator = (o1, o2) -&gt; naturalComparator.compare(o1.getConcept().getName().getName(), o2.getConcept().getName().getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;ProgramWorkflowState&gt; sorted = new TreeSet&lt;&gt;(stateComparator);</b>
+<b class="fc">&nbsp;		if (getStates() != null) {</b>
+<b class="fc">&nbsp;			sorted.addAll(getStates());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return sorted;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a List&amp;lt;{@link ProgramWorkflowState}&amp;gt; including all possible next
+&nbsp;	 * ProgramWorkflowStates, for the passed {@link PatientProgram} ordered by {@link ConceptName}
+&nbsp;	 * 
+&nbsp;	 * @param patientProgram - The PatientProgram to check
+&nbsp;	 * @return List&amp;lt;ProgramWorkflowState&amp;gt; - all possible next ProgramWorkflowStates, for the passed
+&nbsp;	 *         {@link PatientProgram} ordered by {@link ConceptName}
+&nbsp;	 */
+&nbsp;	public List&lt;ProgramWorkflowState&gt; getPossibleNextStates(PatientProgram patientProgram) {
+<b class="nc">&nbsp;		List&lt;ProgramWorkflowState&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		PatientState currentState = patientProgram.getCurrentState(this);</b>
+<b class="nc">&nbsp;		for (ProgramWorkflowState st : getSortedStates()) {</b>
+<b class="nc">&nbsp;			if (isLegalTransition(currentState == null ? null : currentState.getState(), st)) {</b>
+<b class="nc">&nbsp;				ret.add(st);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check whether it is allowable to transition from &lt;code&gt;fromState&lt;/code&gt; to
+&nbsp;	 * &lt;code&gt;toState&lt;/code&gt;.
+&nbsp;	 * 
+&nbsp;	 * @param fromState {@link ProgramWorkflowState} to check transition from
+&nbsp;	 * @param toState {@link ProgramWorkflowState} to check transition to
+&nbsp;	 * @return boolean true if it is allowable to transition from &lt;code&gt;fromState&lt;/code&gt; to
+&nbsp;	 *         &lt;code&gt;toState&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public boolean isLegalTransition(ProgramWorkflowState fromState, ProgramWorkflowState toState) {
+&nbsp;		// If there&#39;s no current state then we need tom move into an initial state
+<b class="fc">&nbsp;		if (fromState == null) {</b>
+<b class="nc">&nbsp;			return toState.getInitial();</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Does not allow patient to move into the same state
+<b class="fc">&nbsp;		return !fromState.equals(toState);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** @see Object#toString() */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;ProgramWorkflow(id=&quot; + getProgramWorkflowId() + &quot;)&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Property Access
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	public Set&lt;ProgramWorkflowState&gt; getStates() {
+<b class="fc">&nbsp;		return states;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setStates(Set&lt;ProgramWorkflowState&gt; states) {
+<b class="fc">&nbsp;		this.states = states;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Program getProgram() {
+<b class="fc">&nbsp;		return program;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setProgram(Program program) {
+<b class="fc">&nbsp;		this.program = program;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getProgramWorkflowId() {
+<b class="fc">&nbsp;		return programWorkflowId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setProgramWorkflowId(Integer programWorkflowId) {
+<b class="fc">&nbsp;		this.programWorkflowId = programWorkflowId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getProgramWorkflowId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setProgramWorkflowId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the number of states which are not retired
+&nbsp;	 * 
+&nbsp;	 * @return the total number of non retired states
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public int getNonRetiredStateCount() {
+<b class="nc">&nbsp;		return getStates(false).size();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

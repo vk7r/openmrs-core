@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > InputRequiredException</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: InputRequiredException (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">InputRequiredException</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">InputRequiredException$DATATYPE</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Used by the {@link DatabaseUpdater} to signal that a given update requires input from the user.
+&nbsp; * 
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;public class InputRequiredException extends Exception {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 121994323413L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Required input will be in one of these forms
+&nbsp;	 */
+<b class="nc">&nbsp;	public enum DATATYPE {</b>
+<b class="nc">&nbsp;		STRING,</b>
+<b class="nc">&nbsp;		INTEGER,</b>
+<b class="nc">&nbsp;		DOUBLE,</b>
+<b class="nc">&nbsp;		DATE</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A mapping from user prompt to answer datatype
+&nbsp;	 */
+&nbsp;	private Map&lt;String, DATATYPE&gt; requiredInput;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Common constructor taking in a message to give the user some context as to where/why the
+&nbsp;	 * authentication failed.
+&nbsp;	 * 
+&nbsp;	 * @param requiredInput a list of questions that need to be answered in the form question, type
+&nbsp;	 */
+&nbsp;	public InputRequiredException(Map&lt;String, DATATYPE&gt; requiredInput) {
+<b class="nc">&nbsp;		super(&quot;Input is required before being able to update the database&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		this.requiredInput = requiredInput;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The user prompts and datatype for each question that the user has to provide input for
+&nbsp;	 * 
+&nbsp;	 * @return the requiredInput
+&nbsp;	 */
+&nbsp;	public Map&lt;String, DATATYPE&gt; getRequiredInput() {
+<b class="nc">&nbsp;		return requiredInput;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,853 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonAddress</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonAddress (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonAddress</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,1%
+  </span>
+  <span class="absValue">
+    (59/67)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,4%
+  </span>
+  <span class="absValue">
+    (103/114)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PersonAddress$HibernateProxy$4IhKu8r9</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    88,1%
+  </span>
+  <span class="absValue">
+    (59/67)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,4%
+  </span>
+  <span class="absValue">
+    (103/114)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.commons.lang3.builder.EqualsBuilder;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import static org.apache.commons.lang3.StringUtils.defaultString;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is the representation of a person&#39;s address. This class is many-to-one to the Person
+&nbsp; * class, so a Person/Patient/User can have zero to n addresses
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;person_address&quot;)
+&nbsp;@Audited
+&nbsp;public class PersonAddress extends BaseChangeableOpenmrsData implements java.io.Serializable, Cloneable, Comparable&lt;PersonAddress&gt;, Address {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 343333L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@Id
+&nbsp;	@Column(name = &quot;person_address_id&quot;)
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	private Integer personAddressId;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;person_id&quot;)
+&nbsp;	private Person person;
+&nbsp;	
+<b class="fc">&nbsp;	@Column(name = &quot;preferred&quot;, length = 1, nullable = false)</b>
+<b class="fc">&nbsp;	private Boolean preferred = false;</b>
+&nbsp;	
+&nbsp;	@Column(name = &quot;address1&quot;)
+&nbsp;	private String address1;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address2&quot;)
+&nbsp;	private String address2;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address3&quot;)
+&nbsp;	private String address3;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address4&quot;)
+&nbsp;	private String address4;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address5&quot;)
+&nbsp;	private String address5;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address6&quot;)
+&nbsp;	private String address6;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address7&quot;)
+&nbsp;	private String address7;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address8&quot;)
+&nbsp;	private String address8;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address9&quot;)
+&nbsp;	private String address9;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address10&quot;)
+&nbsp;	private String address10;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address11&quot;)
+&nbsp;	private String address11;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address12&quot;)
+&nbsp;	private String address12;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address13&quot;)
+&nbsp;	private String address13;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address14&quot;)
+&nbsp;	private String address14;
+&nbsp;	
+&nbsp;	@Column(name = &quot;address15&quot;)
+&nbsp;	private String address15;
+&nbsp;
+&nbsp;	@Column(name = &quot;city_village&quot;)
+&nbsp;	private String cityVillage;
+&nbsp;
+&nbsp;	@Column(name = &quot;county_district&quot;)
+&nbsp;	private String countyDistrict;
+&nbsp;
+&nbsp;	@Column(name = &quot;state_province&quot;)
+&nbsp;	private String stateProvince;
+&nbsp;
+&nbsp;	@Column(name = &quot;country&quot;)
+&nbsp;	private String country;
+&nbsp;
+&nbsp;	@Column(name = &quot;postal_code&quot;, length = 50)
+&nbsp;	private String postalCode;
+&nbsp;
+&nbsp;	@Column(name = &quot;latitude&quot;, length = 50)
+&nbsp;	private String latitude;
+&nbsp;	
+&nbsp;	@Column(name = &quot;longitude&quot;, length = 50)
+&nbsp;	private String longitude;
+&nbsp;	
+&nbsp;	@Column(name = &quot;start_date&quot;, length = 19)
+&nbsp;	private Date startDate;
+&nbsp;	
+&nbsp;	@Column(name = &quot;end_date&quot;, length = 19)
+&nbsp;	private Date endDate;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public PersonAddress() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="nc">&nbsp;	public PersonAddress(Integer personAddressId) {</b>
+<b class="nc">&nbsp;		this.personAddressId = personAddressId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;a1:&quot; + getAddress1() + &quot;, a2:&quot; + getAddress2() + &quot;, cv:&quot; +</b>
+<b class="fc">&nbsp;				getCityVillage() + &quot;, sp:&quot; + getStateProvince() + &quot;, c:&quot; + getCountry() +</b>
+<b class="fc">&nbsp;				&quot;, cd:&quot; + getCountyDistrict() + &quot;, nc:&quot; + getAddress3() + &quot;, pc:&quot; +</b>
+<b class="fc">&nbsp;				getPostalCode() + &quot;, lat:&quot; + getLatitude() + &quot;, long:&quot; + getLongitude();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares this PersonAddress object to the given otherAddress. This method differs from
+&nbsp;	 * {@link #equals(Object)} in that this method compares the inner fields of each address for
+&nbsp;	 * equality. Note: Null/empty fields on &lt;code&gt;otherAddress&lt;/code&gt; /will not/ cause a false value
+&nbsp;	 * to be returned
+&nbsp;	 *
+&nbsp;	 * @param otherAddress PersonAddress with which to compare
+&nbsp;	 * @return boolean true/false whether or not they are the same addresses
+&nbsp;	 */
+&nbsp;	public boolean equalsContent(PersonAddress otherAddress) {
+<b class="fc">&nbsp;		return new EqualsBuilder().append(defaultString(otherAddress.getAddress1()), defaultString(address1)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress2()), defaultString(address2)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress3()), defaultString(address3)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress4()), defaultString(address4)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress5()), defaultString(address5)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress6()), defaultString(address6)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress7()), defaultString(address7)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress8()), defaultString(address8)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress9()), defaultString(address9)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress10()), defaultString(address10)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress11()), defaultString(address11)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress12()), defaultString(address12)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress13()), defaultString(address13)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress14()), defaultString(address14)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getAddress15()), defaultString(address15)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getCityVillage()), defaultString(cityVillage)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getCountyDistrict()), defaultString(countyDistrict)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getStateProvince()), defaultString(stateProvince)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getCountry()), defaultString(country)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getPostalCode()), defaultString(postalCode)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getLatitude()), defaultString(latitude)).append(</b>
+<b class="fc">&nbsp;		    defaultString(otherAddress.getLongitude()), defaultString(longitude)).append(otherAddress.getStartDate(),</b>
+<b class="fc">&nbsp;		    startDate).append(otherAddress.getEndDate(), endDate).isEquals();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * bitwise copy of the personAddress object. NOTICE: THIS WILL NOT COPY THE PATIENT OBJECT. The
+&nbsp;	 * PersonAddress.person object in this object AND the cloned object will point at the same
+&nbsp;	 * person
+&nbsp;	 *
+&nbsp;	 * @return New PersonAddress object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Object clone() {
+&nbsp;		try {
+<b class="fc">&nbsp;			return super.clone();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (CloneNotSupportedException e) {</b>
+<b class="nc">&nbsp;			throw new InternalError(&quot;PersonAddress should be cloneable&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the address1.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress1() {
+<b class="fc">&nbsp;		return address1;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param address1 The address1 to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress1(String address1) {
+<b class="fc">&nbsp;		this.address1 = address1;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the address2.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress2() {
+<b class="fc">&nbsp;		return address2;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param address2 The address2 to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress2(String address2) {
+<b class="fc">&nbsp;		this.address2 = address2;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the cityVillage.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getCityVillage() {
+<b class="fc">&nbsp;		return cityVillage;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cityVillage The cityVillage to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCityVillage(String cityVillage) {
+<b class="fc">&nbsp;		this.cityVillage = cityVillage;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the country.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getCountry() {
+<b class="fc">&nbsp;		return country;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param country The country to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCountry(String country) {
+<b class="fc">&nbsp;		this.country = country;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the preferred.
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getPreferred()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isPreferred() {
+<b class="nc">&nbsp;		return getPreferred();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getPreferred() {
+<b class="fc">&nbsp;		return preferred == null ? Boolean.FALSE : preferred;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param preferred The preferred to set.
+&nbsp;	 */
+&nbsp;	public void setPreferred(Boolean preferred) {
+<b class="fc">&nbsp;		this.preferred = preferred;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the latitude.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getLatitude() {
+<b class="fc">&nbsp;		return latitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param latitude The latitude to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setLatitude(String latitude) {
+<b class="fc">&nbsp;		this.latitude = latitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the longitude.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getLongitude() {
+<b class="fc">&nbsp;		return longitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param longitude The longitude to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setLongitude(String longitude) {
+<b class="fc">&nbsp;		this.longitude = longitude;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the person.
+&nbsp;	 */
+&nbsp;	public Person getPerson() {
+<b class="nc">&nbsp;		return person;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param person The person to set.
+&nbsp;	 */
+&nbsp;	public void setPerson(Person person) {
+<b class="fc">&nbsp;		this.person = person;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the personAddressId.
+&nbsp;	 */
+&nbsp;	public Integer getPersonAddressId() {
+<b class="fc">&nbsp;		return personAddressId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param personAddressId The personAddressId to set.
+&nbsp;	 */
+&nbsp;	public void setPersonAddressId(Integer personAddressId) {
+<b class="fc">&nbsp;		this.personAddressId = personAddressId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the postalCode.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getPostalCode() {
+<b class="fc">&nbsp;		return postalCode;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param postalCode The postalCode to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setPostalCode(String postalCode) {
+<b class="fc">&nbsp;		this.postalCode = postalCode;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the stateProvince.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getStateProvince() {
+<b class="fc">&nbsp;		return stateProvince;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param stateProvince The stateProvince to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setStateProvince(String stateProvince) {
+<b class="fc">&nbsp;		this.stateProvince = stateProvince;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the countyDistrict.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getCountyDistrict() {
+<b class="fc">&nbsp;		return countyDistrict;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param countyDistrict The countyDistrict to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCountyDistrict(String countyDistrict) {
+<b class="fc">&nbsp;		this.countyDistrict = countyDistrict;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to test whether any of the fields in this address are set
+&nbsp;	 *
+&nbsp;	 * @return whether any of the address fields (address1, address2, cityVillage, stateProvince,
+&nbsp;	 *         country, countyDistrict, neighborhoodCell, postalCode, latitude, longitude, etc) are
+&nbsp;	 *         whitespace, empty (&quot;&quot;) or null.
+&nbsp;	 */
+&nbsp;	public boolean isBlank() {
+&nbsp;		
+<b class="fc">&nbsp;		return StringUtils.isBlank(getAddress1()) &amp;&amp; StringUtils.isBlank(getAddress2())</b>
+<b class="fc">&nbsp;		        &amp;&amp; StringUtils.isBlank(getAddress3()) &amp;&amp; StringUtils.isBlank(getAddress4())</b>
+<b class="fc">&nbsp;		        &amp;&amp; StringUtils.isBlank(getAddress5()) &amp;&amp; StringUtils.isBlank(getAddress6())</b>
+<b class="fc">&nbsp;		        &amp;&amp; StringUtils.isBlank(getCityVillage()) &amp;&amp; StringUtils.isBlank(getStateProvince())</b>
+<b class="fc">&nbsp;		        &amp;&amp; StringUtils.isBlank(getCountry()) &amp;&amp; StringUtils.isBlank(getCountyDistrict())</b>
+<b class="fc">&nbsp;		        &amp;&amp; StringUtils.isBlank(getPostalCode()) &amp;&amp; StringUtils.isBlank(getLatitude())</b>
+<b class="fc">&nbsp;		        &amp;&amp; StringUtils.isBlank(getLongitude());</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;			
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+&nbsp;	 * Note: this comparator imposes orderings that are inconsistent with equals.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;squid:S1210&quot;)
+&nbsp;	public int compareTo(PersonAddress other) {
+<b class="fc">&nbsp;		int retValue = 0;</b>
+<b class="fc">&nbsp;		if (other != null) {</b>
+<b class="fc">&nbsp;			retValue = getVoided().compareTo(other.getVoided());</b>
+<b class="fc">&nbsp;			if (retValue == 0) {</b>
+<b class="fc">&nbsp;				retValue = other.getPreferred().compareTo(getPreferred());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (retValue == 0 &amp;&amp; getDateCreated() != null) {</b>
+<b class="fc">&nbsp;				retValue = OpenmrsUtil.compareWithNullAsLatest(getDateCreated(), other.getDateCreated());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (retValue == 0) {</b>
+<b class="fc">&nbsp;				retValue = OpenmrsUtil.compareWithNullAsGreatest(getPersonAddressId(), other.getPersonAddressId());</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// if we&#39;ve gotten this far, just check all address values. If they are
+&nbsp;			// equal, leave the objects at 0. If not, arbitrarily pick retValue=1
+&nbsp;			// and return that (they are not equal).
+<b class="fc">&nbsp;			if (retValue == 0 &amp;&amp; !equalsContent(other)) {</b>
+<b class="fc">&nbsp;				retValue = 1;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return retValue;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address3
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress3() {
+<b class="fc">&nbsp;		return address3;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address3 the address3 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress3(String address3) {
+<b class="fc">&nbsp;		this.address3 = address3;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address4
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress4() {
+<b class="fc">&nbsp;		return address4;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address4 the address4 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress4(String address4) {
+<b class="fc">&nbsp;		this.address4 = address4;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address6
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress6() {
+<b class="fc">&nbsp;		return address6;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address6 the address6 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress6(String address6) {
+<b class="fc">&nbsp;		this.address6 = address6;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @return the address5
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress5() {
+<b class="fc">&nbsp;		return address5;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.8
+&nbsp;	 * @param address5 the address5 to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress5(String address5) {
+<b class="fc">&nbsp;		this.address5 = address5;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="nc">&nbsp;		return getPersonAddressId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setPersonAddressId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the startDate
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Date getStartDate() {
+<b class="fc">&nbsp;		return startDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param startDate to set to
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setStartDate(Date startDate) {
+<b class="fc">&nbsp;		this.startDate = startDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the endDate
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Date getEndDate() {
+<b class="fc">&nbsp;		return this.endDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param endDate to set to
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setEndDate(Date endDate) {
+<b class="fc">&nbsp;		this.endDate = endDate;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns true if the address&#39; endDate is null
+&nbsp;	 *
+&nbsp;	 * @return true or false
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Boolean isActive() {
+<b class="nc">&nbsp;		return this.endDate == null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Makes an address inactive by setting its endDate to the current time
+&nbsp;	 *
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void deactivate() {
+<b class="nc">&nbsp;		setEndDate(Calendar.getInstance().getTime());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Makes an address active by setting its endDate to null
+&nbsp;	 *
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void activate() {
+<b class="nc">&nbsp;		setEndDate(null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress7() {
+<b class="fc">&nbsp;		return address7;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress7(String address7) {
+<b class="fc">&nbsp;		this.address7 = address7;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress8() {
+<b class="fc">&nbsp;		return address8;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress8(String address8) {
+<b class="fc">&nbsp;		this.address8 = address8;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress9() {
+<b class="fc">&nbsp;		return address9;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress9(String address9) {
+<b class="fc">&nbsp;		this.address9 = address9;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress10() {
+<b class="fc">&nbsp;		return address10;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress10(String address10) {
+<b class="fc">&nbsp;		this.address10 = address10;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress11() {
+<b class="fc">&nbsp;		return address11;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress11(String address11) {
+<b class="fc">&nbsp;		this.address11 = address11;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress12() {
+<b class="fc">&nbsp;		return address12;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress12(String address12) {
+<b class="fc">&nbsp;		this.address12 = address12;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress13() {
+<b class="fc">&nbsp;		return address13;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress13(String address13) {
+<b class="fc">&nbsp;		this.address13 = address13;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress14() {
+<b class="fc">&nbsp;		return address14;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress14(String address14) {
+<b class="fc">&nbsp;		this.address14 = address14;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAddress15() {
+<b class="fc">&nbsp;		return address15;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * {@inheritDoc}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAddress15(String address15) {
+<b class="fc">&nbsp;		this.address15 = address15;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

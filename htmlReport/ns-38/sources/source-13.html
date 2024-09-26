@@ -1,0 +1,220 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DrugValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: DrugValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DrugValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (34/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.ConceptMapType;
+&nbsp;import org.openmrs.ConceptReferenceTerm;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.DrugReferenceMap;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validates {@link Drug} objects.
+&nbsp; * 
+&nbsp; * @since 1.10
+&nbsp; */
+&nbsp;@Handler(supports = { Drug.class })
+<b class="fc">&nbsp;public class DrugValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Determines if the command object being submitted is a valid type
+&nbsp;	 * 
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return Drug.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates an Drug object
+&nbsp;	 * 
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the drug object is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if drug on drugReferenceMap is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if conceptReferenceTerm on drugReferenceMap is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; invoke ConceptReferenceTermValidator if term on drugReferenceMap is new
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; invoke ConceptMapTypeValidator if conceptMapType on drugReferenceMap is new
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if all fields are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject drug multiple mappings to the same term
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) {
+<b class="fc">&nbsp;		if (obj == null || !(obj instanceof Drug)) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;The parameter obj should not be null and must be of type&quot; + Drug.class);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			Drug drug = (Drug) obj;</b>
+<b class="fc">&nbsp;			Set&lt;DrugReferenceMap&gt; drugReferenceMaps = drug.getDrugReferenceMaps();</b>
+<b class="fc">&nbsp;			Set&lt;String&gt; mappedTermUuids = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;			int index = 0;</b>
+<b class="fc">&nbsp;			for (DrugReferenceMap referenceMap : drugReferenceMaps) {</b>
+<b class="fc">&nbsp;				Drug mappedDrug = referenceMap.getDrug();</b>
+<b class="fc">&nbsp;				ConceptReferenceTerm referenceTerm = referenceMap.getConceptReferenceTerm();</b>
+<b class="fc">&nbsp;				ConceptMapType mapType = referenceMap.getConceptMapType();</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (mappedDrug == null) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;drugReferenceMaps[&quot; + index + &quot;].drug&quot;, &quot;Drug.drugReferenceMap.mappedDrug&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (referenceTerm == null) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;drugReferenceMaps[&quot; + index + &quot;].conceptReferenceTerm&quot;,</b>
+&nbsp;					    &quot;Drug.drugReferenceMap.conceptReferenceTerm&quot;);
+<b class="fc">&nbsp;				} else if (referenceTerm.getConceptReferenceTermId() == null) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						errors.pushNestedPath(&quot;drugReferenceMaps[&quot; + index + &quot;].conceptReferenceTerm&quot;);</b>
+<b class="fc">&nbsp;						ValidationUtils.invokeValidator(new ConceptReferenceTermValidator(), referenceTerm, errors);</b>
+&nbsp;					}
+&nbsp;					finally {
+<b class="fc">&nbsp;						errors.popNestedPath();</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (mapType == null) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;drugReferenceMaps[&quot; + index + &quot;].conceptMapType&quot;,</b>
+&nbsp;					    &quot;Drug.drugReferenceMap.conceptMapType&quot;);
+<b class="fc">&nbsp;				} else if (mapType.getConceptMapTypeId() == null) {</b>
+&nbsp;					try {
+<b class="fc">&nbsp;						errors.pushNestedPath(&quot;drugReferenceMaps[&quot; + index + &quot;].conceptMapType&quot;);</b>
+<b class="fc">&nbsp;						ValidationUtils.invokeValidator(new ConceptMapTypeValidator(), mapType, errors);</b>
+&nbsp;					}
+&nbsp;					finally {
+<b class="fc">&nbsp;						errors.popNestedPath();</b>
+<b class="fc">&nbsp;					}</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				//don&#39;t proceed to the next map
+<b class="fc">&nbsp;				if (errors.hasErrors()) {</b>
+&nbsp;					return;
+&nbsp;				}
+&nbsp;				
+&nbsp;				//if we already have a mapping to this term, reject it this map
+<b class="fc">&nbsp;				if (!mappedTermUuids.add(referenceMap.getConceptReferenceTerm().getUuid())) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;drugReferenceMaps[&quot; + index + &quot;].conceptReferenceTerm&quot;,</b>
+&nbsp;					    &quot;Drug.drugReferenceMap.termAlreadyMapped&quot;,
+&nbsp;					    &quot;Cannot map a drug multiple times to the same reference term&quot;);
+&nbsp;				}
+<b class="fc">&nbsp;				index++;</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;name&quot;, &quot;retireReason&quot;, &quot;strength&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

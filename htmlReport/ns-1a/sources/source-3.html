@@ -1,0 +1,150 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ChangeLogVersions</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.liquibase</a>
+</div>
+
+<h1>Coverage Summary for Class: ChangeLogVersions (org.openmrs.liquibase)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ChangeLogVersions</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.liquibase;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines which Liquibase snapshot and update change logs are available at all. The information
+&nbsp; * provided by this class needs to be updated when new Liquibase snapshots and updates are added to
+&nbsp; * openmrs-api resources.
+&nbsp; *
+&nbsp; * @since 2.4
+&nbsp; */
+<b class="fc">&nbsp;public class ChangeLogVersions {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This definition of Liquibase snapshot versions needs to be kept in sync with the actual change
+&nbsp;	 * log files in openmrs-core/api/src/main/resources/liquibase/snapshots/core-data and
+&nbsp;	 * openmrs-core/api/src/main/resources/liquibase/snapshots/schema-only. If the actual change log
+&nbsp;	 * files and this list get out of sync, org.openmrs.liquibase.ChangeLogVersionsTest fails.
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final List&lt;String&gt; SNAPSHOT_VERSIONS = Arrays.asList(&quot;1.9.x&quot;, &quot;2.1.x&quot;, &quot;2.2.x&quot;, &quot;2.3.x&quot;, &quot;2.4.x&quot;, &quot;2.5.x&quot;, &quot;2.6.x&quot;);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This definition of Liquibase update versions needs to be kept in sync with the actual change log
+&nbsp;	 * files in openmrs-core/api/src/main/resources/liquibase/updates. If the actual change log files
+&nbsp;	 * and this list get out of sync, org.openmrs.liquibase.ChangeLogVersionsTest fails.
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final List&lt;String&gt; UPDATE_VERSIONS = Arrays.asList(&quot;1.9.x&quot;, &quot;2.0.x&quot;, &quot;2.1.x&quot;, &quot;2.2.x&quot;, &quot;2.3.x&quot;, &quot;2.4.x&quot;, &quot;2.5.x&quot;, &quot;2.6.x&quot;, &quot;2.7.x&quot;);</b>
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getSnapshotVersions() {
+<b class="fc">&nbsp;		return SNAPSHOT_VERSIONS;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getUpdateVersions() {
+<b class="fc">&nbsp;		return UPDATE_VERSIONS;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

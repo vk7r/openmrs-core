@@ -1,0 +1,335 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CreateDiscontinueOrders</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: CreateDiscontinueOrders (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CreateDiscontinueOrders</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (60/70)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CreateDiscontinueOrders$1</td>
+  </tr>
+  <tr>
+    <td class="name">CreateDiscontinueOrders$DiscontinuedOrder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91,7%
+  </span>
+  <span class="absValue">
+    (11/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,1%
+  </span>
+  <span class="absValue">
+    (74/84)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.Date;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Types;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.openmrs.Order;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+<b class="fc">&nbsp;public class CreateDiscontinueOrders implements CustomTaskChange {</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="fc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			List&lt;DiscontinuedOrder&gt; discontinuedOrders = getDiscontinuedOrders(connection);</b>
+<b class="fc">&nbsp;			createDiscontinueOrders(connection, discontinuedOrders);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SQLException | DatabaseException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void createDiscontinueOrders(JdbcConnection connection, List&lt;DiscontinuedOrder&gt; discontinuedOrders)
+&nbsp;	        throws CustomChangeException, SQLException, DatabaseException {
+<b class="fc">&nbsp;		final int batchSize = 1000;</b>
+<b class="fc">&nbsp;		int index = 0;</b>
+<b class="fc">&nbsp;		PreparedStatement insertStatement = null;</b>
+<b class="fc">&nbsp;		Boolean autoCommit = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			autoCommit = connection.getAutoCommit();</b>
+<b class="fc">&nbsp;			connection.setAutoCommit(false);</b>
+<b class="fc">&nbsp;			insertStatement = connection</b>
+<b class="fc">&nbsp;			        .prepareStatement(&quot;Insert into orders(previous_order_id, concept_id, patient_id, encounter_id, &quot;</b>
+&nbsp;			                + &quot;creator, date_created, discontinued_reason, discontinued_reason_non_coded, &quot;
+&nbsp;			                + &quot;uuid, order_action, orderer, order_number, order_type_id, start_date, auto_expire_date) &quot;
+&nbsp;			                + &quot;values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)&quot;);
+<b class="fc">&nbsp;			for (DiscontinuedOrder discontinuedOrder : discontinuedOrders) {</b>
+<b class="fc">&nbsp;				insertStatement.setInt(1, discontinuedOrder.previousOrderId);</b>
+<b class="fc">&nbsp;				insertStatement.setInt(2, discontinuedOrder.conceptId);</b>
+<b class="fc">&nbsp;				insertStatement.setInt(3, discontinuedOrder.patientId);</b>
+<b class="fc">&nbsp;				setIntOrNull(insertStatement, 4, discontinuedOrder.encounterId);</b>
+<b class="fc">&nbsp;				insertStatement.setInt(5, discontinuedOrder.discontinuedById);</b>
+<b class="fc">&nbsp;				insertStatement.setDate(6, new Date(System.currentTimeMillis()));</b>
+<b class="fc">&nbsp;				setIntOrNull(insertStatement, 7, discontinuedOrder.discontinuedReasonId);</b>
+<b class="fc">&nbsp;				insertStatement.setString(8, discontinuedOrder.discontinuedReasonNonCoded);</b>
+<b class="fc">&nbsp;				insertStatement.setString(9, UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;				insertStatement.setString(10, Order.Action.DISCONTINUE.name());</b>
+<b class="fc">&nbsp;				setIntOrNull(insertStatement, 11, discontinuedOrder.discontinuedById);</b>
+<b class="fc">&nbsp;				insertStatement.setString(12, discontinuedOrder.orderNumber);</b>
+<b class="fc">&nbsp;				insertStatement.setInt(13, discontinuedOrder.orderTypeId);</b>
+<b class="fc">&nbsp;				insertStatement.setDate(14, discontinuedOrder.dateActivated);</b>
+<b class="fc">&nbsp;				insertStatement.setDate(15, discontinuedOrder.dateActivated);</b>
+<b class="fc">&nbsp;				insertStatement.addBatch();</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (index % batchSize == 0) {</b>
+<b class="fc">&nbsp;					insertStatement.executeBatch();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				index++;</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			insertStatement.executeBatch();</b>
+<b class="fc">&nbsp;			connection.commit();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			handleError(connection, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (autoCommit != null) {</b>
+<b class="fc">&nbsp;				connection.setAutoCommit(autoCommit);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (insertStatement != null) {</b>
+<b class="fc">&nbsp;				insertStatement.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void setIntOrNull(PreparedStatement statement, int index, Integer value) throws SQLException {
+<b class="fc">&nbsp;		if (value == null || value == 0) {</b>
+<b class="fc">&nbsp;			statement.setNull(index, Types.INTEGER);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			statement.setInt(index, value);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void handleError(JdbcConnection connection, Exception e) throws DatabaseException, CustomChangeException {
+<b class="nc">&nbsp;		connection.rollback();</b>
+<b class="nc">&nbsp;		throw new CustomChangeException(e);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private List&lt;DiscontinuedOrder&gt; getDiscontinuedOrders(JdbcConnection connection) throws CustomChangeException,
+&nbsp;	        SQLException {
+<b class="fc">&nbsp;		List&lt;DiscontinuedOrder&gt; dcOrders = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		PreparedStatement statement = null;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			statement = connection.prepareStatement(&quot;select order_id, concept_id, patient_id, encounter_id, date_stopped, &quot;</b>
+&nbsp;			        + &quot;discontinued_by, discontinued_reason, discontinued_reason_non_coded, order_type_id &quot;
+&nbsp;			        + &quot;from orders where discontinued = ?&quot;);
+<b class="fc">&nbsp;			statement.setBoolean(1, true);</b>
+<b class="fc">&nbsp;			ResultSet rs = statement.executeQuery();</b>
+<b class="fc">&nbsp;			while (rs.next()) {</b>
+<b class="fc">&nbsp;				dcOrders.add(new DiscontinuedOrder(rs.getInt(&quot;order_id&quot;), rs.getInt(&quot;concept_id&quot;), rs.getInt(&quot;patient_id&quot;),</b>
+<b class="fc">&nbsp;				        rs.getInt(&quot;encounter_id&quot;), rs.getInt(&quot;discontinued_by&quot;), rs.getInt(&quot;discontinued_reason&quot;), rs</b>
+<b class="fc">&nbsp;				                .getString(&quot;discontinued_reason_non_coded&quot;), rs.getDate(&quot;date_stopped&quot;), rs</b>
+<b class="fc">&nbsp;				                .getInt(&quot;order_type_id&quot;)));</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SQLException | DatabaseException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (statement != null) {</b>
+<b class="fc">&nbsp;				statement.close();</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return dcOrders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="fc">&nbsp;		return &quot;Finished creating discontinue orders for discontinued orders&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor resourceAccessor) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static class DiscontinuedOrder {</b>
+&nbsp;		
+&nbsp;		public int orderId;
+&nbsp;		
+&nbsp;		public int conceptId;
+&nbsp;		
+&nbsp;		public int patientId;
+&nbsp;		
+&nbsp;		public int encounterId;
+&nbsp;		
+&nbsp;		public int discontinuedReasonId;
+&nbsp;		
+&nbsp;		public String discontinuedReasonNonCoded;
+&nbsp;		
+&nbsp;		public Date dateActivated;
+&nbsp;		
+&nbsp;		public int discontinuedById;
+&nbsp;		
+&nbsp;		public Date dateCreated;
+&nbsp;		
+&nbsp;		public int previousOrderId;
+&nbsp;		
+&nbsp;		public String orderNumber;
+&nbsp;		
+&nbsp;		public int orderTypeId;
+&nbsp;		
+&nbsp;		public Date date;
+&nbsp;		
+&nbsp;		private DiscontinuedOrder(int orderId, int conceptId, int patientId, int encounterId, int discontinuedById,
+<b class="fc">&nbsp;		    int discontinuedReasonId, String discontinuedReasonNonCoded, Date dateStopped, int orderTypeId) {</b>
+<b class="fc">&nbsp;			this.orderId = orderId;</b>
+<b class="fc">&nbsp;			this.previousOrderId = orderId;</b>
+<b class="fc">&nbsp;			this.conceptId = conceptId;</b>
+<b class="fc">&nbsp;			this.patientId = patientId;</b>
+<b class="fc">&nbsp;			this.encounterId = encounterId;</b>
+<b class="fc">&nbsp;			this.discontinuedReasonId = discontinuedReasonId;</b>
+<b class="fc">&nbsp;			this.discontinuedReasonNonCoded = discontinuedReasonNonCoded;</b>
+<b class="fc">&nbsp;			this.dateActivated = dateStopped;</b>
+<b class="fc">&nbsp;			this.discontinuedById = discontinuedById;</b>
+<b class="fc">&nbsp;			this.dateCreated = dateStopped;</b>
+<b class="fc">&nbsp;			this.orderNumber = String.valueOf(orderId).concat(&quot;-DC&quot;);</b>
+<b class="fc">&nbsp;			this.orderTypeId = orderTypeId;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

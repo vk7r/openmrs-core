@@ -1,0 +1,342 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateDiagnosisDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateDiagnosisDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateDiagnosisDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (51/51)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.ConditionVerificationStatus;
+&nbsp;import org.openmrs.Diagnosis;
+&nbsp;import org.openmrs.DiagnosisAttribute;
+&nbsp;import org.openmrs.DiagnosisAttributeType;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.DiagnosisDAO;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import javax.persistence.Query;
+&nbsp;import javax.persistence.TypedQuery;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate implementation of the DiagnosisDAO
+&nbsp; *
+&nbsp; * @see DiagnosisDAO
+&nbsp; * @see org.openmrs.api.DiagnosisService
+&nbsp; *
+&nbsp; */
+<b class="fc">&nbsp;public class HibernateDiagnosisDAO implements DiagnosisDAO {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The rank for a primary diagnosis
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Integer PRIMARY_RANK = 1;</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves the diagnosis.
+&nbsp;	 *
+&nbsp;	 * @param diagnosis the diagnosis to save.
+&nbsp;	 * @return the saved diagnosis.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis saveDiagnosis(Diagnosis diagnosis) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(diagnosis);</b>
+<b class="fc">&nbsp;		return diagnosis;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets all active diagnoses related to the specified patient.
+&nbsp;	 *
+&nbsp;	 * @param patient the patient whose active diagnoses are being queried.
+&nbsp;	 * @return all active diagnoses associated with the specified patient.
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	@Override
+&nbsp;	public List&lt;Diagnosis&gt; getActiveDiagnoses(Patient patient, Date fromDate) {
+<b class="fc">&nbsp;		String fromDateCriteria = &quot;&quot;;</b>
+<b class="fc">&nbsp;		if(fromDate != null){</b>
+<b class="fc">&nbsp;			fromDateCriteria = &quot; and d.dateCreated &gt;= :fromDate &quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(</b>
+&nbsp;			&quot;from Diagnosis d where d.patient.patientId = :patientId and d.voided = false &quot; 
+&nbsp;				+ fromDateCriteria  
+&nbsp;				+ &quot; order by d.dateCreated desc&quot;);
+<b class="fc">&nbsp;		query.setParameter(&quot;patientId&quot;, patient.getId());</b>
+<b class="fc">&nbsp;		if(fromDate != null){</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;fromDate&quot;, fromDate);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#getDiagnosesByEncounter(Encounter, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Diagnosis&gt; getDiagnosesByEncounter(Encounter encounter, boolean primaryOnly, boolean confirmedOnly) {
+<b class="fc">&nbsp;		String queryString = &quot;from Diagnosis d where d.encounter.encounterId = :encounterId&quot;;</b>
+<b class="fc">&nbsp;		if (primaryOnly) {</b>
+<b class="fc">&nbsp;			queryString += &quot; and d.rank = :rankId&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (confirmedOnly) {</b>
+<b class="fc">&nbsp;			queryString += &quot; and d.certainty = :certainty&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		queryString += &quot; order by d.dateCreated desc&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;		TypedQuery&lt;Diagnosis&gt; query = sessionFactory.getCurrentSession().createQuery(queryString, Diagnosis.class).setParameter(&quot;encounterId&quot;, encounter.getId());</b>
+<b class="fc">&nbsp;		if (primaryOnly) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;rankId&quot;, PRIMARY_RANK);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (confirmedOnly) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;certainty&quot;, ConditionVerificationStatus.CONFIRMED);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#getDiagnosesByVisit(Visit, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Diagnosis&gt; getDiagnosesByVisit(Visit visit, boolean primaryOnly, boolean confirmedOnly) {
+<b class="fc">&nbsp;		String queryString = &quot;from Diagnosis d where d.encounter.visit.visitId = :visitId&quot;;</b>
+<b class="fc">&nbsp;		if (primaryOnly) {</b>
+<b class="fc">&nbsp;			queryString += &quot; and d.rank = :rankId&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (confirmedOnly) {</b>
+<b class="fc">&nbsp;			queryString += &quot; and d.certainty = :certainty&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		queryString += &quot; order by d.dateCreated desc&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;		TypedQuery&lt;Diagnosis&gt; query = sessionFactory.getCurrentSession().createQuery(queryString, Diagnosis.class).setParameter(&quot;visitId&quot;, visit.getId());</b>
+<b class="fc">&nbsp;		if (primaryOnly) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;rankId&quot;, PRIMARY_RANK);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (confirmedOnly) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;certainty&quot;, ConditionVerificationStatus.CONFIRMED);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a diagnosis from database using the diagnosis id
+&nbsp;	 * 
+&nbsp;	 * @param diagnosisId the id of the diagnosis to look for
+&nbsp;	 * @return the diagnosis with the given diagnosis id
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis getDiagnosisById(Integer diagnosisId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Diagnosis.class, diagnosisId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the diagnosis attached to the specified UUID.
+&nbsp;	 *
+&nbsp;	 * @param uuid the uuid to search for in the database.
+&nbsp;	 * @return the diagnosis associated with the UUID.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Diagnosis getDiagnosisByUuid(String uuid){
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Diagnosis.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely remove a diagnosis from the database. 
+&nbsp;	 * @param diagnosis diagnosis to remove from the database
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteDiagnosis(Diagnosis diagnosis) throws DAOException{
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(diagnosis);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#getAllDiagnosisAttributeTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;DiagnosisAttributeType&gt; getAllDiagnosisAttributeTypes() throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;DiagnosisAttributeType&gt; cq = cb.createQuery(DiagnosisAttributeType.class);</b>
+<b class="fc">&nbsp;		cq.from(DiagnosisAttributeType.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#getDiagnosisAttributeTypeById(Integer) 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DiagnosisAttributeType getDiagnosisAttributeTypeById(Integer id) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(DiagnosisAttributeType.class, id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#getDiagnosisAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DiagnosisAttributeType getDiagnosisAttributeTypeByUuid(String uuid) throws DAOException {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, DiagnosisAttributeType.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#saveDiagnosisAttributeType(DiagnosisAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public DiagnosisAttributeType saveDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(diagnosisAttributeType);</b>
+<b class="fc">&nbsp;		return diagnosisAttributeType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#deleteDiagnosisAttributeType(DiagnosisAttributeType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public void deleteDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(diagnosisAttributeType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.DiagnosisDAO#getDiagnosisAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public DiagnosisAttribute getDiagnosisAttributeByUuid(String uuid) throws DAOException {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, DiagnosisAttribute.class, uuid);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

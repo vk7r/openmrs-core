@@ -1,0 +1,256 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HL7Constants</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7</a>
+</div>
+
+<h1>Coverage Summary for Class: HL7Constants (org.openmrs.hl7)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HL7Constants</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Constants used by the hl7 package
+&nbsp; */
+&nbsp;public class HL7Constants {
+&nbsp;
+&nbsp;	private HL7Constants() {
+&nbsp;	}
+&nbsp;		
+<b class="fc">&nbsp;	public static final Integer HL7_STATUS_PENDING = 0;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Integer HL7_STATUS_PROCESSING = 1;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Integer HL7_STATUS_PROCESSED = 2;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Integer HL7_STATUS_ERROR = 3;</b>
+&nbsp;	
+&nbsp;	public static final String HL7_TEXT = &quot;ST&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_CODED = &quot;CE&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_CODED_WITH_EXCEPTIONS = &quot;CWE&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_NUMERIC = &quot;NM&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_DATE = &quot;DT&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_TIME = &quot;TM&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_DATETIME = &quot;TS&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_BOOLEAN = &quot;BIT&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_AUTHORITY_UUID = &quot;UUID&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_AUTHORITY_LOCAL = &quot;L&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	public static final Object HL7_ID_PERSON = &quot;PN&quot;;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Object HL7_ID_PATIENT = &quot;PI&quot;;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Integer CLASS_DRUG = 3;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used in hl7 sextuplets: 123^Primary name^99DCT^345^Chosen name^99NAM
+&nbsp;	 */
+&nbsp;	public static final String HL7_LOCAL_CONCEPT = &quot;99DCT&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_LOCAL_CONCEPT_NAME = &quot;99NAM&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_LOCAL_DRUG = &quot;99RX&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_LOCAL_RELATIONSHIP = &quot;99REL&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public static final int HL7_STATUS_DELETED = 4;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final Integer HL7_STATUS_MIGRATED = 5;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * default name for HL7_archives destination directory
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static final String HL7_ARCHIVE_DIRECTORY_NAME = &quot;hl7_archives&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public static final String HL7_FORM_ID = &quot;AMRS.ELD.FORMID&quot;;
+&nbsp;	
+&nbsp;	public static final String HL7_FORM_UUID = &quot;AMRS.ELD.FORMUUID&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * the key to be used for numberTransferred archives in the progressStatusMap
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static final String NUMBER_TRANSFERRED_KEY = &quot;transferred&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * the key to be used for numberOfFailedTransfers in the progressStatusMap
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static final String NUMBER_OF_FAILED_TRANSFERS_KEY = &quot;failures&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * time taken before static/state properties of an instance of the hl7 in archive migration
+&nbsp;	 * thread are reset
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static final long THREAD_SLEEP_PERIOD = 2000;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * the maximum number if archives to fetch per query to save on memory
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static final int MIGRATION_MAX_BATCH_SIZE = 2000;
+&nbsp;	
+&nbsp;	// List of datatypes that do not require complex definitions
+<b class="fc">&nbsp;	public static final Map&lt;String, String&gt; simpleDatatypes = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	static {
+<b class="fc">&nbsp;		simpleDatatypes.put(HL7_TEXT, &quot;xs:string&quot;);</b>
+<b class="fc">&nbsp;		simpleDatatypes.put(HL7_DATE, &quot;xs:date&quot;);</b>
+<b class="fc">&nbsp;		simpleDatatypes.put(HL7_TIME, &quot;xs:time&quot;);</b>
+<b class="fc">&nbsp;		simpleDatatypes.put(HL7_DATETIME, &quot;xs:dateTime&quot;);</b>
+&nbsp;		
+&nbsp;		// We make a special boolean type with an extra attribute
+&nbsp;		// to get InfoPath to treat booleans properly
+<b class="fc">&nbsp;		simpleDatatypes.put(HL7_BOOLEAN, &quot;_infopath_boolean&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Assigning authority for an id for a provider in an HL7 message that specifies that it is a
+&nbsp;	 * provider identifier
+&nbsp;	 */
+&nbsp;	public static final String PROVIDER_ASSIGNING_AUTH_IDENTIFIER = &quot;PROVIDER.IDENTIFIER&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Assigning authority for an id for a provider in an HL7 message that specifies that it is a
+&nbsp;	 * provider id
+&nbsp;	 */
+&nbsp;	public static final String PROVIDER_ASSIGNING_AUTH_PROV_ID = &quot;PROVIDER.ID&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Assigning authority for an id for a provider in an HL7 message that specifies that it is a
+&nbsp;	 * provider uuid
+&nbsp;	 */
+&nbsp;	public static final String PROVIDER_ASSIGNING_AUTH_PROV_UUID = &quot;PROVIDER.UUID&quot;;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,162 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DatatypeService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: DatatypeService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">DatatypeService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.api.db.ClobDatatypeStorage;
+&nbsp;import org.openmrs.customdatatype.CustomDatatype;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeException;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeHandler;
+&nbsp;
+&nbsp;/**
+&nbsp; * API methods related to {@link CustomDatatype} and {@link CustomDatatypeHandler}.
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;public interface DatatypeService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all datatypes registered by core code and modules
+&nbsp;	 */
+&nbsp;	Set&lt;Class&lt;? extends CustomDatatype&lt;?&gt;&gt;&gt; getAllDatatypeClasses();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all handlers registered by core code and modules
+&nbsp;	 */
+&nbsp;	Set&lt;Class&lt;? extends CustomDatatypeHandler&lt;?, ?&gt;&gt;&gt; getAllHandlerClasses();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param clazz
+&nbsp;	 * @param config
+&nbsp;	 * @return an instantiated {@link CustomDatatype}, with a configuration set
+&nbsp;	 * @throws CustomDatatypeException
+&nbsp;	 */
+&nbsp;	&lt;T extends CustomDatatype&lt;?&gt;&gt; T getDatatype(Class&lt;T&gt; clazz, String config) throws CustomDatatypeException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the default handler for a {@link CustomDatatype}, and sets its configuration
+&nbsp;	 *  
+&nbsp;	 * 
+&nbsp;	 * @param datatype
+&nbsp;	 * @param handlerConfig
+&nbsp;	 * @return default handler with the given configuration
+&nbsp;     * &lt;strong&gt;Should&lt;/strong&gt; return a handler for the specified datatype
+&nbsp;     * &lt;strong&gt;Should&lt;/strong&gt; return a handler for a datatype that extends a generic superclass
+&nbsp;	 */
+&nbsp;	CustomDatatypeHandler&lt;?, ?&gt; getHandler(CustomDatatype&lt;?&gt; datatype, String handlerConfig);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param datatypeClass
+&nbsp;	 * @return all handlers suitable for the given {@link CustomDatatype} class
+&nbsp;	 */
+&nbsp;	@SuppressWarnings(&quot;rawtypes&quot;)
+&nbsp;	List&lt;Class&lt;? extends CustomDatatypeHandler&gt;&gt; getHandlerClasses(Class&lt;? extends CustomDatatype&lt;?&gt;&gt; datatypeClass);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a clob storage object by its id
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 * @return clob storage object
+&nbsp;	 */
+&nbsp;	ClobDatatypeStorage getClobDatatypeStorage(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a clob storage object by its uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return clob storage object
+&nbsp;	 */
+&nbsp;	ClobDatatypeStorage getClobDatatypeStorageByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates a clob storage object
+&nbsp;	 * 
+&nbsp;	 * @param storage
+&nbsp;	 * @return the saved object
+&nbsp;	 */
+&nbsp;	ClobDatatypeStorage saveClobDatatypeStorage(ClobDatatypeStorage storage);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes a clob storage object from the database
+&nbsp;	 * 
+&nbsp;	 * @param storage the object to delete
+&nbsp;	 */
+&nbsp;	void deleteClobDatatypeStorage(ClobDatatypeStorage storage);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

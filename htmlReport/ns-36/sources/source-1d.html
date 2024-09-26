@@ -1,0 +1,1466 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsConstants</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsConstants (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsConstants</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (4/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    15,2%
+  </span>
+  <span class="absValue">
+    (37/244)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OpenmrsConstants$PERSON_TYPE</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (6/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16,5%
+  </span>
+  <span class="absValue">
+    (41/248)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Properties;
+&nbsp;
+&nbsp;import liquibase.GlobalConfiguration;
+&nbsp;import org.apache.commons.io.IOUtils;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.api.handler.ExistingVisitAssignmentHandler;
+&nbsp;import org.openmrs.customdatatype.datatype.BooleanDatatype;
+&nbsp;import org.openmrs.customdatatype.datatype.FreeTextDatatype;
+&nbsp;import org.openmrs.hl7.HL7Constants;
+&nbsp;import org.openmrs.module.ModuleConstants;
+&nbsp;import org.openmrs.module.ModuleFactory;
+&nbsp;import org.openmrs.patient.impl.LuhnIdentifierValidator;
+&nbsp;import org.openmrs.scheduler.SchedulerConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import static java.util.Arrays.asList;
+&nbsp;
+&nbsp;/**
+&nbsp; * Constants used in OpenMRS. Contents built from build properties (version, version_short, and
+&nbsp; * expected_database). Some are set at runtime (database, database version). This file should
+&nbsp; * contain all privilege names and global property names. Those strings added to the static CORE_*
+&nbsp; * methods will be written to the database at startup if they don&#39;t exist yet.
+&nbsp; */
+&nbsp;public final class OpenmrsConstants {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(OpenmrsConstants.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static String KEY_OPENMRS_APPLICATION_DATA_DIRECTORY = &quot;OPENMRS_APPLICATION_DATA_DIRECTORY&quot;;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is the hard coded primary key of the concept class for DRUG. This has to be done because
+&nbsp;	 * some logic in the API acts on this concept class
+&nbsp;	 */
+&nbsp;	public static final int CONCEPT_CLASS_DRUG = 3;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * hack alert: During an ant build, the openmrs api jar manifest file is loaded with these
+&nbsp;	 * values. When constructing the OpenmrsConstants class file, the api jar is read and the values
+&nbsp;	 * are copied in as constants
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Package THIS_PACKAGE = OpenmrsConstants.class.getPackage();</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This holds the current openmrs code version. This version is a string containing spaces and
+&nbsp;	 * words.&lt;br&gt;
+&nbsp;	 * The format is:&lt;br&gt;
+&nbsp;	 * &lt;i&gt;major&lt;/i&gt;.&lt;i&gt;minor&lt;/i&gt;.&lt;i&gt;maintenance&lt;/i&gt; &lt;i&gt;suffix&lt;/i&gt; Build &lt;i&gt;buildNumber&lt;/i&gt;
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final String OPENMRS_VERSION = THIS_PACKAGE.getSpecificationVendor() != null ? THIS_PACKAGE</b>
+<b class="nc">&nbsp;	        .getSpecificationVendor() : (getBuildVersion() != null ? getBuildVersion() : getVersion());</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This holds the current openmrs code version in a short space-less string.&lt;br&gt;
+&nbsp;	 * The format is:&lt;br&gt;
+&nbsp;	 * &lt;i&gt;major&lt;/i&gt;.&lt;i&gt;minor&lt;/i&gt;.&lt;i&gt;maintenance&lt;/i&gt;.&lt;i&gt;revision&lt;/i&gt;-&lt;i&gt;suffix&lt;/i&gt;
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final String OPENMRS_VERSION_SHORT = THIS_PACKAGE.getSpecificationVersion() != null ? THIS_PACKAGE</b>
+<b class="nc">&nbsp;	        .getSpecificationVersion() : (getBuildVersionShort() != null ? getBuildVersionShort() : getVersion());</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return build version with alpha characters (eg:1.10.0 SNAPSHOT Build 24858)
+&nbsp;	 * defined in MANIFEST.MF(specification-Vendor)
+&nbsp;	 *
+&nbsp;	 * @see #OPENMRS_VERSION_SHORT
+&nbsp;	 * @see #OPENMRS_VERSION
+&nbsp;	 */
+&nbsp;	private static String getBuildVersion() {
+<b class="fc">&nbsp;		return getOpenmrsProperty(&quot;openmrs.version.long&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return build version without alpha characters (eg: 1.10.0.24858)
+&nbsp;	 * defined in MANIFEST.MF (specification-Version)
+&nbsp;	 *
+&nbsp;	 * @see #OPENMRS_VERSION_SHORT
+&nbsp;	 * @see #OPENMRS_VERSION
+&nbsp;	 */
+&nbsp;	private static String getBuildVersionShort() {
+<b class="fc">&nbsp;		return getOpenmrsProperty(&quot;openmrs.version.short&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static String getVersion() {
+<b class="nc">&nbsp;		return getOpenmrsProperty(&quot;openmrs.version&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static String getOpenmrsProperty(String property) {
+<b class="fc">&nbsp;		InputStream file = OpenmrsConstants.class.getClassLoader().getResourceAsStream(&quot;org/openmrs/api/openmrs.properties&quot;);</b>
+<b class="fc">&nbsp;		if (file == null) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to find the openmrs.properties file&quot;);</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			Properties props = new Properties();</b>
+<b class="fc">&nbsp;			props.load(file);</b>
+&nbsp;			
+<b class="fc">&nbsp;			file.close();</b>
+&nbsp;			
+<b class="fc">&nbsp;			return props.getProperty(property);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to parse the openmrs.properties file&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			IOUtils.closeQuietly(file);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public static String DATABASE_NAME = &quot;openmrs&quot;;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static String DATABASE_BUSINESS_NAME = &quot;openmrs&quot;;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set true from runtime configuration to obscure patients for system demonstrations
+&nbsp;	 */
+<b class="fc">&nbsp;	public static boolean OBSCURE_PATIENTS = false;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static String OBSCURE_PATIENTS_GIVEN_NAME = &quot;Demo&quot;;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static String OBSCURE_PATIENTS_MIDDLE_NAME = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static String OBSCURE_PATIENTS_FAMILY_NAME = &quot;Person&quot;;</b>
+&nbsp;	
+&nbsp;	public static final String REGEX_LARGE = &quot;[!\&quot;#\\$%&amp;&#39;\\(\\)\\*,+-\\./:;&lt;=&gt;\\?@\\[\\\\\\\\\\]^_`{\\|}~]&quot;;
+&nbsp;	
+&nbsp;	public static final String REGEX_SMALL = &quot;[!\&quot;#\\$%&amp;&#39;\\(\\)\\*,\\./:;&lt;=&gt;\\?@\\[\\\\\\\\\\]^_`{\\|}~]&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	public static final Integer CIVIL_STATUS_CONCEPT_ID = 1054;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The directory which OpenMRS should attempt to use as its application data directory
+&nbsp;	 * in case the current users home dir is not writeable (e.g. when using application servers
+&nbsp;	 * like tomcat to deploy OpenMRS).
+&nbsp;	 *
+&nbsp;	 * @see #APPLICATION_DATA_DIRECTORY_RUNTIME_PROPERTY
+&nbsp;	 * @see OpenmrsUtil#getApplicationDataDirectory()
+&nbsp;	 */
+&nbsp;	public static final String APPLICATION_DATA_DIRECTORY_FALLBACK_UNIX = &quot;/var/lib&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	public static final String APPLICATION_DATA_DIRECTORY_FALLBACK_WIN = System.getenv(&quot;appdata&quot;);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The name of the runtime property that a user can set that will specify where openmrs&#39;s
+&nbsp;	 * application directory is
+&nbsp;	 * 
+&nbsp;	 * @see OpenmrsUtil#getApplicationDataDirectory()
+&nbsp;	 * @see OpenmrsUtil#startup(java.util.Properties)
+&nbsp;	 */
+&nbsp;	public static final String APPLICATION_DATA_DIRECTORY_RUNTIME_PROPERTY = &quot;application_data_directory&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The name of the runtime property that a user can set that will specify whether the database
+&nbsp;	 * is automatically updated on startup
+&nbsp;	 */
+&nbsp;	public static final String AUTO_UPDATE_DATABASE_RUNTIME_PROPERTY = &quot;auto_update_database&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * These words are ignored in concept and patient searches
+&nbsp;	 *
+&nbsp;	 * @return Collection&amp;lt;String&amp;gt; of words that are ignored
+&nbsp;	 */
+&nbsp;	public static final Collection&lt;String&gt; STOP_WORDS() {
+<b class="nc">&nbsp;		List&lt;String&gt; stopWords = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;A&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;AND&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;AT&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;BUT&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;BY&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;FOR&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;HAS&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;OF&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;THE&quot;);</b>
+<b class="nc">&nbsp;		stopWords.add(&quot;TO&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return stopWords;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A gender character to gender name map&lt;br&gt;
+&nbsp;	 * TODO issues with localization. How should this be handled?
+&nbsp;	 * @deprecated As of 2.2, replaced by {@link #GENDERS}
+&nbsp;	 *
+&nbsp;	 * @return Map&amp;lt;String, String&amp;gt; of gender character to gender name
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@SuppressWarnings(&quot;squid:S00100&quot;)
+&nbsp;	public static final Map&lt;String, String&gt; GENDER() {
+<b class="nc">&nbsp;		Map&lt;String, String&gt; genders = new LinkedHashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		genders.put(&quot;M&quot;, &quot;Male&quot;);</b>
+<b class="nc">&nbsp;		genders.put(&quot;F&quot;, &quot;Female&quot;);</b>
+<b class="nc">&nbsp;		return genders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A list of 1-letter strings representing genders
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final List&lt;String&gt; GENDERS = Collections.unmodifiableList(asList(&quot;M&quot;, &quot;F&quot;));</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * These roles are given to a user automatically and cannot be assigned
+&nbsp;	 *
+&nbsp;	 * @return &lt;code&gt;Collection&amp;lt;String&amp;gt;&lt;/code&gt; of the auto-assigned roles
+&nbsp;	 */
+&nbsp;	public static final Collection&lt;String&gt; AUTO_ROLES() {
+<b class="nc">&nbsp;		List&lt;String&gt; roles = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		roles.add(RoleConstants.ANONYMOUS);</b>
+<b class="nc">&nbsp;		roles.add(RoleConstants.AUTHENTICATED);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return roles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DRUG_FREQUENCIES = &quot;dashboard.regimen.displayFrequencies&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_CONCEPTS_LOCKED = &quot;concepts.locked&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_LISTING_ATTRIBUTES = &quot;patient.listingAttributeTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_VIEWING_ATTRIBUTES = &quot;patient.viewingAttributeTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_HEADER_ATTRIBUTES = &quot;patient.headerAttributeTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_USER_LISTING_ATTRIBUTES = &quot;user.listingAttributeTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_USER_VIEWING_ATTRIBUTES = &quot;user.viewingAttributeTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_USER_HEADER_ATTRIBUTES = &quot;user.headerAttributeTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_USER_REQUIRE_EMAIL_AS_USERNAME = &quot;user.requireEmailAsUsername&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_HL7_ARCHIVE_DIRECTORY = &quot;hl7_archive.dir&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_THEME = &quot;default_theme&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_APPLICATION_NAME = &quot;application.name&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Array of all core global property names that represent comma-separated lists of
+&nbsp;	 * PersonAttributeTypes. (If you rename a PersonAttributeType then these global properties are
+&nbsp;	 * potentially modified.)
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final String[] GLOBAL_PROPERTIES_OF_PERSON_ATTRIBUTES = { GLOBAL_PROPERTY_PATIENT_LISTING_ATTRIBUTES,</b>
+&nbsp;	        GLOBAL_PROPERTY_PATIENT_VIEWING_ATTRIBUTES, GLOBAL_PROPERTY_PATIENT_HEADER_ATTRIBUTES,
+&nbsp;	        GLOBAL_PROPERTY_USER_LISTING_ATTRIBUTES, GLOBAL_PROPERTY_USER_VIEWING_ATTRIBUTES,
+&nbsp;	        GLOBAL_PROPERTY_USER_HEADER_ATTRIBUTES, GLOBAL_PROPERTY_USER_REQUIRE_EMAIL_AS_USERNAME };
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_REGEX = &quot;patient.identifierRegex&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_PREFIX = &quot;patient.identifierPrefix&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SUFFIX = &quot;patient.identifierSuffix&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SEARCH_PATTERN = &quot;patient.identifierSearchPattern&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_NAME_REGEX = &quot;patient.nameValidationRegex&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PERSON_SEARCH_MAX_RESULTS = &quot;person.searchMaxResults&quot;;
+&nbsp;	
+&nbsp;	public static final int GLOBAL_PROPERTY_PERSON_SEARCH_MAX_RESULTS_DEFAULT_VALUE = 1000;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_MODE = &quot;person.attributeSearchMatchMode&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_EXACT = &quot;EXACT&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_ANYWHERE = &quot;ANYWHERE&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_GZIP_ENABLED = &quot;gzip.enabled&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_GZIP_ACCEPT_COMPRESSED_REQUESTS_FOR_PATHS = &quot;gzip.acceptCompressedRequestsForPaths&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_MEDICAL_RECORD_OBSERVATIONS = &quot;concept.medicalRecordObservations&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PROBLEM_LIST = &quot;concept.problemList&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_SHOW_PATIENT_NAME = &quot;dashboard.showPatientName&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_ENABLE_VISITS = &quot;visits.enabled&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_ALLOW_OVERLAPPING_VISITS = &quot;visits.allowOverlappingVisits&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_PATIENT_IDENTIFIER_VALIDATOR = &quot;patient.defaultPatientIdentifierValidator&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_IMPORTANT_TYPES = &quot;patient_identifier.importantTypes&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_ENCOUNTER_FORM_OBS_SORT_ORDER = &quot;encounterForm.obsSortOrder&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST = &quot;locale.allowed.list&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_IMPLEMENTATION_ID = &quot;implementation_id&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_NEWPATIENTFORM_SHOW_RELATIONSHIPS = &quot;new_patient_form.showRelationships&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_NEWPATIENTFORM_RELATIONSHIPS = &quot;newPatientForm.relationships&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_COMPLEX_OBS_DIR = &quot;obs.complex_obs_dir&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS = &quot;minSearchCharacters&quot;;
+&nbsp;	
+&nbsp;	public static final int GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS = 2;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_LOCALE = &quot;default_locale&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_LOCATION_NAME = &quot;default_location&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE = &quot;en_GB&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_WEEK_START_DAY = &quot;datePicker.weekStart&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_WEEK_START_DAY_DEFAULT_VALUE = &quot;0&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SEARCH_MATCH_MODE = &quot;patientIdentifierSearch.matchMode&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_MODE = &quot;patientSearch.matchMode&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_EXACT = &quot;EXACT&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_ANYWHERE = &quot;ANYWHERE&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_START = &quot;START&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_SOUNDEX = &quot;SOUNDEX&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PROVIDER_SEARCH_MATCH_MODE = &quot;providerSearch.matchMode&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DEFAULT_SERIALIZER = &quot;serialization.defaultSerializer&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_IGNORE_MISSING_NONLOCAL_PATIENTS = &quot;hl7_processor.ignore_missing_patient_non_local&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_TRUE_CONCEPT = &quot;concept.true&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_FALSE_CONCEPT = &quot;concept.false&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_UNKNOWN_CONCEPT = &quot;concept.unknown&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_LOCATION_WIDGET_TYPE = &quot;location.field.style&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_REPORT_BUG_URL = &quot;reportProblem.url&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_ADDRESS_TEMPLATE = &quot;layout.address.format&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT = &quot;layout.name.format&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_LAYOUT_NAME_TEMPLATE = &quot;layout.name.template&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_ENCOUNTER_TYPES_LOCKED = &quot;EncounterType.encounterTypes.locked&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_FORMS_LOCKED = &quot;forms.locked&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PERSON_ATRIBUTE_TYPES_LOCKED = &quot;personAttributeTypes.locked&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_PATIENT_IDENTIFIER_TYPES_LOCKED = &quot;patientIdentifierTypes.locked&quot;;
+&nbsp;	
+&nbsp;	public static final String GLOBAL_PROPERTY_DRUG_ORDER_REQUIRE_DRUG = &quot;drugOrder.requireDrug&quot;;
+&nbsp;
+&nbsp;	public static final String GLOBAL_PROPERTY_DRUG_ORDER_REQUIRE_OUTPATIENT_QUANTITY = &quot;drugOrder.requireOutpatientQuantity&quot;;
+&nbsp;	
+&nbsp;	public static final String DEFAULT_ADDRESS_TEMPLATE = &quot;&lt;org.openmrs.layout.address.AddressTemplate&gt;\n&quot;
+&nbsp;	        + &quot;    &lt;nameMappings class=\&quot;properties\&quot;&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;postalCode\&quot; value=\&quot;Location.postalCode\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;address2\&quot; value=\&quot;Location.address2\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;address1\&quot; value=\&quot;Location.address1\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;country\&quot; value=\&quot;Location.country\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;stateProvince\&quot; value=\&quot;Location.stateProvince\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;cityVillage\&quot; value=\&quot;Location.cityVillage\&quot;/&gt;\n&quot; + &quot;    &lt;/nameMappings&gt;\n&quot;
+&nbsp;	        + &quot;    &lt;sizeMappings class=\&quot;properties\&quot;&gt;\n&quot; + &quot;      &lt;property name=\&quot;postalCode\&quot; value=\&quot;10\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;address2\&quot; value=\&quot;40\&quot;/&gt;\n&quot; + &quot;      &lt;property name=\&quot;address1\&quot; value=\&quot;40\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;country\&quot; value=\&quot;10\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;stateProvince\&quot; value=\&quot;10\&quot;/&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;property name=\&quot;cityVillage\&quot; value=\&quot;10\&quot;/&gt;\n&quot; + &quot;    &lt;/sizeMappings&gt;\n&quot; + &quot;    &lt;lineByLineFormat&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;string&gt;address1&lt;/string&gt;\n&quot; + &quot;      &lt;string&gt;address2&lt;/string&gt;\n&quot;
+&nbsp;	        + &quot;      &lt;string&gt;cityVillage stateProvince country postalCode&lt;/string&gt;\n&quot; + &quot;    &lt;/lineByLineFormat&gt;\n&quot;
+&nbsp;	        + &quot;   &lt;requiredElements&gt;\\n\&quot; + \&quot; &lt;/requiredElements&gt;\\n\&quot; + \&quot; &lt;/org.openmrs.layout.address.AddressTemplate&gt;&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that allows specification of whether user passwords must contain both
+&nbsp;	 * upper and lower case characters. Allowable values are &quot;true&quot;, &quot;false&quot;, and null
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_REQUIRES_UPPER_AND_LOWER_CASE = &quot;security.passwordRequiresUpperAndLowerCase&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that allows specification of whether user passwords require non-digits.
+&nbsp;	 * Allowable values are &quot;true&quot;, &quot;false&quot;, and null
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_REQUIRES_NON_DIGIT = &quot;security.passwordRequiresNonDigit&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that allows specification of whether user passwords must contain digits.
+&nbsp;	 * Allowable values are &quot;true&quot;, &quot;false&quot;, and null
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_REQUIRES_DIGIT = &quot;security.passwordRequiresDigit&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that allows specification of whether user passwords can match username
+&nbsp;	 * or system id. Allowable values are &quot;true&quot;, &quot;false&quot;, and null
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_CANNOT_MATCH_USERNAME_OR_SYSTEMID = &quot;security.passwordCannotMatchUsername&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that allows specification of whether user passwords have a minimum
+&nbsp;	 * length requirement Allowable values are any integer
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_MINIMUM_LENGTH = &quot;security.passwordMinimumLength&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property that stores the duration for which the password reset token is valid
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_RESET_VALIDTIME = &quot;security.validTime&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that allows specification of a regular expression that passwords must
+&nbsp;	 * adhere to
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_CUSTOM_REGEX = &quot;security.passwordCustomRegex&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for absolute color for patient graphs.
+&nbsp;	 */
+&nbsp;	public static final String GP_GRAPH_COLOR_ABSOLUTE = &quot;graph.color.absolute&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for normal color for patient graphs.
+&nbsp;	 */
+&nbsp;	public static final String GP_GRAPH_COLOR_NORMAL = &quot;graph.color.normal&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for critical color for patient graphs.
+&nbsp;	 */
+&nbsp;	public static final String GP_GRAPH_COLOR_CRITICAL = &quot;graph.color.critical&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the maximum number of search results that are returned by a single
+&nbsp;	 * ajax call
+&nbsp;	 */
+&nbsp;	public static final String GP_SEARCH_WIDGET_BATCH_SIZE = &quot;searchWidget.batchSize&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the mode the search widgets should run in, this depends on the speed
+&nbsp;	 * of the network&#39;s connection
+&nbsp;	 */
+&nbsp;	public static final String GP_SEARCH_WIDGET_IN_SERIAL_MODE = &quot;searchWidget.runInSerialMode&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the time interval in milliseconds between key up and triggering the
+&nbsp;	 * search off
+&nbsp;	 */
+&nbsp;	public static final String GP_SEARCH_WIDGET_DELAY_INTERVAL = &quot;searchWidget.searchDelayInterval&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the maximum number of results to return from a single search in the
+&nbsp;	 * search widgets
+&nbsp;	 */
+&nbsp;	public static final String GP_SEARCH_WIDGET_MAXIMUM_RESULTS = &quot;searchWidget.maximumResults&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property for the Date format to be used to display date under search widgets and auto-completes
+&nbsp;	 */
+&nbsp;	public static final String GP_SEARCH_DATE_DISPLAY_FORMAT = &quot;searchWidget.dateDisplayFormat&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for enabling/disabling concept map type management
+&nbsp;	 */
+&nbsp;	public static final String GP_ENABLE_CONCEPT_MAP_TYPE_MANAGEMENT = &quot;concept_map_type_management.enable&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the handler that assigns visits to encounters
+&nbsp;	 */
+&nbsp;	public static final String GP_VISIT_ASSIGNMENT_HANDLER = &quot;visits.assignmentHandler&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for mapping encounter types to visit types.
+&nbsp;	 */
+&nbsp;	public static final String GP_ENCOUNTER_TYPE_TO_VISIT_TYPE_MAPPING = &quot;visits.encounterTypeToVisitTypeMapping&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the encounter roles to display on the provider column of the patient
+&nbsp;	 * dashboard under the encounters tab.
+&nbsp;	 */
+&nbsp;	public static final String GP_DASHBOARD_PROVIDER_DISPLAY_ENCOUNTER_ROLES = &quot;dashboard.encounters.providerDisplayRoles&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for optional configuration of the maximum number of encounters to
+&nbsp;	 * display on the encounter tab of the patient dashboard
+&nbsp;	 */
+&nbsp;	public static final String GP_DASHBOARD_MAX_NUMBER_OF_ENCOUNTERS_TO_SHOW = &quot;dashboard.encounters.maximumNumberToShow&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name to display program, workflow and states in a specific case
+&nbsp;	 */
+&nbsp;	public static final String GP_DASHBOARD_METADATA_CASE_CONVERSION = &quot;dashboard.metadata.caseConversion&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the default ConceptMapType which is set automatically when no other is set manually.
+&nbsp;	 */
+&nbsp;	public static final String GP_DEFAULT_CONCEPT_MAP_TYPE = &quot;concept.defaultConceptMapType&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name of the allowed concept classes for the dosage form field of the concept drug management form.
+&nbsp;	 */
+&nbsp;	public static final String GP_CONCEPT_DRUG_DOSAGE_FORM_CONCEPT_CLASSES = &quot;conceptDrug.dosageForm.conceptClasses&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name of the allowed concept classes for the route field of the concept drug management form.
+&nbsp;	 */
+&nbsp;	public static final String GP_CONCEPT_DRUG_ROUTE_CONCEPT_CLASSES = &quot;conceptDrug.route.conceptClasses&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name of the allowed concept classes for the allergen field of the allergy
+&nbsp;	 * management form.
+&nbsp;	 */
+&nbsp;	public static final String GP_ALLERGY_ALLERGEN_CONCEPT_CLASSES = &quot;allergy.allergen.ConceptClasses&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name of the allowed concept classes for the reaction field of the allergy
+&nbsp;	 * management form.
+&nbsp;	 */
+&nbsp;	public static final String GP_ALLERGY_REACTION_CONCEPT_CLASSES = &quot;allergy.reaction.ConceptClasses&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name of other non coded allergen, stored in allergen coded allergen
+&nbsp;	 * when other non coded allergen is represented
+&nbsp;	 */
+&nbsp;	public static final String GP_ALLERGEN_OTHER_NON_CODED_UUID = &quot;allergy.concept.otherNonCoded&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Encryption properties; both vector and key are required to utilize a two-way encryption
+&nbsp;	 */
+&nbsp;	public static final String ENCRYPTION_CIPHER_CONFIGURATION = &quot;AES/CBC/PKCS5Padding&quot;;
+&nbsp;	
+&nbsp;	public static final String ENCRYPTION_KEY_SPEC = &quot;AES&quot;;
+&nbsp;	
+&nbsp;	public static final String ENCRYPTION_VECTOR_RUNTIME_PROPERTY = &quot;encryption.vector&quot;;
+&nbsp;	
+&nbsp;	public static final String ENCRYPTION_VECTOR_DEFAULT = &quot;9wyBUNglFCRVSUhMfsTa3Q==&quot;;
+&nbsp;	
+&nbsp;	public static final String ENCRYPTION_KEY_RUNTIME_PROPERTY = &quot;encryption.key&quot;;
+&nbsp;	
+&nbsp;	public static final String ENCRYPTION_KEY_DEFAULT = &quot;dTfyELRrAICGDwzjHDjuhw==&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name for the visit type(s) to automatically close
+&nbsp;	 */
+&nbsp;	public static final String GP_VISIT_TYPES_TO_AUTO_CLOSE = &quot;visits.autoCloseVisitType&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The name of the scheduled task that automatically stops the active visits
+&nbsp;	 */
+&nbsp;	public static final String AUTO_CLOSE_VISITS_TASK_NAME = &quot;Auto Close Visits Task&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_ALLOWED_FAILED_LOGINS_BEFORE_LOCKOUT = &quot;security.allowedFailedLoginsBeforeLockout&quot;;
+&nbsp;
+&nbsp;	public static final String GP_UNLOCK_ACCOUNT_WAITING_TIME  = &quot;security.unlockAccountWaitingTime&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.9.9, 1.10.2, 1.11
+&nbsp;	 */
+&nbsp;	public static final String GP_CASE_SENSITIVE_DATABASE_STRING_COMPARISON = &quot;search.caseSensitiveDatabaseStringComparison&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_DASHBOARD_CONCEPTS = &quot;dashboard.header.showConcept&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_MAIL_SMTP_STARTTLS_ENABLE = &quot;mail.smtp.starttls.enable&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_NEXT_ORDER_NUMBER_SEED = &quot;order.nextOrderNumberSeed&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_ORDER_NUMBER_GENERATOR_BEAN_ID = &quot;order.orderNumberGeneratorBeanId&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Specifies the uuid of the concept set where its members represent the possible drug routes
+&nbsp;	 */
+&nbsp;	public static final String GP_DRUG_ROUTES_CONCEPT_UUID = &quot;order.drugRoutesConceptUuid&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_DRUG_DOSING_UNITS_CONCEPT_UUID = &quot;order.drugDosingUnitsConceptUuid&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_DRUG_DISPENSING_UNITS_CONCEPT_UUID = &quot;order.drugDispensingUnitsConceptUuid&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_DURATION_UNITS_CONCEPT_UUID = &quot;order.durationUnitsConceptUuid&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_TEST_SPECIMEN_SOURCES_CONCEPT_UUID = &quot;order.testSpecimenSourcesConceptUuid&quot;;
+&nbsp;	
+&nbsp;	public static final String GP_UNKNOWN_PROVIDER_UUID = &quot;provider.unknownProviderUuid&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	public static final String GP_SEARCH_INDEX_VERSION = &quot;search.indexVersion&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Indicates the version of the search index. The index will be rebuilt, if the version changes.
+&nbsp;	 *
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final Integer SEARCH_INDEX_VERSION = 7;</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @since 1.12
+&nbsp;	 */
+&nbsp;	public static final String GP_DISABLE_VALIDATION = &quot;validation.disable&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * @since 1.12
+&nbsp;	 * Specifies the uuid of the concept which represents drug non coded
+&nbsp;	 */
+&nbsp;	public static final String GP_DRUG_ORDER_DRUG_OTHER = &quot;drugOrder.drugOther&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Global property that stores the base url for the application.
+&nbsp;	 * @deprecated as of 2.6.0, replaced by {@link #GP_PASSWORD_RESET_URL}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static final String GP_HOST_URL = &quot;host.url&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property that stores the base url for the password reset.
+&nbsp;	 */
+&nbsp;	public static final String GP_PASSWORD_RESET_URL = &quot;security.passwordResetUrl&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Global property that stores the number of days for users to be deactivated.
+&nbsp;	 */
+&nbsp;	public static final String GP_NUMBER_OF_DAYS_TO_AUTO_RETIRE_USERS = &quot;users.numberOfDaysToRetire&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * At OpenMRS startup these global properties/default values/descriptions are inserted into the
+&nbsp;	 * database if they do not exist yet.
+&nbsp;	 *
+&nbsp;	 * @return List&amp;lt;GlobalProperty&amp;gt; of the core global properties
+&nbsp;	 */
+&nbsp;	public static final List&lt;GlobalProperty&gt; CORE_GLOBAL_PROPERTIES() {
+<b class="nc">&nbsp;		List&lt;GlobalProperty&gt; props = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;use_patient_attribute.healthCenter&quot;, &quot;false&quot;,</b>
+&nbsp;		        &quot;Indicates whether or not the &#39;health center&#39; attribute is shown when viewing/searching for patients&quot;,
+&nbsp;		        BooleanDatatype.class, null));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;use_patient_attribute.mothersName&quot;, &quot;false&quot;,</b>
+&nbsp;		        &quot;Indicates whether or not mother&#39;s name is able to be added/viewed for a patient&quot;, BooleanDatatype.class,
+&nbsp;		        null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_NEWPATIENTFORM_SHOW_RELATIONSHIPS, &quot;false&quot;,</b>
+&nbsp;		        &quot;true/false whether or not to show the relationship editor on the addPatient.htm screen&quot;,
+&nbsp;		        BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;dashboard.overview.showConcepts&quot;, &quot;&quot;,</b>
+&nbsp;		        &quot;Comma delimited list of concepts ids to show on the patient dashboard overview tab&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(&quot;dashboard.encounters.showEmptyFields&quot;, &quot;true&quot;,</b>
+&nbsp;		                &quot;true/false whether or not to show empty fields on the &#39;View Encounter&#39; window&quot;,
+&nbsp;		                BooleanDatatype.class, null));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                &quot;dashboard.encounters.usePages&quot;,
+&nbsp;		                &quot;smart&quot;,
+&nbsp;		                &quot;true/false/smart on how to show the pages on the &#39;View Encounter&#39; window.  &#39;smart&#39; means that if &gt; 50% of the fields have page numbers defined, show data in pages&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;dashboard.encounters.showViewLink&quot;, &quot;true&quot;,</b>
+&nbsp;		        &quot;true/false whether or not to show the &#39;View Encounter&#39; link on the patient dashboard&quot;,
+&nbsp;		        BooleanDatatype.class, null));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;dashboard.encounters.showEditLink&quot;, &quot;true&quot;,</b>
+&nbsp;		        &quot;true/false whether or not to show the &#39;Edit Encounter&#39; link on the patient dashboard&quot;,
+&nbsp;		        BooleanDatatype.class, null));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                &quot;dashboard.header.programs_to_show&quot;,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;List of programs to show Enrollment details of in the patient header. (Should be an ordered comma-separated list of program_ids or names.)&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                &quot;dashboard.header.workflows_to_show&quot;,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;List of programs to show Enrollment details of in the patient header. List of workflows to show current status of in the patient header. These will only be displayed if they belong to a program listed above. (Should be a comma-separated list of program_workflow_ids.)&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;dashboard.relationships.show_types&quot;, &quot;&quot;,</b>
+&nbsp;		        &quot;Types of relationships separated by commas.  Doctor/Patient,Parent/Child&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;FormEntry.enableDashboardTab&quot;, &quot;true&quot;,</b>
+&nbsp;		        &quot;true/false whether or not to show a Form Entry tab on the patient dashboard&quot;, BooleanDatatype.class, null));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;FormEntry.enableOnEncounterTab&quot;, &quot;false&quot;,</b>
+&nbsp;		        &quot;true/false whether or not to show a Enter Form button on the encounters tab of the patient dashboard&quot;,
+&nbsp;		        BooleanDatatype.class, null));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                &quot;dashboard.regimen.displayDrugSetIds&quot;,
+&nbsp;		                &quot;ANTIRETROVIRAL DRUGS,TUBERCULOSIS TREATMENT DRUGS&quot;,
+&nbsp;		                &quot;Drug sets that appear on the Patient Dashboard Regimen tab. Comma separated list of name of concepts that are defined as drug sets.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_DRUG_FREQUENCIES,
+&nbsp;		                &quot;7 days/week,6 days/week,5 days/week,4 days/week,3 days/week,2 days/week,1 days/week&quot;,
+&nbsp;		                &quot;Frequency of a drug order that appear on the Patient Dashboard. Comma separated list of name of concepts that are defined as drug frequencies.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_GRAPH_COLOR_ABSOLUTE, &quot;rgb(20,20,20)&quot;,</b>
+&nbsp;		        &quot;Color of the &#39;invalid&#39; section of numeric graphs on the patient dashboard.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_GRAPH_COLOR_NORMAL, &quot;rgb(255,126,0)&quot;,</b>
+&nbsp;		        &quot;Color of the &#39;normal&#39; section of numeric graphs on the patient dashboard.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_GRAPH_COLOR_CRITICAL, &quot;rgb(200,0,0)&quot;,</b>
+&nbsp;		        &quot;Color of the &#39;critical&#39; section of numeric graphs on the patient dashboard.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_LOCATION_WIDGET_TYPE, &quot;default&quot;,</b>
+&nbsp;		        &quot;Type of widget to use for location fields&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_MAIL_SMTP_STARTTLS_ENABLE, &quot;false&quot;,</b>
+&nbsp;		        &quot;Set to true to enable TLS encryption, else set to false&quot;));
+&nbsp;
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_RESET_URL, &quot;&quot;,</b>
+&nbsp;		        &quot;The URL to redirect to after requesting for a password reset. Always provide a place holder in this url with name {activationKey}, it will get substituted by the actual activation key.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.transport_protocol&quot;, &quot;smtp&quot;,</b>
+&nbsp;		        &quot;Transport protocol for the messaging engine. Valid values: smtp&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.smtp_host&quot;, &quot;localhost&quot;, &quot;SMTP host name&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.smtp_port&quot;, &quot;25&quot;, &quot;SMTP port&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.from&quot;, &quot;info@openmrs.org&quot;, &quot;Email address to use as the default from address&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.debug&quot;, &quot;false&quot;,</b>
+&nbsp;		        &quot;true/false whether to print debugging information during mailing&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.smtp_auth&quot;, &quot;false&quot;, &quot;true/false whether the smtp host requires authentication&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.user&quot;, &quot;test&quot;, &quot;Username of the SMTP user (if smtp_auth is enabled)&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.password&quot;, &quot;test&quot;, &quot;Password for the SMTP user (if smtp_auth is enabled)&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;mail.default_content_type&quot;, &quot;text/plain&quot;,</b>
+&nbsp;		        &quot;Content type to append to the mail messages&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(ModuleConstants.REPOSITORY_FOLDER_PROPERTY,</b>
+&nbsp;		        ModuleConstants.REPOSITORY_FOLDER_PROPERTY_DEFAULT, &quot;Name of the folder in which to store the modules&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_ADDRESS_TEMPLATE, DEFAULT_ADDRESS_TEMPLATE,</b>
+&nbsp;		        &quot;XML description of address formats&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT, PERSON_NAME_FORMAT_SHORT,</b>
+&nbsp;		        &quot;Format in which to display the person names.  Valid values are short, long&quot;));
+&nbsp;		
+&nbsp;		// TODO should be changed to text defaults and constants should be removed
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;scheduler.username&quot;, SchedulerConstants.SCHEDULER_DEFAULT_USERNAME,</b>
+&nbsp;		        &quot;Username for the OpenMRS user that will perform the scheduler activities&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;scheduler.password&quot;, SchedulerConstants.SCHEDULER_DEFAULT_PASSWORD,</b>
+&nbsp;		        &quot;Password for the OpenMRS user that will perform the scheduler activities&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_CONCEPTS_LOCKED, &quot;false&quot;, &quot;if true, do not allow editing concepts&quot;,</b>
+&nbsp;		        BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_PATIENT_LISTING_ATTRIBUTES, &quot;&quot;,</b>
+&nbsp;		        &quot;A comma delimited list of PersonAttributeType names that should be displayed for patients in _lists_&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GLOBAL_PROPERTY_PATIENT_VIEWING_ATTRIBUTES, &quot;&quot;,</b>
+&nbsp;		                &quot;A comma delimited list of PersonAttributeType names that should be displayed for patients when _viewing individually_&quot;));
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_PATIENT_HEADER_ATTRIBUTES, &quot;&quot;,</b>
+&nbsp;		        &quot;A comma delimited list of PersonAttributeType names that will be shown on the patient dashboard&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_USER_LISTING_ATTRIBUTES, &quot;&quot;,</b>
+&nbsp;		        &quot;A comma delimited list of PersonAttributeType names that should be displayed for users in _lists_&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GLOBAL_PROPERTY_USER_VIEWING_ATTRIBUTES, &quot;&quot;,</b>
+&nbsp;		                &quot;A comma delimited list of PersonAttributeType names that should be displayed for users when _viewing individually_&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GLOBAL_PROPERTY_USER_HEADER_ATTRIBUTES, &quot;&quot;,</b>
+&nbsp;		                &quot;A comma delimited list of PersonAttributeType names that will be shown on the user dashboard. (not used in v1.5)&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_IDENTIFIER_REGEX,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;WARNING: Using this search property can cause a drop in mysql performance with large patient sets.  A MySQL regular expression for the patient identifier search strings.  The @SEARCH@ string is replaced at runtime with the user&#39;s search string.  An empty regex will cause a simply &#39;like&#39; sql search to be used. Example: ^0*@SEARCH@([A-Z]+-[0-9])?$&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_IDENTIFIER_PREFIX,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;This property is only used if &quot;
+&nbsp;		                        + GLOBAL_PROPERTY_PATIENT_IDENTIFIER_REGEX
+&nbsp;		                        + &quot; is empty.  The string here is prepended to the sql indentifier search string.  The sql becomes \&quot;... where identifier like &#39;&lt;PREFIX&gt;&lt;QUERY STRING&gt;&lt;SUFFIX&gt;&#39;;\&quot;.  Typically this value is either a percent sign (%) or empty.&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SUFFIX,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;This property is only used if &quot;
+&nbsp;		                        + GLOBAL_PROPERTY_PATIENT_IDENTIFIER_REGEX
+&nbsp;		                        + &quot; is empty.  The string here is prepended to the sql indentifier search string.  The sql becomes \&quot;... where identifier like &#39;&lt;PREFIX&gt;&lt;QUERY STRING&gt;&lt;SUFFIX&gt;&#39;;\&quot;.  Typically this value is either a percent sign (%) or empty.&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SEARCH_PATTERN,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;If this is empty, the regex or suffix/prefix search is used.  Comma separated list of identifiers to check.  Allows for faster searching of multiple options rather than the slow regex. e.g. @SEARCH@,0@SEARCH@,@SEARCH-1@-@CHECKDIGIT@,0@SEARCH-1@-@CHECKDIGIT@ would turn a request for \&quot;4127\&quot; into a search for \&quot;in (&#39;4127&#39;,&#39;04127&#39;,&#39;412-7&#39;,&#39;0412-7&#39;)\&quot;&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_NAME_REGEX,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;Names of the patients must pass this regex. Eg : ^[a-zA-Z \\-]+$ contains only english alphabet letters, spaces, and hyphens. A value of .* or the empty string means no validation is done.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_PERSON_SEARCH_MAX_RESULTS, String</b>
+<b class="nc">&nbsp;		        .valueOf(GLOBAL_PROPERTY_PERSON_SEARCH_MAX_RESULTS_DEFAULT_VALUE),</b>
+&nbsp;		        &quot;The maximum number of results returned by patient searches&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_GZIP_ENABLED,
+&nbsp;		                &quot;false&quot;,
+&nbsp;		                &quot;Set to &#39;true&#39; to turn on OpenMRS&#39;s gzip filter, and have the webapp compress data before sending it to any client that supports it. Generally use this if you are running Tomcat standalone. If you are running Tomcat behind Apache, then you&#39;d want to use Apache to do gzip compression.&quot;,
+&nbsp;		                BooleanDatatype.class, null));
+&nbsp;		
+&nbsp;	
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_LOG_LEVEL,
+&nbsp;		                &quot;org.openmrs.api:&quot; + LOG_LEVEL_INFO,
+&nbsp;		                &quot;Logging levels for log4j2.xml. Valid format is class:level,class:level. If class not specified, &#39;org.openmrs.api&#39; presumed. Valid levels are trace, debug, info, warn, error or fatal&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_LOG_LOCATION, &quot;&quot;,</b>
+&nbsp;		        &quot;A directory where the OpenMRS log file appender is stored. The log file name is &#39;openmrs.log&#39;.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_LOG_LAYOUT, &quot;%p - %C{1}.%M(%L) |%d{ISO8601}| %m%n&quot;,</b>
+&nbsp;		        &quot;A log layout pattern which is used by the OpenMRS file appender.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_DEFAULT_PATIENT_IDENTIFIER_VALIDATOR,
+&nbsp;		                LUHN_IDENTIFIER_VALIDATOR,
+&nbsp;		                &quot;This property sets the default patient identifier validator.  The default validator is only used in a handful of (mostly legacy) instances.  For example, it&#39;s used to generate the isValidCheckDigit calculated column and to append the string \&quot;(default)\&quot; to the name of the default validator on the editPatientIdentifierType form.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_IDENTIFIER_IMPORTANT_TYPES,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;A comma delimited list of PatientIdentifier names : PatientIdentifier locations that will be displayed on the patient dashboard.  E.g.: TRACnet ID:Rwanda,ELDID:Kenya&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_COMPLEX_OBS_DIR, &quot;complex_obs&quot;,</b>
+&nbsp;		        &quot;Default directory for storing complex obs.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_ENCOUNTER_FORM_OBS_SORT_ORDER,
+&nbsp;		                &quot;number&quot;,
+&nbsp;		                &quot;The sort order for the obs listed on the encounter edit form.  &#39;number&#39; sorts on the associated numbering from the form schema.  &#39;weight&#39; sorts on the order displayed in the form schema.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, &quot;en, en_GB, es, fr, it, pt&quot;,</b>
+&nbsp;		        &quot;Comma delimited list of locales allowed for use on system&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_NEWPATIENTFORM_RELATIONSHIPS,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;Comma separated list of the RelationshipTypes to show on the new/short patient form.  The list is defined like &#39;3a, 4b, 7a&#39;.  The number is the RelationshipTypeId and the &#39;a&#39; vs &#39;b&#39; part is which side of the relationship is filled in by the user.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS, &quot;2&quot;,</b>
+&nbsp;		        &quot;Number of characters user must input before searching is started.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE,
+&nbsp;		                OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE,
+&nbsp;		                &quot;Specifies the default locale. You can specify both the language code(ISO-639) and the country code(ISO-3166), e.g. &#39;en_GB&#39; or just country: e.g. &#39;en&#39;&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_WEEK_START_DAY,</b>
+&nbsp;		        OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_WEEK_START_DAY_DEFAULT_VALUE,
+&nbsp;		        &quot;First day of the week in the date picker. Domingo/Dimanche/Sunday:0  Lunes/Lundi/Monday:1&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_CANNOT_MATCH_USERNAME_OR_SYSTEMID, &quot;true&quot;,</b>
+&nbsp;		        &quot;Configure whether passwords must not match user&#39;s username or system id&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_CUSTOM_REGEX, &quot;&quot;,</b>
+&nbsp;		        &quot;Configure a custom regular expression that a password must match&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_MINIMUM_LENGTH, &quot;8&quot;,</b>
+&nbsp;		        &quot;Configure the minimum length required of all passwords&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_RESET_VALIDTIME, &quot;600000&quot;,</b>
+&nbsp;		        &quot; Specifies the duration of time in seconds for which a password reset token is valid, the default value is 10 minutes and the allowed values range from 1 minute to 12hrs&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_REQUIRES_DIGIT, &quot;true&quot;,</b>
+&nbsp;		        &quot;Configure whether passwords must contain at least one digit&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_PASSWORD_REQUIRES_NON_DIGIT, &quot;true&quot;,</b>
+&nbsp;		        &quot;Configure whether passwords must contain at least one non-digit&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GP_PASSWORD_REQUIRES_UPPER_AND_LOWER_CASE, &quot;true&quot;,</b>
+&nbsp;		                &quot;Configure whether passwords must contain both upper and lower case characters&quot;,
+&nbsp;		                BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_IGNORE_MISSING_NONLOCAL_PATIENTS, &quot;false&quot;,</b>
+&nbsp;		        &quot;If true, hl7 messages for patients that are not found and are non-local will silently be dropped/ignored&quot;,
+&nbsp;		        BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_SHOW_PATIENT_NAME,
+&nbsp;		                &quot;false&quot;,
+&nbsp;		                &quot;Whether or not to display the patient name in the patient dashboard title. Note that enabling this could be security risk if multiple users operate on the same computer.&quot;,
+&nbsp;		                BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_DEFAULT_THEME, &quot;&quot;,</b>
+&nbsp;		        &quot;Default theme for users.  OpenMRS ships with themes of &#39;green&#39;, &#39;orange&#39;, &#39;purple&#39;, and &#39;legacy&#39;&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_HL7_ARCHIVE_DIRECTORY, HL7Constants.HL7_ARCHIVE_DIRECTORY_NAME,</b>
+&nbsp;		        &quot;The default name or absolute path for the folder where to write the hl7_in_archives.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_REPORT_BUG_URL, &quot;http://errors.openmrs.org/scrap&quot;,</b>
+&nbsp;		        &quot;The openmrs url where to submit bug reports&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_SEARCH_WIDGET_BATCH_SIZE, &quot;200&quot;,</b>
+&nbsp;		        &quot;The maximum number of search results that are returned by an ajax call&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_SEARCH_WIDGET_IN_SERIAL_MODE,
+&nbsp;		                &quot;false&quot;,
+&nbsp;		                &quot;Specifies whether the search widgets should make ajax requests in serial or parallel order, a value of true is appropriate for implementations running on a slow network connection and vice versa&quot;,
+&nbsp;		                BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_SEARCH_WIDGET_DELAY_INTERVAL,
+&nbsp;		                &quot;300&quot;,
+&nbsp;		                &quot;Specifies time interval in milliseconds when searching, between keyboard keyup event and triggering the search off, should be higher if most users are slow when typing so as to minimise the load on the server&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GP_SEARCH_DATE_DISPLAY_FORMAT, null,</b>
+&nbsp;		                &quot;Date display format to be used to display the date somewhere in the UI i.e the search widgets and autocompletes&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_DEFAULT_LOCATION_NAME, &quot;Unknown Location&quot;,</b>
+&nbsp;		        &quot;The name of the location to use as a system default&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;				.add(new GlobalProperty(</b>
+&nbsp;						GLOBAL_PROPERTY_PATIENT_IDENTIFIER_SEARCH_MATCH_MODE,
+&nbsp;						GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_EXACT,
+&nbsp;						&quot;Specifies how patient identifiers are matched while searching for a patient. Valid values are &#39;EXACT, &#39;ANYWHERE&#39; or &#39;START&#39;. Defaults to &#39;EXACT&#39; if missing or invalid value is present.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_MODE,
+&nbsp;		                GLOBAL_PROPERTY_PATIENT_SEARCH_MATCH_START,
+&nbsp;		                &quot;Specifies how patient names are matched while searching patient. Valid values are &#39;ANYWHERE&#39; or &#39;START&#39;. Defaults to start if missing or invalid value is present.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_ENABLE_CONCEPT_MAP_TYPE_MANAGEMENT, &quot;false&quot;,</b>
+&nbsp;		        &quot;Enables or disables management of concept map types&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_ENABLE_VISITS,
+&nbsp;		                &quot;true&quot;,
+&nbsp;		                &quot;Set to true to enable the Visits feature. This will replace the &#39;Encounters&#39; tab with a &#39;Visits&#39; tab on the dashboard.&quot;,
+&nbsp;		                BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_VISIT_ASSIGNMENT_HANDLER, ExistingVisitAssignmentHandler.class.getName(),</b>
+&nbsp;		        &quot;Set to the name of the class responsible for assigning encounters to visits.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_APPLICATION_NAME, &quot;OpenMRS&quot;,</b>
+&nbsp;		        &quot;The name of this application, as presented to the user, for example on the login and welcome pages.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_ENCOUNTER_TYPE_TO_VISIT_TYPE_MAPPING,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;Specifies how encounter types are mapped to visit types when automatically assigning encounters to visits. e.g 1:1, 2:1, 3:2 in the format encounterTypeId:visitTypeId or encounterTypeUuid:visitTypeUuid or a combination of encounter/visit type uuids and ids e.g 1:759799ab-c9a5-435e-b671-77773ada74e4&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_ENCOUNTER_TYPES_LOCKED, &quot;false&quot;,</b>
+&nbsp;		        &quot;saving, retiring or deleting an Encounter Type is not permitted, if true&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_DASHBOARD_PROVIDER_DISPLAY_ENCOUNTER_ROLES,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;A comma-separated list of encounter roles (by name or id). Providers with these roles in an encounter will be displayed on the encounter tab of the patient dashboard.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_SEARCH_WIDGET_MAXIMUM_RESULTS, &quot;2000&quot;,</b>
+&nbsp;		        &quot;Specifies the maximum number of results to return from a single search in the search widgets&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_DASHBOARD_MAX_NUMBER_OF_ENCOUNTERS_TO_SHOW,
+&nbsp;		                &quot;3&quot;,
+&nbsp;		                &quot;An integer which, if specified, would determine the maximum number of encounters to display on the encounter tab of the patient dashboard.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_VISIT_TYPES_TO_AUTO_CLOSE, &quot;&quot;,</b>
+&nbsp;		        &quot;comma-separated list of the visit type(s) to automatically close&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_ALLOWED_FAILED_LOGINS_BEFORE_LOCKOUT, &quot;7&quot;,</b>
+&nbsp;		        &quot;Maximum number of failed logins allowed after which username is locked out&quot;));
+&nbsp;
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_UNLOCK_ACCOUNT_WAITING_TIME, &quot;5&quot;,</b>
+&nbsp;			&quot;Waiting time for account to get automatically unlocked after getting locked due to multiple invalid login tries&quot;));
+&nbsp;
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_DEFAULT_CONCEPT_MAP_TYPE, &quot;NARROWER-THAN&quot;,</b>
+&nbsp;		        &quot;Default concept map type which is used when no other is set&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GP_CONCEPT_DRUG_DOSAGE_FORM_CONCEPT_CLASSES, &quot;&quot;,</b>
+&nbsp;		                &quot;A comma-separated list of the allowed concept classes for the dosage form field of the concept drug management form.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(GP_CONCEPT_DRUG_ROUTE_CONCEPT_CLASSES, &quot;&quot;,</b>
+&nbsp;		                &quot;A comma-separated list of the allowed concept classes for the route field of the concept drug management form.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_CASE_SENSITIVE_DATABASE_STRING_COMPARISON,
+&nbsp;		                &quot;false&quot;,
+&nbsp;		                &quot;Indicates whether database string comparison is case sensitive or not. Setting this to false for MySQL with a case insensitive collation improves search performance.&quot;));
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GP_DASHBOARD_METADATA_CASE_CONVERSION,
+&nbsp;		                &quot;&quot;,
+&nbsp;		                &quot;Indicates which type automatic case conversion is applied to program/workflow/state in the patient dashboard. Valid values: lowercase, uppercase, capitalize. If empty no conversion is applied.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_ALLERGY_ALLERGEN_CONCEPT_CLASSES, &quot;Drug,MedSet&quot;,</b>
+&nbsp;		        &quot;A comma-separated list of the allowed concept classes for the allergen field of the allergy dialog&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_ALLERGY_REACTION_CONCEPT_CLASSES, &quot;Symptom&quot;,</b>
+&nbsp;		        &quot;A comma-separated list of the allowed concept classes for the reaction field of the allergy dialog&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_USER_REQUIRE_EMAIL_AS_USERNAME, &quot;false&quot;,</b>
+&nbsp;		        &quot;Indicates whether a username must be a valid e-mail or not.&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_SEARCH_INDEX_VERSION, &quot;&quot;,</b>
+&nbsp;		        &quot;Indicates the index version. If it is blank, the index needs to be rebuilt.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_ALLOW_OVERLAPPING_VISITS, &quot;true&quot;,</b>
+&nbsp;		        &quot;true/false whether or not to allow visits of a given patient to overlap&quot;, BooleanDatatype.class, null));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_FORMS_LOCKED, &quot;false&quot;,</b>
+&nbsp;		        &quot;Set to a value of true if you do not want any changes to be made on forms, else set to false.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_DRUG_ORDER_REQUIRE_DRUG, &quot;false&quot;,</b>
+&nbsp;		        &quot;Set to value true if you need to specify a formulation(Drug) when creating a drug order.&quot;));
+&nbsp;
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_DRUG_ORDER_REQUIRE_OUTPATIENT_QUANTITY, &quot;true&quot;,</b>
+&nbsp;			&quot;true/false whether to require quantity, quantityUnits, and numRefills for outpatient drug orders&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_PERSON_ATRIBUTE_TYPES_LOCKED, &quot;false&quot;,</b>
+&nbsp;		        &quot;Set to a value of true if you do not want allow editing person attribute types, else set to false.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GLOBAL_PROPERTY_PATIENT_IDENTIFIER_TYPES_LOCKED, &quot;false&quot;,</b>
+&nbsp;		        &quot;Set to a value of true if you do not want allow editing patient identifier types, else set to false.&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_NEXT_ORDER_NUMBER_SEED, &quot;1&quot;, &quot;The next order number available for assignment&quot;));</b>
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_ORDER_NUMBER_GENERATOR_BEAN_ID, &quot;&quot;,</b>
+&nbsp;		        &quot;Specifies spring bean id of the order generator to use when assigning order numbers&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_DRUG_ROUTES_CONCEPT_UUID, &quot;&quot;,</b>
+&nbsp;		        &quot;Specifies the uuid of the concept set where its members represent the possible drug routes&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_DRUG_DOSING_UNITS_CONCEPT_UUID, &quot;&quot;,</b>
+&nbsp;		        &quot;Specifies the uuid of the concept set where its members represent the possible drug dosing units&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_DRUG_DISPENSING_UNITS_CONCEPT_UUID, &quot;&quot;,</b>
+&nbsp;		        &quot;Specifies the uuid of the concept set where its members represent the possible drug dispensing units&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_DURATION_UNITS_CONCEPT_UUID, &quot;&quot;,</b>
+&nbsp;		        &quot;Specifies the uuid of the concept set where its members represent the possible duration units&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_TEST_SPECIMEN_SOURCES_CONCEPT_UUID, &quot;&quot;,</b>
+&nbsp;		        &quot;Specifies the uuid of the concept set where its members represent the possible test specimen sources&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_UNKNOWN_PROVIDER_UUID, &quot;&quot;, &quot;Specifies the uuid of the Unknown Provider account&quot;));</b>
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PROVIDER_SEARCH_MATCH_MODE,
+&nbsp;		                &quot;EXACT&quot;,
+&nbsp;		                &quot;Specifies how provider identifiers are matched while searching for providers. Valid values are START,EXACT, END or ANYWHERE&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;		        .add(new GlobalProperty(</b>
+&nbsp;		                GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_MODE,
+&nbsp;		                GLOBAL_PROPERTY_PERSON_ATTRIBUTE_SEARCH_MATCH_EXACT,
+&nbsp;		                &quot;Specifies how person attributes are matched while searching person. Valid values are &#39;ANYWHERE&#39; or &#39;EXACT&#39;. Defaults to exact if missing or invalid value is present.&quot;));
+&nbsp;
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_DISABLE_VALIDATION, &quot;false&quot;,</b>
+&nbsp;				&quot;Disables validation of OpenMRS Objects. Only takes affect on next restart. Warning: only do this is you know what you are doing!&quot;));
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.severity.mild&quot;, &quot;1498AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the MILD severity concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.severity.moderate&quot;, &quot;1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the MODERATE severity concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.severity.severe&quot;, &quot;1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the SEVERE severity concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.allergen.food&quot;, &quot;162553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the food allergens concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.allergen.drug&quot;, &quot;162552AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the drug allergens concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.allergen.environment&quot;, &quot;162554AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the environment allergens concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.reactions&quot;, &quot;162555AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the allergy reactions concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_ALLERGEN_OTHER_NON_CODED_UUID, &quot;5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the allergy other non coded concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props.add(new GlobalProperty(&quot;allergy.concept.unknown&quot;, &quot;1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;,</b>
+&nbsp;		        &quot;UUID for the allergy unknown concept&quot;));
+&nbsp;		
+<b class="nc">&nbsp;		props</b>
+<b class="nc">&nbsp;				.add(new GlobalProperty(GP_DRUG_ORDER_DRUG_OTHER, &quot;&quot;, &quot;Specifies the uuid of the concept which represents drug other non coded&quot;));</b>
+<b class="nc">&nbsp;		props.add(new GlobalProperty(GP_LOGIN_URL, LOGIN_URL,</b>
+&nbsp;			&quot;Responsible for defining the Authentication URL &quot;));
+<b class="nc">&nbsp;		props.addAll(ModuleFactory.getGlobalProperties());</b>
+&nbsp;		
+<b class="nc">&nbsp;		return props;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ConceptProposal proposed concept identifier keyword
+&nbsp;	public static final String PROPOSED_CONCEPT_IDENTIFIER = &quot;PROPOSED&quot;;
+&nbsp;	
+&nbsp;	// ConceptProposal states
+&nbsp;	public static final String CONCEPT_PROPOSAL_UNMAPPED = &quot;UNMAPPED&quot;;
+&nbsp;	
+&nbsp;	public static final String CONCEPT_PROPOSAL_CONCEPT = &quot;CONCEPT&quot;;
+&nbsp;	
+&nbsp;	public static final String CONCEPT_PROPOSAL_SYNONYM = &quot;SYNONYM&quot;;
+&nbsp;	
+&nbsp;	public static final String CONCEPT_PROPOSAL_REJECT = &quot;REJECT&quot;;
+&nbsp;	
+&nbsp;	public static final Collection&lt;String&gt; CONCEPT_PROPOSAL_STATES() {
+<b class="nc">&nbsp;		Collection&lt;String&gt; states = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+<b class="nc">&nbsp;		states.add(CONCEPT_PROPOSAL_UNMAPPED);</b>
+<b class="nc">&nbsp;		states.add(CONCEPT_PROPOSAL_CONCEPT);</b>
+<b class="nc">&nbsp;		states.add(CONCEPT_PROPOSAL_SYNONYM);</b>
+<b class="nc">&nbsp;		states.add(CONCEPT_PROPOSAL_REJECT);</b>
+&nbsp;		
+<b class="nc">&nbsp;		return states;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public static final Locale SPANISH_LANGUAGE = new Locale(&quot;es&quot;);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Locale PORTUGUESE_LANGUAGE = new Locale(&quot;pt&quot;);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final Locale ITALIAN_LANGUAGE = new Locale(&quot;it&quot;);</b>
+&nbsp;	
+&nbsp;	/*
+&nbsp;	 * User property names
+&nbsp;	 */
+&nbsp;	public static final String USER_PROPERTY_CHANGE_PASSWORD = &quot;forcePassword&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_DEFAULT_LOCALE = &quot;defaultLocale&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_DEFAULT_LOCATION = &quot;defaultLocation&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_SHOW_RETIRED = &quot;showRetired&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_SHOW_VERBOSE = &quot;showVerbose&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_NOTIFICATION = &quot;notification&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_NOTIFICATION_ADDRESS = &quot;notificationAddress&quot;;
+&nbsp;	
+&nbsp;	public static final String USER_PROPERTY_NOTIFICATION_FORMAT = &quot;notificationFormat&quot;; // text/plain, text/html
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Name of the user_property that stores the number of unsuccessful login attempts this user has
+&nbsp;	 * made
+&nbsp;	 */
+&nbsp;	public static final String USER_PROPERTY_LOGIN_ATTEMPTS = &quot;loginAttempts&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Name of the user_property that stores the time the user was locked out due to too many login
+&nbsp;	 * attempts
+&nbsp;	 */
+&nbsp;	public static final String USER_PROPERTY_LOCKOUT_TIMESTAMP = &quot;lockoutTimestamp&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A user property name. The value should be a comma-separated ordered list of fully qualified
+&nbsp;	 * locales within which the user is a proficient speaker. The list should be ordered from the
+&nbsp;	 * most to the least proficiency. Example:
+&nbsp;	 * &lt;code&gt;proficientLocales = en_US, en_GB, en, fr_RW&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public static final String USER_PROPERTY_PROFICIENT_LOCALES = &quot;proficientLocales&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp; 	 * Name of the user_property that stores user&#39;s last login time
+&nbsp;	 */
+&nbsp;	public static final String USER_PROPERTY_LAST_LOGIN_TIMESTAMP = &quot;lastLoginTimestamp&quot;;
+&nbsp;	
+&nbsp;	// Used for differences between windows/linux upload capabilities)
+&nbsp;	// Used for determining where to find runtime properties
+&nbsp;	public static final String OPERATING_SYSTEM_KEY = &quot;os.name&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	public static final String OPERATING_SYSTEM = System.getProperty(OPERATING_SYSTEM_KEY);</b>
+&nbsp;	
+&nbsp;	public static final String OPERATING_SYSTEM_WINDOWS_XP = &quot;Windows XP&quot;;
+&nbsp;	
+&nbsp;	public static final String OPERATING_SYSTEM_WINDOWS_VISTA = &quot;Windows Vista&quot;;
+&nbsp;	
+&nbsp;	public static final String OPERATING_SYSTEM_LINUX = &quot;Linux&quot;;
+&nbsp;	
+&nbsp;	public static final String OPERATING_SYSTEM_SUNOS = &quot;SunOS&quot;;
+&nbsp;	
+&nbsp;	public static final String OPERATING_SYSTEM_FREEBSD = &quot;FreeBSD&quot;;
+&nbsp;	
+&nbsp;	public static final String OPERATING_SYSTEM_OSX = &quot;Mac OS X&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * URL to the concept source id verification server
+&nbsp;	 */
+&nbsp;	public static final String IMPLEMENTATION_ID_REMOTE_CONNECTION_URL = &quot;https://implementation.openmrs.org&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Shortcut booleans used to make some OS specific checks more generic; note the *nix flavored
+&nbsp;	 * check is missing some less obvious choices
+&nbsp;	 */
+<b class="fc">&nbsp;	public static final boolean UNIX_BASED_OPERATING_SYSTEM = (OPERATING_SYSTEM.contains(OPERATING_SYSTEM_LINUX)</b>
+<b class="fc">&nbsp;	        || OPERATING_SYSTEM.contains(OPERATING_SYSTEM_SUNOS)</b>
+<b class="fc">&nbsp;	        || OPERATING_SYSTEM.contains(OPERATING_SYSTEM_FREEBSD) || OPERATING_SYSTEM.contains(OPERATING_SYSTEM_OSX));</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final boolean WINDOWS_BASED_OPERATING_SYSTEM = OPERATING_SYSTEM.contains(&quot;Windows&quot;);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public static final boolean WINDOWS_VISTA_OPERATING_SYSTEM = OPERATING_SYSTEM.equals(OPERATING_SYSTEM_WINDOWS_VISTA);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Marker put into the serialization session map to tell @Replace methods whether or not to do
+&nbsp;	 * just the very basic serialization
+&nbsp;	 */
+&nbsp;	public static final String SHORT_SERIALIZATION = &quot;isShortSerialization&quot;;
+&nbsp;	
+&nbsp;	// Global property key for global logger level
+&nbsp;	public static final String GLOBAL_PROPERTY_LOG_LEVEL = &quot;log.level&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * It points to a directory where &#39;openmrs.log&#39; is stored.
+&nbsp;	 *
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public static final String GP_LOG_LOCATION = &quot;log.location&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * It specifies a log layout pattern used by the OpenMRS file appender.
+&nbsp;	 *
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public static final String GP_LOG_LAYOUT = &quot;log.layout&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * It specifies a default name of the OpenMRS file appender.
+&nbsp;	 * .
+&nbsp;	 * @since 1.9.2
+&nbsp;	 */
+&nbsp;	public static final String LOG_OPENMRS_FILE_APPENDER = &quot;OPENMRS FILE APPENDER&quot;;
+&nbsp;	
+&nbsp;	// Global logger category
+&nbsp;	public static final String LOG_CLASS_DEFAULT = &quot;org.openmrs.api&quot;;
+&nbsp;	
+&nbsp;	// Log levels
+&nbsp;	public static final String LOG_LEVEL_TRACE = &quot;trace&quot;;
+&nbsp;	
+&nbsp;	public static final String LOG_LEVEL_DEBUG = &quot;debug&quot;;
+&nbsp;	
+&nbsp;	public static final String LOG_LEVEL_INFO = &quot;info&quot;;
+&nbsp;	
+&nbsp;	public static final String LOG_LEVEL_WARN = &quot;warn&quot;;
+&nbsp;	
+&nbsp;	public static final String LOG_LEVEL_ERROR = &quot;error&quot;;
+&nbsp;	
+&nbsp;	public static final String LOG_LEVEL_FATAL = &quot;fatal&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The name of the in-memory appender
+&nbsp;	 */
+&nbsp;	public static final String MEMORY_APPENDER_NAME = &quot;MEMORY_APPENDER&quot;;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Default url responsible for authentication if a user is not logged in.
+&nbsp;	 *
+&nbsp;	 * @see  #GP_LOGIN_URL
+&nbsp;	 */
+&nbsp;	public static final String LOGIN_URL = &quot;login.htm&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Global property name that defines the default url
+&nbsp;	 * responsible for authentication if user is not logged in.
+&nbsp;	 *
+&nbsp;	 *  @see #LOGIN_URL
+&nbsp;	 */
+&nbsp;	public static final String GP_LOGIN_URL = &quot;login.url&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * These enumerations should be used in ObsService and PersonService getters to help determine
+&nbsp;	 * which type of object to restrict on
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.api.ObsService
+&nbsp;	 * @see org.openmrs.api.PersonService
+&nbsp;	 */
+<b class="fc">&nbsp;	public static enum PERSON_TYPE {</b>
+<b class="fc">&nbsp;		PERSON,</b>
+<b class="fc">&nbsp;		PATIENT,</b>
+<b class="fc">&nbsp;		USER</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	//Patient Identifier Validators
+<b class="fc">&nbsp;	public static final String LUHN_IDENTIFIER_VALIDATOR = LuhnIdentifierValidator.class.getName();</b>
+&nbsp;	
+&nbsp;	/** The data type to return on failing to load a custom data type. */
+<b class="fc">&nbsp;	public static final String DEFAULT_CUSTOM_DATATYPE = FreeTextDatatype.class.getName();</b>
+&nbsp;	
+&nbsp;	/**Prefix followed by registered component name.*/
+&nbsp;	public static final String REGISTERED_COMPONENT_NAME_PREFIX = &quot;bean:&quot;;
+&nbsp;	
+&nbsp;	/** Value for the short person name format */
+&nbsp;	public static final String PERSON_NAME_FORMAT_SHORT = &quot;short&quot;;
+&nbsp;	
+&nbsp;	/** Value for the long person name format */
+&nbsp;	public static final String PERSON_NAME_FORMAT_LONG = &quot;long&quot;;
+&nbsp;
+&nbsp;	// Liquibase Constants
+<b class="fc">&nbsp;	public static final String LIQUIBASE_DUPLICATE_FILE_MODE_DEFAULT = GlobalConfiguration.DuplicateFileMode.WARN.name();</b>
+&nbsp;
+&nbsp;	/** Value for zero login attempts */
+&nbsp;	public static final String ZERO_LOGIN_ATTEMPTS_VALUE = &quot;0&quot;;
+&nbsp;	
+&nbsp;	private OpenmrsConstants() {
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

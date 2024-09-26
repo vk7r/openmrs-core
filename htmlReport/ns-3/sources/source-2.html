@@ -1,0 +1,267 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LoggingAdvice</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.aop</a>
+</div>
+
+<h1>Coverage Summary for Class: LoggingAdvice (org.openmrs.aop)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LoggingAdvice</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    31%
+  </span>
+  <span class="absValue">
+    (18/58)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.aop;
+&nbsp;
+&nbsp;import java.lang.reflect.Method;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.aopalliance.intercept.MethodInterceptor;
+&nbsp;import org.aopalliance.intercept.MethodInvocation;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class provides the log4j aop around advice for our service layer. This advice is placed on
+&nbsp; * all services and daos via the spring application context. See
+&nbsp; * /metadata/api/spring/applicationContext.xml
+&nbsp; */
+<b class="fc">&nbsp;public class LoggingAdvice implements MethodInterceptor {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of all method name prefixes that result in DEBUG-level log messages
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final String[] SETTER_METHOD_PREFIXES = { &quot;save&quot;, &quot;create&quot;, &quot;update&quot;, &quot;void&quot;, &quot;unvoid&quot;, &quot;retire&quot;,</b>
+&nbsp;	        &quot;unretire&quot;, &quot;delete&quot;, &quot;purge&quot; };
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Logger for this class. Uses the name &quot;org.openmrs.api&quot; so that it seems to fit into the
+&nbsp;	 * log4j2.xml configuration
+&nbsp;	 */
+<b class="fc">&nbsp;	private final Logger log = LoggerFactory.getLogger(OpenmrsConstants.LOG_CLASS_DEFAULT);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This method prints out trace statements for getters and debug statements for everything else
+&nbsp;	 * (&quot;setters&quot;). If debugging is turned on, execution time for each method is printed as well.
+&nbsp;	 * This method is called for every method in the Class/Service that it is wrapped around. This
+&nbsp;	 * method should be fairly quick and light.
+&nbsp;	 *
+&nbsp;	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Object invoke(MethodInvocation invocation) throws Throwable {
+&nbsp;		
+<b class="fc">&nbsp;		Method method = invocation.getMethod();</b>
+<b class="fc">&nbsp;		String name = method.getName();</b>
+&nbsp;		
+&nbsp;		// decide what type of logging we&#39;re doing with the current method and the loglevel
+<b class="fc">&nbsp;		boolean isSetterTypeOfMethod = OpenmrsUtil.stringStartsWith(name, SETTER_METHOD_PREFIXES);</b>
+<b class="fc">&nbsp;		boolean logGetter = !isSetterTypeOfMethod &amp;&amp; log.isTraceEnabled();</b>
+<b class="fc">&nbsp;		boolean logSetter = isSetterTypeOfMethod &amp;&amp; log.isDebugEnabled();</b>
+&nbsp;		
+&nbsp;		// used for the execution time calculations
+<b class="fc">&nbsp;		long startTime = System.currentTimeMillis();</b>
+&nbsp;		
+&nbsp;		// check if this method has the logging annotation on it
+<b class="fc">&nbsp;		Logging loggingAnnotation = null;</b>
+<b class="fc">&nbsp;		if (logGetter || logSetter) {</b>
+<b class="nc">&nbsp;			loggingAnnotation = method.getAnnotation(Logging.class);</b>
+<b class="nc">&nbsp;			if (loggingAnnotation != null &amp;&amp; loggingAnnotation.ignore()) {</b>
+<b class="nc">&nbsp;				logGetter = false;</b>
+<b class="nc">&nbsp;				logSetter = false;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (logGetter || logSetter) {</b>
+<b class="nc">&nbsp;			StringBuilder output = new StringBuilder();</b>
+<b class="nc">&nbsp;			output.append(&quot;In method &quot;).append(method.getDeclaringClass().getSimpleName()).append(&quot;.&quot;).append(name);</b>
+&nbsp;			
+&nbsp;			// print the argument values unless we&#39;re ignoring all
+<b class="nc">&nbsp;			if (loggingAnnotation == null || !loggingAnnotation.ignoreAllArgumentValues()) {</b>
+&nbsp;				
+&nbsp;				int x;
+<b class="nc">&nbsp;				Class&lt;?&gt;[] types = method.getParameterTypes();</b>
+<b class="nc">&nbsp;				Object[] values = invocation.getArguments();</b>
+&nbsp;				
+&nbsp;				// change the annotation array of indexes to a list of indexes to ignore
+<b class="nc">&nbsp;				List&lt;Integer&gt; argsToIgnore = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;				if (loggingAnnotation != null &amp;&amp; loggingAnnotation.ignoredArgumentIndexes().length &gt; 0) {</b>
+<b class="nc">&nbsp;					for (int argIndexToIgnore : loggingAnnotation.ignoredArgumentIndexes()) {</b>
+<b class="nc">&nbsp;						argsToIgnore.add(argIndexToIgnore);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				
+&nbsp;				// loop over and print out each argument value
+<b class="nc">&nbsp;				output.append(&quot;. Arguments: &quot;);</b>
+<b class="nc">&nbsp;				for (x = 0; x &lt; types.length; x++) {</b>
+<b class="nc">&nbsp;					output.append(types[x].getSimpleName()).append(&quot;=&quot;);</b>
+&nbsp;					
+&nbsp;					// if there is an annotation to skip this, print out a bogus string.
+<b class="nc">&nbsp;					if (argsToIgnore.contains(x)) {</b>
+<b class="nc">&nbsp;						output.append(&quot;&lt;Arg value ignored&gt;&quot;);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						output.append(values[x]);</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					output.append(&quot;, &quot;);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+&nbsp;			
+&nbsp;			// print the string as either trace or debug
+<b class="nc">&nbsp;			if (logGetter) {</b>
+<b class="nc">&nbsp;				log.trace(output.toString());</b>
+<b class="nc">&nbsp;			} else if (logSetter) {</b>
+<b class="nc">&nbsp;				log.debug(output.toString());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+&nbsp;			// do the actual method we&#39;re wrapped around
+<b class="fc">&nbsp;			return invocation.proceed();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			if (logGetter || logSetter) {</b>
+&nbsp;				String username;
+<b class="nc">&nbsp;				User user = Context.getAuthenticatedUser();</b>
+<b class="nc">&nbsp;				if (user == null) {</b>
+<b class="nc">&nbsp;					username = &quot;Guest (Not logged in)&quot;;</b>
+&nbsp;				} else {
+<b class="nc">&nbsp;					username = user.getUsername();</b>
+<b class="nc">&nbsp;					if (username == null || username.length() == 0) {</b>
+<b class="nc">&nbsp;						username = user.getSystemId();</b>
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				log.debug(String.format(</b>
+&nbsp;				    &quot;An error occurred while executing this method.%nCurrent user: %s%nError message: %s&quot;, username, e
+<b class="nc">&nbsp;				            .getMessage()), e);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			throw e;</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (logGetter || logSetter) {</b>
+<b class="nc">&nbsp;				StringBuilder output = new StringBuilder();</b>
+<b class="nc">&nbsp;				output.append(&quot;Exiting method &quot;).append(name);</b>
+&nbsp;				
+&nbsp;				// only append execution time info if we&#39;re in debug mode
+<b class="nc">&nbsp;				if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;					output.append(&quot;. execution time: &quot;).append(System.currentTimeMillis() - startTime).append(&quot; ms&quot;);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				// print the string as either trace or debug
+<b class="nc">&nbsp;				if (logGetter) {</b>
+<b class="nc">&nbsp;					log.trace(output.toString());</b>
+<b class="nc">&nbsp;				} else if (logSetter) {</b>
+<b class="nc">&nbsp;					log.debug(output.toString());</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

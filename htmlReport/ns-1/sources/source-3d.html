@@ -1,0 +1,348 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Form</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Form (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Form</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (16/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40,4%
+  </span>
+  <span class="absValue">
+    (19/47)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Form$HibernateProxy$OnF5N5fK</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (16/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40,4%
+  </span>
+  <span class="absValue">
+    (19/47)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * Form
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Form extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 845634L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private Integer formId;
+&nbsp;	
+&nbsp;	private String version;
+&nbsp;	
+&nbsp;	private Integer build;
+&nbsp;	
+<b class="fc">&nbsp;	private Boolean published = false;</b>
+&nbsp;	
+&nbsp;	private EncounterType encounterType;
+&nbsp;	
+&nbsp;	private Set&lt;FormField&gt; formFields;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Form() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor with id
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set formId with given parameter
+&nbsp;	 */
+<b class="fc">&nbsp;	public Form(Integer formId) {</b>
+<b class="fc">&nbsp;		this.formId = formId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the formId.
+&nbsp;	 */
+&nbsp;	public Integer getFormId() {
+<b class="fc">&nbsp;		return formId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param formId The formId to set.
+&nbsp;	 */
+&nbsp;	public void setFormId(Integer formId) {
+<b class="fc">&nbsp;		this.formId = formId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the version.
+&nbsp;	 */
+&nbsp;	public String getVersion() {
+<b class="fc">&nbsp;		return version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param version The version to set.
+&nbsp;	 */
+&nbsp;	public void setVersion(String version) {
+<b class="fc">&nbsp;		this.version = version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the build number
+&nbsp;	 */
+&nbsp;	public Integer getBuild() {
+<b class="fc">&nbsp;		return build;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param build The build number to set
+&nbsp;	 */
+&nbsp;	public void setBuild(Integer build) {
+<b class="fc">&nbsp;		this.build = build;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the published.
+&nbsp;	 */
+&nbsp;	public Boolean getPublished() {
+<b class="fc">&nbsp;		return published;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param published The published to set.
+&nbsp;	 */
+&nbsp;	public void setPublished(Boolean published) {
+<b class="fc">&nbsp;		this.published = published;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the type of encounter associated with this form
+&nbsp;	 */
+&nbsp;	public EncounterType getEncounterType() {
+<b class="fc">&nbsp;		return encounterType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param encounterType type of encounter associated with this form
+&nbsp;	 */
+&nbsp;	public void setEncounterType(EncounterType encounterType) {
+<b class="fc">&nbsp;		this.encounterType = encounterType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the formFields.
+&nbsp;	 */
+&nbsp;	public Set&lt;FormField&gt; getFormFields() {
+<b class="fc">&nbsp;		return formFields;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the formFields.
+&nbsp;	 */
+&nbsp;	public List&lt;FormField&gt; getOrderedFormFields() {
+<b class="nc">&nbsp;		if (this.formFields != null) {</b>
+<b class="nc">&nbsp;			List&lt;FormField&gt; fieldList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;			Set&lt;FormField&gt; fieldSet = new HashSet&lt;&gt;(this.formFields);</b>
+&nbsp;			
+<b class="nc">&nbsp;			int fieldSize = fieldSet.size();</b>
+&nbsp;			
+<b class="nc">&nbsp;			for (int i = 0; i &lt; fieldSize; i++) {</b>
+<b class="nc">&nbsp;				int fieldNum = 0;</b>
+<b class="nc">&nbsp;				FormField next = null;</b>
+&nbsp;				
+<b class="nc">&nbsp;				for (FormField ff : fieldSet) {</b>
+<b class="nc">&nbsp;					if (ff.getFieldNumber() != null) {</b>
+<b class="nc">&nbsp;						if (ff.getFieldNumber() &lt; fieldNum || fieldNum == 0) {</b>
+<b class="nc">&nbsp;							fieldNum = ff.getFieldNumber();</b>
+<b class="nc">&nbsp;							next = ff;</b>
+&nbsp;						}
+&nbsp;					} else {
+<b class="nc">&nbsp;						if (fieldNum == 0) {</b>
+<b class="nc">&nbsp;							next = ff;</b>
+&nbsp;						}
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+&nbsp;				
+<b class="nc">&nbsp;				fieldList.add(next);</b>
+<b class="nc">&nbsp;				fieldSet.remove(next);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			return fieldList;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param formFields The formFields to set.
+&nbsp;	 */
+&nbsp;	public void setFormFields(Set&lt;FormField&gt; formFields) {
+<b class="fc">&nbsp;		this.formFields = formFields;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a FormField to the list of form fields
+&nbsp;	 *
+&nbsp;	 * @param formField FormField to be added
+&nbsp;	 */
+&nbsp;	public void addFormField(FormField formField) {
+<b class="nc">&nbsp;		if (formFields == null) {</b>
+<b class="nc">&nbsp;			formFields = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (!formFields.contains(formField) &amp;&amp; formField != null) {</b>
+<b class="nc">&nbsp;			formField.setForm(this);</b>
+<b class="nc">&nbsp;			this.formFields.add(formField);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a FormField from the list of form fields
+&nbsp;	 *
+&nbsp;	 * @param formField FormField to be removed
+&nbsp;	 */
+&nbsp;	public void removeFormField(FormField formField) {
+<b class="nc">&nbsp;		if (formFields != null) {</b>
+<b class="nc">&nbsp;			this.formFields.remove(formField);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (formId == null) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return formId.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getFormId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setFormId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

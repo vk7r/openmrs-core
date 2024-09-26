@@ -1,0 +1,431 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Role</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Role (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Role</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,5%
+  </span>
+  <span class="absValue">
+    (23/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,6%
+  </span>
+  <span class="absValue">
+    (73/78)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.RoleConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * A Role is just an aggregater of {@link Privilege}s. {@link User}s contain a number of roles
+&nbsp; * (Users DO NOT contain any privileges directly) Roles can be grouped by inheriting other roles. If
+&nbsp; * a user is given Role A that inherits from Role B, the user has all rights/abilities for both Role
+&nbsp; * A&#39;s privileges and for Role B&#39;s privileges.
+&nbsp; *
+&nbsp; * @see Privilege
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Role extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 1234233L;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Role.class);</b>
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	private String role;
+&nbsp;	
+&nbsp;	private Set&lt;Privilege&gt; privileges;
+&nbsp;	
+&nbsp;	private Set&lt;Role&gt; inheritedRoles;
+&nbsp;	
+&nbsp;	private Set&lt;Role&gt; childRoles;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public Role() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public Role(String role) {</b>
+<b class="fc">&nbsp;		this.role = role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with all database required properties */
+<b class="fc">&nbsp;	public Role(String role, String description) {</b>
+<b class="fc">&nbsp;		this.role = role;</b>
+<b class="fc">&nbsp;		setDescription(description);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the privileges.
+&nbsp;	 */
+&nbsp;	public Set&lt;Privilege&gt; getPrivileges() {
+<b class="fc">&nbsp;		return privileges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param privileges The privileges to set.
+&nbsp;	 */
+&nbsp;	public void setPrivileges(Set&lt;Privilege&gt; privileges) {
+<b class="fc">&nbsp;		this.privileges = privileges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return this.getRole();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds the given Privilege to the list of privileges
+&nbsp;	 *
+&nbsp;	 * @param privilege Privilege to add
+&nbsp;	 */
+&nbsp;	public void addPrivilege(Privilege privilege) {
+<b class="fc">&nbsp;		if (privileges == null) {</b>
+<b class="fc">&nbsp;			privileges = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (privilege != null &amp;&amp; !containsPrivilege(privileges, privilege.getPrivilege())) {</b>
+<b class="fc">&nbsp;			privileges.add(privilege);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean containsPrivilege(Collection&lt;Privilege&gt; privileges, String privilegeName) {
+<b class="fc">&nbsp;		for (Privilege privilege : privileges) {</b>
+<b class="fc">&nbsp;			if (privilege.getPrivilege().equals(privilegeName)) {</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes the given Privilege from the list of privileges
+&nbsp;	 *
+&nbsp;	 * @param privilege Privilege to remove
+&nbsp;	 */
+&nbsp;	public void removePrivilege(Privilege privilege) {
+<b class="fc">&nbsp;		if (privileges != null) {</b>
+<b class="fc">&nbsp;			privileges.remove(privilege);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the role.
+&nbsp;	 */
+&nbsp;	public String getRole() {
+<b class="fc">&nbsp;		return role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param role The role to set.
+&nbsp;	 */
+&nbsp;	public void setRole(String role) {
+<b class="fc">&nbsp;		this.role = role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return this.role;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Looks for the given &lt;code&gt;privilegeName&lt;/code&gt; privilege name in this roles privileges. This
+&nbsp;	 * method does not recurse through the inherited roles
+&nbsp;	 *
+&nbsp;	 * @param privilegeName String name of a privilege
+&nbsp;	 * @return true/false whether this role has the given privilege
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail given null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true for any privilegeName if super user
+&nbsp;	 */
+&nbsp;	public boolean hasPrivilege(String privilegeName) {
+&nbsp;		
+<b class="fc">&nbsp;		if (RoleConstants.SUPERUSER.equals(this.role)) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (privileges != null) {</b>
+<b class="fc">&nbsp;			for (Privilege p : privileges) {</b>
+<b class="fc">&nbsp;				if (p.getPrivilege().equalsIgnoreCase(privilegeName)) {</b>
+<b class="fc">&nbsp;					return true;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the inheritedRoles.
+&nbsp;	 */
+&nbsp;	public Set&lt;Role&gt; getInheritedRoles() {
+<b class="fc">&nbsp;		if (inheritedRoles == null) {</b>
+<b class="fc">&nbsp;			inheritedRoles = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return inheritedRoles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param inheritedRoles The inheritedRoles to set.
+&nbsp;	 */
+&nbsp;	public void setInheritedRoles(Set&lt;Role&gt; inheritedRoles) {
+<b class="fc">&nbsp;		this.inheritedRoles = inheritedRoles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to test whether or not this role extends/ inherits from any other roles
+&nbsp;	 *
+&nbsp;	 * @return true/false whether this role inherits from other roles
+&nbsp;	 */
+&nbsp;	public boolean inheritsRoles() {
+<b class="fc">&nbsp;		return getInheritedRoles() != null &amp;&amp; !getInheritedRoles().isEmpty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Recursive (if need be) method to return all parent roles of this role
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return parent roles
+&nbsp;	 * @return Return this role&#39;s parents
+&nbsp;	 */
+&nbsp;	public Set&lt;Role&gt; getAllParentRoles() {
+<b class="fc">&nbsp;		Set&lt;Role&gt; parents = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (inheritsRoles()) {</b>
+<b class="fc">&nbsp;			parents.addAll(this.recurseOverParents(parents));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return parents;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the full set of roles be looping over inherited roles. Duplicate roles are dropped.
+&nbsp;	 *
+&nbsp;	 * @param total Roles already looped over
+&nbsp;	 * @return Set&amp;lt;Role&amp;gt; Current and inherited roles
+&nbsp;	 */
+&nbsp;	public Set&lt;Role&gt; recurseOverParents(final Set&lt;Role&gt; total) {
+<b class="fc">&nbsp;		if (!this.inheritsRoles()) {</b>
+<b class="nc">&nbsp;			return total;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Set&lt;Role&gt; allRoles = new HashSet&lt;&gt;(total);</b>
+<b class="fc">&nbsp;		Set&lt;Role&gt; myRoles = new HashSet&lt;&gt;(this.getInheritedRoles());</b>
+<b class="fc">&nbsp;		myRoles.removeAll(total);</b>
+&nbsp;		// prevent an obvious looping problem
+<b class="fc">&nbsp;		myRoles.remove(this); </b>
+<b class="fc">&nbsp;		allRoles.addAll(myRoles);</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Role r : myRoles) {</b>
+<b class="fc">&nbsp;			if (r.inheritsRoles()) {</b>
+<b class="fc">&nbsp;				allRoles.addAll(r.recurseOverParents(allRoles));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Total roles: {}&quot;, allRoles);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return allRoles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return immediate children
+&nbsp;	 */
+&nbsp;	public Set&lt;Role&gt; getChildRoles() {
+<b class="fc">&nbsp;		if (childRoles == null) {</b>
+<b class="fc">&nbsp;			childRoles = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return childRoles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.9
+&nbsp;	 * @param childRoles the immediate children to set
+&nbsp;	 */
+&nbsp;	public void setChildRoles(Set&lt;Role&gt; childRoles) {
+<b class="fc">&nbsp;		this.childRoles = childRoles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to test whether or not this role is a parent of another role
+&nbsp;	 *
+&nbsp;	 * @return true/false whether this role is a parent of another role
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public boolean hasChildRoles() {
+<b class="fc">&nbsp;		return getChildRoles() != null &amp;&amp; !getChildRoles().isEmpty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Recursive (if need be) method to return all child roles of this role
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; only return child roles
+&nbsp;	 * @return this role&#39;s children
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Set&lt;Role&gt; getAllChildRoles() {
+<b class="fc">&nbsp;		Set&lt;Role&gt; children = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (hasChildRoles()) {</b>
+<b class="fc">&nbsp;			children.addAll(this.recurseOverChildren(children));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return children;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the full set of child roles be looping over children. Duplicate roles are dropped.
+&nbsp;	 *
+&nbsp;	 * @param total Roles already looped over
+&nbsp;	 * @return Set&amp;lt;Role&amp;gt; Current and child roles
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Set&lt;Role&gt; recurseOverChildren(final Set&lt;Role&gt; total) {
+<b class="fc">&nbsp;		if (!this.hasChildRoles()) {</b>
+<b class="nc">&nbsp;			return total;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Set&lt;Role&gt; allRoles = new HashSet&lt;&gt;(total);</b>
+&nbsp;
+<b class="fc">&nbsp;		Set&lt;Role&gt; myRoles = new HashSet&lt;&gt;(this.getChildRoles());</b>
+<b class="fc">&nbsp;		myRoles.removeAll(total);</b>
+&nbsp;		// prevent an obvious looping problem
+<b class="fc">&nbsp;		myRoles.remove(this); </b>
+<b class="fc">&nbsp;		allRoles.addAll(myRoles);</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Role r : myRoles) {</b>
+<b class="fc">&nbsp;			if (r.hasChildRoles()) {</b>
+<b class="fc">&nbsp;				allRoles.addAll(r.recurseOverChildren(allRoles));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Total roles: {}&quot;, allRoles);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return allRoles;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,260 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DelegatingFullTextSession</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: DelegatingFullTextSession (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DelegatingFullTextSession</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (7/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,2%
+  </span>
+  <span class="absValue">
+    (16/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; * 
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import org.apache.lucene.search.Query;
+&nbsp;import org.hibernate.engine.spi.SessionDelegatorBaseImpl;
+&nbsp;import org.hibernate.engine.spi.SessionImplementor;
+&nbsp;import org.hibernate.search.FullTextQuery;
+&nbsp;import org.hibernate.search.FullTextSession;
+&nbsp;import org.hibernate.search.FullTextSharedSessionBuilder;
+&nbsp;import org.hibernate.search.MassIndexer;
+&nbsp;import org.hibernate.search.SearchFactory;
+&nbsp;import org.hibernate.search.query.engine.spi.QueryDescriptor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.context.ApplicationEventPublisher;
+&nbsp;
+&nbsp;/**
+&nbsp; * Custom implementation of the {@link FullTextSession} interface that acts a wrapper around a
+&nbsp; * target FullTextSession instance, it actually delegates all the method calls directly to the
+&nbsp; * target except for the {@link FullTextSession#createFullTextQuery(Query, Class[])} method where it
+&nbsp; * first notifies registered listeners of the creation event before returning the newly created
+&nbsp; * {@link FullTextQuery} object. The newly created query object and entity type are passed to the
+&nbsp; * listeners wrapped in a {@link FullTextQueryAndEntityClass} object. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * An example use case is that a listener can enable/disable filters on the newly created query
+&nbsp; * object.
+&nbsp; */
+&nbsp;public class DelegatingFullTextSession extends SessionDelegatorBaseImpl implements FullTextSession {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(DelegatingFullTextSession.class);</b>
+&nbsp;	
+&nbsp;	private FullTextSession delegate;
+&nbsp;	
+&nbsp;	private ApplicationEventPublisher eventPublisher;
+&nbsp;	
+&nbsp;	public DelegatingFullTextSession(FullTextSession delegate, ApplicationEventPublisher eventPublisher) {
+<b class="fc">&nbsp;		super((SessionImplementor) delegate, delegate);</b>
+<b class="fc">&nbsp;		this.delegate = delegate;</b>
+<b class="fc">&nbsp;		this.eventPublisher = eventPublisher;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#createFullTextQuery(Query, Class[])
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FullTextQuery createFullTextQuery(Query luceneQuery, Class&lt;?&gt;... entities) {
+<b class="fc">&nbsp;		if (entities.length &gt; 1) {</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Can&#39;t create FullTextQuery for multiple persistent classes&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Creating new FullTextQuery instance&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Class&lt;?&gt; entityClass = entities[0];</b>
+<b class="fc">&nbsp;		FullTextQuery query = delegate.createFullTextQuery(luceneQuery, entityClass);</b>
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Notifying FullTextQueryCreated listeners...&quot;);</b>
+&nbsp;		
+&nbsp;		//Notify listeners, note that we intentionally don&#39;t catch any exception from a listener
+&nbsp;		//so that failure should just halt the entire creation operation, this is possible because 
+&nbsp;		//the default ApplicationEventMulticaster in spring fires events serially in the same thread
+&nbsp;		//but has the downside of where a rogue listener can block the entire application.
+<b class="fc">&nbsp;		FullTextQueryAndEntityClass queryAndClass = new FullTextQueryAndEntityClass(query, entityClass);</b>
+<b class="fc">&nbsp;		eventPublisher.publishEvent(new FullTextQueryCreatedEvent(queryAndClass));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return query;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public FullTextQuery createFullTextQuery(QueryDescriptor descriptor, Class&lt;?&gt;... entities) {
+<b class="nc">&nbsp;		if (entities.length &gt; 1) {</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Can&#39;t create FullTextQuery for multiple persistent classes&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		log.debug(&quot;Creating new FullTextQuery instance&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		Class&lt;?&gt; entityClass = entities[0];</b>
+<b class="nc">&nbsp;		FullTextQuery query = delegate.createFullTextQuery(descriptor, entityClass);</b>
+&nbsp;
+<b class="nc">&nbsp;		log.debug(&quot;Notifying FullTextQueryCreated listeners...&quot;);</b>
+&nbsp;
+&nbsp;		//Notify listeners, note that we intentionally don&#39;t catch any exception from a listener
+&nbsp;		//so that failure should just halt the entire creation operation, this is possible because 
+&nbsp;		//the default ApplicationEventMulticaster in spring fires events serially in the same thread
+&nbsp;		//but has the downside of where a rogue listener can block the entire application.
+<b class="nc">&nbsp;		FullTextQueryAndEntityClass queryAndClass = new FullTextQueryAndEntityClass(query, entityClass);</b>
+<b class="nc">&nbsp;		eventPublisher.publishEvent(new FullTextQueryCreatedEvent(queryAndClass));</b>
+&nbsp;
+<b class="nc">&nbsp;		return query;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#index(Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T&gt; void index(T entity) {
+<b class="fc">&nbsp;		delegate.index(entity);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#getSearchFactory()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public SearchFactory getSearchFactory() {
+<b class="fc">&nbsp;		return delegate.getSearchFactory();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#purge(Class, Serializable)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T&gt; void purge(Class&lt;T&gt; entityType, Serializable id) {
+<b class="nc">&nbsp;		delegate.purge(entityType, id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#purgeAll(Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T&gt; void purgeAll(Class&lt;T&gt; entityType) {
+<b class="fc">&nbsp;		delegate.purgeAll(entityType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#flushToIndexes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void flushToIndexes() {
+<b class="fc">&nbsp;		delegate.flushToIndexes();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#createIndexer(Class[])
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public MassIndexer createIndexer(Class&lt;?&gt;... types) {
+<b class="nc">&nbsp;		return delegate.createIndexer(types);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FullTextSession#sessionWithOptions()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FullTextSharedSessionBuilder sessionWithOptions() {
+<b class="nc">&nbsp;		return delegate.sessionWithOptions();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > TermsFilterFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate.search</a>
+</div>
+
+<h1>Coverage Summary for Class: TermsFilterFactory (org.openmrs.api.db.hibernate.search)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TermsFilterFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (26/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate.search;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.lucene.index.Term;
+&nbsp;import org.apache.lucene.search.BooleanClause.Occur;
+&nbsp;import org.apache.lucene.search.BooleanQuery;
+&nbsp;import org.apache.lucene.search.MatchAllDocsQuery;
+&nbsp;import org.apache.lucene.search.Query;
+&nbsp;import org.apache.lucene.search.TermQuery;
+&nbsp;import org.hibernate.search.annotations.Factory;
+&nbsp;import org.hibernate.search.annotations.Key;
+&nbsp;import org.hibernate.search.filter.FilterKey;
+&nbsp;import org.hibernate.search.filter.StandardFilterKey;
+&nbsp;import org.hibernate.search.filter.impl.CachingWrapperQuery;
+&nbsp;
+<b class="fc">&nbsp;public class TermsFilterFactory {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;Set&lt;Term&gt;&gt; includeTerms = new HashSet&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;Term&gt; excludeTerms = new HashSet&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	public void setIncludeTerms(Set&lt;Set&lt;Term&gt;&gt; terms) {
+<b class="fc">&nbsp;		this.includeTerms = new HashSet&lt;&gt;(terms);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setExcludeTerms(Set&lt;Term&gt; terms) {
+<b class="fc">&nbsp;		this.excludeTerms = new HashSet&lt;&gt;(terms);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Key
+&nbsp;	public FilterKey getKey() {
+<b class="fc">&nbsp;		StandardFilterKey key = new StandardFilterKey();</b>
+<b class="fc">&nbsp;		key.addParameter(includeTerms);</b>
+<b class="fc">&nbsp;		key.addParameter(excludeTerms);</b>
+<b class="fc">&nbsp;		return key;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Factory
+&nbsp;	public Query getQuery() {
+<b class="fc">&nbsp;		BooleanQuery query = new BooleanQuery();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (includeTerms.isEmpty()) {</b>
+<b class="fc">&nbsp;			query.add(new MatchAllDocsQuery(), Occur.MUST);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			for (Set&lt;Term&gt; terms : includeTerms) {</b>
+&nbsp;
+<b class="fc">&nbsp;				if (terms.size() == 1) {</b>
+<b class="fc">&nbsp;					query.add(new TermQuery(terms.iterator().next()), Occur.MUST);</b>
+<b class="fc">&nbsp;				} else if (terms.size() &gt; 1) {</b>
+<b class="fc">&nbsp;					BooleanQuery subquery = new BooleanQuery();</b>
+<b class="fc">&nbsp;					for (Term term : terms) {</b>
+<b class="fc">&nbsp;						subquery.add(new TermQuery(term), Occur.SHOULD);</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;					query.add(subquery, Occur.MUST);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (Term term : excludeTerms) {</b>
+<b class="fc">&nbsp;			query.add(new TermQuery(term), Occur.MUST_NOT);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return new CachingWrapperQuery(query);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

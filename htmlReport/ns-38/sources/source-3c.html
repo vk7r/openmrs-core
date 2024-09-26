@@ -1,0 +1,281 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > VisitValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: VisitValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VisitValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (51/51)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.parameter.VisitSearchCriteria;
+&nbsp;import org.openmrs.parameter.VisitSearchCriteriaBuilder;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validator for the {@link Visit} class.
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = { Visit.class }, order = 50)
+<b class="fc">&nbsp;public class VisitValidator extends BaseCustomizableValidator implements Validator {</b>
+&nbsp;	
+&nbsp;	private static final double ESTIMATED_BIRTHDATE_ERROR_MARGIN = -0.5;
+&nbsp;	
+&nbsp;	private static final int ESTIMATED_BIRTHDATE_ERROR_MARGIN_MINIMUM_YEARS = -1;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; clazz) {
+<b class="fc">&nbsp;		return Visit.class.isAssignableFrom(clazz);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; accept a visit that has the right number of attribute occurrences
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a visit if it has fewer than min occurs of an attribute
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a visit if it has more than max occurs of an attribute
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if patient is not set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if visit type is not set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if startDatetime is not set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the endDatetime is before the startDatetime
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the startDatetime is after any encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the stopDatetime is before any encounter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if an attribute is bad
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a visit if startDateTime is equal to startDateTime of another visit of the same patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a visit if startDateTime falls into another visit of the same patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a visit if stopDateTime falls into another visit of the same patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a visit if it contains another visit of the same patient
+&nbsp;
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; accept a visit if startDateTime is equal to startDateTime of another voided visit of the same patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; accept a visit if startDateTime falls into another voided visit of the same patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; accept a visit if stopDateTime falls into another voided visit of the same patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; accept a visit if it contains another voided visit of the same patient
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object target, Errors errors) {
+<b class="fc">&nbsp;		Visit visit = (Visit) target;</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;patient&quot;, &quot;Visit.error.patient.required&quot;);</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;visitType&quot;, &quot;Visit.error.visitType.required&quot;);</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;startDatetime&quot;, &quot;Visit.error.startDate.required&quot;);</b>
+<b class="fc">&nbsp;		if (visit.getStartDatetime() != null</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.compareWithNullAsLatest(visit.getStartDatetime(), visit.getStopDatetime()) &gt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;stopDatetime&quot;, &quot;Visit.error.endDateBeforeStartDate&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//If this is not a new visit, validate based on its existing encounters.
+<b class="fc">&nbsp;		if (visit.getId() != null) {</b>
+<b class="fc">&nbsp;			Date startDateTime = visit.getStartDatetime();</b>
+<b class="fc">&nbsp;			Date stopDateTime = visit.getStopDatetime();</b>
+&nbsp;			
+<b class="fc">&nbsp;			List&lt;Encounter&gt; encounters = Context.getEncounterService().getEncountersByVisit(visit, false);</b>
+<b class="fc">&nbsp;			for (Encounter encounter : encounters) {</b>
+<b class="fc">&nbsp;				if (encounter.getEncounterDatetime().before(startDateTime)) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;startDatetime&quot;, &quot;Visit.encountersCannotBeBeforeStartDate&quot;,</b>
+&nbsp;					    &quot;This visit has encounters whose dates cannot be before the start date of the visit.&quot;);
+<b class="fc">&nbsp;					break;</b>
+<b class="fc">&nbsp;				} else if (stopDateTime != null &amp;&amp; encounter.getEncounterDatetime().after(stopDateTime)) {</b>
+<b class="fc">&nbsp;					errors.rejectValue(&quot;stopDatetime&quot;, &quot;Visit.encountersCannotBeAfterStopDate&quot;,</b>
+&nbsp;					    &quot;This visit has encounters whose dates cannot be after the stop date of the visit.&quot;);
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, target.getClass(), &quot;voidReason&quot;);</b>
+&nbsp;		
+&nbsp;		// check attributes
+<b class="fc">&nbsp;		super.validateAttributes(visit, errors, Context.getVisitService().getAllVisitAttributeTypes());</b>
+&nbsp;		
+&nbsp;		// Skipping validation if the patient is not set or not yet persisted
+<b class="fc">&nbsp;		boolean nonExistingPatient = visit.getPatient() == null || visit.getPatient().getId() == null;</b>
+&nbsp;		
+&nbsp;		// check for overlapping visits
+<b class="fc">&nbsp;		if (!nonExistingPatient &amp;&amp; disallowOverlappingVisits()) {</b>
+<b class="fc">&nbsp;			VisitSearchCriteria visitSearchCriteria = new VisitSearchCriteriaBuilder()</b>
+<b class="fc">&nbsp;				.patient(visit.getPatient())</b>
+<b class="fc">&nbsp;				.maxStartDatetime(visit.getStopDatetime())</b>
+<b class="fc">&nbsp;				.minEndDatetime(visit.getStartDatetime())</b>
+<b class="fc">&nbsp;				.includeVoided(false)</b>
+<b class="fc">&nbsp;				.includeInactive(true)</b>
+<b class="fc">&nbsp;				.build();</b>
+&nbsp;			
+<b class="fc">&nbsp;			List&lt;Visit&gt; overLappingVisits = Context.getVisitService().getVisits(visitSearchCriteria);</b>
+&nbsp;			
+<b class="fc">&nbsp;			boolean overlappingSameVisit = overLappingVisits.size() == 1 &amp;&amp; overLappingVisits.get(0).getId().equals(visit.getId());</b>
+&nbsp;					
+<b class="fc">&nbsp;			if (!overlappingSameVisit &amp;&amp; !overLappingVisits.isEmpty()) {</b>
+<b class="fc">&nbsp;				errors.rejectValue(&quot;startDatetime&quot;, &quot;Visit.visitCannotOverlapAnotherVisitOfTheSamePatient&quot;,</b>
+&nbsp;					&quot;This visit overlaps with another visit of the same patient.&quot;);
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		validateVisitStartedBeforePatientBirthdate(visit, errors);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/*
+&nbsp;	 * Convenience method to make the code more readable.
+&nbsp;	 */
+&nbsp;	private boolean disallowOverlappingVisits() {
+<b class="fc">&nbsp;		return !allowOverlappingVisits();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean allowOverlappingVisits() {
+<b class="fc">&nbsp;		return Boolean.parseBoolean(Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_ALLOW_OVERLAPPING_VISITS, &quot;true&quot;));
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void validateVisitStartedBeforePatientBirthdate(Visit visit, Errors errors) {
+<b class="fc">&nbsp;		if (visit.getPatient() == null || visit.getPatient().getBirthdate() == null || visit.getStartDatetime() == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (visit.getStartDatetime().before(getPatientBirthdateAdjustedIfEstimated(visit.getPatient()))) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;startDatetime&quot;, &quot;Visit.startDateCannotFallBeforeTheBirthDateOfTheSamePatient&quot;,</b>
+&nbsp;			    &quot;This visit has a start date that falls before the birthdate of the same patient.&quot;);
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Date getPatientBirthdateAdjustedIfEstimated(Patient patient) {
+<b class="fc">&nbsp;		Date birthday = patient.getBirthdate();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (patient.getBirthdateEstimated()) {</b>
+<b class="fc">&nbsp;			Calendar cal = Calendar.getInstance();</b>
+<b class="fc">&nbsp;			cal.setTime(birthday);</b>
+<b class="fc">&nbsp;			cal.add(Calendar.YEAR, calculateGracePeriodInYears(patient.getAge()));</b>
+<b class="fc">&nbsp;			birthday = cal.getTime();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return birthday;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private int calculateGracePeriodInYears(int age) {
+<b class="fc">&nbsp;		return Math.min(ESTIMATED_BIRTHDATE_ERROR_MARGIN_MINIMUM_YEARS,</b>
+<b class="fc">&nbsp;			(int)Math.ceil(age * ESTIMATED_BIRTHDATE_ERROR_MARGIN));</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

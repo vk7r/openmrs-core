@@ -1,0 +1,731 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateContextDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateContextDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateContextDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68,8%
+  </span>
+  <span class="absValue">
+    (22/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,3%
+  </span>
+  <span class="absValue">
+    (139/213)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.CacheMode;
+&nbsp;import org.hibernate.FlushMode;
+&nbsp;import org.hibernate.HibernateException;
+&nbsp;import org.hibernate.ScrollableResults;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.hibernate.search.FullTextSession;
+&nbsp;import org.hibernate.stat.QueryStatistics;
+&nbsp;import org.hibernate.stat.Statistics;
+&nbsp;import org.hibernate.type.StandardBasicTypes;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.ContextAuthenticationException;
+&nbsp;import org.openmrs.api.context.Daemon;
+&nbsp;import org.openmrs.api.db.ContextDAO;
+&nbsp;import org.openmrs.api.db.FullTextSessionFactory;
+&nbsp;import org.openmrs.api.db.UserDAO;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.openmrs.util.Security;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.orm.hibernate5.SessionFactoryUtils;
+&nbsp;import org.springframework.orm.hibernate5.SessionHolder;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.transaction.support.TransactionSynchronizationManager;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.net.URL;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.concurrent.Future;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate specific implementation of the {@link ContextDAO}. These methods should not be used
+&nbsp; * directly, instead, the methods on the static {@link Context} file should be used.
+&nbsp; * 
+&nbsp; * @see ContextDAO
+&nbsp; * @see Context
+&nbsp; */
+<b class="fc">&nbsp;public class HibernateContextDAO implements ContextDAO {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HibernateContextDAO.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Long DEFAULT_UNLOCK_ACCOUNT_WAITING_TIME = TimeUnit.MILLISECONDS.convert(5L, TimeUnit.MINUTES);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate session factory
+&nbsp;	 */
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	@Autowired
+&nbsp;	private FullTextSessionFactory fullTextSessionFactory;
+&nbsp;	
+&nbsp;	private UserDAO userDao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Session factory to use for this DAO. This is usually injected by spring and its application
+&nbsp;	 * context.
+&nbsp;	 * 
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setUserDAO(UserDAO userDao) {
+<b class="fc">&nbsp;		this.userDao = userDao;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#authenticate(java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(noRollbackFor = ContextAuthenticationException.class)
+&nbsp;	public User authenticate(String login, String password) throws ContextAuthenticationException {
+<b class="fc">&nbsp;		String errorMsg = &quot;Invalid username and/or password: &quot; + login;</b>
+&nbsp;
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+&nbsp;
+<b class="fc">&nbsp;		User candidateUser = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(login)) {</b>
+&nbsp;			// loginWithoutDash is used to compare to the system id
+<b class="fc">&nbsp;			String loginWithDash = login;</b>
+<b class="fc">&nbsp;			if (login.matches(&quot;\\d{2,}&quot;)) {</b>
+<b class="fc">&nbsp;				loginWithDash = login.substring(0, login.length() - 1) + &quot;-&quot; + login.charAt(login.length() - 1);</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			try {
+<b class="fc">&nbsp;				candidateUser = session.createQuery(</b>
+&nbsp;					&quot;from User u where (u.username = ?1 or u.systemId = ?2 or u.systemId = ?3) and u.retired = false&quot;,
+&nbsp;					User.class)
+<b class="fc">&nbsp;					.setParameter(1, login).setParameter(2, login).setParameter(3, loginWithDash).uniqueResult();</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (HibernateException he) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Got hibernate exception while logging in: &#39;{}&#39;&quot;, login, he);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Got regular exception while logging in: &#39;{}&#39;&quot;, login, e);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// only continue if this is a valid username and a nonempty password
+<b class="fc">&nbsp;		if (candidateUser != null &amp;&amp; password != null) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Candidate user id: {}&quot;, candidateUser.getUserId());</b>
+&nbsp;
+<b class="fc">&nbsp;			String lockoutTimeString = candidateUser.getUserProperty(OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP, null);</b>
+<b class="fc">&nbsp;			long lockoutTime = -1;</b>
+<b class="fc">&nbsp;			if (StringUtils.isNotBlank(lockoutTimeString) &amp;&amp; !&quot;0&quot;.equals(lockoutTimeString)) {</b>
+&nbsp;				try {
+&nbsp;					// putting this in a try/catch in case the admin decided to put junk into the property
+<b class="fc">&nbsp;					lockoutTime = Long.parseLong(lockoutTimeString);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (NumberFormatException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;bad value stored in {} user property: {}&quot;, OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP,</b>
+&nbsp;						lockoutTimeString);
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			// if they&#39;ve been locked out, don&#39;t continue with the authentication
+<b class="fc">&nbsp;			if (lockoutTime &gt; 0) {</b>
+&nbsp;				// unlock them after x mins, otherwise reset the timestamp
+&nbsp;				// to now and make them wait another x mins
+<b class="fc">&nbsp;				final Long unlockTime = getUnlockTimeMs();</b>
+<b class="fc">&nbsp;				if (System.currentTimeMillis() - lockoutTime &gt; unlockTime) {</b>
+<b class="nc">&nbsp;					candidateUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOGIN_ATTEMPTS, OpenmrsConstants.ZERO_LOGIN_ATTEMPTS_VALUE);</b>
+<b class="nc">&nbsp;					candidateUser.removeUserProperty(OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP);</b>
+<b class="nc">&nbsp;					saveUserProperties(candidateUser);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					candidateUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP, String.valueOf(System</b>
+<b class="fc">&nbsp;						.currentTimeMillis()));</b>
+<b class="fc">&nbsp;					throw new ContextAuthenticationException(</b>
+&nbsp;						&quot;Invalid number of connection attempts. Please try again later.&quot;);
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			Object[] passwordAndSalt = (Object[]) session</b>
+<b class="fc">&nbsp;				.createNativeQuery(&quot;select password, salt from users where user_id = ?1&quot;)</b>
+<b class="fc">&nbsp;				.addScalar(&quot;password&quot;, StandardBasicTypes.STRING).addScalar(&quot;salt&quot;, StandardBasicTypes.STRING)</b>
+<b class="fc">&nbsp;				.setParameter(1, candidateUser.getUserId()).uniqueResult();</b>
+&nbsp;
+<b class="fc">&nbsp;			String passwordOnRecord = (String) passwordAndSalt[0];</b>
+<b class="fc">&nbsp;			String saltOnRecord = (String) passwordAndSalt[1];</b>
+&nbsp;
+&nbsp;			// if the username and password match, hydrate the user and return it
+<b class="fc">&nbsp;			if (passwordOnRecord != null &amp;&amp; Security.hashMatches(passwordOnRecord, password + saltOnRecord)) {</b>
+&nbsp;				// hydrate the user object
+<b class="fc">&nbsp;				candidateUser.getAllRoles().size();</b>
+<b class="fc">&nbsp;				candidateUser.getUserProperties().size();</b>
+<b class="fc">&nbsp;				candidateUser.getPrivileges().size();</b>
+&nbsp;
+&nbsp;				// only clean up if the were some login failures, otherwise all should be clean
+<b class="fc">&nbsp;				int attempts = getUsersLoginAttempts(candidateUser);</b>
+<b class="fc">&nbsp;				if (attempts &gt; 0) {</b>
+<b class="fc">&nbsp;					candidateUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOGIN_ATTEMPTS, OpenmrsConstants.ZERO_LOGIN_ATTEMPTS_VALUE);</b>
+<b class="fc">&nbsp;					candidateUser.removeUserProperty(OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				setLastLoginTime(candidateUser);</b>
+<b class="fc">&nbsp;				saveUserProperties(candidateUser);</b>
+&nbsp;
+&nbsp;				// skip out of the method early (instead of throwing the exception)
+&nbsp;				// to indicate that this is the valid user
+<b class="fc">&nbsp;				return candidateUser;</b>
+&nbsp;			} else {
+&nbsp;				// the user failed the username/password, increment their
+&nbsp;				// attempts here and set the &quot;lockout&quot; timestamp if necessary
+<b class="fc">&nbsp;				int attempts = getUsersLoginAttempts(candidateUser);</b>
+&nbsp;
+<b class="fc">&nbsp;				attempts++;</b>
+&nbsp;
+<b class="fc">&nbsp;				int allowedFailedLoginCount = 7;</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					allowedFailedLoginCount = Integer.parseInt(Context.getAdministrationService().getGlobalProperty(</b>
+<b class="fc">&nbsp;						OpenmrsConstants.GP_ALLOWED_FAILED_LOGINS_BEFORE_LOCKOUT).trim());</b>
+&nbsp;				}
+<b class="fc">&nbsp;				catch (Exception ex) {</b>
+<b class="fc">&nbsp;					log.error(&quot;Unable to convert the global property {} to a valid integer. Using default value of 7.&quot;,</b>
+&nbsp;						OpenmrsConstants.GP_ALLOWED_FAILED_LOGINS_BEFORE_LOCKOUT);
+<b class="nc">&nbsp;				}</b>
+&nbsp;
+<b class="fc">&nbsp;				if (attempts &gt; allowedFailedLoginCount) {</b>
+&nbsp;					// set the user as locked out at this exact time
+<b class="fc">&nbsp;					candidateUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOCKOUT_TIMESTAMP, String.valueOf(System</b>
+<b class="fc">&nbsp;						.currentTimeMillis()));</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					candidateUser.setUserProperty(OpenmrsConstants.USER_PROPERTY_LOGIN_ATTEMPTS, String.valueOf(attempts));</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				saveUserProperties(candidateUser);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// throw this exception only once in the same place with the same
+&nbsp;		// message regardless of username/pw combo entered
+<b class="fc">&nbsp;		log.info(&quot;Failed login attempt (login={}) - {}&quot;, login, errorMsg);</b>
+<b class="fc">&nbsp;		throw new ContextAuthenticationException(errorMsg);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void setLastLoginTime(User candidateUser) {
+<b class="fc">&nbsp;		candidateUser.setUserProperty(</b>
+&nbsp;			OpenmrsConstants.USER_PROPERTY_LAST_LOGIN_TIMESTAMP,
+<b class="fc">&nbsp;			String.valueOf(System.currentTimeMillis())</b>
+&nbsp;		);
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Long getUnlockTimeMs() {
+<b class="fc">&nbsp;		String unlockTimeGPValue = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;				OpenmrsConstants.GP_UNLOCK_ACCOUNT_WAITING_TIME);
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(unlockTimeGPValue)) {</b>
+<b class="nc">&nbsp;			return convertUnlockAccountWaitingTimeGP(unlockTimeGPValue);</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			return DEFAULT_UNLOCK_ACCOUNT_WAITING_TIME;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Long convertUnlockAccountWaitingTimeGP(String waitingTime) {
+&nbsp;		try {
+<b class="nc">&nbsp;			return TimeUnit.MILLISECONDS.convert(Long.valueOf(waitingTime), TimeUnit.MINUTES);</b>
+<b class="nc">&nbsp;		} catch (Exception ex) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Unable to convert the global property &quot;</b>
+&nbsp;					+ OpenmrsConstants.GP_UNLOCK_ACCOUNT_WAITING_TIME
+&nbsp;					+ &quot;to a valid Long. Using default value of 5&quot;);
+<b class="nc">&nbsp;			return DEFAULT_UNLOCK_ACCOUNT_WAITING_TIME;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#getUserByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public User getUserByUuid(String uuid) {
+&nbsp;		
+&nbsp;		// don&#39;t flush here in case we&#39;re in the AuditableInterceptor.  Will cause a StackOverflowEx otherwise
+<b class="fc">&nbsp;		FlushMode flushMode = sessionFactory.getCurrentSession().getHibernateFlushMode();</b>
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().setHibernateFlushMode(FlushMode.MANUAL);</b>
+&nbsp;		
+<b class="fc">&nbsp;		User u = HibernateUtil.getUniqueEntityByUUID(sessionFactory, User.class, uuid);</b>
+&nbsp;		
+&nbsp;		// reset the flush mode to whatever it was before
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().setHibernateFlushMode(flushMode);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return u;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#getUserByUsername(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public User getUserByUsername(String username) {
+<b class="nc">&nbsp;		return userDao.getUserByUsername(username);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @throws Exception 
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#createUser(User, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public User createUser(User user, String password, List&lt;String&gt; roleNames) throws Exception {
+<b class="fc">&nbsp;		return Daemon.createUser(user, password, roleNames);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Call the UserService to save the given user while proxying the privileges needed to do so.
+&nbsp;	 * 
+&nbsp;	 * @param user the User to save
+&nbsp;	 */
+&nbsp;	private void saveUserProperties(User user) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().update(user);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the integer stored for the given user that is their number of login attempts
+&nbsp;	 * 
+&nbsp;	 * @param user the user to check
+&nbsp;	 * @return the # of login attempts for this user defaulting to zero if none defined
+&nbsp;	 */
+&nbsp;	private int getUsersLoginAttempts(User user) {
+<b class="fc">&nbsp;		String attemptsString = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_LOGIN_ATTEMPTS, &quot;0&quot;);</b>
+<b class="fc">&nbsp;		int attempts = 0;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			attempts = Integer.parseInt(attemptsString);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (NumberFormatException e) {</b>
+&nbsp;			// skip over errors and leave the attempts at zero
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return attempts;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.context.Context#openSession()
+&nbsp;	 */
+<b class="fc">&nbsp;	private boolean participate = false;</b>
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void openSession() {
+<b class="fc">&nbsp;		log.debug(&quot;HibernateContext: Opening Hibernate Session&quot;);</b>
+<b class="fc">&nbsp;		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Participating in existing session ({})&quot;, sessionFactory.hashCode());</b>
+<b class="fc">&nbsp;			participate = true;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			log.debug(&quot;Registering session with synchronization manager ({})&quot;, sessionFactory.hashCode());</b>
+<b class="fc">&nbsp;			Session session = sessionFactory.openSession();</b>
+<b class="fc">&nbsp;			session.setHibernateFlushMode(FlushMode.MANUAL);</b>
+<b class="fc">&nbsp;			TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.context.Context#closeSession()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void closeSession() {
+<b class="fc">&nbsp;		log.debug(&quot;HibernateContext: closing Hibernate Session&quot;);</b>
+<b class="fc">&nbsp;		if (!participate) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Unbinding session from synchronization manager (&quot; + sessionFactory.hashCode() + &quot;)&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (TransactionSynchronizationManager.hasResource(sessionFactory)) {</b>
+<b class="nc">&nbsp;				Object value = TransactionSynchronizationManager.unbindResource(sessionFactory);</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					if (value instanceof SessionHolder) {</b>
+<b class="nc">&nbsp;						Session session = ((SessionHolder) value).getSession();</b>
+<b class="nc">&nbsp;						SessionFactoryUtils.closeSession(session);</b>
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Unexpected exception on closing Hibernate Session&quot;, e);</b>
+<b class="nc">&nbsp;				}</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			log.debug(&quot;Participating in existing session, so not releasing session through synchronization manager&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#clearSession()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public void clearSession() {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().clear();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#evictFromSession(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void evictFromSession(Object obj) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().evict(obj);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#evictEntity(OpenmrsObject)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void evictEntity(OpenmrsObject obj) {
+<b class="fc">&nbsp;		sessionFactory.getCache().evictEntity(obj.getClass(), obj.getId());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#evictAllEntities(Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void evictAllEntities(Class&lt;?&gt; entityClass) {
+<b class="fc">&nbsp;		sessionFactory.getCache().evictEntityRegion(entityClass);</b>
+<b class="fc">&nbsp;		sessionFactory.getCache().evictCollectionRegions();</b>
+<b class="fc">&nbsp;		sessionFactory.getCache().evictQueryRegions();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#clearEntireCache()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void clearEntireCache() {
+<b class="fc">&nbsp;		sessionFactory.getCache().evictAllRegions();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#refreshEntity(Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void refreshEntity(Object obj) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().refresh(obj);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#flushSession()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public void flushSession() {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().flush();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.context.Context#startup(Properties)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public void startup(Properties properties) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.context.Context#shutdown()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void shutdown() {
+<b class="nc">&nbsp;		if (log.isInfoEnabled()) {</b>
+<b class="nc">&nbsp;			showUsageStatistics();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (sessionFactory != null) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			log.debug(&quot;Closing any open sessions&quot;);</b>
+<b class="nc">&nbsp;			closeSession();</b>
+&nbsp;			
+<b class="nc">&nbsp;			log.debug(&quot;Shutting down threadLocalSession factory&quot;);</b>
+<b class="nc">&nbsp;			if (!sessionFactory.isClosed()) {</b>
+<b class="nc">&nbsp;				sessionFactory.close();</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			log.debug(&quot;The threadLocalSession has been closed&quot;);</b>
+&nbsp;			
+&nbsp;		} else {
+<b class="nc">&nbsp;			log.error(&quot;SessionFactory is null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to print out the hibernate cache usage stats to the log
+&nbsp;	 */
+&nbsp;	private void showUsageStatistics() {
+<b class="nc">&nbsp;		if (sessionFactory.getStatistics().isStatisticsEnabled()) {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Getting query statistics: &quot;);</b>
+<b class="nc">&nbsp;			Statistics stats = sessionFactory.getStatistics();</b>
+<b class="nc">&nbsp;			for (String query : stats.getQueries()) {</b>
+<b class="nc">&nbsp;				log.info(&quot;QUERY: &quot; + query);</b>
+<b class="nc">&nbsp;				QueryStatistics qstats = stats.getQueryStatistics(query);</b>
+<b class="nc">&nbsp;				log.info(&quot;Cache Hit Count : &quot; + qstats.getCacheHitCount());</b>
+<b class="nc">&nbsp;				log.info(&quot;Cache Miss Count: &quot; + qstats.getCacheMissCount());</b>
+<b class="nc">&nbsp;				log.info(&quot;Cache Put Count : &quot; + qstats.getCachePutCount());</b>
+<b class="nc">&nbsp;				log.info(&quot;Execution Count : &quot; + qstats.getExecutionCount());</b>
+<b class="nc">&nbsp;				log.info(&quot;Average time    : &quot; + qstats.getExecutionAvgTime());</b>
+<b class="nc">&nbsp;				log.info(&quot;Row Count       : &quot; + qstats.getExecutionRowCount());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes the default properties defined in /metadata/api/hibernate/hibernate.default.properties
+&nbsp;	 * and merges it into the user-defined runtime properties
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#mergeDefaultRuntimeProperties(java.util.Properties)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge default runtime properties
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void mergeDefaultRuntimeProperties(Properties runtimeProperties) {
+&nbsp;		
+<b class="fc">&nbsp;		Map&lt;String, String&gt; cache = new HashMap&lt;&gt;();</b>
+&nbsp;		// loop over runtime properties and precede each with &quot;hibernate&quot; if
+&nbsp;		// it isn&#39;t already
+<b class="fc">&nbsp;		for (Map.Entry&lt;Object, Object&gt; entry : runtimeProperties.entrySet()) {</b>
+<b class="fc">&nbsp;			Object key = entry.getKey();</b>
+<b class="fc">&nbsp;			String prop = (String) key;</b>
+<b class="fc">&nbsp;			String value = (String) entry.getValue();</b>
+<b class="fc">&nbsp;			log.trace(&quot;Setting property: &quot; + prop + &quot;:&quot; + value);</b>
+<b class="fc">&nbsp;			if (!prop.startsWith(&quot;hibernate&quot;) &amp;&amp; !runtimeProperties.containsKey(&quot;hibernate.&quot; + prop)) {</b>
+<b class="fc">&nbsp;				cache.put(&quot;hibernate.&quot; + prop, value);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		runtimeProperties.putAll(cache);</b>
+&nbsp;		
+&nbsp;		// load in the default hibernate properties from hibernate.default.properties
+<b class="fc">&nbsp;		Properties props = new Properties();</b>
+<b class="fc">&nbsp;		URL url = getClass().getResource(&quot;/hibernate.default.properties&quot;);</b>
+<b class="fc">&nbsp;		File file = new File(url.getPath());</b>
+<b class="fc">&nbsp;		OpenmrsUtil.loadProperties(props, file);</b>
+&nbsp;		
+&nbsp;		// add in all default properties that don&#39;t exist in the runtime
+&nbsp;		// properties yet
+<b class="fc">&nbsp;		for (Map.Entry&lt;Object, Object&gt; entry : props.entrySet()) {</b>
+<b class="fc">&nbsp;			if (!runtimeProperties.containsKey(entry.getKey())) {</b>
+<b class="fc">&nbsp;				runtimeProperties.put(entry.getKey(), entry.getValue());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public void updateSearchIndexForType(Class&lt;?&gt; type) {
+&nbsp;		//From http://docs.jboss.org/hibernate/search/3.3/reference/en-US/html/manual-index-changes.html#search-batchindex-flushtoindexes
+<b class="fc">&nbsp;		FullTextSession session = fullTextSessionFactory.getFullTextSession();</b>
+<b class="fc">&nbsp;		session.purgeAll(type);</b>
+&nbsp;		
+&nbsp;		//Prepare session for batch work
+<b class="fc">&nbsp;		session.flush();</b>
+<b class="fc">&nbsp;		session.clear();</b>
+&nbsp;		
+<b class="fc">&nbsp;		FlushMode flushMode = session.getHibernateFlushMode();</b>
+<b class="fc">&nbsp;		CacheMode cacheMode = session.getCacheMode();</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			session.setHibernateFlushMode(FlushMode.MANUAL);</b>
+<b class="fc">&nbsp;			session.setCacheMode(CacheMode.IGNORE);</b>
+&nbsp;			
+&nbsp;			//Scrollable results will avoid loading too many objects in memory
+<b class="fc">&nbsp;			try (ScrollableResults results = HibernateUtil.getScrollableResult(sessionFactory, type, 1000)) {</b>
+<b class="fc">&nbsp;				int index = 0;</b>
+<b class="fc">&nbsp;				while (results.next()) {</b>
+<b class="fc">&nbsp;					index++;</b>
+&nbsp;					//index each element
+<b class="fc">&nbsp;					session.index(results.get(0));</b>
+<b class="fc">&nbsp;					if (index % 1000 == 0) {</b>
+&nbsp;						//apply changes to indexes
+<b class="fc">&nbsp;						session.flushToIndexes();</b>
+&nbsp;						//free memory since the queue is processed
+<b class="fc">&nbsp;						session.clear();</b>
+&nbsp;						// reset index to avoid overflows
+<b class="fc">&nbsp;						index = 0;</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;			} finally {</b>
+<b class="fc">&nbsp;				session.flushToIndexes();</b>
+<b class="fc">&nbsp;				session.clear();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			session.setHibernateFlushMode(flushMode);</b>
+<b class="fc">&nbsp;			session.setCacheMode(cacheMode);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#updateSearchIndexForObject(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional
+&nbsp;	public void updateSearchIndexForObject(Object object) {
+<b class="nc">&nbsp;		FullTextSession session = fullTextSessionFactory.getFullTextSession();</b>
+<b class="nc">&nbsp;		session.index(object);</b>
+<b class="nc">&nbsp;		session.flushToIndexes();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ContextDAO#setupSearchIndex()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setupSearchIndex() {
+<b class="nc">&nbsp;		String gp = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GP_SEARCH_INDEX_VERSION, &quot;&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (!OpenmrsConstants.SEARCH_INDEX_VERSION.toString().equals(gp)) {</b>
+<b class="nc">&nbsp;			updateSearchIndex();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ContextDAO#updateSearchIndex()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void updateSearchIndex() {
+&nbsp;		try {
+<b class="nc">&nbsp;			log.info(&quot;Updating the search index... It may take a few minutes.&quot;);</b>
+<b class="nc">&nbsp;			fullTextSessionFactory.getFullTextSession().createIndexer().startAndWait();</b>
+<b class="nc">&nbsp;			GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(</b>
+&nbsp;			    OpenmrsConstants.GP_SEARCH_INDEX_VERSION);
+<b class="nc">&nbsp;			if (gp == null) {</b>
+<b class="nc">&nbsp;				gp = new GlobalProperty(OpenmrsConstants.GP_SEARCH_INDEX_VERSION);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			gp.setPropertyValue(OpenmrsConstants.SEARCH_INDEX_VERSION.toString());</b>
+<b class="nc">&nbsp;			Context.getAdministrationService().saveGlobalProperty(gp);</b>
+<b class="nc">&nbsp;			log.info(&quot;Finished updating the search index&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			throw new RuntimeException(&quot;Failed to update the search index&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see ContextDAO#updateSearchIndexAsync()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Future&lt;?&gt; updateSearchIndexAsync() {
+&nbsp;		try {
+<b class="nc">&nbsp;			log.info(&quot;Started asynchronously updating the search index...&quot;);</b>
+<b class="nc">&nbsp;			return fullTextSessionFactory.getFullTextSession().createIndexer().start();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			throw new RuntimeException(&quot;Failed to start asynchronous search index update&quot;, e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see ContextDAO#getDatabaseConnection() 
+&nbsp;	 */
+&nbsp;	public Connection getDatabaseConnection() {
+&nbsp;		try {
+<b class="nc">&nbsp;			return SessionFactoryUtils.getDataSource(sessionFactory).getConnection();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SQLException e) {</b>
+<b class="nc">&nbsp;			throw new RuntimeException(&quot;Unable to retrieve a database connection&quot;, e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,244 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > WorkflowCollectionEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.propertyeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: WorkflowCollectionEditor (org.openmrs.propertyeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WorkflowCollectionEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (3/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    59,6%
+  </span>
+  <span class="absValue">
+    (34/57)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.propertyeditor;
+&nbsp;
+&nbsp;import java.beans.PropertyEditorSupport;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.ProgramWorkflowService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class to convert the &quot;programid: workflowoneid workflow2id&quot; strings to actual workflows on a
+&nbsp; * program
+&nbsp; */
+&nbsp;public class WorkflowCollectionEditor extends PropertyEditorSupport {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(WorkflowCollectionEditor.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	public WorkflowCollectionEditor() {</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private Program program = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param program
+&nbsp;	 */
+<b class="nc">&nbsp;	public WorkflowCollectionEditor(Program program) {</b>
+<b class="nc">&nbsp;		this.program = program;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Takes a &quot;program_id:list&quot; where program_id is the id of the program that this collection is
+&nbsp;	 * for (or not present, if it&#39;s a new program) and list is a space-separated list of concept
+&nbsp;	 * ids. This class is a bit of a hack, because I don&#39;t know a better way to do this. -DJ The
+&nbsp;	 * purpose is to retire and un-retire workflows where possible rather than deleting and creating
+&nbsp;	 * them.
+&nbsp;	 * 
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update workflows in program
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAsText(String text) throws IllegalArgumentException {
+<b class="fc">&nbsp;		if (StringUtils.hasText(text)) {</b>
+<b class="fc">&nbsp;			ConceptService cs = Context.getConceptService();</b>
+<b class="fc">&nbsp;			ProgramWorkflowService pws = Context.getProgramWorkflowService();</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				int ind = text.indexOf(&quot;:&quot;);</b>
+<b class="fc">&nbsp;				String progIdStr = text.substring(0, ind);</b>
+<b class="fc">&nbsp;				text = text.substring(ind + 1);</b>
+<b class="fc">&nbsp;				if (program == null) {</b>
+&nbsp;					// if a program wasn&#39;t passed in, try to look it up now
+<b class="fc">&nbsp;					program = pws.getProgram(Integer.valueOf(progIdStr));</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;			catch (Exception ex) {}</b>
+&nbsp;			
+<b class="fc">&nbsp;			String[] conceptIds = text.split(&quot; &quot;);</b>
+<b class="fc">&nbsp;			Set&lt;ProgramWorkflow&gt; oldSet = program == null ? new HashSet&lt;&gt;() : program.getAllWorkflows();</b>
+<b class="fc">&nbsp;			Set&lt;Integer&gt; newConceptIds = new HashSet&lt;&gt;();</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (String id : conceptIds) {</b>
+<b class="fc">&nbsp;				if (id.trim().length() == 0) {</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				log.debug(&quot;trying &quot; + id);</b>
+<b class="fc">&nbsp;				newConceptIds.add(Integer.valueOf(id.trim()));</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// go through oldSet and see what we need to keep and what we need to unvoid
+<b class="fc">&nbsp;			Set&lt;Integer&gt; alreadyDone = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (ProgramWorkflow pw : oldSet) {</b>
+<b class="fc">&nbsp;				if (!newConceptIds.contains(pw.getConcept().getConceptId())) {</b>
+<b class="fc">&nbsp;					pw.setRetired(true);</b>
+<b class="nc">&nbsp;				} else if (newConceptIds.contains(pw.getConcept().getConceptId()) &amp;&amp; pw.getRetired()) {</b>
+<b class="nc">&nbsp;					pw.setRetired(false);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				alreadyDone.add(pw.getConcept().getConceptId());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// now add any new ones
+<b class="fc">&nbsp;			newConceptIds.removeAll(alreadyDone);</b>
+<b class="fc">&nbsp;			for (Integer conceptId : newConceptIds) {</b>
+<b class="fc">&nbsp;				ProgramWorkflow pw = new ProgramWorkflow();</b>
+<b class="fc">&nbsp;				pw.setProgram(program);</b>
+<b class="fc">&nbsp;				pw.setConcept(cs.getConcept(conceptId));</b>
+<b class="fc">&nbsp;				oldSet.add(pw);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			setValue(oldSet);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			setValue(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convert this program&#39;s workflows into &quot;id: wkflowid wkflowid wkflowid&quot;
+&nbsp;	 * 
+&nbsp;	 * @see java.beans.PropertyEditorSupport#getAsText()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public String getAsText() {
+<b class="nc">&nbsp;		Collection&lt;ProgramWorkflow&gt; pws = (Collection&lt;ProgramWorkflow&gt;) getValue();</b>
+<b class="nc">&nbsp;		if (pws == null || pws.isEmpty()) {</b>
+<b class="nc">&nbsp;			return &quot;:&quot;;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			Integer progId = null;</b>
+<b class="nc">&nbsp;			for (ProgramWorkflow pw : pws) {</b>
+<b class="nc">&nbsp;				if (pw.getProgram() != null &amp;&amp; pw.getProgram().getProgramId() != null) {</b>
+<b class="nc">&nbsp;					progId = pw.getProgram().getProgramId();</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			StringBuilder ret = new StringBuilder();</b>
+<b class="nc">&nbsp;			if (progId != null) {</b>
+<b class="nc">&nbsp;				ret.append(progId);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			ret.append(&quot;:&quot;);</b>
+<b class="nc">&nbsp;			for (ProgramWorkflow pw : pws) {</b>
+<b class="nc">&nbsp;				ret.append(pw.getConcept().getConceptId()).append(&quot; &quot;);</b>
+<b class="nc">&nbsp;			}</b>
+<b class="nc">&nbsp;			return ret.toString().trim();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

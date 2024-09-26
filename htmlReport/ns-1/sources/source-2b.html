@@ -1,0 +1,525 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Condition</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Condition (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Condition</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,6%
+  </span>
+  <span class="absValue">
+    (28/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,3%
+  </span>
+  <span class="absValue">
+    (63/73)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Condition$HibernateProxy$iuC9W4Ps</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    96,6%
+  </span>
+  <span class="absValue">
+    (28/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,3%
+  </span>
+  <span class="absValue">
+    (63/73)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;
+&nbsp;import javax.persistence.AssociationOverride;
+&nbsp;import javax.persistence.AssociationOverrides;
+&nbsp;import javax.persistence.AttributeOverride;
+&nbsp;import javax.persistence.AttributeOverrides;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Embedded;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.EnumType;
+&nbsp;import javax.persistence.Enumerated;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import javax.persistence.Transient;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * The condition class records detailed information about a condition, problem, diagnosis, or other
+&nbsp; * situation or issue. This records information about a disease/illness identified from diagnosis or
+&nbsp; * identification of health issues/situations that require ongoing monitoring.
+&nbsp; *
+&nbsp; * @see &lt;a href=
+&nbsp; *      &quot;https://www.hl7.org/fhir/condition.html&quot;&gt;https://www.hl7.org/fhir/condition.html&lt;/a&gt;
+&nbsp; * @since 2.2
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;conditions&quot;)
+&nbsp;@Audited
+&nbsp;public class Condition extends BaseFormRecordableOpenmrsData {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	@Id
+&nbsp;	@GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;	@Column(name = &quot;condition_id&quot;)
+&nbsp;	private Integer conditionId;
+&nbsp;	
+&nbsp;	@Embedded
+&nbsp;	@AttributeOverrides({ @AttributeOverride(name = &quot;nonCoded&quot;, column = @Column(name = &quot;condition_non_coded&quot;)) })
+&nbsp;	@AssociationOverrides({ @AssociationOverride(name = &quot;coded&quot;, joinColumns = @JoinColumn(name = &quot;condition_coded&quot;)),
+&nbsp;	        @AssociationOverride(name = &quot;specificName&quot;, joinColumns = @JoinColumn(name = &quot;condition_coded_name&quot;)) })
+&nbsp;	private CodedOrFreeText condition;
+&nbsp;	
+&nbsp;	@Enumerated(EnumType.STRING)
+&nbsp;	@Column(name = &quot;clinical_status&quot;)
+&nbsp;	private ConditionClinicalStatus clinicalStatus;
+&nbsp;	
+&nbsp;	@Enumerated(EnumType.STRING)
+&nbsp;	@Column(name = &quot;verification_status&quot;)
+&nbsp;	private ConditionVerificationStatus verificationStatus;
+&nbsp;	
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;previous_version&quot;)
+&nbsp;	private Condition previousVersion;
+&nbsp;	
+&nbsp;	@Column(name = &quot;additional_detail&quot;)
+&nbsp;	private String additionalDetail;
+&nbsp;	
+&nbsp;	@Column(name = &quot;onset_date&quot;)
+&nbsp;	private Date onsetDate;
+&nbsp;	
+&nbsp;	@Column(name = &quot;end_date&quot;)
+&nbsp;	private Date endDate;
+&nbsp;	
+&nbsp;	@Transient
+&nbsp;	private String endReason;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = false)
+&nbsp;	@JoinColumn(name = &quot;patient_id&quot;)
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	@ManyToOne(optional = true)
+&nbsp;	@JoinColumn(name = &quot;encounter_id&quot;)
+&nbsp;	private Encounter encounter;
+&nbsp;	
+<b class="fc">&nbsp;	public Condition() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to instantiate a condition class with all the necessary parameters
+&nbsp;	 *
+&nbsp;	 * @param condition - the condition to be set
+&nbsp;	 * @param clinicalStatus - the clinical status of the condition to be set
+&nbsp;	 * @param verificationStatus - the verification status of the condition, describing if the condition
+&nbsp;	 *            is confirmed or not
+&nbsp;	 * @param previousVersion - the previous version of the condition to be set
+&nbsp;	 * @param additionalDetail - additional details of the condition to be set
+&nbsp;	 * @param onsetDate - the date the condition is set
+&nbsp;	 * @param patient - the patient associated with the condition
+&nbsp;	 */
+&nbsp;	public Condition(CodedOrFreeText condition, ConditionClinicalStatus clinicalStatus,
+&nbsp;	    ConditionVerificationStatus verificationStatus, Condition previousVersion, String additionalDetail, Date onsetDate,
+<b class="nc">&nbsp;	    Date endDate, Patient patient) {</b>
+<b class="nc">&nbsp;		this.condition = condition;</b>
+<b class="nc">&nbsp;		this.clinicalStatus = clinicalStatus;</b>
+<b class="nc">&nbsp;		this.verificationStatus = verificationStatus;</b>
+<b class="nc">&nbsp;		this.previousVersion = previousVersion;</b>
+<b class="nc">&nbsp;		this.additionalDetail = additionalDetail;</b>
+<b class="nc">&nbsp;		this.onsetDate = onsetDate != null ? new Date(onsetDate.getTime()) : null;</b>
+<b class="nc">&nbsp;		this.endDate = endDate != null ? new Date(endDate.getTime()) : null;</b>
+<b class="nc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new Condition instance from the passed condition such that the newly created Condition
+&nbsp;	 * matches the passed Condition @see Condition#matches, but does not equal the passed Condition (uuid, id differ)
+&nbsp;	 * @param condition the Condition to copy
+&nbsp;	 * @return a new Condition that is a copy of the passed condition
+&nbsp;	 */
+&nbsp;	public static Condition newInstance(Condition condition) {
+<b class="fc">&nbsp;		return copy(condition, new Condition());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Copies property values from the fromCondition to the toCondition such that fromCondition
+&nbsp;	 * matches toCondition @see Condition#matches, but does not equal toCondition (uuid, id differ)
+&nbsp;	 * @param fromCondition the Condition to copy from
+&nbsp;	 * @param toCondition the Condition to copy into                      
+&nbsp;	 * @return a new Condition that is a copy of the passed condition
+&nbsp;	 */
+&nbsp;	public static Condition copy(Condition fromCondition, Condition toCondition) {
+<b class="fc">&nbsp;		toCondition.setPreviousVersion(fromCondition.getPreviousVersion());</b>
+<b class="fc">&nbsp;		toCondition.setPatient(fromCondition.getPatient());</b>
+<b class="fc">&nbsp;		toCondition.setEncounter(fromCondition.getEncounter());</b>
+<b class="fc">&nbsp;		toCondition.setFormNamespaceAndPath(fromCondition.getFormNamespaceAndPath());</b>
+<b class="fc">&nbsp;		toCondition.setClinicalStatus(fromCondition.getClinicalStatus());</b>
+<b class="fc">&nbsp;		toCondition.setVerificationStatus(fromCondition.getVerificationStatus());</b>
+<b class="fc">&nbsp;		toCondition.setCondition(fromCondition.getCondition());</b>
+<b class="fc">&nbsp;		toCondition.setOnsetDate(fromCondition.getOnsetDate());</b>
+<b class="fc">&nbsp;		toCondition.setAdditionalDetail(fromCondition.getAdditionalDetail());</b>
+<b class="fc">&nbsp;		toCondition.setEndDate(fromCondition.getEndDate());</b>
+<b class="fc">&nbsp;		toCondition.setEndReason(fromCondition.getEndReason());</b>
+<b class="fc">&nbsp;		toCondition.setVoided(fromCondition.getVoided());</b>
+<b class="fc">&nbsp;		toCondition.setVoidedBy(fromCondition.getVoidedBy());</b>
+<b class="fc">&nbsp;		toCondition.setVoidReason(fromCondition.getVoidReason());</b>
+<b class="fc">&nbsp;		toCondition.setDateVoided(fromCondition.getDateVoided());</b>
+<b class="fc">&nbsp;		return toCondition;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Compares properties with those in the given Condition to determine if they have the same meaning
+&nbsp;	 * This method will return true immediately following the creation of a Condition from another Condition
+&nbsp;	 * @see Condition#newInstance(Condition)
+&nbsp;	 * This method will return false if any value is different, excepting identity data (id, uuid)
+&nbsp;	 * If the given instance is null, this will return false
+&nbsp;	 * @param c the Condition to compare against 	
+&nbsp;	 * @return true if the given Condition has the same meaningful properties as the passed Condition
+&nbsp;	 * @since 2.6.1
+&nbsp;	 */
+&nbsp;	public boolean matches(Condition c) {
+<b class="fc">&nbsp;		if (c == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		CodedOrFreeText coft1 = getCondition() == null ? new CodedOrFreeText() : getCondition();</b>
+<b class="fc">&nbsp;		CodedOrFreeText coft2 = c.getCondition() == null ? new CodedOrFreeText() : c.getCondition();</b>
+&nbsp;		
+<b class="fc">&nbsp;		boolean ret = (OpenmrsUtil.nullSafeEquals(getPreviousVersion(), c.getPreviousVersion()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getPatient(), c.getPatient()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getEncounter(), c.getEncounter()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getFormNamespaceAndPath(), c.getFormNamespaceAndPath()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getClinicalStatus(), c.getClinicalStatus()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getVerificationStatus(), c.getVerificationStatus()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(coft1.getCoded(), coft2.getCoded()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(coft1.getSpecificName(), coft2.getSpecificName()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(coft1.getNonCoded(), coft2.getNonCoded()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getOnsetDate(), c.getOnsetDate()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getAdditionalDetail(), c.getAdditionalDetail()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getEndDate(), c.getEndDate()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getEndReason(), c.getEndReason()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getVoided(), c.getVoided()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getVoidedBy(), c.getVoidedBy()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getVoidReason(), c.getVoidReason()));</b>
+<b class="fc">&nbsp;		ret = ret &amp;&amp; (OpenmrsUtil.nullSafeEquals(getDateVoided(), c.getDateVoided()));</b>
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the condition id
+&nbsp;	 *
+&nbsp;	 * @return conditionId - the id of the condition
+&nbsp;	 */
+&nbsp;	public Integer getConditionId() {
+<b class="fc">&nbsp;		return conditionId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the condition id
+&nbsp;	 *
+&nbsp;	 * @param conditionId the id of the condition to be set
+&nbsp;	 */
+&nbsp;	public void setConditionId(Integer conditionId) {
+<b class="fc">&nbsp;		this.conditionId = conditionId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the condition that has been set
+&nbsp;	 *
+&nbsp;	 * @return condition - a CodedOrFreeText object that defines the condition
+&nbsp;	 */
+&nbsp;	public CodedOrFreeText getCondition() {
+<b class="fc">&nbsp;		return condition;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the condition
+&nbsp;	 *
+&nbsp;	 * @param condition the condition to be set
+&nbsp;	 */
+&nbsp;	public void setCondition(CodedOrFreeText condition) {
+<b class="fc">&nbsp;		this.condition = condition;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the clinical status of the condition
+&nbsp;	 *
+&nbsp;	 * @return clinicalStatus - a ConditionClinicalStatus object that defines the clinical status
+&nbsp;	 */
+&nbsp;	public ConditionClinicalStatus getClinicalStatus() {
+<b class="fc">&nbsp;		return clinicalStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the clinical status of the condition
+&nbsp;	 *
+&nbsp;	 * @param clinicalStatus the clinical status of the condition to be set
+&nbsp;	 */
+&nbsp;	public void setClinicalStatus(ConditionClinicalStatus clinicalStatus) {
+<b class="fc">&nbsp;		this.clinicalStatus = clinicalStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the verification status of the condition
+&nbsp;	 *
+&nbsp;	 * @return verificationStatus - a ConditionVerificationStatus object that defines the verification
+&nbsp;	 *         status of the condition
+&nbsp;	 */
+&nbsp;	public ConditionVerificationStatus getVerificationStatus() {
+<b class="fc">&nbsp;		return verificationStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the verification status of the condition
+&nbsp;	 *
+&nbsp;	 * @param verificationStatus the verification status of the condition to be set
+&nbsp;	 */
+&nbsp;	public void setVerificationStatus(ConditionVerificationStatus verificationStatus) {
+<b class="fc">&nbsp;		this.verificationStatus = verificationStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the previous version of the condition
+&nbsp;	 *
+&nbsp;	 * @return previousVersion - a condition object showing the previous version of the condition
+&nbsp;	 */
+&nbsp;	public Condition getPreviousVersion() {
+<b class="fc">&nbsp;		return previousVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the previous version of the condition
+&nbsp;	 *
+&nbsp;	 * @param previousVersion the previous version of the condition to be set
+&nbsp;	 */
+&nbsp;	public void setPreviousVersion(Condition previousVersion) {
+<b class="fc">&nbsp;		this.previousVersion = previousVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the addition detail of the condition
+&nbsp;	 *
+&nbsp;	 * @return additionalDetail - a string showing additional detail of the condition
+&nbsp;	 */
+&nbsp;	public String getAdditionalDetail() {
+<b class="fc">&nbsp;		return additionalDetail;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the additional detail of the condition
+&nbsp;	 *
+&nbsp;	 * @param additionalDetail the additional detail of the condition to be set
+&nbsp;	 */
+&nbsp;	public void setAdditionalDetail(String additionalDetail) {
+<b class="fc">&nbsp;		this.additionalDetail = additionalDetail;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the onset date of the condition
+&nbsp;	 *
+&nbsp;	 * @return onsetDate - a date object that shows the onset date which is the date the condition was
+&nbsp;	 *         set
+&nbsp;	 */
+&nbsp;	public Date getOnsetDate() {
+<b class="fc">&nbsp;		return onsetDate != null ? (Date) onsetDate.clone() : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the onset date
+&nbsp;	 *
+&nbsp;	 * @param onsetDate the onset date of the condition to be set
+&nbsp;	 */
+&nbsp;	public void setOnsetDate(Date onsetDate) {
+<b class="fc">&nbsp;		this.onsetDate = onsetDate != null ? new Date(onsetDate.getTime()) : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the condition end date
+&nbsp;	 *
+&nbsp;	 * @return endDate - a date object that shows the end date of the condition
+&nbsp;	 */
+&nbsp;	public Date getEndDate() {
+<b class="fc">&nbsp;		return endDate != null ? (Date) endDate.clone() : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the end date
+&nbsp;	 *
+&nbsp;	 * @param endDate the end date to be set for the condition
+&nbsp;	 */
+&nbsp;	public void setEndDate(Date endDate) {
+<b class="fc">&nbsp;		this.endDate = endDate != null ? new Date(endDate.getTime()) : null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the condition end reason
+&nbsp;	 *
+&nbsp;	 * @return endReason - a string that shows the end reason of the condition
+&nbsp;	 */
+&nbsp;	public String getEndReason() {
+<b class="fc">&nbsp;		return endReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the end reason
+&nbsp;	 *
+&nbsp;	 * @param endReason the end reason to be set for the condition
+&nbsp;	 */
+&nbsp;	public void setEndReason(String endReason) {
+<b class="fc">&nbsp;		this.endReason = endReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return id - The unique Identifier for the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConditionId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param id - The unique Identifier for the object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setConditionId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the patient associated with the condition
+&nbsp;	 *
+&nbsp;	 * @return patient - the patient object associated with the condition
+&nbsp;	 */
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the patient associated with the condition
+&nbsp;	 *
+&nbsp;	 * @param patient - The patient object to be associated with condition
+&nbsp;	 */
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property getter for encounter
+&nbsp;	 * 
+&nbsp;	 * @return encounter - the associated encounter
+&nbsp;	 * @since 2.4.0, 2.3.1
+&nbsp;	 */
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Basic property setter for encounter
+&nbsp;	 *  
+&nbsp;	 * @param encounter - the encounter to set
+&nbsp;	 * @since 2.4.0, 2.3.1
+&nbsp;	 */
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

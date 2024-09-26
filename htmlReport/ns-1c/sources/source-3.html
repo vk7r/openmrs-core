@@ -1,0 +1,233 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LogicTransform</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicTransform (org.openmrs.logic)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LogicTransform</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic;
+&nbsp;
+&nbsp;import org.openmrs.logic.op.Count;
+&nbsp;import org.openmrs.logic.op.First;
+&nbsp;import org.openmrs.logic.op.Last;
+&nbsp;import org.openmrs.logic.op.Operator;
+&nbsp;import org.openmrs.logic.op.TransformOperator;
+&nbsp;import org.openmrs.logic.result.Result;
+&nbsp;
+&nbsp;/**
+&nbsp; * LogicTransform is internal representation of the transformation applied to the LogicCriteria &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Example: &lt;br&gt;
+&nbsp; * &lt;code&gt;count()&lt;/code&gt; will apply the {@link Count} operator and return the total number of
+&nbsp; * {@link Result} instead of the Result itself &lt;code&gt;first(2)&lt;/code&gt; will apply the {@link First}
+&nbsp; * operator and return the first two {@link Result} out of the entire Result
+&nbsp; */
+&nbsp;public class LogicTransform {
+&nbsp;	
+&nbsp;	private Operator transformOperator;
+&nbsp;	
+<b class="nc">&nbsp;	private Integer numResults = null;</b>
+&nbsp;	
+<b class="nc">&nbsp;	private String sortColumn = null;</b>
+&nbsp;	
+<b class="nc">&nbsp;	public LogicTransform(Operator transformOperator, Integer numResults) {</b>
+<b class="nc">&nbsp;		this.transformOperator = transformOperator;</b>
+<b class="nc">&nbsp;		this.numResults = numResults;</b>
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	public LogicTransform(Operator transformOperator) {</b>
+<b class="nc">&nbsp;		this.transformOperator = transformOperator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the {@link TransformOperator} in this LogicTransform object
+&nbsp;	 *
+&nbsp;	 * @return the current TransformOperator
+&nbsp;	 */
+&nbsp;	public Operator getTransformOperator() {
+<b class="nc">&nbsp;		return transformOperator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		StringBuilder result = new StringBuilder();</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (transformOperator != null) {</b>
+<b class="nc">&nbsp;			result.append(transformOperator);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (numResults != null) {</b>
+<b class="nc">&nbsp;			result.append(&quot; &quot;).append(numResults);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (sortColumn != null) {</b>
+<b class="nc">&nbsp;			result.append(&quot; ordered by &quot;).append(sortColumn);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return result.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get number of {@link Result} object should be returned by the current criteria. &lt;br&gt;
+&nbsp;	 * Only for {@link First} and {@link Last}
+&nbsp;	 */
+&nbsp;	public Integer getNumResults() {
+<b class="nc">&nbsp;		return numResults;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getSortColumn() {
+<b class="nc">&nbsp;		return sortColumn;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set number of {@link Result} object should be returned by the current criteria. &lt;br&gt;
+&nbsp;	 * Only for {@link First} and {@link Last}
+&nbsp;	 *
+&nbsp;	 * @param numResults the total Result expected from this criteria
+&nbsp;	 */
+&nbsp;	public void setNumResults(Integer numResults) {
+<b class="nc">&nbsp;		this.numResults = numResults;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setSortColumn(String sortColumn) {
+<b class="nc">&nbsp;		this.sortColumn = sortColumn;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object obj) {
+<b class="nc">&nbsp;		if (!(obj instanceof LogicTransform)) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		LogicTransform compTransform = (LogicTransform) obj;</b>
+&nbsp;
+<b class="nc">&nbsp;		return safeEquals(this.transformOperator, compTransform.getTransformOperator()) &amp;&amp; safeEquals(numResults,</b>
+<b class="nc">&nbsp;				compTransform.getNumResults()) &amp;&amp; safeEquals(sortColumn, compTransform.getSortColumn());</b>
+&nbsp;
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean safeEquals(Object a, Object b) {
+<b class="nc">&nbsp;		if (a == null &amp;&amp; b == null) {</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (a == null || b == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return a.equals(b);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		final int prime = 31;</b>
+<b class="nc">&nbsp;		int result = 1;</b>
+<b class="nc">&nbsp;		result = prime * result + ((transformOperator == null) ? 0 : transformOperator.hashCode());</b>
+<b class="nc">&nbsp;		result = prime * result + ((numResults == null) ? 0 : numResults.hashCode());</b>
+<b class="nc">&nbsp;		result = prime * result + ((sortColumn == null) ? 0 : sortColumn.hashCode());</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

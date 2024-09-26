@@ -1,0 +1,158 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MessageService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification</a>
+</div>
+
+<h1>Coverage Summary for Class: MessageService (org.openmrs.notification)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">MessageService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;
+&nbsp;public interface MessageService {
+&nbsp;	
+&nbsp;	// Set dependencies for message services
+&nbsp;	// TODO Should these be required or do we let the implementations constructor dictate the dependencies?
+&nbsp;	public void setMessageSender(MessageSender sender);
+&nbsp;	
+&nbsp;	public MessageSender getMessageSender();
+&nbsp;	
+&nbsp;	public void setMessagePreparator(MessagePreparator preparator);
+&nbsp;	
+&nbsp;	public MessagePreparator getMessagePreparator();
+&nbsp;	
+&nbsp;	/* Send Message Methods */
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * TODO Auto generated method comment
+&nbsp;	 * 
+&nbsp;	 * @param message
+&nbsp;	 * @throws MessageException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; send message
+&nbsp;	 */
+&nbsp;	public void sendMessage(Message message) throws MessageException;
+&nbsp;	
+&nbsp;	//sends message to everyone of a certain role
+&nbsp;	public void sendMessage(Message message, String roleName) throws MessageException;
+&nbsp;	
+&nbsp;	//sends message to user with the given id
+&nbsp;	public void sendMessage(Message message, Integer userId) throws MessageException;
+&nbsp;	
+&nbsp;	//sends message to user
+&nbsp;	public void sendMessage(Message message, User user) throws MessageException;
+&nbsp;	
+&nbsp;	//sends message to all users with a given role
+&nbsp;	public void sendMessage(Message message, Role role) throws MessageException;
+&nbsp;	
+&nbsp;	//sends message to a collection of users
+&nbsp;	public void sendMessage(Message message, Collection&lt;User&gt; users) throws MessageException;
+&nbsp;	
+&nbsp;	public void sendMessage(String recipients, String sender, String subject, String message) throws MessageException;
+&nbsp;	
+&nbsp;	// Prepare message methods
+&nbsp;	public Message createMessage(String subject, String message) throws MessageException;
+&nbsp;	
+&nbsp;	public Message createMessage(String sender, String subject, String message) throws MessageException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * TODO Auto generated method comment
+&nbsp;	 * 
+&nbsp;	 * @param recipients
+&nbsp;	 * @param sender
+&nbsp;	 * @param subject
+&nbsp;	 * @param message
+&nbsp;	 * @return Message the message that was created
+&nbsp;	 * @throws MessageException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create message
+&nbsp;	 */
+&nbsp;	public Message createMessage(String recipients, String sender, String subject, String message) throws MessageException;
+&nbsp;	
+&nbsp;	public Message createMessage(String recipients, String sender, String subject, String message, String attachment,
+&nbsp;	        String attachmentContentType, String attachmentFileName) throws MessageException;
+&nbsp;	
+&nbsp;	public Message prepareMessage(String templateName, Map data) throws MessageException;
+&nbsp;	
+&nbsp;	public Message prepareMessage(Template template) throws MessageException;
+&nbsp;	
+&nbsp;	// Template methods
+&nbsp;	public List getAllTemplates() throws MessageException;
+&nbsp;	
+&nbsp;	public Template getTemplate(Integer id) throws MessageException;
+&nbsp;	
+&nbsp;	public List getTemplatesByName(String name) throws MessageException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

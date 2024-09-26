@@ -1,0 +1,347 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LocaleUtility</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: LocaleUtility (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LocaleUtility</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (12/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,7%
+  </span>
+  <span class="absValue">
+    (48/61)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.MissingResourceException;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.LocaleUtils;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.api.GlobalPropertyListener;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * A utility class for working with Locales.
+&nbsp; */
+<b class="fc">&nbsp;public class LocaleUtility implements GlobalPropertyListener {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(LocaleUtility.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Cached version of the default locale. This is cached so that we don&#39;t have to look it up in
+&nbsp;	 * the global property table every page load
+&nbsp;	 */
+<b class="fc">&nbsp;	private static Locale defaultLocaleCache = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Cached version of the localeAllowedList. This is cached so that we don&#39;t have to look it up
+&nbsp;	 * in the global property table every page load
+&nbsp;	 */
+<b class="fc">&nbsp;	private static List&lt;Locale&gt; localesAllowedListCache = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the default locale specified as a global property.
+&nbsp;	 *
+&nbsp;	 * @return default locale object.
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return null if global property does not exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with empty global property value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail with bogus global property value
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return locale object for global property
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not cache locale when session is not open
+&nbsp;	 */
+&nbsp;	public static Locale getDefaultLocale() {
+<b class="fc">&nbsp;		if (defaultLocaleCache == null) {</b>
+<b class="fc">&nbsp;			if (Context.isSessionOpen()) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					String locale = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;					    OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE);
+&nbsp;					
+<b class="fc">&nbsp;					if (StringUtils.hasLength(locale)) {</b>
+&nbsp;						try {
+<b class="fc">&nbsp;							defaultLocaleCache = fromSpecification(locale);</b>
+&nbsp;						}
+<b class="nc">&nbsp;						catch (Exception t) {</b>
+<b class="nc">&nbsp;							log.warn(&quot;Unable to parse default locale global property value: &quot; + locale, t);</b>
+<b class="fc">&nbsp;						}</b>
+&nbsp;					}
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) {</b>
+&nbsp;					// swallow most of the stack trace for most users
+<b class="nc">&nbsp;					log.warn(&quot;Unable to get locale global property value. &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;					log.trace(&quot;Unable to get locale global property value&quot;, e);</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;				// if we weren&#39;t able to load the locale from the global property,
+&nbsp;				// use the default one
+<b class="fc">&nbsp;				if (defaultLocaleCache == null) {</b>
+<b class="fc">&nbsp;					defaultLocaleCache = fromSpecification(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE);</b>
+&nbsp;				}
+&nbsp;			} else {
+&nbsp;				// if session is not open, return the default locale without caching
+<b class="fc">&nbsp;				return fromSpecification(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return defaultLocaleCache;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compatible is a looser matching than that provided by Locale.equals(). Two locales are
+&nbsp;	 * considered equal if they are equal, or if either does not have a country specified and the
+&nbsp;	 * languages match.
+&nbsp;	 *
+&nbsp;	 * @param lhs left hand side Locale
+&nbsp;	 * @param rhs right hand side Locale
+&nbsp;	 * @return true if the two locales are compatible, false otherwise
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; confirm different language missing country as compatible
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; confirm same language missing country as compatible
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not confirm different country as compatible
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; confirm matching country as compatible
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not confirm different language as compatible
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; confirm matching language as compatible
+&nbsp;	 */
+&nbsp;	public static boolean areCompatible(Locale lhs, Locale rhs) {
+<b class="fc">&nbsp;		return lhs.equals(rhs) || ((&quot;&quot;.equals(lhs.getCountry())) || (&quot;&quot;.equals(rhs.getCountry()))) &amp;&amp; lhs.getLanguage()</b>
+<b class="fc">&nbsp;				.equals(rhs.getLanguage());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a locale based on a string specification. The specification must be conform with the
+&nbsp;	 * following format: ll_CC_vv &lt;br&gt;
+&nbsp;	 * &lt;ul&gt;
+&nbsp;	 * &lt;li&gt;ll: two-character lowercase ISO-639 language code
+&nbsp;	 * &lt;li&gt;CC: two-character uppercase ISO-3166 country code optional
+&nbsp;	 * &lt;li&gt;vv: arbitrary length variant code
+&nbsp;	 * &lt;/ul&gt;
+&nbsp;	 * For example: en_US_Traditional_WIN ...represents English language in the United States with
+&nbsp;	 * the traditional collation for windows.
+&nbsp;	 *
+&nbsp;	 * @param localeSpecification encoded locale specification
+&nbsp;	 * @return the representative Locale, or null if the specification is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locale from two character language code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locale from language code and country code
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locale from language code country code and variant
+&nbsp;	 */
+&nbsp;	public static Locale fromSpecification(String localeSpecification) {
+&nbsp;		Locale createdLocale;
+&nbsp;		
+<b class="fc">&nbsp;		localeSpecification = localeSpecification.trim();</b>
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			createdLocale = LocaleUtils.toLocale(localeSpecification);</b>
+<b class="fc">&nbsp;		} catch (IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;			if (localeSpecification.matches(&quot;[a-zA-Z]{2}[-_][a-zA-Z]{2,}&quot;)) {</b>
+<b class="fc">&nbsp;				return null;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				createdLocale = generateLocaleFromLegacyFormat(localeSpecification);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return createdLocale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static Locale generateLocaleFromLegacyFormat(String localeSpecification) {
+<b class="fc">&nbsp;		Locale createdLocale = null;</b>
+&nbsp;		
+<b class="fc">&nbsp;		String[] localeComponents = localeSpecification.split(&quot;_&quot;);</b>
+<b class="fc">&nbsp;		if (localeComponents.length == 1) {</b>
+<b class="fc">&nbsp;			createdLocale = new Locale(localeComponents[0]);</b>
+<b class="nc">&nbsp;		} else if (localeComponents.length == 2) {</b>
+<b class="nc">&nbsp;			createdLocale = new Locale(localeComponents[0], localeComponents[1]);</b>
+<b class="nc">&nbsp;		} else if (localeComponents.length &gt; 2) {</b>
+<b class="nc">&nbsp;			String variant = localeSpecification.substring(localeSpecification.indexOf(localeComponents[2]));</b>
+<b class="nc">&nbsp;			createdLocale = new Locale(localeComponents[0], localeComponents[1], variant);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return createdLocale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Utility method that returns a collection of all openmrs system locales, the set includes the
+&nbsp;	 * current logged in user&#39;s preferred locale if any is set, the default locale, allowed locales
+&nbsp;	 * in the order they are specified in the &#39;allowed.locale.list&#39; global property and &#39;en&#39; at the
+&nbsp;	 * very end of the set if it isn&#39;t yet among them.
+&nbsp;	 *
+&nbsp;	 * @return a collection of all specified and allowed locales with no duplicates.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a set of locales with a predictable order
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a set of locales with no duplicates
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; have default locale as the first element if user has no preferred locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; have default locale as the second element if user has a preferred locale
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; always have english included in the returned collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; always have default locale default value included in the returned collection
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	public static Set&lt;Locale&gt; getLocalesInOrder() {
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;Locale&gt; locales = new LinkedHashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		locales.add(Context.getLocale());</b>
+<b class="fc">&nbsp;		locales.add(getDefaultLocale());</b>
+<b class="fc">&nbsp;		if (localesAllowedListCache == null) {</b>
+<b class="fc">&nbsp;			localesAllowedListCache = Context.getAdministrationService().getAllowedLocales();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (localesAllowedListCache != null) {</b>
+<b class="fc">&nbsp;			locales.addAll(localesAllowedListCache);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		locales.add(Locale.ENGLISH);</b>
+<b class="fc">&nbsp;		locales.add(fromSpecification(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE));</b>
+&nbsp;		
+<b class="fc">&nbsp;		return locales;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setDefaultLocaleCache(Locale defaultLocaleCache) {
+<b class="fc">&nbsp;		LocaleUtility.defaultLocaleCache = defaultLocaleCache;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setLocalesAllowedListCache(List&lt;Locale&gt; localesAllowedListCache) {
+<b class="fc">&nbsp;		LocaleUtility.localesAllowedListCache = localesAllowedListCache;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void globalPropertyChanged(GlobalProperty newValue) {
+&nbsp;		// reset the value
+<b class="fc">&nbsp;		setDefaultLocaleCache(null);</b>
+<b class="fc">&nbsp;		setLocalesAllowedListCache(null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public void globalPropertyDeleted(String propertyName) {
+&nbsp;		// reset the value
+<b class="fc">&nbsp;		setDefaultLocaleCache(null);</b>
+<b class="fc">&nbsp;		setLocalesAllowedListCache(null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean supportsPropertyName(String propertyName) {
+<b class="fc">&nbsp;		return propertyName.equals(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE)</b>
+<b class="fc">&nbsp;		        || propertyName.equals(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if specified locale object is valid
+&nbsp;	 *
+&nbsp;	 * @param locale
+&nbsp;	 *            object for validation
+&nbsp;	 * @return true if locale is available
+&nbsp;	 */
+&nbsp;	public static boolean isValid(Locale locale) {
+&nbsp;		try {
+<b class="nc">&nbsp;			return locale.getISO3Language() != null &amp;&amp; locale.getISO3Country() != null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (MissingResourceException e) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

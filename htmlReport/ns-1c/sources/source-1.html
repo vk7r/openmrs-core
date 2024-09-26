@@ -1,0 +1,407 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Duration</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic</a>
+</div>
+
+<h1>Coverage Summary for Class: Duration (org.openmrs.logic)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Duration</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/39)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Duration$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Duration$Units</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/48)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic;
+&nbsp;
+&nbsp;import org.openmrs.logic.op.ComparisonOperator;
+&nbsp;import org.openmrs.logic.op.Operand;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a duration of time &amp;mdash; e.g., one year, two weeks, or 18 months. Used within
+&nbsp; * criteria. Use the &lt;code&gt;Duration duration = Duration.days(5.0);&lt;/code&gt; to get a duration object
+&nbsp; * 
+&nbsp; * @see org.openmrs.logic.LogicCriteria
+&nbsp; */
+&nbsp;public class Duration implements Operand {
+&nbsp;	
+<b class="nc">&nbsp;	public static enum Units {</b>
+<b class="nc">&nbsp;		SECONDS,</b>
+<b class="nc">&nbsp;		MINUTES,</b>
+<b class="nc">&nbsp;		HOURS,</b>
+<b class="nc">&nbsp;		DAYS,</b>
+<b class="nc">&nbsp;		WEEKS,</b>
+<b class="nc">&nbsp;		MONTHS,</b>
+<b class="nc">&nbsp;		YEARS</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private Double duration;
+&nbsp;	
+&nbsp;	private Units units;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Private constructor used by the static methods on this class. Use the
+&nbsp;	 * &lt;code&gt;Duration duration = Duration.days(5.0);&lt;/code&gt; to get a duration object
+&nbsp;	 * 
+&nbsp;	 * @param duration
+&nbsp;	 * @param units
+&nbsp;	 */
+<b class="nc">&nbsp;	private Duration(Double duration, Units units) {</b>
+<b class="nc">&nbsp;		this.duration = duration;</b>
+<b class="nc">&nbsp;		this.units = units;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getDuration() {
+<b class="nc">&nbsp;		return duration;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Units getUnits() {
+<b class="nc">&nbsp;		return units;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the equivalent duration in days
+&nbsp;	 * 
+&nbsp;	 * @return the equivalent duration in days
+&nbsp;	 */
+&nbsp;	public Double getDurationInDays() {
+<b class="nc">&nbsp;		switch (units) {</b>
+&nbsp;			case SECONDS:
+<b class="nc">&nbsp;				return duration / 86400;</b>
+&nbsp;			case MINUTES:
+<b class="nc">&nbsp;				return duration / 1440;</b>
+&nbsp;			case HOURS:
+<b class="nc">&nbsp;				return duration / 24;</b>
+&nbsp;			case DAYS:
+<b class="nc">&nbsp;				return duration;</b>
+&nbsp;			case WEEKS:
+<b class="nc">&nbsp;				return duration * 7;</b>
+&nbsp;			case MONTHS:
+<b class="nc">&nbsp;				return duration * 30;</b>
+&nbsp;			case YEARS:
+<b class="nc">&nbsp;				return duration * 365;</b>
+&nbsp;			default:
+<b class="nc">&nbsp;				return 0d;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the equivalent duration in milliseconds
+&nbsp;	 * 
+&nbsp;	 * @return the equivalent duration in milliseconds
+&nbsp;	 */
+&nbsp;	public long getDurationInMillis() {
+<b class="nc">&nbsp;		long d = duration.longValue();</b>
+<b class="nc">&nbsp;		switch (units) {</b>
+&nbsp;			case SECONDS:
+<b class="nc">&nbsp;				return d * 1000;</b>
+&nbsp;			case MINUTES:
+<b class="nc">&nbsp;				return d * 60000;</b>
+&nbsp;			case HOURS:
+<b class="nc">&nbsp;				return d * 3600000;</b>
+&nbsp;			case DAYS:
+<b class="nc">&nbsp;				return d * 86400000;</b>
+&nbsp;			case WEEKS:
+<b class="nc">&nbsp;				return d * 10080000;</b>
+&nbsp;			case MONTHS:
+<b class="nc">&nbsp;				return d * 2628000000L;</b>
+&nbsp;			case YEARS:
+<b class="nc">&nbsp;				return d * 31536000000L;</b>
+&nbsp;			default:
+<b class="nc">&nbsp;				return 0;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of seconds
+&nbsp;	 * 
+&nbsp;	 * @param duration number of seconds for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object for given number of seconds
+&nbsp;	 */
+&nbsp;	public static Duration seconds(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.SECONDS);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of seconds
+&nbsp;	 * 
+&nbsp;	 * @param duration number of seconds for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object for given number of seconds
+&nbsp;	 */
+&nbsp;	public static Duration seconds(int duration) {
+<b class="nc">&nbsp;		return seconds(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of minutes
+&nbsp;	 * 
+&nbsp;	 * @param duration number of minutes for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object for given number of minutes
+&nbsp;	 */
+&nbsp;	public static Duration minutes(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.MINUTES);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of minutes
+&nbsp;	 * 
+&nbsp;	 * @param duration number of minutes for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object for given number of minutes
+&nbsp;	 */
+&nbsp;	public static Duration minutes(int duration) {
+<b class="nc">&nbsp;		return minutes(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of hours
+&nbsp;	 * 
+&nbsp;	 * @param duration number of hours for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object for given number of hours
+&nbsp;	 */
+&nbsp;	public static Duration hours(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.HOURS);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of hours
+&nbsp;	 * 
+&nbsp;	 * @param duration number of hours for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object for given number of hours
+&nbsp;	 */
+&nbsp;	public static Duration hours(int duration) {
+<b class="nc">&nbsp;		return hours(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of days
+&nbsp;	 * 
+&nbsp;	 * @param duration number of days for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of days
+&nbsp;	 */
+&nbsp;	public static Duration days(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.DAYS);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of days
+&nbsp;	 * 
+&nbsp;	 * @param duration number of days for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of days
+&nbsp;	 */
+&nbsp;	public static Duration days(int duration) {
+<b class="nc">&nbsp;		return days(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of weeks
+&nbsp;	 * 
+&nbsp;	 * @param duration number of weeks for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of weeks
+&nbsp;	 */
+&nbsp;	public static Duration weeks(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.WEEKS);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of weeks
+&nbsp;	 * 
+&nbsp;	 * @param duration number of weeks for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of weeks
+&nbsp;	 */
+&nbsp;	public static Duration weeks(int duration) {
+<b class="nc">&nbsp;		return weeks(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of months
+&nbsp;	 * 
+&nbsp;	 * @param duration number of months for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of months
+&nbsp;	 */
+&nbsp;	public static Duration months(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.MONTHS);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of months
+&nbsp;	 * 
+&nbsp;	 * @param duration number of months for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of months
+&nbsp;	 */
+&nbsp;	public static Duration months(int duration) {
+<b class="nc">&nbsp;		return months(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of years
+&nbsp;	 * 
+&nbsp;	 * @param duration number of years for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of years
+&nbsp;	 */
+&nbsp;	public static Duration years(Double duration) {
+<b class="nc">&nbsp;		return new Duration(duration, Units.YEARS);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a duration for the given number of years
+&nbsp;	 * 
+&nbsp;	 * @param duration number of years for duration
+&nbsp;	 * @return &lt;code&gt;Duration&lt;/code&gt; object with specified number of years
+&nbsp;	 */
+&nbsp;	public static Duration years(int duration) {
+<b class="nc">&nbsp;		return years(new Double(duration));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.logic.op.Operand#supports(org.openmrs.logic.op.ComparisonOperator)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(ComparisonOperator operator) {
+<b class="nc">&nbsp;		return (ComparisonOperator.WITHIN.equals(operator));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

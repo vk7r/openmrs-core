@@ -1,0 +1,925 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">PatientService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Allergies;
+&nbsp;import org.openmrs.Allergy;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.PatientDAO;
+&nbsp;import org.openmrs.comparator.PatientIdentifierTypeDefaultComparator;
+&nbsp;import org.openmrs.patient.IdentifierValidator;
+&nbsp;import org.openmrs.person.PersonMergeLogData;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains methods pertaining to Patients in the system
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * Usage:
+&nbsp; * List&amp;lt;Patient&amp;gt; patients = Context.getPatientService().getAllPatients();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.Patient
+&nbsp; */
+&nbsp;public interface PatientService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the DAO for this service. This is done by DI and Spring. See the
+&nbsp;	 * applicationContext-service.xml definition file.
+&nbsp;	 * 
+&nbsp;	 * @param dao DAO for this service
+&nbsp;	 */
+&nbsp;	public void setPatientDAO(PatientDAO dao);
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Saved the given &lt;code&gt;patient&lt;/code&gt; to the database
+&nbsp;	 * 
+&nbsp;	 * @param patient patient to be created or updated
+&nbsp;	 * @return patient who was created or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new patient from existing person plus user object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not throw a NonUniqueObjectException when called with a hand constructed patient
+&nbsp;	 *         regression 1375
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when patient does not have any patient identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail when patient does not have required patient identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update the date changed and changed by on update of the person address
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the preferred name address and identifier if none is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set the preferred name address and identifier if they already exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set a voided name or address or identifier as preferred
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_PATIENTS, PrivilegeConstants.EDIT_PATIENTS })
+&nbsp;	public Patient savePatient(Patient patient) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get patient by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param patientId internal patient identifier
+&nbsp;	 * @return patient with given internal identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null object if patient id doesnt exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient with given patient id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when patient with given patient id does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public Patient getPatient(Integer patientId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get patient by internal identifier. If this id is for an existing person then instantiates a
+&nbsp;	 * new patient from that person, copying over all the fields.
+&nbsp;	 * 
+&nbsp;	 * @param patientOrPersonId
+&nbsp;	 * @return a new unsaved patient or null if person or patient is not found
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	Patient getPatientOrPromotePerson(Integer patientOrPersonId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get patient by universally unique identifier.
+&nbsp;	 * 
+&nbsp;	 * @param uuid universally unique identifier
+&nbsp;	 * @return the patient that matches the uuid
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if patient not found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public Patient getPatientByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get patient identifier by universally unique identifier.
+&nbsp;	 * 
+&nbsp;	 * @param uuid universally unique identifier
+&nbsp;	 * @return the patient identifier that matches the uuid
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if patient identifier not found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_IDENTIFIERS })
+&nbsp;	public PatientIdentifier getPatientIdentifierByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all non voided patients in the system
+&nbsp;	 * 
+&nbsp;	 * @return non voided patients in the system
+&nbsp;	 * @see #getAllPatients(boolean)
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all non voided patients
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getAllPatients() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns patients in the system
+&nbsp;	 * 
+&nbsp;	 * @param includeVoided if false, will limit the search to non-voided patients
+&nbsp;	 * @return patients in the system
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch voided patients when given include voided is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch non voided patients when given include voided is false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getAllPatients(boolean includeVoided) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get patients based on given criteria The identifier is matched with the regex
+&nbsp;	 * &lt;code&gt;OpenmrsConstants.PATIENT_IDENTIFIER_REGEX&lt;/code&gt; All parameters are optional and
+&nbsp;	 * nullable. If null, it is not included in the search. Will not return voided patients
+&nbsp;	 * 
+&nbsp;	 * @param name (optional) this is a slight break from the norm, patients with a partial match on
+&nbsp;	 *            this name will be returned
+&nbsp;	 * @param identifier (optional) only patients with a matching identifier are returned. This
+&nbsp;	 * 			  however applies only if &lt;code&gt;name&lt;/code&gt; argument is null. Otherwise, its 
+&nbsp;	 * 			  ignored.	
+&nbsp;	 * @param identifierTypes (optional) the PatientIdentifierTypes to restrict to
+&nbsp;	 * @param matchIdentifierExactly (required) if true, then the given &lt;code&gt;identifier&lt;/code&gt; must
+&nbsp;	 *            equal the id in the database. if false, then the identifier is &#39;searched&#39; for by
+&nbsp;	 *            using a regular expression
+&nbsp;	 * @return patients that matched the given criteria (and are not voided)
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patients that partially match given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patients that partially match given identifier if &lt;code&gt;name&lt;/code&gt; argument
+&nbsp;	 * 		   is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patients that partially match given identifier when match identifier
+&nbsp;	 *         exactly equals false and if &lt;code&gt;name&lt;/code&gt; argument is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patients that exactly match given identifier when match identifier exactly
+&nbsp;	 *         equals true and if &lt;code&gt;name&lt;/code&gt; argument is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all patients that match given identifier types
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return duplicates
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return voided patients
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no match is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; search familyName2 with name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; support simple regex
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; support pattern using last digit as check digit
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if name and identifier is empty
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getPatients(String name, String identifier, List&lt;PatientIdentifierType&gt; identifierTypes,
+&nbsp;	        boolean matchIdentifierExactly) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Void patient record (functionally delete patient from system). Voids Person and retires
+&nbsp;	 * Users.
+&nbsp;	 * 
+&nbsp;	 * @param patient patient to be voided
+&nbsp;	 * @param reason reason for voiding patient
+&nbsp;	 * @return the voided patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void given patient with given reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void all patient identifiers associated with given patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return voided patient with given reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when patient is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire users
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_PATIENTS })
+&nbsp;	public Patient voidPatient(Patient patient, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unvoid patient record. Unvoids Person as well.
+&nbsp;	 * 
+&nbsp;	 * @param patient patient to be revived
+&nbsp;	 * @return the revived Patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid given patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unvoided patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unvoid person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not unretire users
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_PATIENTS })
+&nbsp;	public Patient unvoidPatient(Patient patient) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Delete patient from database. This &lt;b&gt;should not be called&lt;/b&gt; except for testing and
+&nbsp;	 * administration purposes. Use the void method instead.
+&nbsp;	 * 
+&nbsp;	 * @param patient patient to be deleted
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see #voidPatient(org.openmrs.Patient,java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete patient from database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PATIENTS })
+&nbsp;	public void purgePatient(Patient patient) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get all patientIdentifiers that match all of the given criteria Voided identifiers are not
+&nbsp;	 * returned
+&nbsp;	 * 
+&nbsp;	 * @param identifier the full identifier to match on
+&nbsp;	 * @param patientIdentifierTypes the type of identifiers to get
+&nbsp;	 * @param locations the locations of the identifiers to match
+&nbsp;	 * @param patients the patients containing these identifiers
+&nbsp;	 * @param isPreferred if true, limits to only preferred identifiers if false, only non
+&nbsp;	 *            preferred. if null, ignores preferred status
+&nbsp;	 * @return PatientIdentifiers matching these criteria
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only non voided patients and patient identifiers
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifiers that exactly matches given identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch patient identifiers that partially matches given identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifiers that match given patient identifier types
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifiers that match given locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifiers that match given patients
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch preferred patient identifiers when given is preferred equals true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch non preferred patient identifiers when given is preferred equals false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch preferred and non preferred patient identifiers when given is preferred is null
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_IDENTIFIERS })
+&nbsp;	public List&lt;PatientIdentifier&gt; getPatientIdentifiers(String identifier,
+&nbsp;	        List&lt;PatientIdentifierType&gt; patientIdentifierTypes, List&lt;Location&gt; locations, List&lt;Patient&gt; patients,
+&nbsp;	        Boolean isPreferred) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Create or update a PatientIdentifierType
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifierType PatientIdentifierType to create or update
+&nbsp;	 * @return the saved type
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new patient identifier type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update existing patient identifier type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when trying to save a patient identifier type while patient identifier
+&nbsp;	 *         types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_IDENTIFIER_TYPES })
+&nbsp;	public PatientIdentifierType savePatientIdentifierType(PatientIdentifierType patientIdentifierType) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get all patientIdentifier types
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Ordered same as {@link PatientIdentifierTypeDefaultComparator}.
+&nbsp;	 * 
+&nbsp;	 * @return patientIdentifier types list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch all non retired patient identifier types
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order as default comparator
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_IDENTIFIER_TYPES })
+&nbsp;	public List&lt;PatientIdentifierType&gt; getAllPatientIdentifierTypes() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all patientIdentifier types.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Ordered same as {@link PatientIdentifierTypeDefaultComparator}.
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired true/false whether retired types should be included
+&nbsp;	 * @return patientIdentifier types list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier types including retired when include retired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier types excluding retired when include retired is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order as default comparator
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_IDENTIFIER_TYPES })
+&nbsp;	public List&lt;PatientIdentifierType&gt; getAllPatientIdentifierTypes(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all patientIdentifier types that match the given criteria
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Ordered same as {@link PatientIdentifierTypeDefaultComparator}.
+&nbsp;	 * 
+&nbsp;	 * @param name name of the type to match on
+&nbsp;	 * @param format the string format to match on
+&nbsp;	 * @param required if true, limits to only identifiers marked as required if false, only non
+&nbsp;	 *            required. if null, ignores required bit
+&nbsp;	 * @param hasCheckDigit if true, limits to only check digit&#39;d identifiers if false, only non
+&nbsp;	 *            checkdigit&#39;d. if null, ignores checkDigit
+&nbsp;	 * @return patientIdentifier types list
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier types that match given name with given format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch required patient identifier types when given required is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch non required patient identifier types when given required is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch any patient identifier types when given required is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier types with check digit when given has check digit is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier types without check digit when given has check digit is
+&nbsp;	 *         false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch any patient identifier types when given has check digit is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; order as default comparator
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_IDENTIFIER_TYPES })
+&nbsp;	public List&lt;PatientIdentifierType&gt; getPatientIdentifierTypes(String name, String format, Boolean required,
+&nbsp;	        Boolean hasCheckDigit) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get patientIdentifierType by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifierTypeId
+&nbsp;	 * @return patientIdentifierType with specified internal identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier with given patient identifier type id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when patient identifier identifier does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_IDENTIFIER_TYPES })
+&nbsp;	public PatientIdentifierType getPatientIdentifierType(Integer patientIdentifierTypeId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get patient identifierType by universally unique identifier
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return patientIdentifierType with specified internal identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier type with given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when patient identifier type with given uuid does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_IDENTIFIER_TYPES })
+&nbsp;	public PatientIdentifierType getPatientIdentifierTypeByUuid(String uuid) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Get patientIdentifierType by exact name
+&nbsp;	 * 
+&nbsp;	 * @param name
+&nbsp;	 * @return patientIdentifierType with given name
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient identifier type that exactly matches given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return patient identifier type that partially matches given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when patient identifier type with given name does not exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_IDENTIFIER_TYPES })
+&nbsp;	public PatientIdentifierType getPatientIdentifierTypeByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retire a type of patient identifier
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifierType type of patient identifier to be retired
+&nbsp;	 * @param reason the reason to retire this identifier type
+&nbsp;	 * @return the retired type
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire patient identifier type with given reason
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when reason is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when trying to retire a patient identifier type while patient identifier
+&nbsp;	 *         types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_IDENTIFIER_TYPES })
+&nbsp;	public PatientIdentifierType retirePatientIdentifierType(PatientIdentifierType patientIdentifierType, String reason)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretire a type of patient identifier
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifierType type of patient identifier to be unretired
+&nbsp;	 * @return the unretired type
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire patient identifier type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return unretired patient identifier type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when trying to unretire a patient identifier type while patient
+&nbsp;	 *         identifier types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_IDENTIFIER_TYPES })
+&nbsp;	public PatientIdentifierType unretirePatientIdentifierType(PatientIdentifierType patientIdentifierType)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge PatientIdentifierType (cannot be undone)
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifierType PatientIdentifierType to purge from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete type from database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete patient identifier type from database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when trying to delete a patient identifier type while patient identifier
+&nbsp;	 *         types are locked
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_IDENTIFIER_TYPES })
+&nbsp;	public void purgePatientIdentifierType(PatientIdentifierType patientIdentifierType) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Convenience method to validate all identifiers for a given patient
+&nbsp;	 * 
+&nbsp;	 * @param patient patient for which to validate identifiers
+&nbsp;	 * @see #checkPatientIdentifiers(Patient)
+&nbsp;	 * @throws PatientIdentifierException if one or more of the identifiers are invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; validate when patient has all required and no duplicate and no blank patient
+&nbsp;	 *         identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; ignore voided patient identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove identifier and throw error when patient has blank patient identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when patient has null patient identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when patient has empty patient identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when patient has identical identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when patient does not have one or more required identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; require one non voided patient identifier
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_IDENTIFIERS })
+&nbsp;	public void checkPatientIdentifiers(Patient patient) throws PatientIdentifierException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Generic search on patients based on the given string. Implementations can use this string to
+&nbsp;	 * search on name, identifier, etc Voided patients are not returned in search results
+&nbsp;	 * 
+&nbsp;	 * @param query the string to search on
+&nbsp;	 * @return a list of matching Patients
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; force search string to be greater than minsearchcharacters global property
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; allow search string to be one according to minsearchcharacters global property
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patients with patient identifiers matching given query
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patients with any name matching given query
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if given query length less than minimum search characters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when minimum search characters is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail when minimum search characters is invalid integer
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getPatients(String query) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Generic search on patients based on the given string and returns a specific number of them
+&nbsp;	 * from the specified starting position. Implementations can use this string to search on name,
+&nbsp;	 * identifier, searchable person attributes etc. Voided patients are not returned in search
+&nbsp;	 * results. If start is 0 and length is not specified, then all matches are returned
+&nbsp;	 * 
+&nbsp;	 * @param query the string to search on
+&nbsp;	 * @param start the starting index
+&nbsp;	 * @param length the number of patients to return
+&nbsp;	 * @return a list of matching Patients
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find a patients with a matching identifier with no digits
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getPatients(String query, Integer start, Integer length) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param query the string to search on
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 * @param start the starting index
+&nbsp;	 * @param length the number of patients to return
+&nbsp;	 * @return a list of matching Patients
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getPatients(String query, boolean includeVoided, Integer start, Integer length) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * This method tries to find a patient in the database given the attributes on the given
+&nbsp;	 * &lt;code&gt;patientToMatch&lt;/code&gt; object. Assumes there could be a PersonAttribute on this Patient
+&nbsp;	 * with PersonAttributeType.name = &quot;Other Matching Information&quot;. This PersonAttribute has a
+&nbsp;	 * &quot;value&quot; that is just key value pairs in the form of key:value;nextkey:nextvalue;
+&nbsp;	 * 
+&nbsp;	 * @param patientToMatch
+&nbsp;	 * @return null if no match found, a fresh patient object from the db if is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patient matching patient id of given patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch patient matching any other patient information
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no patient matches given patient to match
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public Patient getPatientByExample(Patient patientToMatch) throws APIException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Search the database for patients that both share the given attributes. Each attribute that is
+&nbsp;	 * passed in must be identical to what is stored for at least one other patient for both
+&nbsp;	 * patients to be returned.
+&nbsp;	 * 
+&nbsp;	 * @param attributes attributes on a Person or Patient object. similar to: [gender, givenName,
+&nbsp;	 *            middleName, familyName]
+&nbsp;	 * @return list of patients that match other patients
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch patients that exactly match on all given attributes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not return patients that exactly match on some but not all given attributes
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getDuplicatePatientsByAttributes(List&lt;String&gt; attributes) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to join two patients&#39; information into one record.
+&nbsp;	 * &lt;ol&gt;
+&nbsp;	 * &lt;li&gt;Moves object (encounters/obs) pointing to &lt;code&gt;nonPreferred&lt;/code&gt; to point at
+&nbsp;	 * &lt;code&gt;preferred&lt;/code&gt;&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;Copies data (gender/birthdate/names/ids/etc) from &lt;code&gt;nonPreferred&lt;/code&gt; to
+&nbsp;	 * &lt;code&gt;preferred&lt;/code&gt; IFF the data is missing or null in &lt;code&gt;preferred&lt;/code&gt;&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;&lt;code&gt;notPreferred&lt;/code&gt; is marked as voided&lt;/li&gt;
+&nbsp;	 * &lt;/ol&gt;
+&nbsp;	 * 
+&nbsp;	 * @param preferred The Patient to merge to
+&nbsp;	 * @param notPreferred The Patient to merge from (and then void)
+&nbsp;	 * @throws APIException
+&nbsp;	 * @throws SerializationException
+&nbsp;	 * @see PersonMergeLogData
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not merge the same patient to itself
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy nonvoided names to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy nonvoided identifiers to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; copy nonvoided addresses to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not copy over relationships that are only between the preferred and notpreferred
+&nbsp;	 *         patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not merge patient with itself
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not create duplicate relationships
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge encounters from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge visits from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non duplicate patient identifiers from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non duplicate patient names from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non duplicate addresses from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non voided patient programs from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non voided relationships from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge observations associated with encounters from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non voided person attributes from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge other non voided observations from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge other non voided orders from non preferred to preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non preferred death date when preferred death date is not null or empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge non preferred death cause when preferred death cause is not null or empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void non preferred person object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; change user records of non preferred person to preferred person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void non preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void all relationships for non preferred patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not void relationships for same type and side with different relatives
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit moved encounters
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit moved visits
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit created patient programs
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit voided relationships
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit created relationships
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit moved independent observations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit created identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit created names
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit created addresses
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit created attributes
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit moved users
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit prior cause of death
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit prior date of death
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit prior date of birth
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit prior date of birth estimated
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; audit prior gender
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not copy over duplicate patient identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if not preferred patient has unvoided orders
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PATIENTS })
+&nbsp;	public void mergePatients(Patient preferred, Patient notPreferred) throws APIException, SerializationException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to join multiple patients&#39; information into one record.
+&nbsp;	 * 
+&nbsp;	 * @param preferred
+&nbsp;	 * @param notPreferred
+&nbsp;	 * @throws APIException
+&nbsp;	 * @throws SerializationException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; merge all non Preferred patients in the the notPreferred list to preferred patient
+&nbsp;	 */
+&nbsp;	public void mergePatients(Patient preferred, List&lt;Patient&gt; notPreferred) throws APIException, SerializationException;
+&nbsp;		
+&nbsp;	/**
+&nbsp;	 * Convenience method to establish that a patient has died. In addition to exiting the patient
+&nbsp;	 * from care (see above), this method will also set the appropriate patient characteristics to
+&nbsp;	 * indicate that they have died, when they died, etc.
+&nbsp;	 * 
+&nbsp;	 * @param patient - the patient who has died
+&nbsp;	 * @param dateDied - the declared date/time of the patient&#39;s death
+&nbsp;	 * @param causeOfDeath - the concept that corresponds with the reason the patient died
+&nbsp;	 * @param otherReason - if the concept representing the reason is OTHER NON-CODED, and a
+&nbsp;	 *            string-based &quot;other&quot; reason is supplied
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw API exception if patient is null 
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_PATIENTS })
+&nbsp;	public void processDeath(Patient patient, Date dateDied, Concept causeOfDeath, String otherReason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that saves the Obs that indicates when and why the patient died (including
+&nbsp;	 * any &quot;other&quot; reason there might be)
+&nbsp;	 * 
+&nbsp;	 * @param patient - the patient who has died
+&nbsp;	 * @param dateDied - the declared date/time of the patient&#39;s death
+&nbsp;	 * @param causeOfDeath - the concept that corresponds with the reason the patient died
+&nbsp;	 * @param otherReason - if the concept representing the reason is OTHER NON-CODED, and a
+&nbsp;	 *            string-based &quot;other&quot; reason is supplied
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when given patient is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when given death date is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when given cause is null is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when cause of death global property is not specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw error when patient already has more than one cause of death observations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; modify existing cause of death observation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set death attributes as long as patient is not already dead
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be tested more thoroughly
+&nbsp;	 */
+&nbsp;	@Authorized(value = { PrivilegeConstants.GET_PATIENTS, PrivilegeConstants.EDIT_OBS }, requireAll = true)
+&nbsp;	public void saveCauseOfDeathObs(Patient patient, Date dateDied, Concept causeOfDeath, String otherReason)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets an identifier validator matching the given class.
+&nbsp;	 * 
+&nbsp;	 * @param clazz identifierValidator which validator to get.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient identifier validator given class
+&nbsp;	 */
+&nbsp;	public IdentifierValidator getIdentifierValidator(Class&lt;IdentifierValidator&gt; clazz);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return patient identifier validator given class name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; treat empty strings like a null entry
+&nbsp;	 */
+&nbsp;	public IdentifierValidator getIdentifierValidator(String pivClassName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the default IdentifierValidator
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return default patient identifier validator
+&nbsp;	 */
+&nbsp;	public IdentifierValidator getDefaultIdentifierValidator();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return All registered PatientIdentifierValidators
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all registered patient identifier validators
+&nbsp;	 */
+&nbsp;	public Collection&lt;IdentifierValidator&gt; getAllIdentifierValidators();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the given patient identifier is already assigned to a patient other than
+&nbsp;	 * patientIdentifier.patient
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier the patient identifier to look for in other patients
+&nbsp;	 * @return whether or not the identifier is in use by a patient other than
+&nbsp;	 *         patientIdentifier.patient
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when patientIdentifier contains a patient and another patient has this id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when patientIdentifier contains a patient and no other patient has this
+&nbsp;	 *         id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true when patientIdentifier does not contain a patient and a patient has this
+&nbsp;	 *         id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false when patientIdentifier does not contain a patient and no patient has
+&nbsp;	 *         this id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; ignore voided patientIdentifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; ignore voided patients
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if in use for a location and id type uniqueness is set to location
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if in use for another location and id uniqueness is set to location
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if in use and id type uniqueness is set to unique
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if in use and id type uniqueness is null
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_PATIENTS)
+&nbsp;	public boolean isIdentifierInUseByAnotherPatient(PatientIdentifier patientIdentifier);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a patient identifier that matches the given patientIndentifier id
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifierId the patientIdentifier id
+&nbsp;	 * @return the patientIdentifier matching the Id
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the patientIdentifier with the given id
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENT_IDENTIFIERS })
+&nbsp;	public PatientIdentifier getPatientIdentifier(Integer patientIdentifierId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Void patient identifier (functionally delete patient identifier from system)
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier patientIdentifier to be voided
+&nbsp;	 * @param reason reason for voiding patient identifier
+&nbsp;	 * @return the voided patient identifier
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void given patient identifier with given reaso
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException if the reason is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException if the reason is an empty string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException if the reason is a white space character
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_PATIENT_IDENTIFIERS })
+&nbsp;	public PatientIdentifier voidPatientIdentifier(PatientIdentifier patientIdentifier, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saved the given &lt;code&gt;patientIndentifier&lt;/code&gt; to the database
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier patientIndentifier to be created or updated
+&nbsp;	 * @return patientIndentifier that was created or updated
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create new patientIndentifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update an existing patient identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException when a null argument is passed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException when one of the required fields is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException if the patientIdentifier string is a white space
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw an APIException if the patientIdentifier string is an empty string
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_PATIENT_IDENTIFIERS, PrivilegeConstants.EDIT_PATIENT_IDENTIFIERS })
+&nbsp;	public PatientIdentifier savePatientIdentifier(PatientIdentifier patientIdentifier) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Purge PatientIdentifier (cannot be undone)
+&nbsp;	 * 
+&nbsp;	 * @param patientIdentifier PatientIdentifier to purge from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete patient identifier from database
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PATIENT_IDENTIFIERS })
+&nbsp;	public void purgePatientIdentifier(PatientIdentifier patientIdentifier) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets allergies for a given patient
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient
+&nbsp;	 * @return the allergies object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the allergy list and status
+&nbsp;	 */
+&nbsp;	Allergies getAllergies(Patient patient);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Updates the patient&#39;s allergies
+&nbsp;	 * 
+&nbsp;	 * @param patient the patient
+&nbsp;	 * @param allergies the allergies
+&nbsp;	 * @return the saved allergies
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save the allergy list and status
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void removed allergies and maintain status as see list if some allergies are removed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void all allergies and set status to unknown if all allergies are removed
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set status to no known allergies for patient without allergies
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void all allergies and set status to no known allergies if all allergies are removed and status set as such
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with edited comment
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with edited severity
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with edited coded allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with edited non coded allergen
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with edited reaction coded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with edited reaction non coded
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with removed reactions
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; void allergies with added reactions
+&nbsp;     * &lt;strong&gt;Should&lt;/strong&gt; set the non coded concept for non coded allergen if not specified
+&nbsp;	 */
+&nbsp;	Allergies setAllergies(Patient patient, Allergies allergies);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the Allergy identified by internal Ingerger Id
+&nbsp;	 * 
+&nbsp;	 * @param allergyListId identifies allergy by internal Ingerger Id
+&nbsp;	 * @return the allergy
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_ALLERGIES })
+&nbsp;	public Allergy getAllergy(Integer allergyListId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the Allergy identified by uuid
+&nbsp;	 * 
+&nbsp;	 * @since 2.0
+&nbsp;	 * @param uuid identifies allergy 
+&nbsp;	 * @return the allergy matching the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return allergy given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_ALLERGIES })
+&nbsp;	public Allergy getAllergyByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates an AllergyListItem to the Patient&#39;s Allergy Active List. Sets the start date to now,
+&nbsp;	 * if it is null.
+&nbsp;	 * 
+&nbsp;	 * @param allergy the Allergy
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save the allergy
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.ADD_ALLERGIES, PrivilegeConstants.EDIT_ALLERGIES })
+&nbsp;	public void saveAllergy(Allergy allergy) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Resolving the allergy, effectively removes the Allergy from the Patient&#39;s Active List by
+&nbsp;	 * setting the stop date to now, if null.
+&nbsp;	 * 
+&nbsp;	 * @param allergy the Allergy
+&nbsp;	 * @param reason the reason of remove
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the end date for the allergy
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.EDIT_ALLERGIES })
+&nbsp;	public void removeAllergy(Allergy allergy, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Used only in cases where the Allergy was entered by error
+&nbsp;	 * 
+&nbsp;	 * @param allergy
+&nbsp;	 * @param reason
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.DELETE_ALLERGIES })
+&nbsp;	public void voidAllergy(Allergy allergy, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the number of unvoided patients with names or patient identifiers or searchable person
+&nbsp;	 * attributes starting with or equal to the specified text
+&nbsp;	 * 
+&nbsp;	 * @param query the string to search on
+&nbsp;	 * @return the number of patients matching the given search phrase
+&nbsp;	 * @since 1.8
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the right count when a patient has multiple matching person names
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the right count of patients with a matching identifier with no digits
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public Integer getCountOfPatients(String query);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param query the string to search on
+&nbsp;	 * @param includeVoided true/false whether or not to included voided patients
+&nbsp;	 * @return the number of patients matching the given search phrase
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public Integer getCountOfPatients(String query, boolean includeVoided);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a limited size of patients from a given start index based on given criteria The
+&nbsp;	 * identifier is matched with the regex &lt;code&gt;OpenmrsConstants.PATIENT_IDENTIFIER_REGEX&lt;/code&gt;
+&nbsp;	 * All parameters are optional and nullable. If null, it is not included in the search. Will not
+&nbsp;	 * return voided patients
+&nbsp;	 * 
+&nbsp;	 * @param name (optional) this is a slight break from the norm, patients with a partial match on
+&nbsp;	 *            this name will be returned
+&nbsp;	 * @param identifier (optional) only patients with a matching identifier are returned
+&nbsp;	 * @param identifierTypes (optional) the PatientIdentifierTypes to restrict to
+&nbsp;	 * @param matchIdentifierExactly (required) if true, then the given &lt;code&gt;identifier&lt;/code&gt; must
+&nbsp;	 *            equal the id in the database. if false, then the identifier is &#39;searched&#39; for by
+&nbsp;	 *            using a regular expression
+&nbsp;	 * @param start the starting index
+&nbsp;	 * @param length the number of patients to return
+&nbsp;	 * @return patients that matched the given criteria (and are not voided)
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PATIENTS })
+&nbsp;	public List&lt;Patient&gt; getPatients(String name, String identifier, List&lt;PatientIdentifierType&gt; identifierTypes,
+&nbsp;	        boolean matchIdentifierExactly, Integer start, Integer length) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check if patient identifier types are locked, and if they are, throws an exception during
+&nbsp;	 * manipulation of a patient identifier type
+&nbsp;	 * 
+&nbsp;	 * @throws PatientIdentifierTypeLockedException
+&nbsp;	 */
+&nbsp;	public void checkIfPatientIdentifierTypesAreLocked() throws PatientIdentifierTypeLockedException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get all patientIdentifiers that are associated to the patient program
+&nbsp;	 * @param patientProgram the patientProgram to be used to fetch the associated identifiers
+&nbsp;	 * @return PatientIdentifiers matching the patient program
+&nbsp;	 * @since 2.6.0
+&nbsp;	 */
+&nbsp;	@Authorized({PrivilegeConstants.GET_PATIENT_IDENTIFIERS})
+&nbsp;	public List&lt;PatientIdentifier&gt; getPatientIdentifiersByPatientProgram(PatientProgram patientProgram);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

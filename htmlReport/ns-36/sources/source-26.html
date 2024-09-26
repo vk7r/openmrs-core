@@ -1,0 +1,447 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Security</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: Security (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Security</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (16/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,6%
+  </span>
+  <span class="absValue">
+    (53/74)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.security.GeneralSecurityException;
+&nbsp;import java.security.MessageDigest;
+&nbsp;import java.security.NoSuchAlgorithmException;
+&nbsp;import java.security.SecureRandom;
+&nbsp;import java.util.Base64;
+&nbsp;import java.util.Random;
+&nbsp;
+&nbsp;import javax.crypto.Cipher;
+&nbsp;import javax.crypto.KeyGenerator;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import javax.crypto.spec.IvParameterSpec;
+&nbsp;import javax.crypto.spec.SecretKeySpec;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * OpenMRS&#39;s security class deals with the hashing of passwords.
+&nbsp; */
+&nbsp;public class Security {
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * encryption settings
+&nbsp;	 */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Security.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Random RANDOM = new SecureRandom();</b>
+&nbsp;
+&nbsp;	private Security() {
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Compare the given hash and the given string-to-hash to see if they are equal. The
+&nbsp;	 * string-to-hash is usually of the form password + salt. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This should be used so that this class can compare against the new correct hashing algorithm
+&nbsp;	 * and the old incorrect hashing algorithm.
+&nbsp;	 *
+&nbsp;	 * @param hashedPassword a stored password that has been hashed previously
+&nbsp;	 * @param passwordToHash a string to encode/hash and compare to hashedPassword
+&nbsp;	 * @return true/false whether the two are equal
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match strings hashed with incorrect sha1 algorithm
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match strings hashed with sha1 algorithm
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; match strings hashed with sha512 algorithm and 128 characters salt
+&nbsp;	 */
+&nbsp;	public static boolean hashMatches(String hashedPassword, String passwordToHash) {
+<b class="fc">&nbsp;		if (hashedPassword == null || passwordToHash == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;password.cannot.be.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return hashedPassword.equals(encodeString(passwordToHash))</b>
+<b class="fc">&nbsp;			|| hashedPassword.equals(encodeStringSHA1(passwordToHash))</b>
+<b class="fc">&nbsp;			|| hashedPassword.equals(incorrectlyEncodeString(passwordToHash));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 /**
+&nbsp;	 * This method will hash &lt;code&gt;strToEncode&lt;/code&gt; using the preferred algorithm. Currently,
+&nbsp;	 * OpenMRS&#39;s preferred algorithm is hard coded to be SHA-512.
+&nbsp;	 *
+&nbsp;	 * @param strToEncode string to encode
+&nbsp;	 * @return the SHA-512 encryption of a given string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; encode strings to 128 characters
+&nbsp;	 */
+&nbsp;	public static String encodeString(String strToEncode) throws APIException {
+<b class="fc">&nbsp;		return encodeString(strToEncode, &quot;SHA-512&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This method will hash &lt;code&gt;strToEncode&lt;/code&gt; using the old SHA-1 algorithm.
+&nbsp;	 *
+&nbsp;	 * @param strToEncode string to encode
+&nbsp;	 * @return the SHA-1 encryption of a given string
+&nbsp;	 */
+&nbsp;	private static String encodeStringSHA1(String strToEncode) throws APIException {
+<b class="fc">&nbsp;		return encodeString(strToEncode, &quot;SHA-1&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static String encodeString(String strToEncode, String algorithm) {
+<b class="fc">&nbsp;		return hexString(digest(strToEncode.getBytes(StandardCharsets.UTF_8), algorithm));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static byte[] digest(byte[] input, String algorithm) {
+&nbsp;		MessageDigest md;
+&nbsp;		try {
+<b class="fc">&nbsp;			md = MessageDigest.getInstance(algorithm);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (NoSuchAlgorithmException e) {</b>
+&nbsp;			// Yikes! Can&#39;t encode password...what to do?
+<b class="nc">&nbsp;			log.error(&quot;Can&#39;t encode password because the given algorithm: &quot; + algorithm + &quot; was not found! (fail)&quot;, e);</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;system.cannot.find.encryption.algorithm&quot;, null, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return md.digest(input);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Convenience method to convert a byte array to a string
+&nbsp;	 *
+&nbsp;	 * @param block Byte array to convert to HexString
+&nbsp;	 * @return Hexadecimal string encoding the byte array
+&nbsp;	 */
+&nbsp;	private static String hexString(byte[] block) {
+<b class="fc">&nbsp;		StringBuilder buf = new StringBuilder();</b>
+<b class="fc">&nbsp;		char[] hexChars = { &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;, &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;f&#39; };</b>
+&nbsp;		int high;
+&nbsp;		int low;
+<b class="fc">&nbsp;		for (byte aBlock : block) {</b>
+<b class="fc">&nbsp;			high = ((aBlock &amp; 0xf0) &gt;&gt; 4);</b>
+<b class="fc">&nbsp;			low = (aBlock &amp; 0x0f);</b>
+<b class="fc">&nbsp;			buf.append(hexChars[high]);</b>
+<b class="fc">&nbsp;			buf.append(hexChars[low]);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return buf.toString();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This method will hash &lt;code&gt;strToEncode&lt;/code&gt; using SHA-1 and the incorrect hashing method
+&nbsp;	 * that sometimes dropped out leading zeros.
+&nbsp;	 *
+&nbsp;	 * @param strToEncode string to encode
+&nbsp;	 * @return the SHA-1 encryption of a given string
+&nbsp;	 */
+&nbsp;	private static String incorrectlyEncodeString(String strToEncode) throws APIException {
+<b class="fc">&nbsp;		return incorrectHexString(digest(strToEncode.getBytes(StandardCharsets.UTF_8), &quot;SHA-1&quot;));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This method used to be the simple hexString method, however, as pointed out in ticket
+&nbsp;	 * http://dev.openmrs.org/ticket/1178, it was not working correctly. Authenticated still needs
+&nbsp;	 * to occur against both this method and the correct hex string, so this wrong implementation
+&nbsp;	 * will remain until we either force users to change their passwords, or we just decide to
+&nbsp;	 * invalidate them.
+&nbsp;	 *
+&nbsp;	 * @param b the byte array to encode
+&nbsp;	 * @return the old possibly less than 40 characters hashed string
+&nbsp;	 */
+&nbsp;	private static String incorrectHexString(byte[] b) {
+<b class="fc">&nbsp;		if (b == null || b.length &lt; 1) {</b>
+<b class="nc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		StringBuilder s = new StringBuilder();</b>
+<b class="fc">&nbsp;		for (byte aB : b) {</b>
+<b class="fc">&nbsp;			s.append(Integer.toHexString(aB &amp; 0xFF));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return new String(s);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * This method will generate a random string
+&nbsp;	 *
+&nbsp;	 * @return a secure random token.
+&nbsp;	 */
+&nbsp;	public static String getRandomToken() throws APIException {
+<b class="fc">&nbsp;		byte[] token = new byte[64];</b>
+<b class="fc">&nbsp;		RANDOM.nextBytes(token);</b>
+<b class="fc">&nbsp;		return hexString(digest(token, &quot;SHA-512&quot;));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * encrypt text to a string with specific initVector and secretKey; rarely used except in
+&nbsp;	 * testing and where specifically necessary
+&nbsp;	 *
+&nbsp;	 * @see #encrypt(String)
+&nbsp;	 *
+&nbsp;	 * @param text string to be encrypted
+&nbsp;	 * @param initVector custom init vector byte array
+&nbsp;	 * @param secretKey custom secret key byte array
+&nbsp;	 * @return encrypted text
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static String encrypt(String text, byte[] initVector, byte[] secretKey) {
+<b class="fc">&nbsp;		IvParameterSpec initVectorSpec = new IvParameterSpec(initVector);</b>
+<b class="fc">&nbsp;		SecretKeySpec secret = new SecretKeySpec(secretKey, OpenmrsConstants.ENCRYPTION_KEY_SPEC);</b>
+&nbsp;		byte[] encrypted;
+&nbsp;		String result;
+&nbsp;
+&nbsp;		try {
+<b class="fc">&nbsp;			Cipher cipher = Cipher.getInstance(OpenmrsConstants.ENCRYPTION_CIPHER_CONFIGURATION);</b>
+<b class="fc">&nbsp;			cipher.init(Cipher.ENCRYPT_MODE, secret, initVectorSpec);</b>
+<b class="fc">&nbsp;			encrypted = cipher.doFinal(text.getBytes(StandardCharsets.UTF_8));</b>
+<b class="fc">&nbsp;			result = new String(Base64.getEncoder().encode(encrypted), StandardCharsets.UTF_8);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (GeneralSecurityException e) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;could.not.encrypt.text&quot;, null, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * encrypt text using stored initVector and securityKey
+&nbsp;	 *
+&nbsp;	 * @param text the text to encrypt
+&nbsp;	 * @return encrypted text
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; encrypt short and long text
+&nbsp;	 *
+&nbsp;	 * @deprecated As of version 2.4.0, this method is not referenced in openmrs-core or any other projects under the
+&nbsp;	 * GitHub OpenMRS organisation.
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static String encrypt(String text) {
+<b class="fc">&nbsp;		return Security.encrypt(text, Security.getSavedInitVector(), Security.getSavedSecretKey());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * decrypt text to a string with specific initVector and secretKey; rarely used except in
+&nbsp;	 * testing and where specifically necessary
+&nbsp;	 *
+&nbsp;	 * @see #decrypt(String)
+&nbsp;	 *
+&nbsp;	 * @param text text to be decrypted
+&nbsp;	 * @param initVector custom init vector byte array
+&nbsp;	 * @param secretKey custom secret key byte array
+&nbsp;	 * @return decrypted text
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static String decrypt(String text, byte[] initVector, byte[] secretKey) {
+<b class="fc">&nbsp;		IvParameterSpec initVectorSpec = new IvParameterSpec(initVector);</b>
+<b class="fc">&nbsp;		SecretKeySpec secret = new SecretKeySpec(secretKey, OpenmrsConstants.ENCRYPTION_KEY_SPEC);</b>
+&nbsp;		String decrypted;
+&nbsp;
+&nbsp;		try {
+<b class="fc">&nbsp;			Cipher cipher = Cipher.getInstance(OpenmrsConstants.ENCRYPTION_CIPHER_CONFIGURATION);</b>
+<b class="fc">&nbsp;			cipher.init(Cipher.DECRYPT_MODE, secret, initVectorSpec);</b>
+<b class="fc">&nbsp;			byte[] original = cipher.doFinal(Base64.getDecoder().decode(text));</b>
+<b class="fc">&nbsp;			decrypted = new String(original, StandardCharsets.UTF_8);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (GeneralSecurityException e) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;could.not.decrypt.text&quot;, null, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return decrypted;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * decrypt text using stored initVector and securityKey
+&nbsp;	 *
+&nbsp;	 * @param text text to be decrypted
+&nbsp;	 * @return decrypted text
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; decrypt short and long text
+&nbsp;	 *
+&nbsp;	 * @deprecated As of version 2.4.0, this method is not referenced in openmrs-core or any other projects under the
+&nbsp;	 * GitHub OpenMRS organisation.
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public static String decrypt(String text) {
+<b class="fc">&nbsp;		return Security.decrypt(text, Security.getSavedInitVector(), Security.getSavedSecretKey());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * retrieve the stored init vector from runtime properties
+&nbsp;	 *
+&nbsp;	 * @return stored init vector byte array
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static byte[] getSavedInitVector() {
+<b class="fc">&nbsp;		String initVectorText = Context.getRuntimeProperties().getProperty(</b>
+&nbsp;			OpenmrsConstants.ENCRYPTION_VECTOR_RUNTIME_PROPERTY, OpenmrsConstants.ENCRYPTION_VECTOR_DEFAULT);
+&nbsp;
+<b class="fc">&nbsp;		if (StringUtils.hasText(initVectorText)) {</b>
+<b class="fc">&nbsp;			return Base64.getDecoder().decode(initVectorText);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		throw new APIException(&quot;no.encryption.initialization.vector.found&quot;, (Object[]) null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * generate a new cipher initialization vector; should only be called once in order to not
+&nbsp;	 * invalidate all encrypted data
+&nbsp;	 *
+&nbsp;	 * @return a random array of 16 bytes
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static byte[] generateNewInitVector() {
+&nbsp;		// initialize the init vector with 16 random bytes
+<b class="nc">&nbsp;		byte[] initVector = new byte[16];</b>
+<b class="nc">&nbsp;		RANDOM.nextBytes(initVector);</b>
+&nbsp;
+<b class="nc">&nbsp;		return initVector;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * retrieve the secret key from runtime properties
+&nbsp;	 *
+&nbsp;	 * @return stored secret key byte array
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static byte[] getSavedSecretKey() {
+<b class="fc">&nbsp;		String keyText = Context.getRuntimeProperties().getProperty(OpenmrsConstants.ENCRYPTION_KEY_RUNTIME_PROPERTY,</b>
+&nbsp;			OpenmrsConstants.ENCRYPTION_KEY_DEFAULT);
+&nbsp;
+<b class="fc">&nbsp;		if (StringUtils.hasText(keyText)) {</b>
+<b class="fc">&nbsp;			return Base64.getDecoder().decode(keyText);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		throw new APIException(&quot;no.encryption.secret.key.found&quot;, (Object[]) null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * generate a new secret key; should only be called once in order to not invalidate all
+&nbsp;	 * encrypted data
+&nbsp;	 *
+&nbsp;	 * @return generated secret key byte array
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public static byte[] generateNewSecretKey() {
+&nbsp;		// Get the KeyGenerator
+&nbsp;		KeyGenerator kgen;
+&nbsp;		try {
+<b class="nc">&nbsp;			kgen = KeyGenerator.getInstance(OpenmrsConstants.ENCRYPTION_KEY_SPEC);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (NoSuchAlgorithmException e) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;could.not.generate.cipher.key&quot;, null, e);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		kgen.init(128); // 192 and 256 bits may not be available</b>
+&nbsp;
+&nbsp;		// Generate the secret key specs.
+<b class="nc">&nbsp;		SecretKey skey = kgen.generateKey();</b>
+&nbsp;
+<b class="nc">&nbsp;		return skey.getEncoded();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

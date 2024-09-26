@@ -1,0 +1,402 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProviderService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: ProviderService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ProviderService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Provider;
+&nbsp;import org.openmrs.ProviderAttribute;
+&nbsp;import org.openmrs.ProviderAttributeType;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * This service contains methods relating to providers.
+&nbsp; * 
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = Provider.class)
+&nbsp;public interface ProviderService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all providers. includes retired Provider.This method delegates to the
+&nbsp;	 * #getAllProviders(boolean) method
+&nbsp;	 * 
+&nbsp;	 * @return a list of provider objects.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all providers
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public List&lt;Provider&gt; getAllProviders();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all providers
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired - if true, retired providers are also included
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all providers that are unretired
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public List&lt;Provider&gt; getAllProviders(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires a given Provider
+&nbsp;	 * 
+&nbsp;	 * @param provider provider to retire
+&nbsp;	 * @param reason reason why the provider is retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire a provider
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROVIDERS })
+&nbsp;	public void retireProvider(Provider provider, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretire a given Provider
+&nbsp;	 * 
+&nbsp;	 * @param provider provider to unretire
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire a provider
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROVIDERS })
+&nbsp;	public Provider unretireProvider(Provider provider);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes a given Provider
+&nbsp;	 * 
+&nbsp;	 * @param provider provider to be deleted
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete a provider
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_PROVIDERS })
+&nbsp;	public void purgeProvider(Provider provider);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a provider by its provider id
+&nbsp;	 * 
+&nbsp;	 * @param providerId the provider id
+&nbsp;	 * @return the provider by it&#39;s id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get provider given ID
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Provider getProvider(Integer providerId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param provider
+&nbsp;	 * @return the Provider object after saving it in the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save a Provider with Person alone
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not save a Provider person being null
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_PROVIDERS })
+&nbsp;	public Provider saveProvider(Provider provider);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the Provider object having the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get provider given Uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Provider getProviderByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the Providers for the given person.
+&nbsp;	 * 
+&nbsp;	 * @param person
+&nbsp;	 * @return providers or empty collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return providers for given person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if person is null
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Collection&lt;Provider&gt; getProvidersByPerson(Person person);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the Providers for the given person including or excluding retired.
+&nbsp;	 * 
+&nbsp;	 * @param person
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return providers or empty collection
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all providers by person including retired if includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all providers by person and exclude retired if includeRetired is false
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if person is null
+&nbsp;	 * @since 1.10, 1.9.1
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Collection&lt;Provider&gt; getProvidersByPerson(Person person, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param query
+&nbsp;	 * @param start
+&nbsp;	 * @param length
+&nbsp;	 * @param attributes
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return the list of Providers given the query , current page and page length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider with given identifier with case in sensitive
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider with given name with case in sensitive
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider by matching query string with any unVoided PersonName&#39;s Given Name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider by matching query string with any unVoided PersonName&#39;s middleName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider by matching query string with any unVoided Person&#39;s familyName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch provider if the query string matches with any voided Person name for that
+&nbsp;	 *         Provider
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all visits with given attribute values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not find any visits if none have given attribute values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all providers if query is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find provider by identifier
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public List&lt;Provider&gt; getProviders(String query, Integer start, Integer length,
+&nbsp;	        Map&lt;ProviderAttributeType, Object&gt; attributes, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param query
+&nbsp;	 * @param start
+&nbsp;	 * @param length
+&nbsp;	 * @param attributes
+&nbsp;	 * @return the list of Providers given the query , current page and page length
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider with given identifier with case in sensitive
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider with given name with case in sensitive
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider by matching query string with any unVoided PersonName&#39;s Given Name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider by matching query string with any unVoided PersonName&#39;s middleName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch provider by matching query string with any unVoided Person&#39;s familyName
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fetch provider if the query string matches with any voided Person name for that
+&nbsp;	 *         Provider
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all visits with given attribute values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not find any visits if none have given attribute values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all providers if query is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return retired providers
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public List&lt;Provider&gt; getProviders(String query, Integer start, Integer length,
+&nbsp;	        Map&lt;ProviderAttributeType, Object&gt; attributes);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param query
+&nbsp;	 * @return Count-Integer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; exclude retired providers
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Integer getCountOfProviders(String query);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the count of providers with a person name or identifier or name that matches the
+&nbsp;	 * specified query
+&nbsp;	 * 
+&nbsp;	 * @param query the text to match
+&nbsp;	 * @param includeRetired specifies whether retired providers should be include or not
+&nbsp;	 * @return Count-Integer
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fetch number of provider matching given query
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include retired providers if includeRetired is set to true
+&nbsp;	 * @since 1.9.4
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Integer getCountOfProviders(String query, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all provider attribute types including retired provider attribute types. This method
+&nbsp;	 * delegates to the #getAllProviderAttributeTypes(boolean) method
+&nbsp;	 * 
+&nbsp;	 * @return a list of provider attribute type objects.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all provider attribute types including retired by default
+&nbsp;	 */
+&nbsp;	public List&lt;ProviderAttributeType&gt; getAllProviderAttributeTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all provider attribute types optionally including retired provider attribute types.
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean value to indicate whether to include retired records or not
+&nbsp;	 * @return a list of provider attribute type objects.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all provider attribute types excluding retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get all provider attribute types including retired
+&nbsp;	 */
+&nbsp;	public List&lt;ProviderAttributeType&gt; getAllProviderAttributeTypes(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a provider attribute type by it&#39;s id
+&nbsp;	 * 
+&nbsp;	 * @param providerAttributeTypeId the provider attribute type id
+&nbsp;	 * @return the provider type attribute by it&#39;s id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get provider attribute type for the given id
+&nbsp;	 */
+&nbsp;	public ProviderAttributeType getProviderAttributeType(Integer providerAttributeTypeId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a provider attribute type by its uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the uuid of the provider attribute type
+&nbsp;	 * @return the provider attribute type for the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the provider attribute type by its uuid
+&nbsp;	 */
+&nbsp;	public ProviderAttributeType getProviderAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a provider attribute type by its name
+&nbsp;	 *
+&nbsp;	 * @param name the name of the provider attribute type
+&nbsp;	 * @return the provider attribute type for the given name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the provider attribute type by its name
+&nbsp;	 * @since 2.7.0, 2.6.3
+&nbsp;	 */
+&nbsp;	@Authorized({PrivilegeConstants.GET_PROVIDER_ATTRIBUTE_TYPES})
+&nbsp;	public ProviderAttributeType getProviderAttributeTypeByName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a provider attribute by it&#39;s providerAttributeID
+&nbsp;	 * 
+&nbsp;	 * @param providerAttributeID the provider attribute ID of the providerAttribute
+&nbsp;	 * @return the provider attribute for the given providerAttributeID
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the provider attribute by it&#39;s providerAttributeID
+&nbsp;	 */
+&nbsp;	public ProviderAttribute getProviderAttribute(Integer providerAttributeID);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a provider attribute by its providerAttributeUuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the provider attribute uuid of the providerAttribute
+&nbsp;	 * @return the provider attribute for the given providerAttributeUuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the provider attribute by its providerAttributeUuid
+&nbsp;	 */
+&nbsp;	public ProviderAttribute getProviderAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the provider attribute type
+&nbsp;	 * 
+&nbsp;	 * @param providerAttributeType the provider attribute type to be saved
+&nbsp;	 * @return the saved provider attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save the provider attribute type
+&nbsp;	 */
+&nbsp;	public ProviderAttributeType saveProviderAttributeType(ProviderAttributeType providerAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retire a provider attribute type
+&nbsp;	 * 
+&nbsp;	 * @param providerAttributeType the provider attribute type to be retired
+&nbsp;	 * @param reason for retiring the provider attribute type
+&nbsp;	 * @return the retired provider attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire provider type attribute
+&nbsp;	 */
+&nbsp;	public ProviderAttributeType retireProviderAttributeType(ProviderAttributeType providerAttributeType, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Un-Retire a provider attribute type
+&nbsp;	 * 
+&nbsp;	 * @param providerAttributeType the provider type attribute to unretire
+&nbsp;	 * @return the unretire provider attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire a provider attribute type
+&nbsp;	 */
+&nbsp;	public ProviderAttributeType unretireProviderAttributeType(ProviderAttributeType providerAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes a provider attribute type
+&nbsp;	 * 
+&nbsp;	 * @param providerAttributeType provider attribute type to be deleted
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete a provider attribute type
+&nbsp;	 */
+&nbsp;	public void purgeProviderAttributeType(ProviderAttributeType providerAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if the identifier for the specified provider is unique
+&nbsp;	 * 
+&nbsp;	 * @param provider the provider whose identifier to check
+&nbsp;	 * @return true if the identifier is unique otherwise false
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if the identifier is a duplicate
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the identifier is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if the identifier is a blank string
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public boolean isProviderIdentifierUnique(Provider provider) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a provider with a matching identifier, this method performs a case insensitive search
+&nbsp;	 * 
+&nbsp;	 * @param identifier the identifier to match against
+&nbsp;	 * @return a {@link Provider}
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get a provider matching the specified identifier ignoring case
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Provider getProviderByIdentifier(String identifier);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the unknown provider account, i.e. the provider account that matches the uuid specified
+&nbsp;	 * as the value for the global property
+&nbsp;	 * {@link org.openmrs.util.OpenmrsConstants#GP_UNKNOWN_PROVIDER_UUID}
+&nbsp;	 * 
+&nbsp;	 * @return a {@link Provider}
+&nbsp;	 * @since 1.10
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the unknown provider account
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_PROVIDERS })
+&nbsp;	public Provider getUnknownProvider();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

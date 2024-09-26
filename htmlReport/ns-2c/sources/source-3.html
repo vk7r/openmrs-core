@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MedicationDispenseCriteria</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.parameter</a>
+</div>
+
+<h1>Coverage Summary for Class: MedicationDispenseCriteria (org.openmrs.parameter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MedicationDispenseCriteria</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.parameter;
+&nbsp;
+&nbsp;import org.openmrs.DrugOrder;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;
+&nbsp;/**
+&nbsp; * The search parameter object for MedicationDispense. A convenience interface for building
+&nbsp; * instances is provided by {@link MedicationDispenseCriteriaBuilder}.
+&nbsp; * @since 2.6.0
+&nbsp; * @see MedicationDispenseCriteriaBuilder
+&nbsp; */
+&nbsp;public class MedicationDispenseCriteria {
+&nbsp;	
+&nbsp;	private Patient patient;
+&nbsp;	
+&nbsp;	private Encounter encounter;
+&nbsp;	
+&nbsp;	private DrugOrder drugOrder;
+&nbsp;	
+<b class="fc">&nbsp;	private boolean includeVoided = false;</b>
+&nbsp;	
+<b class="fc">&nbsp;	public MedicationDispenseCriteria() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Patient getPatient() {
+<b class="fc">&nbsp;		return patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Encounter getEncounter() {
+<b class="fc">&nbsp;		return encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setEncounter(Encounter encounter) {
+<b class="fc">&nbsp;		this.encounter = encounter;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public DrugOrder getDrugOrder() {
+<b class="fc">&nbsp;		return drugOrder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDrugOrder(DrugOrder drugOrder) {
+<b class="fc">&nbsp;		this.drugOrder = drugOrder;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isIncludeVoided() {
+<b class="fc">&nbsp;		return includeVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setIncludeVoided(boolean includeVoided) {
+<b class="fc">&nbsp;		this.includeVoided = includeVoided;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

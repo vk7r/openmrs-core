@@ -1,0 +1,313 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DiagnosisService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: DiagnosisService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">DiagnosisService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import org.openmrs.DiagnosisAttribute;
+&nbsp;import org.openmrs.DiagnosisAttributeType;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.Diagnosis;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * &lt;pre&gt;
+&nbsp; * API methods for managing diagnoses
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; *  @since 2.2
+&nbsp; */
+&nbsp;public interface DiagnosisService extends OpenmrsService {
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves a diagnosis
+&nbsp;	 *
+&nbsp;	 * @param diagnosis - the diagnosis to be saved
+&nbsp;	 * @return the diagnosis
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_DIAGNOSES })
+&nbsp;	Diagnosis save(Diagnosis diagnosis);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Voids a diagnosis
+&nbsp;	 *
+&nbsp;	 * @param diagnosis - the diagnosis to be voided
+&nbsp;	 * @param voidReason - the reason for voiding the diagnosis
+&nbsp;	 * @return the diagnosis that was voided
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_DIAGNOSES })
+&nbsp;	Diagnosis voidDiagnosis(Diagnosis diagnosis, String voidReason);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a diagnosis based on the uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid - uuid of the diagnosis to be returned
+&nbsp;	 * @return diagnosis matching the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_DIAGNOSES })
+&nbsp;	Diagnosis getDiagnosisByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets diagnoses since date, sorted in reverse chronological order
+&nbsp;	 *
+&nbsp;	 * @param patient the patient whose diagnosis we are to get
+&nbsp;	 * @param fromDate the date used to filter diagnosis which happened from this date and later
+&nbsp;	 * @return the list of diagnoses for the given patient and starting from the given date
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_DIAGNOSES })
+&nbsp;	List&lt;Diagnosis&gt; getDiagnoses(Patient patient, Date fromDate);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets diagnoses for an Encounter.
+&nbsp;	 *
+&nbsp;	 * @param encounter the encounter for which to fetch diagnoses
+&nbsp;	 * @param primaryOnly whether to return only primary diagnoses
+&nbsp;	 * @param confirmedOnly whether to return only confirmed diagnoses
+&nbsp;	 * @return the list of diagnoses for the given encounter
+&nbsp;	 * 
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_DIAGNOSES })
+&nbsp;	List&lt;Diagnosis&gt; getDiagnosesByEncounter(Encounter encounter, boolean primaryOnly, boolean confirmedOnly);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets diagnoses for a Visit.
+&nbsp;	 *
+&nbsp;	 * @param visit the visit for which to fetch diagnoses
+&nbsp;	 * @param primaryOnly whether to return only primary diagnoses
+&nbsp;	 * @param confirmedOnly whether to return only confirmed diagnoses
+&nbsp;	 * @return the list of diagnoses for the given visit
+&nbsp;	 * 
+&nbsp;	 * @since 2.5.0
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_DIAGNOSES })
+&nbsp;	List&lt;Diagnosis&gt; getDiagnosesByVisit(Visit visit, boolean primaryOnly, boolean confirmedOnly);
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds the primary diagnoses for a given encounter
+&nbsp;	 *
+&nbsp;	 * @deprecated since 2.5.0, use {@link #getDiagnosesByEncounter}
+&nbsp;	 * 
+&nbsp;	 * @param encounter the encounter whose diagnoses we are to get
+&nbsp;	 * @return the list of diagnoses in the given encounter
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	List&lt;Diagnosis&gt; getPrimaryDiagnoses(Encounter encounter);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets unique diagnoses since date, sorted in reverse chronological order
+&nbsp;	 *
+&nbsp;	 * @param patient the patient whose diagnosis we are to get
+&nbsp;	 * @param fromDate the date used to filter diagnosis which happened from this date and later
+&nbsp;	 * @return the list of diagnoses
+&nbsp;	 */
+&nbsp;	List&lt;Diagnosis&gt; getUniqueDiagnoses(Patient patient, Date fromDate);
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a diagnosis by id.
+&nbsp;	 *
+&nbsp;	 * @param diagnosisId - id of the diagnosis to be returned
+&nbsp;	 * @return diagnosis matching the given id
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_DIAGNOSES })
+&nbsp;	Diagnosis getDiagnosis(Integer diagnosisId);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Revive a diagnosis (pull a Lazarus)
+&nbsp;	 *
+&nbsp;	 * @param diagnosis diagnosis to unvoid
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unset voided bit on given diagnosis
+&nbsp;	 * @return the unvoided diagnosis
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_DIAGNOSES)
+&nbsp;	Diagnosis unvoidDiagnosis(Diagnosis diagnosis) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely remove a diagnosis from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidDiagnosis(Diagnosis) for that one) If other things link to
+&nbsp;	 * this diagnosis, an error will be thrown.
+&nbsp;	 *
+&nbsp;	 * @param diagnosis diagnosis to remove from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see #purgeDiagnosis(Diagnosis) 
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given diagnosis from th e database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_DIAGNOSES)
+&nbsp;	void purgeDiagnosis(Diagnosis diagnosis) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fetches all diagnosis attribute types including retired ones.
+&nbsp;	 *
+&nbsp;	 * @return all {@link DiagnosisAttributeType}s
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all diagnosis attribute types including retired ones.
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_DIAGNOSES_ATTRIBUTE_TYPES)
+&nbsp;	List&lt;DiagnosisAttributeType&gt; getAllDiagnosisAttributeTypes() throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fetches a given diagnosis attribute type using the provided id
+&nbsp;	 *
+&nbsp;	 * @param id the id of the diagnosis attribute type to fetch
+&nbsp;	 * @return the {@link DiagnosisAttributeType} with the given id
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the diagnosis attribute type with the given id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no diagnosis attribute type exists with the given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_DIAGNOSES_ATTRIBUTE_TYPES)
+&nbsp;	DiagnosisAttributeType getDiagnosisAttributeTypeById(Integer id) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fetches a given diagnosis attribute type using the provided uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the uuid of the diagnosis attribute type to fetch
+&nbsp;	 * @return the {@link DiagnosisAttributeType} with the given uuid
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the diagnosis attribute type with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no diagnosis attribute type exists with the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_DIAGNOSES_ATTRIBUTE_TYPES)
+&nbsp;	DiagnosisAttributeType getDiagnosisAttributeTypeByUuid(String uuid) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given diagnosis attribute type in the database
+&nbsp;	 *
+&nbsp;	 * @param diagnosisAttributeType the diagnosis attribute type to save or update
+&nbsp;	 * @return the DiagnosisAttributeType created/saved
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a new diagnosis attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; edit an existing diagnosis attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_DIAGNOSES)
+&nbsp;	DiagnosisAttributeType saveDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Retires the given diagnosis attribute type in the database
+&nbsp;	 *
+&nbsp;	 * @param diagnosisAttributeType the diagnosis attribute type to retire
+&nbsp;	 * @param reason the reason why the diagnosis attribute type is being retired
+&nbsp;	 * @return the diagnosisAttributeType retired
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire a diagnosis attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_DIAGNOSES)
+&nbsp;	DiagnosisAttributeType retireDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType, String reason) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Restores a diagnosis attribute type that was previously retired
+&nbsp;	 *
+&nbsp;	 * @param diagnosisAttributeType the diagnosis attribute type to unretire.
+&nbsp;	 * @return the DiagnosisAttributeType unretired
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire a retired diagnosis attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_DIAGNOSES)
+&nbsp;	DiagnosisAttributeType unretireDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely removes a diagnosis attribute type from the database
+&nbsp;	 *
+&nbsp;	 * @param diagnosisAttributeType the diagnosis attribute type to purge
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; completely remove a diagnosis attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_DIAGNOSES)
+&nbsp;	void purgeDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fetches a given diagnosis attribute using the provided uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid the uuid of the diagnosis attribute to fetch
+&nbsp;	 * @return the {@link DiagnosisAttribute} with the given uuid
+&nbsp;	 * @since 2.5.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the diagnosis attribute with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no diagnosis attribute has the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_DIAGNOSES)
+&nbsp;	DiagnosisAttribute getDiagnosisAttributeByUuid(String uuid) throws APIException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

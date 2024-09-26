@@ -1,0 +1,407 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: FormDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">FormDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.EncounterType;
+&nbsp;import org.openmrs.Field;
+&nbsp;import org.openmrs.FieldAnswer;
+&nbsp;import org.openmrs.FieldType;
+&nbsp;import org.openmrs.Form;
+&nbsp;import org.openmrs.FormField;
+&nbsp;import org.openmrs.FormResource;
+&nbsp;import org.openmrs.api.FormService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Database access functions for the Form, FormField, and Field objects
+&nbsp; */
+&nbsp;public interface FormDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#saveForm(Form)
+&nbsp;	 */
+&nbsp;	public Form saveForm(Form form) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates new form from the given &lt;code&gt;Form&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param form &lt;code&gt;Form&lt;/code&gt; to duplicate
+&nbsp;	 * @return newly duplicated &lt;code&gt;Form&lt;/code&gt;
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Form duplicateForm(Form form) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get form by internal form identifier
+&nbsp;	 * 
+&nbsp;	 * @param formId &lt;code&gt;Integer&lt;/code&gt; internal identifier for requested Form
+&nbsp;	 * @return requested &lt;code&gt;Form&lt;/code&gt;
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Form getForm(Integer formId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get form by exact name and version
+&nbsp;	 * 
+&nbsp;	 * @param name the name of the form to get
+&nbsp;	 * @param version the version of the form to get
+&nbsp;	 * @return the form with the exact name and version given
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Form getForm(String name, String version) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all forms with the given name, sorted (alphabetically) by descending version
+&nbsp;	 * 
+&nbsp;	 * @param name String name of the forms to get
+&nbsp;	 * @return All forms with the given name, sorted by (alphabetically) by descending version
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Form&gt; getFormsByName(String name) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete form from database. This is included for troubleshooting and low-level system
+&nbsp;	 * administration. Ideally, this method should &lt;b&gt;never&lt;/b&gt; be called &amp;mdash; &lt;code&gt;Forms&lt;/code&gt;
+&nbsp;	 * should be &lt;em&gt;retired&lt;/em&gt; and not &lt;em&gt;deleted&lt;/em&gt; altogether (since many foreign key
+&nbsp;	 * constraints depend on forms, deleting a form would require deleting all traces, and any
+&nbsp;	 * historical trail would be lost). This method only clears form roles and attempts to delete
+&nbsp;	 * the form record. If the form has been included in any other parts of the database (through a
+&nbsp;	 * foreign key), the attempt to delete the form will violate foreign key constraints and fail.
+&nbsp;	 * 
+&nbsp;	 * @param form Form to delete
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteForm(Form form) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all field types
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include retired field types as well?
+&nbsp;	 * @return List&amp;lt;FieldTypes&amp;gt; object with all FieldTypes, possibly including retired ones
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;FieldType&gt; getAllFieldTypes(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get fieldType by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param fieldTypeId Internal Integer identifier of FieldType
+&nbsp;	 * @return The FieldType with specified internal identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public FieldType getFieldType(Integer fieldTypeId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all forms in the database, possibly including retired ones
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include retired forms?
+&nbsp;	 * @return List&amp;lt;Form&amp;gt; object of all forms, possibly including retired ones
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Form&gt; getAllForms(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all FormFields in the database
+&nbsp;	 * 
+&nbsp;	 * @return List&amp;lt;FormField&amp;gt; object of all FormFields in the database
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;FormField&gt; getAllFormFields() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.FormService#getFormField(org.openmrs.Form, org.openmrs.Concept,
+&nbsp;	 *      java.util.Collection, boolean)
+&nbsp;	 */
+&nbsp;	public FormField getFormField(Form form, Concept concept, Collection&lt;FormField&gt; ignoreFormFields, boolean force)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param search String phrase to search for
+&nbsp;	 * @return list of fields in the database matching search phrase
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Field&gt; getFields(String search) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all fields in the database, possibly including retired ones
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to return retired fields
+&nbsp;	 * @return all fields in the database, possibly including retired ones
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Field&gt; getAllFields(boolean includeRetired) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#getField(Integer)
+&nbsp;	 */
+&nbsp;	public Field getField(Integer fieldId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#saveField(Field)
+&nbsp;	 */
+&nbsp;	public Field saveField(Field field) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes a field from the database.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This will fail if any other entities reference this field via a foreign key
+&nbsp;	 * 
+&nbsp;	 * @param field the Field to delete
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteField(Field field) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#getFormField(Integer)
+&nbsp;	 */
+&nbsp;	public FormField getFormField(Integer formFieldId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#saveFormField(FormField)
+&nbsp;	 */
+&nbsp;	public FormField saveFormField(FormField formField) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deletes a FormField from the database. This will fail if any other entities reference this
+&nbsp;	 * FormField via a foreign key
+&nbsp;	 * 
+&nbsp;	 * @param formField the FormField to delete
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteFormField(FormField formField) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all fields that match a broad range of (nullable) criteria
+&nbsp;	 * 
+&nbsp;	 * @param forms &lt;code&gt;Collection&lt;/code&gt; of &lt;code&gt;Form&lt;/code&gt; to which the requested Fields must
+&nbsp;	 *            belong
+&nbsp;	 * @param fieldTypes &lt;code&gt;Collection&lt;/code&gt; of &lt;code&gt;FieldType&lt;/code&gt; of which the requested
+&nbsp;	 *            fields must be
+&nbsp;	 * @param concepts &lt;code&gt;Collection&lt;/code&gt; of &lt;code&gt;Concepts&lt;/code&gt; which the fields must point
+&nbsp;	 *            to
+&nbsp;	 * @param tableNames Collection of &lt;code&gt;TableName&lt;/code&gt;s which the fields must point to
+&nbsp;	 * @param attributeNames Collection of &lt;code&gt;String&lt;/code&gt; attribute names which the
+&nbsp;	 *            fields must point to
+&nbsp;	 * @param selectMultiple &lt;code&gt;Boolean&lt;/code&gt; value that matching fields must have for
+&nbsp;	 *            selectMultiple
+&nbsp;	 * @param containsAllAnswers &lt;code&gt;Collection&lt;/code&gt; of &lt;code&gt;FieldAnswer&lt;/code&gt;s, all of which
+&nbsp;	 *            a matching field must contain (not yet implemented)
+&nbsp;	 * @param containsAnyAnswer &lt;code&gt;Collection&lt;/code&gt; of &lt;code&gt;FieldAnswer&lt;/code&gt;s, any one of
+&nbsp;	 *            which a matching field must contain (not yet implemented)
+&nbsp;	 * @param retired &lt;code&gt;Boolean&lt;/code&gt; retired status that fields must match
+&nbsp;	 * @return All Fields that match the criteria
+&nbsp;	 */
+&nbsp;	public List&lt;Field&gt; getFields(Collection&lt;Form&gt; forms, Collection&lt;FieldType&gt; fieldTypes, Collection&lt;Concept&gt; concepts,
+&nbsp;	        Collection&lt;String&gt; tableNames, Collection&lt;String&gt; attributeNames, Boolean selectMultiple,
+&nbsp;	        Collection&lt;FieldAnswer&gt; containsAllAnswers, Collection&lt;FieldAnswer&gt; containsAnyAnswer, Boolean retired)
+&nbsp;	        throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all forms that contain the given &lt;code&gt;Concept&lt;/code&gt; as one of their fields. (Includes
+&nbsp;	 * retired forms.)
+&nbsp;	 * 
+&nbsp;	 * @param concept the &lt;code&gt;Concept&lt;/code&gt; to search through form fields for
+&nbsp;	 * @return forms that contain a form field referencing the given concept
+&nbsp;	 */
+&nbsp;	public List&lt;Form&gt; getFormsContainingConcept(Concept concept) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all forms that match all the criteria. Expects the list objects to be non-null
+&nbsp;	 * 
+&nbsp;	 * @param partialName String of partial name of form to search on
+&nbsp;	 * @param published boolean - is the form published?
+&nbsp;	 * @param encounterTypes Collection of &lt;code&gt;EncounterType&lt;/code&gt;s that the form must represent
+&nbsp;	 * @param retired boolean - is the form retired?
+&nbsp;	 * @param containingAnyFormField Collection of &lt;code&gt;FormField&lt;/code&gt;s, any one of which must be
+&nbsp;	 *            contained in the form
+&nbsp;	 * @param containingAllFormFields Collection of &lt;code&gt;FormField&lt;/code&gt;s, all of which must be
+&nbsp;	 *            contained in the form
+&nbsp;	 * @param fields Collection of &lt;code&gt;Field&lt;/code&gt;s that the form must contain
+&nbsp;	 * @return All forms that match the criteria
+&nbsp;	 * @see org.openmrs.api.FormService#getForms(java.lang.String, java.lang.Boolean,
+&nbsp;	 *      java.util.Collection, java.lang.Boolean, java.util.Collection, java.util.Collection,
+&nbsp;	 *      java.util.Collection)
+&nbsp;	 */
+&nbsp;	public List&lt;Form&gt; getForms(String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see #getForms(String, Boolean, Collection, Boolean, Collection, Collection, Collection)
+&nbsp;	 */
+&nbsp;	public Integer getFormCount(String partialName, Boolean published, Collection&lt;EncounterType&gt; encounterTypes,
+&nbsp;	        Boolean retired, Collection&lt;FormField&gt; containingAnyFormField, Collection&lt;FormField&gt; containingAllFormFields,
+&nbsp;	        Collection&lt;Field&gt; fields) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete the given field type from the database
+&nbsp;	 * 
+&nbsp;	 * @param fieldType FieldType to delete
+&nbsp;	 */
+&nbsp;	public void deleteFieldType(FieldType fieldType) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return field or null
+&nbsp;	 */
+&nbsp;	public Field getFieldByUuid(String uuid);
+&nbsp;	
+&nbsp;	public FieldAnswer getFieldAnswerByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return field type or null
+&nbsp;	 */
+&nbsp;	public FieldType getFieldTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return fieldType  associated with given name
+&nbsp;	 *
+&nbsp;	 * @param name Name of the fileType to query
+&nbsp;	 * @return fieldType object associate with given name
+&nbsp;	 */
+&nbsp;	public FieldType getFieldTypeByName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return form or null
+&nbsp;	 */
+&nbsp;	public Form getFormByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return form field or null
+&nbsp;	 */
+&nbsp;	public FormField getFormFieldByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given field type to the database
+&nbsp;	 * 
+&nbsp;	 * @param fieldType FieldType to save to the database
+&nbsp;	 * @return the newly saved field type
+&nbsp;	 */
+&nbsp;	public FieldType saveFieldType(FieldType fieldType) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of FormFields given a Field
+&nbsp;	 * 
+&nbsp;	 * @param field
+&nbsp;	 * @return List of FormFields
+&nbsp;	 */
+&nbsp;	public List&lt;FormField&gt; getFormFieldsByField(Field field);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#getFormResource(java.lang.Integer) 
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource getFormResource(Integer formResourceId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#getFormResourceByUuid(java.lang.String) 
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource getFormResourceByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#getFormResource(org.openmrs.Form, java.lang.String)
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource getFormResource(Form form, String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#getFormResourcesForForm(org.openmrs.Form)
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public Collection&lt;FormResource&gt; getFormResourcesForForm(Form form);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#saveFormResource(org.openmrs.FormResource)
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public FormResource saveFormResource(FormResource formResource);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see FormService#purgeFormResource(org.openmrs.FormResource)
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void deleteFormResource(FormResource formResource);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

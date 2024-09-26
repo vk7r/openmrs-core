@@ -1,0 +1,112 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > GlobalPropertyListener</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: GlobalPropertyListener (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">GlobalPropertyListener</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;
+&nbsp;/**
+&nbsp; * This interface allows code to be run when global properties are created, edited, or deleted. &lt;br&gt;
+&nbsp; * 
+&nbsp; * @see AdministrationService#addGlobalPropertyListener(GlobalPropertyListener)
+&nbsp; */
+&nbsp;public interface GlobalPropertyListener {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Asks this listener whether it wants to be notified about the given property name
+&nbsp;	 * 
+&nbsp;	 * @param propertyName
+&nbsp;	 * @return whether this listener wants its action methods to be notified of properties with the
+&nbsp;	 *         given name
+&nbsp;	 */
+&nbsp;	public boolean supportsPropertyName(String propertyName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called after a global property is created or updated
+&nbsp;	 * 
+&nbsp;	 * @param newValue the new value of the property that was just saved
+&nbsp;	 */
+&nbsp;	public void globalPropertyChanged(GlobalProperty newValue);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Called after a global property is deleted
+&nbsp;	 * 
+&nbsp;	 * @param propertyName the name of the property that was just deleted
+&nbsp;	 */
+&nbsp;	public void globalPropertyDeleted(String propertyName);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

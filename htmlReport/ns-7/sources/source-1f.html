@@ -1,0 +1,140 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > TemplateDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: TemplateDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">TemplateDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.notification.Template;
+&nbsp;
+&nbsp;/**
+&nbsp; * Message template related database functions
+&nbsp; * 
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public interface TemplateDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all message templates
+&nbsp;	 * 
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Template&gt; getTemplates() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get message template by id
+&nbsp;	 * 
+&nbsp;	 * @param id internal message template identifier
+&nbsp;	 * @return message template with given internal identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public Template getTemplate(Integer id) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get message template by name
+&nbsp;	 * 
+&nbsp;	 * @param name message template name
+&nbsp;	 * @return message template with given name
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;Template&gt; getTemplatesByName(String name) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create new template.
+&nbsp;	 * 
+&nbsp;	 * @param template
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void createTemplate(Template template) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Update existing template.
+&nbsp;	 * 
+&nbsp;	 * @param template
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void updateTemplate(Template template) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete existing template.
+&nbsp;	 * 
+&nbsp;	 * @param template
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteTemplate(Template template) throws DAOException;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

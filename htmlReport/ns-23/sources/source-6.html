@@ -1,0 +1,904 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Module</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.module</a>
+</div>
+
+<h1>Coverage Summary for Class: Module (org.openmrs.module)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Module</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    79%
+  </span>
+  <span class="absValue">
+    (64/81)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,9%
+  </span>
+  <span class="absValue">
+    (146/174)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.module;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.IdentityHashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Properties;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.builder.HashCodeBuilder;
+&nbsp;import org.openmrs.GlobalProperty;
+&nbsp;import org.openmrs.Privilege;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;
+&nbsp;/**
+&nbsp; * Generic module class that openmrs manipulates
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public final class Module {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Module.class);</b>
+&nbsp;	
+&nbsp;	private String name;
+&nbsp;	
+&nbsp;	private String moduleId;
+&nbsp;	
+&nbsp;	private String packageName;
+&nbsp;	
+&nbsp;	private String description;
+&nbsp;	
+&nbsp;	private String author;
+&nbsp;	
+&nbsp;	private String version;
+&nbsp;	
+&nbsp;	private String updateURL; // should be a URL to an update.rdf file
+&nbsp;	
+<b class="fc">&nbsp;	private String updateVersion = null; // version obtained from the remote update.rdf file</b>
+&nbsp;	
+<b class="fc">&nbsp;	private String downloadURL = null; // will only be populated when the remote file is newer than the current module</b>
+&nbsp;	
+&nbsp;	private ModuleActivator moduleActivator;
+&nbsp;	
+&nbsp;	private String activatorName;
+&nbsp;	
+&nbsp;	private String requireOpenmrsVersion;
+&nbsp;	
+&nbsp;	private String requireDatabaseVersion;
+&nbsp;	
+&nbsp;	private Map&lt;String, String&gt; requiredModulesMap;
+&nbsp;	
+&nbsp;	private Map&lt;String, String&gt; awareOfModulesMap;
+&nbsp;	
+&nbsp;	private Map&lt;String, String&gt; startBeforeModulesMap;
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;AdvicePoint&gt; advicePoints = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Map&lt;String, String&gt; extensionNames = new IdentityHashMap&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;Extension&gt; extensions = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Map&lt;String, Properties&gt; messages = new HashMap&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;Privilege&gt; privileges = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;GlobalProperty&gt; globalProperties = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;String&gt; mappingFiles = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;String&gt; packagesWithMappedClasses = new HashSet&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Document config = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Document sqldiff = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private boolean mandatory = Boolean.FALSE;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private List&lt;ModuleConditionalResource&gt; conditionalResources = new ArrayList&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// keep a reference to the file that we got this module from so we can delete
+&nbsp;	// it if necessary
+<b class="fc">&nbsp;	private File file = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private String startupErrorMessage = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Simple constructor
+&nbsp;	 *
+&nbsp;	 * @param name
+&nbsp;	 */
+<b class="fc">&nbsp;	public Module(String name) {</b>
+<b class="fc">&nbsp;		this.name = name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Main constructor
+&nbsp;	 *
+&nbsp;	 * @param name
+&nbsp;	 * @param moduleId
+&nbsp;	 * @param packageName
+&nbsp;	 * @param author
+&nbsp;	 * @param description
+&nbsp;	 * @param version
+&nbsp;	 */
+<b class="fc">&nbsp;	public Module(String name, String moduleId, String packageName, String author, String description, String version) {</b>
+<b class="fc">&nbsp;		this.name = name;</b>
+<b class="fc">&nbsp;		this.moduleId = moduleId;</b>
+<b class="fc">&nbsp;		this.packageName = packageName;</b>
+<b class="fc">&nbsp;		this.author = author;</b>
+<b class="fc">&nbsp;		this.description = description;</b>
+<b class="fc">&nbsp;		this.version = version;</b>
+<b class="fc">&nbsp;		log.debug(&quot;Creating module &quot; + name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object obj) {
+<b class="fc">&nbsp;		if (obj != null &amp;&amp; obj instanceof Module) {</b>
+<b class="fc">&nbsp;			Module mod = (Module) obj;</b>
+<b class="fc">&nbsp;			return getModuleId().equals(mod.getModuleId());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		return new HashCodeBuilder().append(getModuleId()).toHashCode();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the moduleActivator
+&nbsp;	 */
+&nbsp;	public ModuleActivator getModuleActivator() {
+&nbsp;		try {
+<b class="fc">&nbsp;			if (moduleActivator == null) {</b>
+<b class="fc">&nbsp;				ModuleClassLoader classLoader = ModuleFactory.getModuleClassLoader(this);</b>
+<b class="fc">&nbsp;				if (classLoader == null) {</b>
+<b class="nc">&nbsp;					throw new ModuleException(&quot;The classloader is null&quot;, getModuleId());</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				Class&lt;?&gt; c = classLoader.loadClass(getActivatorName());</b>
+<b class="fc">&nbsp;				Object o = c.newInstance();</b>
+<b class="fc">&nbsp;				if (ModuleActivator.class.isAssignableFrom(o.getClass())) {</b>
+<b class="fc">&nbsp;					setModuleActivator((ModuleActivator) o);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassNotFoundException | NoClassDefFoundError e) {</b>
+&nbsp;			
+<b class="nc">&nbsp;			throw new ModuleException(&quot;Unable to load/find moduleActivator: &#39;&quot; + getActivatorName() + &quot;&#39;&quot;, name, e);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IllegalAccessException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(&quot;Unable to load/access moduleActivator: &#39;&quot; + getActivatorName() + &quot;&#39;&quot;, name, e);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (InstantiationException e) {</b>
+<b class="nc">&nbsp;			throw new ModuleException(&quot;Unable to load/instantiate moduleActivator: &#39;&quot; + getActivatorName() + &quot;&#39;&quot;, name, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return moduleActivator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param moduleActivator the moduleActivator to set
+&nbsp;	 */
+&nbsp;	public void setModuleActivator(ModuleActivator moduleActivator) {
+<b class="fc">&nbsp;		this.moduleActivator = moduleActivator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the activatorName
+&nbsp;	 */
+&nbsp;	public String getActivatorName() {
+<b class="fc">&nbsp;		return activatorName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param activatorName the activatorName to set
+&nbsp;	 */
+&nbsp;	public void setActivatorName(String activatorName) {
+<b class="fc">&nbsp;		this.activatorName = activatorName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the author
+&nbsp;	 */
+&nbsp;	public String getAuthor() {
+<b class="fc">&nbsp;		return author;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param author the author to set
+&nbsp;	 */
+&nbsp;	public void setAuthor(String author) {
+<b class="nc">&nbsp;		this.author = author;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the description
+&nbsp;	 */
+&nbsp;	public String getDescription() {
+<b class="fc">&nbsp;		return description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param description the description to set
+&nbsp;	 */
+&nbsp;	public void setDescription(String description) {
+<b class="nc">&nbsp;		this.description = description;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the name
+&nbsp;	 */
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param name the name to set
+&nbsp;	 */
+&nbsp;	public void setName(String name) {
+<b class="nc">&nbsp;		this.name = name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the requireDatabaseVersion
+&nbsp;	 */
+&nbsp;	public String getRequireDatabaseVersion() {
+<b class="fc">&nbsp;		return requireDatabaseVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param requireDatabaseVersion the requireDatabaseVersion to set
+&nbsp;	 */
+&nbsp;	public void setRequireDatabaseVersion(String requireDatabaseVersion) {
+<b class="fc">&nbsp;		this.requireDatabaseVersion = requireDatabaseVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This list of strings is just what is included in the config.xml file, the full package names:
+&nbsp;	 * e.g. org.openmrs.module.formentry
+&nbsp;	 *
+&nbsp;	 * @return the list of requiredModules
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getRequiredModules() {
+<b class="fc">&nbsp;		return requiredModulesMap == null ? null : new ArrayList&lt;&gt;(requiredModulesMap.keySet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method to get the version of this given module that is required
+&nbsp;	 *
+&nbsp;	 * @return the version of the given required module, or null if there are no version constraints
+&nbsp;	 * @since 1.5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no required modules exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no required module by given name exists
+&nbsp;	 */
+&nbsp;	public String getRequiredModuleVersion(String moduleName) {
+<b class="fc">&nbsp;		return requiredModulesMap == null ? null : requiredModulesMap.get(moduleName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is a convenience method to set all the required modules without any version requirements
+&nbsp;	 *
+&nbsp;	 * @param requiredModules the requiredModules to set for this module
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set modules when there is a null required modules map
+&nbsp;	 */
+&nbsp;	public void setRequiredModules(List&lt;String&gt; requiredModules) {
+<b class="fc">&nbsp;		if (requiredModulesMap == null) {</b>
+<b class="fc">&nbsp;			requiredModulesMap = new HashMap&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (String module : requiredModules) {</b>
+<b class="fc">&nbsp;			requiredModulesMap.put(module, null);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param requiredModule the requiredModule to add for this module
+&nbsp;	 * @param version version requiredModule
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add module to required modules map
+&nbsp;	 */
+&nbsp;	public void addRequiredModule(String requiredModule, String version) {
+<b class="fc">&nbsp;		if (requiredModulesMap != null) {</b>
+<b class="fc">&nbsp;			requiredModulesMap.put(requiredModule, version);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param requiredModulesMap &lt;code&gt;Map&amp;lt;String,String&amp;gt;&lt;/code&gt; of the &lt;code&gt;requiredModule&lt;/code&gt;s
+&nbsp;	 *            to set
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	public void setRequiredModulesMap(Map&lt;String, String&gt; requiredModulesMap) {
+<b class="fc">&nbsp;		this.requiredModulesMap = requiredModulesMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the modules that are required for this module. The keys in this map are the module
+&nbsp;	 * package names. The values in the map are the required version. If no specific version is
+&nbsp;	 * required, it will be null.
+&nbsp;	 *
+&nbsp;	 * @return a map from required module to the version that is required
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getRequiredModulesMap() {
+<b class="fc">&nbsp;		return requiredModulesMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets modules that must start after this module
+&nbsp;	 * @param startBeforeModulesMap the startedBefore modules to set
+&nbsp;	 */
+&nbsp;	public void setStartBeforeModulesMap(Map&lt;String, String&gt; startBeforeModulesMap) {
+<b class="fc">&nbsp;		this.startBeforeModulesMap = startBeforeModulesMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets modules which should start after this
+&nbsp;	 * @return map where key is module name and value is module version
+&nbsp;	 */
+&nbsp;	public Map&lt;String, String&gt; getStartBeforeModulesMap() {
+<b class="fc">&nbsp;		return this.startBeforeModulesMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets names of modules which should start after this
+&nbsp;	 * @since 1.11
+&nbsp;	 * @return list of module names or null
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getStartBeforeModules() {
+<b class="fc">&nbsp;		return this.startBeforeModulesMap == null ? null : new ArrayList&lt;&gt;(this.startBeforeModulesMap.keySet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the modules that this module is aware of.
+&nbsp;	 *
+&nbsp;	 * @param awareOfModulesMap &lt;code&gt;Map&amp;lt;String,String&amp;gt;&lt;/code&gt; of the
+&nbsp;	 *            &lt;code&gt;awareOfModulesMap&lt;/code&gt;s to set
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public void setAwareOfModulesMap(Map&lt;String, String&gt; awareOfModulesMap) {
+<b class="fc">&nbsp;		this.awareOfModulesMap = awareOfModulesMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This list of strings is just what is included in the config.xml file, the full package names:
+&nbsp;	 * e.g. org.openmrs.module.formentry, for the modules that this module is aware of.
+&nbsp;	 *
+&nbsp;	 * @since 1.9
+&nbsp;	 * @return the list of awareOfModules
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getAwareOfModules() {
+<b class="fc">&nbsp;		return awareOfModulesMap == null ? null : new ArrayList&lt;&gt;(awareOfModulesMap.keySet());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getAwareOfModuleVersion(String awareOfModule) {
+<b class="nc">&nbsp;		return awareOfModulesMap == null ? null : awareOfModulesMap.get(awareOfModule);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the requireOpenmrsVersion
+&nbsp;	 */
+&nbsp;	public String getRequireOpenmrsVersion() {
+<b class="fc">&nbsp;		return requireOpenmrsVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param requireOpenmrsVersion the requireOpenmrsVersion to set
+&nbsp;	 */
+&nbsp;	public void setRequireOpenmrsVersion(String requireOpenmrsVersion) {
+<b class="fc">&nbsp;		this.requireOpenmrsVersion = requireOpenmrsVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the module id
+&nbsp;	 */
+&nbsp;	public String getModuleId() {
+<b class="fc">&nbsp;		return moduleId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the module id, with all . replaced with /
+&nbsp;	 */
+&nbsp;	public String getModuleIdAsPath() {
+<b class="fc">&nbsp;		return moduleId == null ? null : moduleId.replace(&#39;.&#39;, &#39;/&#39;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param moduleId the module id to set
+&nbsp;	 */
+&nbsp;	public void setModuleId(String moduleId) {
+<b class="fc">&nbsp;		this.moduleId = moduleId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the packageName
+&nbsp;	 */
+&nbsp;	public String getPackageName() {
+<b class="fc">&nbsp;		return packageName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param packageName the packageName to set
+&nbsp;	 */
+&nbsp;	public void setPackageName(String packageName) {
+<b class="nc">&nbsp;		this.packageName = packageName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the version
+&nbsp;	 */
+&nbsp;	public String getVersion() {
+<b class="fc">&nbsp;		return version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param version the version to set
+&nbsp;	 */
+&nbsp;	public void setVersion(String version) {
+<b class="nc">&nbsp;		this.version = version;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the updateURL
+&nbsp;	 */
+&nbsp;	public String getUpdateURL() {
+<b class="fc">&nbsp;		return updateURL;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param updateURL the updateURL to set
+&nbsp;	 */
+&nbsp;	public void setUpdateURL(String updateURL) {
+<b class="fc">&nbsp;		this.updateURL = updateURL;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the downloadURL
+&nbsp;	 */
+&nbsp;	public String getDownloadURL() {
+<b class="nc">&nbsp;		return downloadURL;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param downloadURL the downloadURL to set
+&nbsp;	 */
+&nbsp;	public void setDownloadURL(String downloadURL) {
+<b class="nc">&nbsp;		this.downloadURL = downloadURL;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the updateVersion
+&nbsp;	 */
+&nbsp;	public String getUpdateVersion() {
+<b class="nc">&nbsp;		return updateVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param updateVersion the updateVersion to set
+&nbsp;	 */
+&nbsp;	public void setUpdateVersion(String updateVersion) {
+<b class="nc">&nbsp;		this.updateVersion = updateVersion;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Expands (i.e. creates instances of) {@code Extension}s defined by their class name in {@link #setExtensionNames(Map)}.
+&nbsp;	 * 
+&nbsp;	 * @return the extensions
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not expand extensionNames if extensionNames is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not expand extensionNames if extensionNames is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not expand extensionNames if extensions matches extensionNames
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; expand extensionNames if extensions does not match extensionNames 
+&nbsp;	 */
+&nbsp;	public List&lt;Extension&gt; getExtensions() {
+<b class="fc">&nbsp;		if (isNoNeedToExpand()) {</b>
+<b class="fc">&nbsp;			return extensions;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return expandExtensionNames();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param extensions the extensions to set
+&nbsp;	 */
+&nbsp;	public void setExtensions(List&lt;Extension&gt; extensions) {
+<b class="nc">&nbsp;		this.extensions = extensions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A map of pointId to classname. The classname is expected to be a class that extends the
+&nbsp;	 * {@link Extension} object.
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * This map will be expanded into full Extension objects the first time {@link #getExtensions()}
+&nbsp;	 * is called.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * The map is a direct representation of {@code extension} tags in a module&#39;s config.xml. For example
+&nbsp;	 * &lt;pre&gt;{@code
+&nbsp;	 * &lt;extension&gt;
+&nbsp;	 *     &lt;point&gt;org.openmrs.admin.list&lt;/point&gt;
+&nbsp;	 *     &lt;class&gt;org.openmrs.module.reporting.web.extension.ManageAdminListExt&lt;/class&gt;
+&nbsp;	 * &lt;/extension&gt;
+&nbsp;	 * }
+&nbsp;	 * &lt;/pre&gt;
+&nbsp;	 * &lt;/p&gt;
+&nbsp;	 *
+&nbsp;	 * @param map from pointid to classname of an extension
+&nbsp;	 * @see ModuleFileParser
+&nbsp;	 */
+&nbsp;	public void setExtensionNames(Map&lt;String, String&gt; map) {
+<b class="fc">&nbsp;		if (log.isDebugEnabled()) {</b>
+<b class="nc">&nbsp;			for (Map.Entry&lt;String, String&gt; entry : extensionNames.entrySet()) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;Setting extension names: {} : {}&quot;, entry.getKey(), entry.getValue());</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		this.extensionNames = map;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean isNoNeedToExpand() {
+<b class="fc">&nbsp;		if (extensionNames == null || extensionNames.isEmpty()) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (Extension ext : extensions) {</b>
+<b class="fc">&nbsp;			if (!extensionNames.get(ext.getPointId()).equals(ext.getClass().getName())) {</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return extensions.size() == extensionNames.size();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Expand the temporary extensionNames map of pointid-classname to full pointid-classobject. &lt;br&gt;
+&nbsp;	 * This has to be done after the fact because when the pointid-classnames are parsed, the
+&nbsp;	 * module&#39;s objects aren&#39;t fully realized yet and so not all classes can be loaded. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 *
+&nbsp;	 * @return a list of full Extension objects
+&nbsp;	 */
+&nbsp;	private List&lt;Extension&gt; expandExtensionNames() {
+<b class="fc">&nbsp;		ModuleClassLoader moduleClsLoader = ModuleFactory.getModuleClassLoader(this);</b>
+<b class="fc">&nbsp;		if (moduleClsLoader == null) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Module class loader is not available, maybe the module {} is stopped/stopping&quot;, getName());</b>
+<b class="fc">&nbsp;			return extensions;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		extensions.clear();</b>
+<b class="fc">&nbsp;		for (Map.Entry&lt;String, String&gt; entry : extensionNames.entrySet()) {</b>
+<b class="fc">&nbsp;			String point = entry.getKey();</b>
+<b class="fc">&nbsp;			String className = entry.getValue();</b>
+<b class="fc">&nbsp;			log.debug(getModuleId() + &quot;: Expanding extension name (point|class): {}|{}&quot;, point, className);</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Class&lt;?&gt; cls = moduleClsLoader.loadClass(className);</b>
+<b class="fc">&nbsp;				Extension ext = (Extension) cls.newInstance();</b>
+<b class="fc">&nbsp;				ext.setPointId(point);</b>
+<b class="fc">&nbsp;				ext.setModuleId(this.getModuleId());</b>
+<b class="fc">&nbsp;				extensions.add(ext);</b>
+<b class="fc">&nbsp;				log.debug(getModuleId() + &quot;: Added extension: {}|{}&quot;, ext.getExtensionId(), ext.getClass());</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoClassDefFoundError e) {</b>
+<b class="fc">&nbsp;				log.warn(getModuleId() + &quot;: Unable to create instance of class defined for extension point: &quot; + point, e);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return extensions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the advicePoints
+&nbsp;	 */
+&nbsp;	public List&lt;AdvicePoint&gt; getAdvicePoints() {
+<b class="fc">&nbsp;		return advicePoints;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param advicePoints the advicePoints to set
+&nbsp;	 */
+&nbsp;	public void setAdvicePoints(List&lt;AdvicePoint&gt; advicePoints) {
+<b class="fc">&nbsp;		this.advicePoints = advicePoints;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public File getFile() {
+<b class="fc">&nbsp;		return file;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setFile(File file) {
+<b class="fc">&nbsp;		this.file = file;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a mapping from locale to properties used by this module. The locales are represented as
+&nbsp;	 * a string containing language and country codes.
+&nbsp;	 *
+&nbsp;	 * @return mapping from locales to properties
+&nbsp;	 * @deprecated as of 2.0 because messages are automatically loaded from the classpath
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public Map&lt;String, Properties&gt; getMessages() {
+<b class="nc">&nbsp;		return messages;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the map from locale to properties used by this module.
+&nbsp;	 *
+&nbsp;	 * @param messages map of locale to properties for that locale
+&nbsp;	 * @deprecated as of 2.0 because messages are automatically loaded from the classpath
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public void setMessages(Map&lt;String, Properties&gt; messages) {
+<b class="nc">&nbsp;		this.messages = messages;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;GlobalProperty&gt; getGlobalProperties() {
+<b class="fc">&nbsp;		return globalProperties;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setGlobalProperties(List&lt;GlobalProperty&gt; globalProperties) {
+<b class="fc">&nbsp;		this.globalProperties = globalProperties;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;Privilege&gt; getPrivileges() {
+<b class="fc">&nbsp;		return privileges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPrivileges(List&lt;Privilege&gt; privileges) {
+<b class="fc">&nbsp;		this.privileges = privileges;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Document getConfig() {
+<b class="nc">&nbsp;		return config;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConfig(Document config) {
+<b class="fc">&nbsp;		this.config = config;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Document getSqldiff() {
+<b class="nc">&nbsp;		return sqldiff;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setSqldiff(Document sqldiff) {
+<b class="nc">&nbsp;		this.sqldiff = sqldiff;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getMappingFiles() {
+<b class="fc">&nbsp;		return mappingFiles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setMappingFiles(List&lt;String&gt; mappingFiles) {
+<b class="fc">&nbsp;		this.mappingFiles = mappingFiles;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Packages to scan for classes with JPA annotated classes.
+&nbsp;	 * @return the set of packages to scan
+&nbsp;	 * @since 1.9.2, 1.10
+&nbsp;	 */
+&nbsp;	public Set&lt;String&gt; getPackagesWithMappedClasses() {
+<b class="fc">&nbsp;		return packagesWithMappedClasses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param packagesToScan
+&nbsp;	 * @see #getPackagesWithMappedClasses()
+&nbsp;	 * @since 1.9.2, 1.10
+&nbsp;	 */
+&nbsp;	public void setPackagesWithMappedClasses(Set&lt;String&gt; packagesToScan) {
+<b class="fc">&nbsp;		this.packagesWithMappedClasses = packagesToScan;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This property is set by the module owner to tell OpenMRS that once it is installed, it must
+&nbsp;	 * always startup. This is intended for modules with system-critical monitoring or security
+&nbsp;	 * checks that should always be in place.
+&nbsp;	 *
+&nbsp;	 * @return true if this module has said that it should always start up
+&nbsp;	 */
+&nbsp;	public boolean isMandatory() {
+<b class="fc">&nbsp;		return mandatory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setMandatory(boolean mandatory) {
+<b class="fc">&nbsp;		this.mandatory = mandatory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is a convenience method to know whether this module is core to OpenMRS. A module is
+&nbsp;	 * &#39;core&#39; when this module is essentially part of the core code and must exist at all times
+&nbsp;	 *
+&nbsp;	 * @return true if this is an OpenMRS core module
+&nbsp;	 * @see ModuleConstants#CORE_MODULES
+&nbsp;	 */
+&nbsp;	public boolean isCoreModule() {
+<b class="nc">&nbsp;		return !ModuleUtil.ignoreCoreModules() &amp;&amp; ModuleConstants.CORE_MODULES.containsKey(moduleId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isStarted() {
+<b class="fc">&nbsp;		return ModuleFactory.isModuleStarted(this);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param e string to set as startup error message
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception when message is null
+&nbsp;	 */
+&nbsp;	public void setStartupErrorMessage(String e) {
+<b class="fc">&nbsp;		if (e == null) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(&quot;Startup error message cannot be null&quot;, this.getModuleId());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		this.startupErrorMessage = e;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Add the given exceptionMessage and throwable as the startup error for this module. This
+&nbsp;	 * method loops over the stacktrace and adds the detailed message
+&nbsp;	 *
+&nbsp;	 * @param exceptionMessage optional. the default message to show on the first line of the error
+&nbsp;	 *            message
+&nbsp;	 * @param t throwable stacktrace to include in the error message
+&nbsp;	 *
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception when throwable is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set StartupErrorMessage when exceptionMessage is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; append throwable&#39;s message to exceptionMessage
+&nbsp;	 */
+&nbsp;	public void setStartupErrorMessage(String exceptionMessage, Throwable t) {
+<b class="fc">&nbsp;		if (t == null) {</b>
+<b class="fc">&nbsp;			throw new ModuleException(&quot;Startup error value cannot be null&quot;, this.getModuleId());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		StringBuilder sb = new StringBuilder();</b>
+&nbsp;		
+&nbsp;		// if exceptionMessage is not null, append it
+<b class="fc">&nbsp;		if (exceptionMessage != null) {</b>
+<b class="fc">&nbsp;			sb.append(exceptionMessage);</b>
+<b class="fc">&nbsp;			sb.append(&quot;\n&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		sb.append(t.getMessage());</b>
+<b class="fc">&nbsp;		sb.append(&quot;\n&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.startupErrorMessage = sb.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getStartupErrorMessage() {
+<b class="fc">&nbsp;		return startupErrorMessage;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean hasStartupError() {
+<b class="fc">&nbsp;		return (this.startupErrorMessage != null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void clearStartupError() {
+<b class="fc">&nbsp;		this.startupErrorMessage = null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (moduleId == null) {</b>
+<b class="nc">&nbsp;			return super.toString();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return moduleId;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/*
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; dispose all classInstances, not AdvicePoints
+&nbsp;	 */	
+&nbsp;	public void disposeAdvicePointsClassInstance() {
+<b class="fc">&nbsp;		if (advicePoints == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		for (AdvicePoint advicePoint : advicePoints) {</b>
+<b class="fc">&nbsp;			advicePoint.disposeClassInstance();</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;ModuleConditionalResource&gt; getConditionalResources() {
+<b class="fc">&nbsp;		return conditionalResources;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConditionalResources(List&lt;ModuleConditionalResource&gt; conditionalResources) {
+<b class="fc">&nbsp;		this.conditionalResources = conditionalResources;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isCore() {
+<b class="fc">&nbsp;		return ModuleConstants.CORE_MODULES.containsKey(getModuleId());</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

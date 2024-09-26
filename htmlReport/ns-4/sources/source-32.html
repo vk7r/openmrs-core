@@ -1,0 +1,570 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LocationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: LocationService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LocationService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Address;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.LocationAttribute;
+&nbsp;import org.openmrs.LocationAttributeType;
+&nbsp;import org.openmrs.LocationTag;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.api.db.LocationDAO;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;/**
+&nbsp; * API methods for managing Locations &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Example Usage: &lt;br&gt;
+&nbsp; * &lt;code&gt;
+&nbsp; *   List&amp;lt;Location&amp;gt; locations = Context.getLocationService().getAllLocations();
+&nbsp; * &lt;/code&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.Location
+&nbsp; */
+&nbsp;public interface LocationService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the data access object that the service will use to interact with the database. This is
+&nbsp;	 * set by spring in the applicationContext-service.xml file
+&nbsp;	 * 
+&nbsp;	 * @param dao
+&nbsp;	 */
+&nbsp;	public void setLocationDAO(LocationDAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save location to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param location is the location to be saved to the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if location has no name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; overwrite transient tag if tag with same name exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if transient tag is not found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return saved object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove location tag from location
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add location tag to location
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; remove child location from location
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cascade save to child location from location
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update location successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create location successfully
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_LOCATIONS })
+&nbsp;	public Location saveLocation(Location location) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a location given that locations primary key &lt;code&gt;locationId&lt;/code&gt; A null value is
+&nbsp;	 * returned if no location exists with this location.
+&nbsp;	 * 
+&nbsp;	 * @param locationId integer primary key of the location to find
+&nbsp;	 * @return Location object that has location.locationId = &lt;code&gt;locationId&lt;/code&gt; passed in.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no location match given location id
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public Location getLocation(Integer locationId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a location given the location&#39;s exact &lt;code&gt;name&lt;/code&gt; A null value is returned if
+&nbsp;	 * there is no location with this name
+&nbsp;	 * 
+&nbsp;	 * @param name the exact name of the location to match on
+&nbsp;	 * @return Location matching the &lt;code&gt;name&lt;/code&gt; to Location.name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no location match given location name
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public Location getLocation(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the default location for this implementation.
+&nbsp;	 * 
+&nbsp;	 * @return The default location for this implementation.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return default location for the implementation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return Unknown Location if the global property is something else that doesnot exist
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public Location getDefaultLocation() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a location by uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid is the uuid of the desired location
+&nbsp;	 * @return location with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public Location getLocationByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a location tag by uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid is the uuid of the desired location tag
+&nbsp;	 * @return location tag with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find object given valid uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no object found with given uuid
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public LocationTag getLocationTagByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all locations, includes retired locations. This method delegates to the
+&nbsp;	 * #getAllLocations(boolean) method
+&nbsp;	 * 
+&nbsp;	 * @return locations that are in the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all locations including retired
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getAllLocations() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all locations.
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to include retired locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all locations when includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only unretired locations when includeRetires is false
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getAllLocations(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns locations that match the beginning of the given string. A null list will never be
+&nbsp;	 * returned. An empty list will be returned if there are no locations. Search is case
+&nbsp;	 * insensitive. matching this &lt;code&gt;nameFragment&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param nameFragment is the string used to search for locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no location match the name fragment
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getLocations(String nameFragment) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the locations matching the specified arguments. A null list will never be returned. An empty list will be
+&nbsp;	 * returned if there are no locations. Search is case insensitive. matching this &lt;code&gt;nameFragment&lt;/code&gt;. If start
+&nbsp;	 * and length are not specified, then all matches are returned.
+&nbsp;	 *
+&nbsp;	 * @param nameFragment    is the string used to search for locations
+&nbsp;	 * @param parent          only return children of this parent
+&nbsp;	 * @param attributeValues the attribute values
+&nbsp;	 * @param includeRetired  specifies if retired locations should also be returned
+&nbsp;	 * @param start           the beginning index
+&nbsp;	 * @param length          the number of matching locations to return
+&nbsp;	 * @return the list of locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no location has matching attribute values
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locations having all matching attribute values
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getLocations(String nameFragment, Location parent,
+&nbsp;	        Map&lt;LocationAttributeType, Object&gt; attributeValues, boolean includeRetired, Integer start, Integer length)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns locations that contain the given tag.
+&nbsp;	 * 
+&nbsp;	 * @param tag LocationTag criterion
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locations by tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no locations has the given tag
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getLocationsByTag(LocationTag tag) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns locations that are mapped to all given tags.
+&nbsp;	 * 
+&nbsp;	 * @param tags Set of LocationTag criteria
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locations having all tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all unretired locations given an empty tag list
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getLocationsHavingAllTags(List&lt;LocationTag&gt; tags) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns locations that are mapped to any of the given tags.
+&nbsp;	 * 
+&nbsp;	 * @param tags Set of LocationTag criteria
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locations having any tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no location has the given tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when given an empty tag list
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getLocationsHavingAnyTag(List&lt;LocationTag&gt; tags) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires the given location. This effectively removes the location from circulation or use.
+&nbsp;	 * 
+&nbsp;	 * @param location location to be retired
+&nbsp;	 * @param reason is the reason why the location is being retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire location successfully
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_LOCATIONS })
+&nbsp;	public Location retireLocation(Location location, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretire the given location. This restores a previously retired location back into
+&nbsp;	 * circulation and use.
+&nbsp;	 * 
+&nbsp;	 * @param location
+&nbsp;	 * @return the newly unretired location
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire retired location
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_LOCATIONS })
+&nbsp;	public Location unretireLocation(Location location) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a location from the database (not reversible) This method delegates to
+&nbsp;	 * #purgeLocation(location, boolean) method
+&nbsp;	 * 
+&nbsp;	 * @param location the Location to clean out of the database.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete location successfully
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_LOCATIONS })
+&nbsp;	public void purgeLocation(Location location) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save location tag to database (create if new or update if changed)
+&nbsp;	 * 
+&nbsp;	 * @param tag is the tag to be saved to the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if tag has no name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return saved object
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update location tag successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create location tag successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw exception if tag name is null
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_LOCATION_TAGS })
+&nbsp;	public LocationTag saveLocationTag(LocationTag tag) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a location tag given that locations primary key &lt;code&gt;locationTagId&lt;/code&gt;. A null
+&nbsp;	 * value is returned if no tag exists with this ID.
+&nbsp;	 * 
+&nbsp;	 * @param locationTagId integer primary key of the location tag to find
+&nbsp;	 * @return LocationTag object that has LocationTag.locationTagId = &lt;code&gt;locationTagId&lt;/code&gt;
+&nbsp;	 *         passed in.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no location tag match given id
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public LocationTag getLocationTag(Integer locationTagId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a location tag given the location&#39;s exact name (tag). A null value is returned if
+&nbsp;	 * there is no tag with this name.
+&nbsp;	 * 
+&nbsp;	 * @param tag the exact name of the tag to match on
+&nbsp;	 * @return LocationTag matching the name to LocationTag.tag
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get location tag by name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null when no location tag match given name
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public LocationTag getLocationTagByName(String tag) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all location tags, includes retired location tags. This method delegates to the
+&nbsp;	 * #getAllLocationTags(boolean) method.
+&nbsp;	 * 
+&nbsp;	 * @return location tags that are in the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all location tags including retired
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;LocationTag&gt; getAllLocationTags() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all location tags.
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired whether or not to include retired location tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all location tags if includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only unretired location tags if includeRetired is false
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;LocationTag&gt; getAllLocationTags(boolean includeRetired) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns location tags that match the beginning of the given string. A null list will never be
+&nbsp;	 * returned. An empty list will be returned if there are no tags. Search is case insensitive.
+&nbsp;	 * matching this &lt;code&gt;search&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param search is the string used to search for tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no location tag match given search string
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;LocationTag&gt; getLocationTags(String search) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retire the given location tag. This effectively removes the tag from circulation or use.
+&nbsp;	 * 
+&nbsp;	 * @param tag location tag to be retired
+&nbsp;	 * @param reason is the reason why the location tag is being retired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire location tag successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire location tag with given reason
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_LOCATION_TAGS })
+&nbsp;	public LocationTag retireLocationTag(LocationTag tag, String reason) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Unretire the given location tag. This restores a previously retired tag back into circulation
+&nbsp;	 * and use.
+&nbsp;	 * 
+&nbsp;	 * @param tag
+&nbsp;	 * @return the newly unretired location tag
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire retired location tag
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_LOCATION_TAGS })
+&nbsp;	public LocationTag unretireLocationTag(LocationTag tag) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove a location tag from the database (not reversible).
+&nbsp;	 * 
+&nbsp;	 * @param tag the LocationTag to clean out of the database.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete location tag
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.PURGE_LOCATION_TAGS })
+&nbsp;	public void purgeLocationTag(LocationTag tag) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return the number of all locations that start with the given name fragment, if the name
+&nbsp;	 * fragment is null or an empty string, then the number of all locations will be returned
+&nbsp;	 * 
+&nbsp;	 * @param nameFragment is the string used to search for locations
+&nbsp;	 * @param includeRetired Specifies if retired locations should be counted or ignored
+&nbsp;	 * @return the number of all locations starting with the given nameFragment
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public Integer getCountOfLocations(String nameFragment, Boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all root locations (i.e. those who have no parentLocation), optionally including
+&nbsp;	 * retired ones.
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return return all root locations depends on includeRetired
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all root locations when includeRetired is true
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return only unretired root locations when includeRetired is false
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public List&lt;Location&gt; getRootLocations(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Given an Address object, returns all the possible values for the specified AddressField. This
+&nbsp;	 * method is not implemented in core, but is meant to overridden by implementing modules such as
+&nbsp;	 * the Address Hierarchy module.
+&nbsp;	 * 
+&nbsp;	 * @param incomplete the incomplete address
+&nbsp;	 * @param fieldName the address field we are looking for possible values for
+&nbsp;	 * @return a list of possible address values for the specified field
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list if no possible address matches
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if method not implemented
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null by default
+&nbsp;	 * @since 1.7.2
+&nbsp;	 */
+&nbsp;	public List&lt;String&gt; getPossibleAddressValues(Address incomplete, String fieldName) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the xml of default address template.
+&nbsp;	 * 
+&nbsp;	 * @return a string value of the default address template. If the GP is empty, the default
+&nbsp;	 *         template is returned
+&nbsp;	 * @see OpenmrsConstants#GLOBAL_PROPERTY_ADDRESS_TEMPLATE
+&nbsp;	 * @see OpenmrsConstants#DEFAULT_ADDRESS_TEMPLATE
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.GET_LOCATIONS })
+&nbsp;	public String getAddressTemplate() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saved default address template to global properties
+&nbsp;	 * 
+&nbsp;	 * @param xml is a string to be saved as address template
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; throw APIException if the string is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; update default address template successfully
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create default address template successfully
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized( { PrivilegeConstants.MANAGE_ADDRESS_TEMPLATES })
+&nbsp;	public void saveAddressTemplate(String xml) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return all {@link LocationAttributeType}s
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return all location attribute types including retired ones
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	List&lt;LocationAttributeType&gt; getAllLocationAttributeTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param id
+&nbsp;	 * @return the {@link LocationAttributeType} with the given internal id
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the location attribute type with the given id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no location attribute type exists with the given id
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	LocationAttributeType getLocationAttributeType(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the {@link LocationAttributeType} with the given uuid
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the location attribute type with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no location attribute type exists with the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	LocationAttributeType getLocationAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates or updates the given location attribute type in the database
+&nbsp;	 * 
+&nbsp;	 * @param locationAttributeType
+&nbsp;	 * @return the LocationAttributeType created/saved
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create a new location attribute type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; edit an existing location attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	LocationAttributeType saveLocationAttributeType(LocationAttributeType locationAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires the given location attribute type in the database
+&nbsp;	 * 
+&nbsp;	 * @param locationAttributeType
+&nbsp;	 * @return the locationAttribute retired
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; retire a location attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	LocationAttributeType retireLocationAttributeType(LocationAttributeType locationAttributeType, String reason);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Restores a location attribute type that was previous retired in the database
+&nbsp;	 * 
+&nbsp;	 * @param locationAttributeType
+&nbsp;	 * @return the LocationAttributeType unretired
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unretire a retired location attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.MANAGE_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	LocationAttributeType unretireLocationAttributeType(LocationAttributeType locationAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely removes a location attribute type from the database
+&nbsp;	 * 
+&nbsp;	 * @param locationAttributeType
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; completely remove a location attribute type
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PURGE_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	void purgeLocationAttributeType(LocationAttributeType locationAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the {@link LocationAttribute} with the given uuid
+&nbsp;	 * @since 1.9
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get the location attribute with the given uuid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no location attribute has the given uuid
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+&nbsp;	LocationAttribute getLocationAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retrieves a LocationAttributeType object based on the name provided
+&nbsp;	 *
+&nbsp;	 * @param locationAttributeTypeName
+&nbsp;	 * @return the {@link LocationAttributeType} with the specified name
+&nbsp;	 * @since 1.10.0
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the location attribute type with the specified name
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no location attribute type exists with the specified name
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)
+&nbsp;	LocationAttributeType getLocationAttributeTypeByName(String locationAttributeTypeName);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

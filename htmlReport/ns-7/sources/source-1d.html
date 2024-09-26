@@ -1,0 +1,428 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">OrderDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import org.openmrs.CareSetting;
+&nbsp;import org.openmrs.Order;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptClass;
+&nbsp;import org.openmrs.OrderAttribute;
+&nbsp;import org.openmrs.OrderAttributeType;
+&nbsp;import org.openmrs.OrderGroup;
+&nbsp;import org.openmrs.OrderType;
+&nbsp;import org.openmrs.OrderGroupAttribute;
+&nbsp;import org.openmrs.OrderGroupAttributeType;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.OrderFrequency;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.parameter.OrderSearchCriteria;
+&nbsp;
+&nbsp;/**
+&nbsp; * Order-related database functions
+&nbsp; * &lt;p&gt;
+&nbsp; * This class should never be used directly. It should only be used through the
+&nbsp; * {@link org.openmrs.api.OrderService}
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.OrderService
+&nbsp; */
+&nbsp;public interface OrderDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#saveOrder(org.openmrs.Order, org.openmrs.api.OrderContext)
+&nbsp;	 */
+&nbsp;	public Order saveOrder(Order order) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#purgeOrder(Order)
+&nbsp;	 */
+&nbsp;	public void deleteOrder(Order order) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrder(Integer)
+&nbsp;	 */
+&nbsp;	public Order getOrder(Integer orderId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This searches for orders given the parameters. Most arguments are optional (nullable). If
+&nbsp;	 * multiple arguments are given, the returned orders will match on all arguments. The orders are
+&nbsp;	 * sorted by startDate with the latest coming first
+&nbsp;	 * 
+&nbsp;	 * @param orderType The type of Order to get
+&nbsp;	 * @param patients The patients to get orders for
+&nbsp;	 * @param concepts The concepts in order.getConcept to get orders for
+&nbsp;	 * @param orderers The orderers to match on
+&nbsp;	 * @param encounters The encounters that the orders are assigned to
+&nbsp;	 * @return list of Orders matching the parameters
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getOrders(OrderType orderType, List&lt;Patient&gt; patients, List&lt;Concept&gt; concepts, List&lt;User&gt; orderers,
+&nbsp;	        List&lt;Encounter&gt; encounters);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrders(org.openmrs.Patient, org.openmrs.CareSetting,
+&nbsp;	 *      org.openmrs.OrderType, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getOrders(Patient patient, CareSetting careSetting, List&lt;OrderType&gt; orderTypes,
+&nbsp;	        boolean includeVoided, boolean includeDiscontinuationOrders);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrders(OrderSearchCriteria)
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getOrders(OrderSearchCriteria orderSearchCriteria);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return order or null
+&nbsp;	 */
+&nbsp;	public Order getOrderByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete Obs that references an order
+&nbsp;	 */
+&nbsp;	public void deleteObsThatReference(Order order);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderByOrderNumber(java.lang.String)
+&nbsp;	 */
+&nbsp;	public Order getOrderByOrderNumber(String orderNumber);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the next available order number seed
+&nbsp;	 * 
+&nbsp;	 * @return the order number seed
+&nbsp;	 */
+&nbsp;	public Long getNextOrderNumberSeedSequenceValue();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getActiveOrders(org.openmrs.Patient, org.openmrs.OrderType,
+&nbsp;	 *      org.openmrs.CareSetting, java.util.Date)
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getActiveOrders(Patient patient, List&lt;OrderType&gt; orderTypes, CareSetting careSetting, Date asOfDate);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get care setting by type
+&nbsp;	 * 
+&nbsp;	 * @param careSettingId
+&nbsp;	 * @return the care setting type
+&nbsp;	 */
+&nbsp;	public CareSetting getCareSetting(Integer careSettingId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getCareSettingByUuid(String)
+&nbsp;	 */
+&nbsp;	public CareSetting getCareSettingByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getCareSettingByName(String)
+&nbsp;	 */
+&nbsp;	public CareSetting getCareSettingByName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getCareSettings(boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;CareSetting&gt; getCareSettings(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderTypeByName(String)
+&nbsp;	 */
+&nbsp;	public OrderType getOrderTypeByName(String orderTypeName);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderFrequency
+&nbsp;	 */
+&nbsp;	public OrderFrequency getOrderFrequency(Integer orderFrequencyId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderFrequencyByUuid
+&nbsp;	 */
+&nbsp;	public OrderFrequency getOrderFrequencyByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderFrequencies(boolean)
+&nbsp;	 */
+&nbsp;	List&lt;OrderFrequency&gt; getOrderFrequencies(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderFrequencies(String, java.util.Locale, boolean, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;OrderFrequency&gt; getOrderFrequencies(String searchPhrase, Locale locale, boolean exactLocale,
+&nbsp;	        boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#saveOrderFrequency(org.openmrs.OrderFrequency)
+&nbsp;	 */
+&nbsp;	public OrderFrequency saveOrderFrequency(OrderFrequency orderFrequency);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#purgeOrderFrequency(org.openmrs.OrderFrequency)
+&nbsp;	 */
+&nbsp;	public void purgeOrderFrequency(OrderFrequency orderFrequency);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks if an order frequency is being referenced by any order
+&nbsp;	 * 
+&nbsp;	 * @param orderFrequency the order frequency
+&nbsp;	 * @return true if in use, else false
+&nbsp;	 */
+&nbsp;	public boolean isOrderFrequencyInUse(OrderFrequency orderFrequency);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderFrequencyByConcept
+&nbsp;	 */
+&nbsp;	public OrderFrequency getOrderFrequencyByConcept(Concept concept);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderType
+&nbsp;	 */
+&nbsp;	public OrderType getOrderType(Integer orderTypeId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderTypeByUuid
+&nbsp;	 */
+&nbsp;	public OrderType getOrderTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderTypes
+&nbsp;	 */
+&nbsp;	public List&lt;OrderType&gt; getOrderTypes(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderTypeByConceptClass(org.openmrs.ConceptClass)
+&nbsp;	 */
+&nbsp;	public OrderType getOrderTypeByConceptClass(ConceptClass conceptClass);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#saveOrderType(org.openmrs.OrderType)
+&nbsp;	 */
+&nbsp;	public OrderType saveOrderType(OrderType orderType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#purgeOrderType(org.openmrs.OrderType)
+&nbsp;	 */
+&nbsp;	public void purgeOrderType(OrderType orderType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getSubtypes(org.openmrs.OrderType, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;OrderType&gt; getOrderSubtypes(OrderType orderType, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Check whether give order type is used by any order
+&nbsp;	 * 
+&nbsp;	 * @param orderType the order type to check the usage
+&nbsp;	 * @return true if used else false
+&nbsp;	 */
+&nbsp;	public boolean isOrderTypeInUse(OrderType orderType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getDiscontinuationOrder(Order)
+&nbsp;	 */
+&nbsp;	public Order getDiscontinuationOrder(Order order);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getRevisionOrder(org.openmrs.Order)
+&nbsp;	 */
+&nbsp;	public Order getRevisionOrder(Order order) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the fresh order from the database
+&nbsp;	 *
+&nbsp;	 * @param order the order to get from the database
+&nbsp;	 * @param isOrderADrugOrder is the order a previous order
+&nbsp;	 * @return a list of orders from the database
+&nbsp;	 */
+&nbsp;	public List&lt;Object[]&gt; getOrderFromDatabase(Order order, boolean isOrderADrugOrder) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves an orderGroup to the database
+&nbsp;	 *
+&nbsp;	 * @param orderGroup
+&nbsp;	 * @return an orderGroup
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public OrderGroup saveOrderGroup(OrderGroup orderGroup) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroupByUuid(String)
+&nbsp;	 */
+&nbsp;	public OrderGroup getOrderGroupByUuid(String uuid) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroup(Integer)
+&nbsp;	 */
+&nbsp;	public OrderGroup getOrderGroupById(Integer orderGroupId) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroupsByPatient(Patient)
+&nbsp;	 */
+&nbsp;	public List&lt;OrderGroup&gt; getOrderGroupsByPatient(Patient patient) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroupsByEncounter(Encounter)
+&nbsp;	 */
+&nbsp;	public List&lt;OrderGroup&gt; getOrderGroupsByEncounter(Encounter encounter) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see  org.openmrs.api.OrderService#getOrderGroupAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	public OrderGroupAttribute getOrderGroupAttributeByUuid(String uuid) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getAllOrderGroupAttributeTypes()
+&nbsp;	 */
+&nbsp;	public List&lt;OrderGroupAttributeType&gt; getAllOrderGroupAttributeTypes()throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroupAttributeType(Integer)
+&nbsp;	 */
+&nbsp;	public OrderGroupAttributeType getOrderGroupAttributeType(Integer orderGroupAttributeTypeId)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroupAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	public OrderGroupAttributeType getOrderGroupAttributeTypeByUuid(String uuid)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#saveOrderGroupAttributeType(OrderGroupAttributeType)
+&nbsp;	 */
+&nbsp;	public OrderGroupAttributeType  saveOrderGroupAttributeType(OrderGroupAttributeType orderGroupAttributeType)throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#purgeOrderGroupAttributeType(OrderGroupAttributeType)
+&nbsp;	 */
+&nbsp;	public  void deleteOrderGroupAttributeType(OrderGroupAttributeType orderGroupAttributeType)throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderGroupAttributeTypeByName(String)
+&nbsp;	 */
+&nbsp;	public OrderGroupAttributeType getOrderGroupAttributeTypeByName(String name)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	OrderAttribute getOrderAttributeByUuid(String uuid) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getAllOrderAttributeTypes()
+&nbsp;	 */
+&nbsp;	List&lt;OrderAttributeType&gt; getAllOrderAttributeTypes()throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderAttributeTypeById(Integer)
+&nbsp;	 */
+&nbsp;	OrderAttributeType getOrderAttributeTypeById(Integer orderAttributeTypeId)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	OrderAttributeType getOrderAttributeTypeByUuid(String uuid)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#saveOrderAttributeType(OrderAttributeType)
+&nbsp;	 */
+&nbsp;	OrderAttributeType saveOrderAttributeType(OrderAttributeType orderAttributeType)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#purgeOrderAttributeType(OrderAttributeType)
+&nbsp;	 */
+&nbsp;	void deleteOrderAttributeType(OrderAttributeType orderAttributeType)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrderAttributeTypeByName(String)
+&nbsp;	 */
+&nbsp;	OrderAttributeType getOrderAttributeTypeByName(String name)throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getActiveOrders(org.openmrs.Patient, org.openmrs.Visit, java.util.List,
+&nbsp;	 *      org.openmrs.CareSetting, java.util.Date)
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getActiveOrders(Patient patient, Visit visit, List&lt;OrderType&gt; orderTypes, CareSetting careSetting,
+&nbsp;			Date asOfDate);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.OrderService#getOrders(org.openmrs.Patient, org.openmrs.Visit, org.openmrs.CareSetting, java.util.List,
+&nbsp;	 *      boolean, boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;Order&gt; getOrders(Patient patient, Visit visit, CareSetting careSetting, List&lt;OrderType&gt; orderTypes,
+&nbsp;			boolean includeVoided, boolean includeDiscontinuationOrders);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

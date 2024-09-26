@@ -1,0 +1,632 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LuceneQuery</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate.search</a>
+</div>
+
+<h1>Coverage Summary for Class: LuceneQuery (org.openmrs.api.db.hibernate.search)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LuceneQuery</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,3%
+  </span>
+  <span class="absValue">
+    (25/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,3%
+  </span>
+  <span class="absValue">
+    (103/118)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">LuceneQuery$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">LuceneQuery$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">LuceneQuery$MatchType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91,2%
+  </span>
+  <span class="absValue">
+    (31/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (112/128)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate.search;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.lucene.analysis.Analyzer;
+&nbsp;import org.apache.lucene.index.Term;
+&nbsp;import org.apache.lucene.queries.TermsFilter;
+&nbsp;import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+&nbsp;import org.apache.lucene.queryparser.classic.ParseException;
+&nbsp;import org.apache.lucene.queryparser.classic.QueryParser;
+&nbsp;import org.apache.lucene.search.MatchAllDocsQuery;
+&nbsp;import org.apache.lucene.search.Query;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.search.FullTextQuery;
+&nbsp;import org.hibernate.search.FullTextSession;
+&nbsp;import org.hibernate.search.query.dsl.QueryBuilder;
+&nbsp;import org.openmrs.api.db.FullTextSessionFactory;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.collection.ListPart;
+&nbsp;
+&nbsp;/**
+&nbsp; * Performs Lucene queries.
+&nbsp; * 
+&nbsp; * @since 1.11
+&nbsp; */
+&nbsp;public abstract class LuceneQuery&lt;T&gt; extends SearchQuery&lt;T&gt; {
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;Set&lt;Term&gt;&gt; includeTerms = new HashSet&lt;&gt;();</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;Term&gt; excludeTerms = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;	private TermsFilter termsFilter;
+&nbsp;
+<b class="fc">&nbsp;	private boolean noUniqueTerms = false;</b>
+&nbsp;
+&nbsp;	private Set&lt;Object&gt; skipSameValues;
+&nbsp;
+<b class="fc">&nbsp;	boolean useOrQueryParser = false;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Normal uses a textual match algorithm for the search
+&nbsp;	 * Soundex indicates to use a Phonetic search strategy
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum MatchType</b>
+&nbsp;	{
+<b class="fc">&nbsp;		NORMAL, SOUNDEX</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;T&gt; LuceneQuery&lt;T&gt; newQuery(final Class&lt;T&gt; type, final Session session, final String query, final Collection&lt;String&gt; fields) {
+<b class="fc">&nbsp;		return newQuery(type, session, query, fields, MatchType.NORMAL);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;T&gt; LuceneQuery&lt;T&gt; newQuery(final Class&lt;T&gt; type, final Session session, final String query, final Collection&lt;String&gt; fields, MatchType matchType) {
+<b class="fc">&nbsp;		return new LuceneQuery&lt;T&gt;(type, session) {</b>
+&nbsp;			@Override
+&nbsp;			protected Query prepareQuery() throws ParseException {
+<b class="fc">&nbsp;				if (query.isEmpty()) {</b>
+<b class="nc">&nbsp;					return new MatchAllDocsQuery();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				return newMultipleFieldQueryParser(fields, matchType).parse(query);</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The preferred way to create a Lucene query using the query parser.
+&nbsp;	 * @param type filters on type
+&nbsp;	 * @param session
+&nbsp;	 * @param query
+&nbsp;	 * 
+&nbsp;	 * @return the Lucene query
+&nbsp;	 */
+&nbsp;	public static &lt;T&gt; LuceneQuery&lt;T&gt; newQuery(final Class&lt;T&gt; type, final Session session, final String query) {
+<b class="fc">&nbsp;		return new LuceneQuery&lt;T&gt;(type, session) {</b>
+&nbsp;			
+&nbsp;			@Override
+&nbsp;			protected Query prepareQuery() throws ParseException {
+<b class="fc">&nbsp;				if (query.isEmpty()) {</b>
+<b class="fc">&nbsp;					return new MatchAllDocsQuery();</b>
+&nbsp;				}
+<b class="fc">&nbsp;				return newQueryParser().parse(query);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		};
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Escape any characters that can be interpreted by the query parser.
+&nbsp;	 * 
+&nbsp;	 * @param query
+&nbsp;	 * @return the escaped query
+&nbsp;	 */
+&nbsp;	public static String escapeQuery(final String query) {
+<b class="fc">&nbsp;		return QueryParser.escape(query);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public LuceneQuery(Class&lt;T&gt; type, Session session) {
+<b class="fc">&nbsp;		super(session, type);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public LuceneQuery&lt;T&gt; useOrQueryParser() {
+<b class="fc">&nbsp;		useOrQueryParser = true;</b>
+&nbsp;
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Include items with the given value in the specified field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is a filter applied before the query.
+&nbsp;	 * 
+&nbsp;	 * @param field
+&nbsp;	 * @param value
+&nbsp;	 * @return the query
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;T&gt; include(String field, Object value) {
+<b class="fc">&nbsp;		if (value != null) {</b>
+<b class="fc">&nbsp;			include(field, new Object[] { value });</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public LuceneQuery&lt;T&gt; include(String field, Collection&lt;?&gt; values) {
+<b class="fc">&nbsp;		if (values != null) {</b>
+<b class="fc">&nbsp;			include(field, values.toArray());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Include items with any of the given values in the specified field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is a filter applied before the query.
+&nbsp;	 * 
+&nbsp;	 * @param field
+&nbsp;	 * @param values
+&nbsp;	 * @return the query
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;T&gt; include(String field, Object[] values) {
+<b class="fc">&nbsp;		if (values != null &amp;&amp; values.length != 0) {</b>
+<b class="fc">&nbsp;			Set&lt;Term&gt; terms = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (Object value : values) {</b>
+<b class="fc">&nbsp;				terms.add(new Term(field, value.toString()));</b>
+&nbsp;			}
+<b class="fc">&nbsp;			includeTerms.add(terms);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Exclude any items with the given value in the specified field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is a filter applied before the query.
+&nbsp;	 * 
+&nbsp;	 * @param field
+&nbsp;	 * @param value
+&nbsp;	 * @return the query
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;T&gt; exclude(String field, Object value) {
+<b class="nc">&nbsp;		if (value != null) {</b>
+<b class="nc">&nbsp;			exclude(field, new Object[] { value });</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Exclude any items with the given values in the specified field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It is a filter applied before the query.
+&nbsp;	 * 
+&nbsp;	 * @param field
+&nbsp;	 * @param values
+&nbsp;	 * @return the query
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;T&gt; exclude(String field, Object[] values) {
+<b class="fc">&nbsp;		if (values != null &amp;&amp; values.length != 0) {</b>
+<b class="fc">&nbsp;			for (Object value : values) {</b>
+<b class="fc">&nbsp;				excludeTerms.add(new Term(field, value.toString()));</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * It is called by the constructor to get an instance of a query.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * To construct the query you can use {@link #newQueryBuilder()} or {@link #newQueryParser()},
+&nbsp;	 * which are created for the proper type.
+&nbsp;	 * 
+&nbsp;	 * @return the query
+&nbsp;	 * @throws ParseException
+&nbsp;	 */
+&nbsp;	protected abstract Query prepareQuery() throws ParseException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * It is called by the constructor after creating {@link FullTextQuery}.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * You can override it to adjust the full text query, e.g. add a filter.
+&nbsp;	 * 
+&nbsp;	 * @param fullTextQuery
+&nbsp;	 */
+&nbsp;	protected void adjustFullTextQuery(FullTextQuery fullTextQuery) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * You can use it in {@link #prepareQuery()}.
+&nbsp;	 * 
+&nbsp;	 * @return the query builder
+&nbsp;	 */
+&nbsp;	protected QueryBuilder newQueryBuilder() {
+<b class="nc">&nbsp;		return getFullTextSession().getSearchFactory().buildQueryBuilder().forEntity(getType()).get();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * You can use it in {@link #prepareQuery()}.
+&nbsp;	 * 
+&nbsp;	 * @return the query parser
+&nbsp;	 */
+&nbsp;	protected QueryParser newQueryParser() {
+<b class="fc">&nbsp;		Analyzer analyzer = getFullTextSession().getSearchFactory().getAnalyzer(getType());</b>
+<b class="fc">&nbsp;		QueryParser queryParser = new QueryParser(null, analyzer); </b>
+<b class="fc">&nbsp;		setDefaultOperator(queryParser);</b>
+<b class="fc">&nbsp;		return queryParser;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	protected MultiFieldQueryParser newMultipleFieldQueryParser(Collection&lt;String&gt; fields, MatchType matchType) {
+&nbsp;		Analyzer analyzer;
+&nbsp;		
+<b class="fc">&nbsp;		if(matchType == MatchType.SOUNDEX) {</b>
+<b class="fc">&nbsp;			analyzer = getFullTextSession().getSearchFactory().getAnalyzer(getType());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		else if (getType().isAssignableFrom(PatientIdentifier.class) || getType().isAssignableFrom(PersonName.class) || getType().isAssignableFrom(PersonAttribute.class)) {</b>
+<b class="fc">&nbsp;			analyzer = getFullTextSession().getSearchFactory().getAnalyzer(LuceneAnalyzers.EXACT_ANALYZER);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			analyzer = getFullTextSession().getSearchFactory().getAnalyzer(getType());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		MultiFieldQueryParser queryParser = new MultiFieldQueryParser(fields.toArray(new String[fields.size()]), analyzer);</b>
+&nbsp;
+<b class="fc">&nbsp;		setDefaultOperator(queryParser);</b>
+<b class="fc">&nbsp;		return queryParser;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setDefaultOperator(QueryParser queryParser) {
+<b class="fc">&nbsp;		if (useOrQueryParser) {</b>
+<b class="fc">&nbsp;			queryParser.setDefaultOperator(QueryParser.Operator.OR);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			queryParser.setDefaultOperator(QueryParser.Operator.AND);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gives you access to the full text session.
+&nbsp;	 * 
+&nbsp;	 * @return the full text session
+&nbsp;	 */
+&nbsp;	protected FullTextSession getFullTextSession() {
+<b class="fc">&nbsp;		return Context.getRegisteredComponent(&quot;fullTextSessionFactory&quot;, FullTextSessionFactory.class).getFullTextSession();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Skip elements, values of which repeat in the given field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Only first elements will be included in the results.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * &lt;b&gt;Note:&lt;/b&gt; This method must be called as last when constructing a query. When called it
+&nbsp;	 * will project the query and create a filter to eliminate duplicates.
+&nbsp;	 * 
+&nbsp;	 * @param field
+&nbsp;	 * @return this
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;T&gt; skipSame(String field){
+<b class="fc">&nbsp;		return skipSame(field, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Skip elements, values of which repeat in the given field.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Only first elements will be included in the results.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * &lt;b&gt;Note:&lt;/b&gt; This method must be called as last when constructing a query. When called it
+&nbsp;	 * will project the query and create a filter to eliminate duplicates.
+&nbsp;	 *
+&nbsp;	 * @param field
+&nbsp;	 * @param luceneQuery results of which should be skipped too. It works only for queries, which called skipSame as well.
+&nbsp;	 * @return this
+&nbsp;	 */
+&nbsp;	public LuceneQuery&lt;T&gt; skipSame(String field, LuceneQuery&lt;?&gt; luceneQuery){
+<b class="fc">&nbsp;		String idPropertyName = getSession().getSessionFactory().getClassMetadata(getType()).getIdentifierPropertyName();</b>
+&nbsp;
+<b class="fc">&nbsp;		FullTextQuery query = buildQuery();</b>
+<b class="fc">&nbsp;		query.setProjection(idPropertyName, field);</b>
+<b class="fc">&nbsp;		List&lt;Object[]&gt; documents = query.list();</b>
+&nbsp;
+<b class="fc">&nbsp;		skipSameValues = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (luceneQuery != null) {</b>
+<b class="fc">&nbsp;			if (luceneQuery.skipSameValues == null) {</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;The skipSame method must be called on the given luceneQuery before calling this method.&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			skipSameValues.addAll(luceneQuery.skipSameValues);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		termsFilter = null;</b>
+<b class="fc">&nbsp;		if (!documents.isEmpty()) {</b>
+<b class="fc">&nbsp;			List&lt;Term&gt; terms = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;			for (Object[] row : documents) {</b>
+<b class="fc">&nbsp;				if (skipSameValues.add(row[1])) {</b>
+<b class="fc">&nbsp;					terms.add(new Term(idPropertyName, row[0].toString()));</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			if (!terms.isEmpty()) {</b>
+<b class="fc">&nbsp;				termsFilter = new TermsFilter(terms);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				noUniqueTerms = true;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public T uniqueResult() {
+<b class="nc">&nbsp;		if (noUniqueTerms) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@SuppressWarnings(&quot;unchecked&quot;)
+<b class="nc">&nbsp;		T result = (T) buildQuery().uniqueResult();</b>
+&nbsp;		
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public List&lt;T&gt; list() {
+<b class="fc">&nbsp;		if (noUniqueTerms) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@SuppressWarnings(&quot;unchecked&quot;)
+<b class="fc">&nbsp;		List&lt;T&gt; list = buildQuery().list();</b>
+&nbsp;		
+<b class="fc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public ListPart&lt;T&gt; listPart(Long firstResult, Long maxResults) {
+<b class="fc">&nbsp;		if (noUniqueTerms) {</b>
+<b class="nc">&nbsp;			return ListPart.newListPart(Collections.emptyList(), firstResult, maxResults, 0L, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		FullTextQuery fullTextQuery = buildQuery();</b>
+<b class="fc">&nbsp;		applyPartialResults(fullTextQuery, firstResult, maxResults);</b>
+&nbsp;		
+&nbsp;		@SuppressWarnings(&quot;unchecked&quot;)
+<b class="fc">&nbsp;		List&lt;T&gt; list = fullTextQuery.list();</b>
+&nbsp;
+<b class="fc">&nbsp;		return ListPart.newListPart(list, firstResult, maxResults, (long) fullTextQuery.getResultSize(),</b>
+<b class="fc">&nbsp;		    !fullTextQuery.hasPartialResults());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.hibernate.search.SearchQuery#resultSize()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public long resultSize() {
+<b class="fc">&nbsp;		if (noUniqueTerms) {</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return buildQuery().getResultSize();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;Object[]&gt; listProjection(String... fields) {
+<b class="fc">&nbsp;		if (noUniqueTerms) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		FullTextQuery fullTextQuery = buildQuery();</b>
+<b class="fc">&nbsp;		fullTextQuery.setProjection(fields);</b>
+&nbsp;		
+&nbsp;		@SuppressWarnings(&quot;unchecked&quot;)
+<b class="fc">&nbsp;		List&lt;Object[]&gt; list = fullTextQuery.list();</b>
+&nbsp;
+<b class="fc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public ListPart&lt;Object[]&gt; listPartProjection(Long firstResult, Long maxResults, String... fields) {
+<b class="fc">&nbsp;		if (noUniqueTerms) {</b>
+<b class="fc">&nbsp;			return ListPart.newListPart(Collections.emptyList(), firstResult, maxResults, 0L, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		FullTextQuery fullTextQuery = buildQuery();</b>
+<b class="fc">&nbsp;		applyPartialResults(fullTextQuery, firstResult, maxResults);</b>
+&nbsp;		
+<b class="fc">&nbsp;		fullTextQuery.setProjection(fields);</b>
+&nbsp;		
+&nbsp;		@SuppressWarnings(&quot;unchecked&quot;)
+<b class="fc">&nbsp;		List&lt;Object[]&gt; list = fullTextQuery.list();</b>
+&nbsp;		
+<b class="fc">&nbsp;		return ListPart.newListPart(list, firstResult, maxResults, (long) fullTextQuery.getResultSize(),</b>
+<b class="fc">&nbsp;		    !fullTextQuery.hasPartialResults());</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	public ListPart&lt;Object[]&gt; listPartProjection(Integer firstResult, Integer maxResults, String... fields) {
+<b class="fc">&nbsp;		Long first = (firstResult != null) ? Long.valueOf(firstResult) : null;</b>
+<b class="fc">&nbsp;		Long max = (maxResults != null) ? Long.valueOf(maxResults) : null;</b>
+<b class="fc">&nbsp;		return listPartProjection(first, max, fields);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private FullTextQuery buildQuery() {
+&nbsp;		Query query;
+&nbsp;		try {
+<b class="fc">&nbsp;			query = prepareQuery();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ParseException e) {</b>
+<b class="nc">&nbsp;			throw new IllegalStateException(&quot;Invalid query&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		FullTextQuery fullTextQuery = getFullTextSession().createFullTextQuery(query, getType());</b>
+&nbsp;
+<b class="fc">&nbsp;		fullTextQuery.enableFullTextFilter(&quot;termsFilterFactory&quot;).setParameter(&quot;includeTerms&quot;, includeTerms)</b>
+<b class="fc">&nbsp;				.setParameter(&quot;excludeTerms&quot;, excludeTerms);</b>
+&nbsp;
+<b class="fc">&nbsp;		fullTextQuery.setFilter(termsFilter);</b>
+&nbsp;
+<b class="fc">&nbsp;		adjustFullTextQuery(fullTextQuery);</b>
+&nbsp;
+<b class="fc">&nbsp;		return fullTextQuery;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void applyPartialResults(FullTextQuery fullTextQuery, Long firstResult, Long maxResults) {
+<b class="fc">&nbsp;		if (firstResult != null) {</b>
+<b class="fc">&nbsp;			fullTextQuery.setFirstResult(firstResult.intValue());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (maxResults != null) {</b>
+<b class="fc">&nbsp;			fullTextQuery.setMaxResults(maxResults.intValue());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

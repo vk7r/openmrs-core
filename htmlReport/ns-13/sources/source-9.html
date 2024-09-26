@@ -1,0 +1,333 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Hl7InArchivesMigrateThread</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7</a>
+</div>
+
+<h1>Coverage Summary for Class: Hl7InArchivesMigrateThread (org.openmrs.hl7)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Hl7InArchivesMigrateThread</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/45)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Hl7InArchivesMigrateThread$Status</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/51)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.UserContext;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Separate thread to move the hl7 in archives from the database tables to the filesystem. It is
+&nbsp; * highly recommended to start this thread via DWRHL7Service as opposed to calling the thread&#39;s
+&nbsp; * start() method to ensure the thread is started after making all the necessary checks.
+&nbsp; */
+&nbsp;public class Hl7InArchivesMigrateThread extends Thread {
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(Hl7InArchivesMigrateThread.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Map holds data about the progress of the transfer process, that is numberTransferred and
+&nbsp;	 * numberOfFailedTransfers
+&nbsp;	 */
+&nbsp;	private static Map&lt;String, Integer&gt; progressStatusMap;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * number of days to keep when migrating
+&nbsp;	 */
+<b class="nc">&nbsp;	private static Integer daysKept = 365;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Whether or not activity should continue with this thread
+&nbsp;	 */
+<b class="nc">&nbsp;	private static boolean active = false;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * User Context to be used for authentication and privilege checks
+&nbsp;	 */
+&nbsp;	private UserContext userContext;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Flag to keep track of the status of the migration process
+&nbsp;	 */
+<b class="nc">&nbsp;	private static Status transferStatus = Status.NONE;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The different states this thread can be in at a given point during migration
+&nbsp;	 */
+<b class="nc">&nbsp;	public enum Status {</b>
+<b class="nc">&nbsp;		RUNNING,</b>
+<b class="nc">&nbsp;		STOPPED,</b>
+<b class="nc">&nbsp;		COMPLETED,</b>
+<b class="nc">&nbsp;		ERROR,</b>
+<b class="nc">&nbsp;		NONE</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setProgressStatusMap(Map&lt;String, Integer&gt; progressStatusMap) {
+<b class="nc">&nbsp;		Hl7InArchivesMigrateThread.progressStatusMap = progressStatusMap;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor to initialize variables
+&nbsp;	 */
+<b class="nc">&nbsp;	public Hl7InArchivesMigrateThread() {</b>
+<b class="nc">&nbsp;		this.userContext = Context.getUserContext();</b>
+<b class="nc">&nbsp;		setProgressStatusMap(new HashMap&lt;&gt;());</b>
+<b class="nc">&nbsp;		progressStatusMap.put(HL7Constants.NUMBER_TRANSFERRED_KEY, 0);</b>
+<b class="nc">&nbsp;		progressStatusMap.put(HL7Constants.NUMBER_OF_FAILED_TRANSFERS_KEY, 0);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the daysKept
+&nbsp;	 */
+&nbsp;	public static Integer getDaysKept() {
+<b class="nc">&nbsp;		return daysKept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param daysKept the daysKept to set
+&nbsp;	 */
+&nbsp;	public static void setDaysKept(Integer daysKept) {
+<b class="nc">&nbsp;		Hl7InArchivesMigrateThread.daysKept = daysKept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the active
+&nbsp;	 */
+&nbsp;	public static boolean isActive() {
+<b class="nc">&nbsp;		return active;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param active the active to set
+&nbsp;	 */
+&nbsp;	public static void setActive(boolean active) {
+<b class="nc">&nbsp;		Hl7InArchivesMigrateThread.active = active;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static void setTransferStatus(Status transferStatus) {
+<b class="nc">&nbsp;		Hl7InArchivesMigrateThread.transferStatus = transferStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Runnable#run()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void run() {
+&nbsp;		
+<b class="nc">&nbsp;		Context.openSession();</b>
+<b class="nc">&nbsp;		Context.setUserContext(userContext);</b>
+<b class="nc">&nbsp;		setTransferStatus(Status.RUNNING);</b>
+&nbsp;		
+<b class="nc">&nbsp;		while (isActive() &amp;&amp; transferStatus == Status.RUNNING) {</b>
+&nbsp;			try {
+&nbsp;				// migrate the archives
+<b class="nc">&nbsp;				if (isActive()) {</b>
+<b class="nc">&nbsp;					Context.getHL7Service().migrateHl7InArchivesToFileSystem(progressStatusMap);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;				//if transfer is done when user didn&#39;t just stop it
+<b class="nc">&nbsp;				if (transferStatus != Status.STOPPED) {</b>
+<b class="nc">&nbsp;					setTransferStatus(Status.COMPLETED);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+<b class="nc">&nbsp;			catch (APIException api) {</b>
+&nbsp;				// log this as a debug, because we want to swallow minor errors 
+<b class="nc">&nbsp;				log.debug(&quot;Unable to migrate HL7 archive&quot;, api);</b>
+&nbsp;				
+&nbsp;				try {
+<b class="nc">&nbsp;					Thread.sleep(HL7Constants.THREAD_SLEEP_PERIOD);</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (InterruptedException e) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Hl7 in archive migration thread has been abnormally interrupted&quot;, e);</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;				
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception e) {</b>
+<b class="nc">&nbsp;				setTransferStatus(Status.ERROR);</b>
+<b class="nc">&nbsp;				log.warn(&quot;Some error occurred while migrating hl7 archives&quot;, e);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		// clean up
+<b class="nc">&nbsp;		Context.closeSession();</b>
+<b class="nc">&nbsp;		setActive(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * convenience method to set transfer status and active flag to stop migration
+&nbsp;	 */
+&nbsp;	public static void stopMigration() {
+<b class="nc">&nbsp;		transferStatus = Status.STOPPED;</b>
+<b class="nc">&nbsp;		setActive(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the transferStatus
+&nbsp;	 */
+&nbsp;	public static Status getTransferStatus() {
+<b class="nc">&nbsp;		return transferStatus;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the numberTransferred at a given time during migration
+&nbsp;	 */
+&nbsp;	public static Integer getNumberTransferred() {
+<b class="nc">&nbsp;		if (progressStatusMap == null) {</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return progressStatusMap.get(HL7Constants.NUMBER_TRANSFERRED_KEY);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the number of failed transfers during migration, this could be that the system couldn&#39;t
+&nbsp;	 * write them to the file system or couldn&#39;t be deleted from the database.
+&nbsp;	 *
+&nbsp;	 * @return the numberOfFailedTransfers
+&nbsp;	 */
+&nbsp;	public static Integer getNumberOfFailedTransfers() {
+<b class="nc">&nbsp;		if (progressStatusMap == null) {</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return progressStatusMap.get(HL7Constants.NUMBER_OF_FAILED_TRANSFERS_KEY);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the userContext
+&nbsp;	 */
+&nbsp;	public UserContext getUserContext() {
+<b class="nc">&nbsp;		return this.userContext;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

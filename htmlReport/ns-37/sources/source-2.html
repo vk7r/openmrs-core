@@ -1,0 +1,451 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BooleanConceptChangeSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: BooleanConceptChangeSet (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BooleanConceptChangeSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/135)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * Adds yes/no boolean concepts and changes all boolean obs values to match these concepts
+&nbsp; */
+<b class="nc">&nbsp;public class BooleanConceptChangeSet implements CustomTaskChange {</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(BooleanConceptChangeSet.class);</b>
+&nbsp;	
+&nbsp;	private Integer trueConceptId;
+&nbsp;	
+&nbsp;	private Integer falseConceptId;
+&nbsp;	
+&nbsp;	//string values for boolean concepts
+<b class="nc">&nbsp;	private static Map&lt;String, String[]&gt; trueNames = new HashMap&lt;&gt;();</b>
+&nbsp;	
+<b class="nc">&nbsp;	private static Map&lt;String, String[]&gt; falseNames = new HashMap&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	// how to say True and Yes in OpenMRS core languages
+&nbsp;	static {
+&nbsp;		// names may not include spaces, or else the logic to create concept words will break
+&nbsp;		
+<b class="nc">&nbsp;		trueNames.put(&quot;en&quot;, new String[] { &quot;True&quot;, &quot;Yes&quot; });</b>
+<b class="nc">&nbsp;		trueNames.put(&quot;fr&quot;, new String[] { &quot;Vrai&quot;, &quot;Oui&quot; });</b>
+<b class="nc">&nbsp;		trueNames.put(&quot;es&quot;, new String[] { &quot;Verdadero&quot;, &quot;Sí&quot; });</b>
+<b class="nc">&nbsp;		trueNames.put(&quot;it&quot;, new String[] { &quot;Vero&quot;, &quot;Sì&quot; });</b>
+<b class="nc">&nbsp;		trueNames.put(&quot;pt&quot;, new String[] { &quot;Verdadeiro&quot;, &quot;Sim&quot; });</b>
+&nbsp;		
+<b class="nc">&nbsp;		falseNames.put(&quot;en&quot;, new String[] { &quot;False&quot;, &quot;No&quot; });</b>
+<b class="nc">&nbsp;		falseNames.put(&quot;fr&quot;, new String[] { &quot;Faux&quot;, &quot;Non&quot; });</b>
+<b class="nc">&nbsp;		falseNames.put(&quot;es&quot;, new String[] { &quot;Falso&quot;, &quot;No&quot; });</b>
+<b class="nc">&nbsp;		falseNames.put(&quot;it&quot;, new String[] { &quot;Falso&quot;, &quot;No&quot; });</b>
+<b class="nc">&nbsp;		falseNames.put(&quot;pt&quot;, new String[] { &quot;Falso&quot;, &quot;Não&quot; });</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomTaskChange#execute(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="nc">&nbsp;		JdbcConnection connection = (JdbcConnection) database.getConnection();</b>
+&nbsp;		
+&nbsp;		// try to find existing concepts with the right names
+<b class="nc">&nbsp;		trueConceptId = findConceptByName(connection, trueNames);</b>
+<b class="nc">&nbsp;		falseConceptId = findConceptByName(connection, falseNames);</b>
+&nbsp;		
+&nbsp;		// if they don&#39;t exist, create them
+<b class="nc">&nbsp;		if (trueConceptId == null) {</b>
+<b class="nc">&nbsp;			trueConceptId = createConcept(connection, trueNames);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (falseConceptId == null) {</b>
+<b class="nc">&nbsp;			falseConceptId = createConcept(connection, falseNames);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// create the global properties
+<b class="nc">&nbsp;		final boolean trueFalseGlobalPropertiesPresent = getInt(connection,</b>
+&nbsp;		    &quot;SELECT COUNT(*) FROM global_property WHERE property IN (&#39;&quot; + OpenmrsConstants.GLOBAL_PROPERTY_TRUE_CONCEPT
+&nbsp;		            + &quot;&#39;, &#39;&quot; + OpenmrsConstants.GLOBAL_PROPERTY_FALSE_CONCEPT + &quot;&#39;)&quot;) == 2;
+<b class="nc">&nbsp;		if (!trueFalseGlobalPropertiesPresent) {</b>
+<b class="nc">&nbsp;			createGlobalProperties(connection, trueConceptId, falseConceptId);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// now change all the existing obs
+<b class="nc">&nbsp;		changeObs(connection);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Finds a concept that has any of the the given names in the given locale. If you have a
+&nbsp;	 * concept named &#39;True&#39; in &#39;en_US&#39; and you search for &#39;True&#39; in &#39;en&#39; this will be returned.
+&nbsp;	 *
+&nbsp;	 * @param connection
+&nbsp;	 * @param names a Map from (2-letter) locale to all possible names in that locale
+&nbsp;	 * @return a concept id.
+&nbsp;	 * @throws CustomChangeException
+&nbsp;	 */
+&nbsp;	private Integer findConceptByName(JdbcConnection connection, Map&lt;String, String[]&gt; names) throws CustomChangeException {
+<b class="nc">&nbsp;		for (Map.Entry&lt;String, String[]&gt; e : names.entrySet()) {</b>
+<b class="nc">&nbsp;			String locale = e.getKey();</b>
+<b class="nc">&nbsp;			for (String name : e.getValue()) {</b>
+<b class="nc">&nbsp;				Integer ret = getInt(connection, &quot;select concept_id from concept_name where name = &#39;&quot; + name</b>
+&nbsp;				        + &quot;&#39; and locale like &#39;&quot; + locale + &quot;%&#39;&quot;);
+<b class="nc">&nbsp;				if (ret != null) {</b>
+<b class="nc">&nbsp;					return ret;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * creates a concept
+&nbsp;	 *
+&nbsp;	 * @param connection a DatabaseConnection
+&nbsp;	 * @param names a Map from locale to names in that locale, which will be added to the new
+&nbsp;	 *            concept
+&nbsp;	 * @throws CustomChangeException
+&nbsp;	 */
+&nbsp;	private Integer createConcept(JdbcConnection connection, Map&lt;String, String[]&gt; names) throws CustomChangeException {
+<b class="nc">&nbsp;		PreparedStatement updateStatement = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			int conceptId = getInt(connection, &quot;SELECT MAX(concept_id) FROM concept&quot;);</b>
+<b class="nc">&nbsp;			conceptId++;</b>
+<b class="nc">&nbsp;			updateStatement = connection</b>
+<b class="nc">&nbsp;			        .prepareStatement(&quot;INSERT INTO concept (concept_id, short_name, description, datatype_id, class_id, retired, is_set, creator, date_created, uuid) VALUES (?, &#39;&#39;, &#39;&#39;, 4, 11, FALSE, FALSE, 1, NOW(), ?)&quot;);</b>
+<b class="nc">&nbsp;			updateStatement.setInt(1, conceptId);</b>
+<b class="nc">&nbsp;			updateStatement.setString(2, UUID.randomUUID().toString());</b>
+<b class="nc">&nbsp;			updateStatement.executeUpdate();</b>
+&nbsp;			
+<b class="nc">&nbsp;			boolean preferredDoneAlready = false; // only tag one name as preferred</b>
+&nbsp;			
+<b class="nc">&nbsp;			int conceptNameId = getInt(connection, &quot;SELECT MAX(concept_name_id) FROM concept_name&quot;);</b>
+<b class="nc">&nbsp;			for (Map.Entry&lt;String, String[]&gt; e : names.entrySet()) {</b>
+<b class="nc">&nbsp;				String locale = e.getKey();</b>
+<b class="nc">&nbsp;				for (String name : e.getValue()) {</b>
+<b class="nc">&nbsp;					conceptNameId++;</b>
+<b class="nc">&nbsp;					updateStatement = connection</b>
+<b class="nc">&nbsp;					        .prepareStatement(&quot;INSERT INTO concept_name (concept_name_id, concept_id, locale, name, creator, date_created, uuid) VALUES (?, ?, ?, ?, 1, NOW(), ?)&quot;);</b>
+<b class="nc">&nbsp;					updateStatement.setInt(1, conceptNameId);</b>
+<b class="nc">&nbsp;					updateStatement.setInt(2, conceptId);</b>
+<b class="nc">&nbsp;					updateStatement.setString(3, locale);</b>
+<b class="nc">&nbsp;					updateStatement.setString(4, name);</b>
+<b class="nc">&nbsp;					updateStatement.setString(5, UUID.randomUUID().toString());</b>
+<b class="nc">&nbsp;					updateStatement.executeUpdate();</b>
+<b class="nc">&nbsp;					updateStatement.close();</b>
+&nbsp;					
+&nbsp;					// Tag the first english name as preferred. This is ugly, but it&#39;s not feasible to
+&nbsp;					// fix this before refactoring concept_name_tags.
+<b class="nc">&nbsp;					if (!preferredDoneAlready &amp;&amp; &quot;en&quot;.equals(locale)) {</b>
+<b class="nc">&nbsp;						updateStatement = connection</b>
+<b class="nc">&nbsp;						        .prepareStatement(&quot;INSERT INTO concept_name_tag_map (concept_name_id, concept_name_tag_id) VALUES (?, 4)&quot;);</b>
+<b class="nc">&nbsp;						updateStatement.setInt(1, conceptNameId);</b>
+<b class="nc">&nbsp;						updateStatement.executeUpdate();</b>
+<b class="nc">&nbsp;						updateStatement.close();</b>
+<b class="nc">&nbsp;						preferredDoneAlready = true;</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					updateStatement = connection</b>
+<b class="nc">&nbsp;					        .prepareStatement(&quot;INSERT INTO concept_word (concept_id, word, locale, concept_name_id) VALUES (?, ?, ?, ?)&quot;);</b>
+<b class="nc">&nbsp;					updateStatement.setInt(1, conceptId);</b>
+<b class="nc">&nbsp;					updateStatement.setString(2, name);</b>
+<b class="nc">&nbsp;					updateStatement.setString(3, locale);</b>
+<b class="nc">&nbsp;					updateStatement.setInt(4, conceptNameId);</b>
+<b class="nc">&nbsp;					updateStatement.executeUpdate();</b>
+&nbsp;					
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+<b class="nc">&nbsp;			return conceptId;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Unable to create concept with names &quot; + names, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (updateStatement != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					updateStatement.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * changes all obs which have boolean values to the new (coded) representation of boolean
+&nbsp;	 * values.
+&nbsp;	 *
+&nbsp;	 * @param connection a DatabaseConnection
+&nbsp;	 * @param trueConceptName the concept name for boolean true values
+&nbsp;	 * @param falseConceptName the concept name for boolean false values
+&nbsp;	 * @throws CustomChangeException
+&nbsp;	 */
+&nbsp;	private void changeObs(JdbcConnection connection) throws CustomChangeException {
+<b class="nc">&nbsp;		PreparedStatement updateStatement = null;</b>
+&nbsp;		
+&nbsp;		try {
+&nbsp;			
+&nbsp;			/* replace value_numerical boolean values by coded boolean values */
+<b class="nc">&nbsp;			updateStatement = connection</b>
+<b class="nc">&nbsp;			        .prepareStatement(&quot;UPDATE obs SET value_coded = ?, value_numeric = NULL WHERE value_numeric != 0 AND concept_id IN (SELECT concept_id FROM concept WHERE datatype_id = 10)&quot;);</b>
+<b class="nc">&nbsp;			updateStatement.setInt(1, trueConceptId);</b>
+<b class="nc">&nbsp;			updateStatement.executeUpdate();</b>
+<b class="nc">&nbsp;			updateStatement.close();</b>
+&nbsp;			
+<b class="nc">&nbsp;			updateStatement = connection</b>
+<b class="nc">&nbsp;			        .prepareStatement(&quot;UPDATE obs SET value_coded = ?, value_numeric = NULL WHERE value_numeric = 0 AND concept_id IN (SELECT concept_id FROM concept WHERE datatype_id = 10)&quot;);</b>
+<b class="nc">&nbsp;			updateStatement.setInt(1, falseConceptId);</b>
+<b class="nc">&nbsp;			updateStatement.executeUpdate();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Unable to change obs&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (updateStatement != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					updateStatement.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Inserts global properties &#39;Concept.true&#39; and &#39;Concept.false&#39; into the global_property table
+&nbsp;	 *
+&nbsp;	 * @param connection a DatabaseConnection
+&nbsp;	 * @param trueConceptId the concept id for true boolean concept
+&nbsp;	 * @param falseConceptId the concept id for false boolean concept
+&nbsp;	 * @throws CustomChangeException
+&nbsp;	 */
+&nbsp;	private void createGlobalProperties(JdbcConnection connection, Integer trueConceptId, Integer falseConceptId)
+&nbsp;	        throws CustomChangeException {
+<b class="nc">&nbsp;		if (trueConceptId == null || trueConceptId &lt; 1 || falseConceptId == null || falseConceptId &lt; 1) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Can&#39;t create global properties for true/false concepts with invalid conceptIds&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		PreparedStatement updateStatement = null;</b>
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			updateStatement = connection</b>
+<b class="nc">&nbsp;			        .prepareStatement(&quot;INSERT INTO global_property (property, property_value, description, uuid) VALUES (?, ?, ?, ?)&quot;);</b>
+<b class="nc">&nbsp;			updateStatement.setString(1, OpenmrsConstants.GLOBAL_PROPERTY_TRUE_CONCEPT);</b>
+<b class="nc">&nbsp;			updateStatement.setInt(2, trueConceptId);</b>
+<b class="nc">&nbsp;			updateStatement.setString(3, &quot;Concept id of the concept defining the TRUE boolean concept&quot;);</b>
+<b class="nc">&nbsp;			updateStatement.setString(4, UUID.randomUUID().toString());</b>
+<b class="nc">&nbsp;			updateStatement.executeUpdate();</b>
+&nbsp;			
+<b class="nc">&nbsp;			updateStatement.setString(1, OpenmrsConstants.GLOBAL_PROPERTY_FALSE_CONCEPT);</b>
+<b class="nc">&nbsp;			updateStatement.setInt(2, falseConceptId);</b>
+<b class="nc">&nbsp;			updateStatement.setString(3, &quot;Concept id of the concept defining the FALSE boolean concept&quot;);</b>
+<b class="nc">&nbsp;			updateStatement.setString(4, UUID.randomUUID().toString());</b>
+<b class="nc">&nbsp;			updateStatement.executeUpdate();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Unable to create global properties for concept ids defining boolean concepts&quot;,</b>
+&nbsp;			        e);
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (updateStatement != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					updateStatement.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * returns an integer resulting from the execution of an sql statement
+&nbsp;	 *
+&nbsp;	 * @param connection a DatabaseConnection
+&nbsp;	 * @param sql the sql statement to execute
+&nbsp;	 * @return integer resulting from the execution of the sql statement
+&nbsp;	 * @throws CustomChangeException
+&nbsp;	 */
+&nbsp;	private Integer getInt(JdbcConnection connection, String sql) throws CustomChangeException {
+<b class="nc">&nbsp;		Statement stmt = null;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			stmt = connection.createStatement();</b>
+<b class="nc">&nbsp;			ResultSet rs = stmt.executeQuery(sql);</b>
+<b class="nc">&nbsp;			Integer result = null;</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (rs.next()) {</b>
+<b class="nc">&nbsp;				result = rs.getInt(1);</b>
+&nbsp;			} else {
+&nbsp;				// this is okay, we just return null in this case
+<b class="nc">&nbsp;				log.debug(&quot;Query returned no results: &quot; + sql);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			if (rs.next()) {</b>
+<b class="nc">&nbsp;				log.warn(&quot;Query returned multiple results when we expected just one: &quot; + sql);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			return result;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException | SQLException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Unable to get int&quot;, e);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="nc">&nbsp;			if (stmt != null) {</b>
+&nbsp;				try {
+<b class="nc">&nbsp;					stmt.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (SQLException e) {}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Finished creating boolean concepts&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor fileOpener) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="nc">&nbsp;		return new ValidationErrors();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

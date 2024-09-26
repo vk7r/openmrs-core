@@ -1,0 +1,193 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LongFreeTextDatatype</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.customdatatype.datatype</a>
+</div>
+
+<h1>Coverage Summary for Class: LongFreeTextDatatype (org.openmrs.customdatatype.datatype)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LongFreeTextDatatype</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (7/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.customdatatype.datatype;
+&nbsp;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.ClobDatatypeStorage;
+&nbsp;import org.openmrs.customdatatype.CustomDatatype;
+&nbsp;import org.openmrs.customdatatype.InvalidCustomValueException;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;/**
+&nbsp; * Free-text datatype, represented by a plain String in Java, but stored in the 
+&nbsp; * database as a CLOB or similar.
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class LongFreeTextDatatype implements CustomDatatype&lt;String&gt; {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomDatatype#setConfiguration(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setConfiguration(String config) {
+&nbsp;		// no configuration options
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomDatatype#save(java.lang.Object, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String save(String typedValue, String existingValueReference) throws InvalidCustomValueException {
+&nbsp;		// get existing object or create a new one
+<b class="fc">&nbsp;		ClobDatatypeStorage storage = existingValueReference != null ? Context.getDatatypeService()</b>
+<b class="nc">&nbsp;		        .getClobDatatypeStorageByUuid(existingValueReference) : new ClobDatatypeStorage();</b>
+&nbsp;		
+<b class="fc">&nbsp;		storage.setValue(typedValue);</b>
+<b class="fc">&nbsp;		storage = Context.getDatatypeService().saveClobDatatypeStorage(storage);</b>
+&nbsp;		
+<b class="fc">&nbsp;		return storage.getUuid();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomDatatype#getReferenceStringForValue(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getReferenceStringForValue(String typedValue) throws UnsupportedOperationException {
+&nbsp;		// this doesn&#39;t make sense in this case, because there may be multiple 
+&nbsp;		// stored clobs with the same value
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomDatatype#fromReferenceString(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String fromReferenceString(String referenceString) throws InvalidCustomValueException {
+<b class="nc">&nbsp;		return Context.getDatatypeService().getClobDatatypeStorageByUuid(referenceString).getValue();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomDatatype#getTextSummary(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public CustomDatatype.Summary getTextSummary(String referenceString) {
+<b class="nc">&nbsp;		String ret = Context.getMessageSourceService().getMessage(</b>
+&nbsp;		    &quot;org.openmrs.customdatatype.datatype.LongFreeTextDatatype.placeholderValue&quot;, new Object[] { referenceString },
+<b class="nc">&nbsp;		    Context.getLocale());</b>
+<b class="nc">&nbsp;		return new CustomDatatype.Summary(ret, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomDatatype#validate(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(String typedValue) throws InvalidCustomValueException {
+&nbsp;		// any non-null String is legal
+<b class="fc">&nbsp;		if (typedValue == null) {</b>
+<b class="nc">&nbsp;			throw new InvalidCustomValueException(&quot;Cannot be null&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

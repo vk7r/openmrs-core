@@ -1,0 +1,328 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientIdentifierValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientIdentifierValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientIdentifierValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98,2%
+  </span>
+  <span class="absValue">
+    (55/56)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PatientIdentifierType.LocationBehavior;
+&nbsp;import org.openmrs.PatientIdentifierType.UniquenessBehavior;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.BlankIdentifierException;
+&nbsp;import org.openmrs.api.IdentifierNotUniqueException;
+&nbsp;import org.openmrs.api.InvalidCheckDigitException;
+&nbsp;import org.openmrs.api.InvalidIdentifierFormatException;
+&nbsp;import org.openmrs.api.PatientIdentifierException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.patient.IdentifierValidator;
+&nbsp;import org.openmrs.patient.UnallowedIdentifierException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class validates a PatientIdentifier object.
+&nbsp; */
+&nbsp;@Handler(supports = { PatientIdentifier.class }, order = 50)
+<b class="fc">&nbsp;public class PatientIdentifierValidator implements Validator {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PatientIdentifierValidator.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return PatientIdentifier.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates a PatientIdentifier.
+&nbsp;	 * 
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) {
+<b class="fc">&nbsp;		PatientIdentifier pi = (PatientIdentifier) obj;</b>
+&nbsp;		try {
+<b class="fc">&nbsp;			validateIdentifier(pi);</b>
+<b class="fc">&nbsp;			ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;identifier&quot;, &quot;voidReason&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			errors.reject(e.getMessage());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks that the given {@link PatientIdentifier} is valid
+&nbsp;	 * 
+&nbsp;	 * @param pi - the {@link PatientIdentifier} to validate
+&nbsp;	 * @throws PatientIdentifierException if the {@link PatientIdentifier} is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PatientIdentifier is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if PatientIdentifier is voided
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if another patient has a matching identifier of the same type
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if in use and id type uniqueness is set to non unique
+&nbsp;	 * @see #validateIdentifier(String, PatientIdentifierType)
+&nbsp;	 */
+&nbsp;	public static void validateIdentifier(PatientIdentifier pi) throws PatientIdentifierException {
+&nbsp;		
+&nbsp;		// Validate that the identifier is non-null
+<b class="fc">&nbsp;		if (pi == null) {</b>
+<b class="fc">&nbsp;			throw new BlankIdentifierException(&quot;PatientIdentifier.error.null&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Only validate if the PatientIdentifier is not voided
+<b class="fc">&nbsp;		if (!pi.getVoided()) {</b>
+&nbsp;			
+&nbsp;			// Check that this is a valid identifier
+<b class="fc">&nbsp;			validateIdentifier(pi.getIdentifier(), pi.getIdentifierType());</b>
+&nbsp;			
+&nbsp;			// Check that location is included if it is required (default behavior is to require it)
+<b class="fc">&nbsp;			LocationBehavior lb = pi.getIdentifierType().getLocationBehavior();</b>
+<b class="fc">&nbsp;			if (pi.getLocation() == null &amp;&amp; (lb == null || lb == LocationBehavior.REQUIRED)) {</b>
+<b class="fc">&nbsp;				String identifierString = (pi.getIdentifier() != null) ? pi.getIdentifier() : &quot;&quot;;</b>
+<b class="fc">&nbsp;				throw new PatientIdentifierException(Context.getMessageSourceService().getMessage(</b>
+<b class="fc">&nbsp;				    &quot;PatientIdentifier.location.null&quot;, new Object[] { identifierString }, Context.getLocale()));</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (pi.getIdentifierType().getUniquenessBehavior() != UniquenessBehavior.NON_UNIQUE</b>
+<b class="fc">&nbsp;			        &amp;&amp; Context.getPatientService().isIdentifierInUseByAnotherPatient(pi)) {</b>
+&nbsp;				// Check is already in use by another patient
+<b class="fc">&nbsp;				throw new IdentifierNotUniqueException(Context.getMessageSourceService().getMessage(</b>
+<b class="fc">&nbsp;				    &quot;PatientIdentifier.error.notUniqueWithParameter&quot;, new Object[] { pi.getIdentifier() },</b>
+<b class="fc">&nbsp;				    Context.getLocale()), pi);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates that a given identifier string is valid for a given {@link PatientIdentifierType}
+&nbsp;	 * Checks for things like blank identifiers, invalid check digits, and invalid format.
+&nbsp;	 * 
+&nbsp;	 * @param pit - the {@link PatientIdentifierType} to validate against
+&nbsp;	 * @param identifier - the identifier to check against the passed {@link PatientIdentifierType}
+&nbsp;	 * @throws PatientIdentifierException if the identifier is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if PatientIdentifierType is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if identifier is blank
+&nbsp;	 * @see #checkIdentifierAgainstFormat(String, String, String)
+&nbsp;	 * @see #checkIdentifierAgainstValidator(String, IdentifierValidator)
+&nbsp;	 */
+&nbsp;	public static void validateIdentifier(String identifier, PatientIdentifierType pit) throws PatientIdentifierException {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Checking identifier: &quot; + identifier + &quot; for type: &quot; + pit);</b>
+&nbsp;		
+&nbsp;		// Validate input parameters
+<b class="fc">&nbsp;		if (pit == null) {</b>
+<b class="fc">&nbsp;			throw new BlankIdentifierException(&quot;PatientIdentifierType.null&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (StringUtils.isBlank(identifier)) {</b>
+<b class="fc">&nbsp;			throw new BlankIdentifierException(&quot;PatientIdentifier.error.nullOrBlank&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		checkIdentifierAgainstFormat(identifier, pit.getFormat(), pit.getFormatDescription());</b>
+&nbsp;		
+&nbsp;		// Check identifier against IdentifierValidator
+<b class="fc">&nbsp;		if (pit.hasValidator()) {</b>
+<b class="fc">&nbsp;			IdentifierValidator validator = Context.getPatientService().getIdentifierValidator(pit.getValidator());</b>
+<b class="fc">&nbsp;			checkIdentifierAgainstValidator(identifier, validator);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		log.debug(&quot;The identifier check was successful&quot;);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates that a given identifier string is valid for a given regular expression format
+&nbsp;	 * 
+&nbsp;	 * @param identifier - the identifier to check against the passed {@link PatientIdentifierType}
+&nbsp;	 * @param format - the regular expression format to validate against
+&nbsp;	 * @param formatDescription - user-friendly way of describing format (may be null)
+&nbsp;	 * @throws PatientIdentifierException if the identifier is does not match the format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if identifier is blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if identifier does not match the format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if identifier matches the format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if the format is blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include format in error message if no formatDescription is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; include formatDescription in error message if specified
+&nbsp;	 */
+&nbsp;	public static void checkIdentifierAgainstFormat(String identifier, String format, String formatDescription)
+&nbsp;	        throws PatientIdentifierException {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Checking identifier: &quot; + identifier + &quot; against format: &quot; + format);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (StringUtils.isBlank(identifier)) {</b>
+<b class="nc">&nbsp;			throw new BlankIdentifierException(&quot;PatientIdentifier.error.nullOrBlank&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (StringUtils.isBlank(format)) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Format is blank, identifier passes.&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Check identifier against regular expression format
+<b class="fc">&nbsp;		if (!identifier.matches(format)) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;The two DO NOT match&quot;);</b>
+<b class="fc">&nbsp;			throw new InvalidIdentifierFormatException(getMessage(&quot;PatientIdentifier.error.invalidFormat&quot;, identifier,</b>
+<b class="fc">&nbsp;			    StringUtils.isNotBlank(formatDescription) ? formatDescription : format));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		log.debug(&quot;The two match!!&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates that a given identifier string is valid for a given IdentifierValidator
+&nbsp;	 * 
+&nbsp;	 * @param identifier the identifier to check against the passed {@link PatientIdentifierType}
+&nbsp;	 * @param validator the IdentifierValidator to use to check the identifier
+&nbsp;	 * @throws PatientIdentifierException if the identifier is does not match the format
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if identifier is blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if identifier is invalid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if identifier is valid
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if validator is null
+&nbsp;	 */
+&nbsp;	public static void checkIdentifierAgainstValidator(String identifier, IdentifierValidator validator)
+&nbsp;	        throws PatientIdentifierException {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Checking identifier: &quot; + identifier + &quot; against validator: &quot; + validator);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (StringUtils.isBlank(identifier)) {</b>
+<b class="fc">&nbsp;			throw new BlankIdentifierException(&quot;PatientIdentifier.error.nullOrBlank&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (validator == null) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Validator is null, identifier passes.&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Check identifier against IdentifierValidator
+&nbsp;		try {
+<b class="fc">&nbsp;			if (!validator.isValid(identifier)) {</b>
+<b class="fc">&nbsp;				throw new InvalidCheckDigitException(getMessage(&quot;PatientIdentifier.error.checkDigitWithParameter&quot;,</b>
+&nbsp;				    identifier));
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		catch (UnallowedIdentifierException e) {</b>
+<b class="fc">&nbsp;			throw new InvalidCheckDigitException(getMessage(&quot;PatientIdentifier.error.unallowedIdentifier&quot;, identifier,</b>
+<b class="fc">&nbsp;			    validator.getName()));</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		log.debug(&quot;The identifier passed validation.&quot;);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static String getMessage(String messageKey, String... arguments) {
+<b class="fc">&nbsp;		return Context.getMessageSourceService().getMessage(messageKey, arguments, Context.getLocale());</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

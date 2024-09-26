@@ -1,0 +1,335 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderSearchCriteriaBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.parameter</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderSearchCriteriaBuilder (org.openmrs.parameter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderSearchCriteriaBuilder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (20/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (38/38)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.parameter;
+&nbsp;
+&nbsp;import org.openmrs.*;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * A convenience builder for {@link OrderSearchCriteria}. Create a builder, set
+&nbsp; * its properties to desired values and finally call {@link #build()}
+&nbsp; * to create the actual search criteria instance.
+&nbsp; * @see OrderSearchCriteria
+&nbsp; */
+<b class="fc">&nbsp;public class OrderSearchCriteriaBuilder {</b>
+&nbsp;	private Patient patient;
+&nbsp;
+&nbsp;	private CareSetting careSetting;
+&nbsp;
+&nbsp;	private Collection&lt;Concept&gt; concepts;
+&nbsp;
+&nbsp;	private Collection&lt;OrderType&gt; orderTypes;
+&nbsp;	
+&nbsp;	private Visit visit;
+&nbsp;	
+&nbsp;	private String accessionNumber;
+&nbsp;	
+&nbsp;	private String orderNumber;
+&nbsp;
+&nbsp;	private Date activatedOnOrBeforeDate;
+&nbsp;
+&nbsp;	private Date activatedOnOrAfterDate;
+&nbsp;
+&nbsp;	private boolean isStopped;
+&nbsp;
+&nbsp;	private Date autoExpireOnOrBeforeDate;
+&nbsp;
+&nbsp;	private Date canceledOrExpiredOnOrBeforeDate;
+&nbsp;
+&nbsp;	private Order.Action action;
+&nbsp;
+&nbsp;	private Order.FulfillerStatus fulfillerStatus;
+&nbsp;
+&nbsp;	private Boolean includeNullFulfillerStatus;
+&nbsp;
+&nbsp;	private boolean excludeCanceledAndExpired;
+&nbsp;
+&nbsp;	private boolean excludeDiscontinueOrders;
+&nbsp;
+&nbsp;	private boolean includeVoided;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param patient the patient the order is for
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setPatient(Patient patient) {
+<b class="fc">&nbsp;		this.patient = patient;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param visit the visit the order is for
+&nbsp;	 * @return this builder instance
+&nbsp;	 * @since 2.7.0
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setVisit(Visit visit) {
+<b class="fc">&nbsp;		this.visit = visit;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param careSetting the care setting to match on
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setCareSetting(CareSetting careSetting) {
+<b class="fc">&nbsp;		this.careSetting = careSetting;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param concepts the concepts defining the order must be in this collection
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setConcepts(Collection&lt;Concept&gt; concepts) {
+<b class="fc">&nbsp;		this.concepts = concepts;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param orderTypes the order types to match on must be in this collection
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setOrderTypes(Collection&lt;OrderType&gt; orderTypes) {
+<b class="fc">&nbsp;		this.orderTypes = orderTypes;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param accessionNumber the accessionNumber to match on (exact match, case-insensitive)
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setAccessionNumber(String accessionNumber) {
+<b class="fc">&nbsp;		this.accessionNumber = accessionNumber;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param orderNumber the orderNumber to match on (exact match, case-insensitive)
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setOrderNumber(String orderNumber) {
+<b class="fc">&nbsp;		this.orderNumber = orderNumber;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param activatedOnOrBeforeDate orders must have dateActivated on or before this date
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setActivatedOnOrBeforeDate(Date activatedOnOrBeforeDate) {
+<b class="fc">&nbsp;		this.activatedOnOrBeforeDate = activatedOnOrBeforeDate;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param activatedOnOrAfterDate orders must have dateActivated on or after this date
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setActivatedOnOrAfterDate(Date activatedOnOrAfterDate) {
+<b class="fc">&nbsp;		this.activatedOnOrAfterDate = activatedOnOrAfterDate;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @param isStopped
+&nbsp;	 * @return this builde instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setIsStopped(boolean isStopped) {
+<b class="fc">&nbsp;		this.isStopped = isStopped;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * 
+&nbsp;	 * @param autoExpireOnOrBeforeDate
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setAutoExpireOnOrBeforeDate(Date autoExpireOnOrBeforeDate) {
+<b class="fc">&nbsp;		this.autoExpireOnOrBeforeDate = autoExpireOnOrBeforeDate;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @param canceledOrExpiredOnOrBeforeDate
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setCanceledOrExpiredOnOrBeforeDate(Date canceledOrExpiredOnOrBeforeDate) {
+<b class="fc">&nbsp;		this.canceledOrExpiredOnOrBeforeDate = canceledOrExpiredOnOrBeforeDate;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;     *
+&nbsp;     * @param action
+&nbsp;     * @return this builder instance
+&nbsp;     */
+&nbsp;    public OrderSearchCriteriaBuilder setAction(Order.Action action) {
+<b class="fc">&nbsp;        this.action = action;</b>
+<b class="fc">&nbsp;        return (this);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;	 *
+&nbsp;	 * @param fulfillerStatus
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setFulfillerStatus(Order.FulfillerStatus fulfillerStatus) {
+<b class="fc">&nbsp;		this.fulfillerStatus = fulfillerStatus;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @param includeNullFulfillerStatus
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setIncludeNullFulfillerStatus(Boolean includeNullFulfillerStatus) {
+<b class="fc">&nbsp;		this.includeNullFulfillerStatus = includeNullFulfillerStatus;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OrderSearchCriteriaBuilder setExcludeCanceledAndExpired(boolean excludeCanceledAndExpired) {
+<b class="fc">&nbsp;		this.excludeCanceledAndExpired = excludeCanceledAndExpired;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OrderSearchCriteriaBuilder setExcludeDiscontinueOrders(boolean excludeDiscontinueOrders) {
+<b class="fc">&nbsp;		this.excludeDiscontinueOrders = excludeDiscontinueOrders;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @param includeVoided whether to include the voided orders or not
+&nbsp;	 * @return this builder instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteriaBuilder setIncludeVoided(boolean includeVoided) {
+<b class="fc">&nbsp;		this.includeVoided = includeVoided;</b>
+<b class="fc">&nbsp;		return (this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Create an {@link OrderSearchCriteria} with the properties of this builder instance.
+&nbsp;	 * @return a new search criteria instance
+&nbsp;	 */
+&nbsp;	public OrderSearchCriteria build() {
+<b class="fc">&nbsp;		return new OrderSearchCriteria(patient, careSetting, concepts, orderTypes, accessionNumber, orderNumber, activatedOnOrBeforeDate,  </b>
+&nbsp;			activatedOnOrAfterDate, isStopped, autoExpireOnOrBeforeDate, canceledOrExpiredOnOrBeforeDate,
+&nbsp;				action, fulfillerStatus, includeNullFulfillerStatus, excludeCanceledAndExpired, excludeDiscontinueOrders, includeVoided, visit);
+&nbsp;	}
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

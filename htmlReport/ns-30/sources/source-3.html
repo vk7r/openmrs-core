@@ -1,0 +1,333 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptAnswersEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.propertyeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptAnswersEditor (org.openmrs.propertyeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptAnswersEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,7%
+  </span>
+  <span class="absValue">
+    (71/99)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.propertyeditor;
+&nbsp;
+&nbsp;import java.beans.PropertyEditorSupport;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptAnswer;
+&nbsp;import org.openmrs.Drug;
+&nbsp;import org.openmrs.api.ConceptService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Handles lists of conceptids that correspond to answers.
+&nbsp; */
+&nbsp;public class ConceptAnswersEditor extends PropertyEditorSupport {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(ConceptAnswersEditor.class);</b>
+&nbsp;	
+&nbsp;	private Collection&lt;ConceptAnswer&gt; originalConceptAnswers;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor taking in the original answers. This should be the actual list on the
+&nbsp;	 * pojo object to prevent hibernate errors later on.
+&nbsp;	 * 
+&nbsp;	 * @param originalAnswers the list on the pojo
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptAnswersEditor(Collection&lt;ConceptAnswer&gt; originalAnswers) {</b>
+<b class="fc">&nbsp;		if (originalAnswers == null) {</b>
+<b class="nc">&nbsp;			originalConceptAnswers = new HashSet&lt;&gt;();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			originalConceptAnswers = originalAnswers;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * loops over the textbox assigned to this property. The textbox is assumed to be a string of
+&nbsp;	 * conceptIds^drugIds separated by spaces.
+&nbsp;	 * 
+&nbsp;	 * @param text list of conceptIds (not conceptAnswerIds)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set the sort weights with the least possible changes
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAsText(String text) throws IllegalArgumentException {
+<b class="fc">&nbsp;		if (StringUtils.hasText(text)) {</b>
+<b class="fc">&nbsp;			ConceptService cs = Context.getConceptService();</b>
+<b class="fc">&nbsp;			String[] conceptIds = text.split(&quot; &quot;);</b>
+<b class="fc">&nbsp;			List&lt;String&gt; requestConceptIds = new ArrayList&lt;&gt;();</b>
+&nbsp;			//set up parameter answer Set for easier add/delete functions and removal of duplicates
+<b class="fc">&nbsp;			for (String id : conceptIds) {</b>
+<b class="fc">&nbsp;				id = id.trim();</b>
+<b class="fc">&nbsp;				if (!(&quot;&quot;.equals(id)) &amp;&amp; !requestConceptIds.contains(id)) { //remove whitespace, blank lines, and duplicates</b>
+<b class="fc">&nbsp;					requestConceptIds.add(id);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			Collection&lt;ConceptAnswer&gt; deletedConceptAnswers = new HashSet&lt;&gt;();</b>
+&nbsp;			
+&nbsp;			// loop over original concept answers to find any deleted answers
+<b class="fc">&nbsp;			for (ConceptAnswer origConceptAnswer : originalConceptAnswers) {</b>
+<b class="fc">&nbsp;				boolean answerDeleted = true;</b>
+<b class="fc">&nbsp;				for (String conceptId : requestConceptIds) {</b>
+<b class="fc">&nbsp;					Integer id = getConceptId(conceptId);</b>
+<b class="fc">&nbsp;					Integer drugId = getDrugId(conceptId);</b>
+<b class="fc">&nbsp;					Drug answerDrug = origConceptAnswer.getAnswerDrug();</b>
+<b class="fc">&nbsp;					if (id.equals(origConceptAnswer.getAnswerConcept().getConceptId())) {</b>
+<b class="fc">&nbsp;						if (drugId == null &amp;&amp; answerDrug == null) {</b>
+<b class="fc">&nbsp;							answerDeleted = false;</b>
+<b class="nc">&nbsp;						} else if ((drugId != null &amp;&amp; answerDrug != null)</b>
+<b class="nc">&nbsp;						        &amp;&amp; drugId.equals(origConceptAnswer.getAnswerDrug().getDrugId())) {</b>
+<b class="nc">&nbsp;							answerDeleted = false;</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+<b class="fc">&nbsp;				if (answerDeleted) {</b>
+<b class="nc">&nbsp;					deletedConceptAnswers.add(origConceptAnswer);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// loop over those deleted answers to delete them
+<b class="fc">&nbsp;			for (ConceptAnswer conceptAnswer : deletedConceptAnswers) {</b>
+<b class="nc">&nbsp;				originalConceptAnswers.remove(conceptAnswer);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			// loop over concept ids in the request to add any that are new
+<b class="fc">&nbsp;			for (String conceptId : requestConceptIds) {</b>
+<b class="fc">&nbsp;				Integer id = getConceptId(conceptId);</b>
+<b class="fc">&nbsp;				Integer drugId = getDrugId(conceptId);</b>
+<b class="fc">&nbsp;				boolean newAnswerConcept = true;</b>
+<b class="fc">&nbsp;				for (ConceptAnswer origConceptAnswer : originalConceptAnswers) {</b>
+<b class="fc">&nbsp;					Drug answerDrug = origConceptAnswer.getAnswerDrug();</b>
+<b class="fc">&nbsp;					if (id.equals(origConceptAnswer.getAnswerConcept().getConceptId())) {</b>
+<b class="fc">&nbsp;						if (drugId == null &amp;&amp; answerDrug == null) {</b>
+<b class="fc">&nbsp;							newAnswerConcept = false;</b>
+<b class="nc">&nbsp;						} else if ((drugId != null &amp;&amp; answerDrug != null) &amp;&amp; drugId.equals(answerDrug.getDrugId())) {</b>
+<b class="nc">&nbsp;							newAnswerConcept = false;</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;				// if the current request answer is new, add it to the originals
+<b class="fc">&nbsp;				if (newAnswerConcept) {</b>
+<b class="nc">&nbsp;					Concept answer = cs.getConcept(id);</b>
+<b class="nc">&nbsp;					Drug drug = null;</b>
+<b class="nc">&nbsp;					if (drugId != null) {</b>
+<b class="nc">&nbsp;						drug = cs.getDrug(drugId);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					ConceptAnswer ac = new ConceptAnswer(answer, drug);</b>
+<b class="nc">&nbsp;					originalConceptAnswers.add(ac);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+&nbsp;			//loop over to set the order
+&nbsp;			//as the list comes into &#39;requestConceptIds&#39; in the order the user wants
+&nbsp;			//  there are 2 conditions that will require the sort_weights to be reassigned
+&nbsp;			//    1) any ConceptAnswer.sortWeight == NULL (meaning it is just added)
+&nbsp;			//    2) the list is not in ASCENDING order (example sort order of the list is 1, 2, 10, 9)
+&nbsp;			//  -startIdx (start index) is where in this list we will start to reassign the sort_weights
+<b class="fc">&nbsp;			Double lastWeightSeen = null;</b>
+<b class="fc">&nbsp;			int startIdx = -1;//the idx to start at, if we have a NULL sort weight (new concept answer) or sort weights are not ascending</b>
+<b class="fc">&nbsp;			for (int i = 0; i &lt; requestConceptIds.size() - 1; i++) {</b>
+<b class="fc">&nbsp;				Integer id1 = getConceptId(requestConceptIds.get(i));</b>
+<b class="fc">&nbsp;				ConceptAnswer ca1 = getConceptAnswerFromOriginal(id1);</b>
+&nbsp;				
+<b class="fc">&nbsp;				if (ca1.getSortWeight() == null) {</b>
+<b class="fc">&nbsp;					if (lastWeightSeen == null) {</b>
+&nbsp;						//start at 1, we&#39;re at the beginning
+<b class="fc">&nbsp;						lastWeightSeen = 1d;</b>
+&nbsp;					} else {
+&nbsp;						//we start at +1
+<b class="nc">&nbsp;						lastWeightSeen += 1;</b>
+&nbsp;					}
+<b class="fc">&nbsp;					startIdx = i;</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				Integer id2 = getConceptId(requestConceptIds.get(i + 1));</b>
+<b class="nc">&nbsp;				ConceptAnswer ca2 = getConceptAnswerFromOriginal(id2);</b>
+<b class="nc">&nbsp;				int c = ca1.compareTo(ca2);</b>
+<b class="nc">&nbsp;				if (c &gt; 0) {</b>
+<b class="nc">&nbsp;					startIdx = i;</b>
+<b class="nc">&nbsp;					lastWeightSeen = ca1.getSortWeight();</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;				
+<b class="nc">&nbsp;				lastWeightSeen = ca1.getSortWeight();</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (startIdx != -1) {</b>
+&nbsp;				//then we need to re-weight
+<b class="fc">&nbsp;				for (int i = startIdx; i &lt; requestConceptIds.size(); i++) {</b>
+<b class="fc">&nbsp;					Integer id = getConceptId(requestConceptIds.get(i));</b>
+<b class="fc">&nbsp;					ConceptAnswer ca = getConceptAnswerFromOriginal(id);</b>
+<b class="fc">&nbsp;					ca.setSortWeight(lastWeightSeen++);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			log.debug(&quot;originalConceptAnswers.getConceptId(): &quot;);</b>
+<b class="fc">&nbsp;			for (ConceptAnswer a : originalConceptAnswers) {</b>
+<b class="fc">&nbsp;				log.debug(&quot;id: &quot; + a.getAnswerConcept().getConceptId());</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			
+<b class="fc">&nbsp;			log.debug(&quot;requestConceptIds: &quot;);</b>
+<b class="fc">&nbsp;			for (String i : requestConceptIds) {</b>
+<b class="fc">&nbsp;				log.debug(&quot;id: &quot; + i);</b>
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			originalConceptAnswers.clear();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		setValue(originalConceptAnswers);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * find this conceptId in the original set and set its weight
+&nbsp;	 */
+&nbsp;	private ConceptAnswer getConceptAnswerFromOriginal(Integer id) {
+<b class="fc">&nbsp;		for (ConceptAnswer ca : originalConceptAnswers) {</b>
+<b class="fc">&nbsp;			if (ca.getAnswerConcept().getConceptId().equals(id)) {</b>
+<b class="fc">&nbsp;				return ca;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parses the string and returns the Integer concept id Expected string: &quot;123&quot; or &quot;123^34&quot;
+&nbsp;	 * (&quot;conceptId^drugId&quot;)
+&nbsp;	 * 
+&nbsp;	 * @param conceptId
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private Integer getConceptId(String conceptId) {
+<b class="fc">&nbsp;		if (conceptId.contains(&quot;^&quot;)) {</b>
+<b class="nc">&nbsp;			return Integer.valueOf(conceptId.substring(0, conceptId.indexOf(&quot;^&quot;)));</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return Integer.valueOf(conceptId);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parses the string and returns the Integer drug id or null if none Expected string: &quot;123&quot; or
+&nbsp;	 * &quot;123^34&quot; (&quot;conceptId^drugId&quot;)
+&nbsp;	 * 
+&nbsp;	 * @param conceptId
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private Integer getDrugId(String conceptId) {
+<b class="fc">&nbsp;		if (conceptId.contains(&quot;^&quot;)) {</b>
+<b class="nc">&nbsp;			return Integer.valueOf(conceptId.substring(conceptId.indexOf(&quot;^&quot;) + 1));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

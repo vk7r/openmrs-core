@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptClass</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptClass (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptClass</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptClass$HibernateProxy$JFV0S6x6</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;
+&nbsp;/**
+&nbsp; * ConceptClass
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptClass extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 33473L;
+&nbsp;	
+&nbsp;	//UUIDs for core concept classes
+&nbsp;	
+&nbsp;	public static final String TEST_UUID = &quot;8d4907b2-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String PROCEDURE_UUID = &quot;8d490bf4-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String DRUG_UUID = &quot;8d490dfc-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String DIAGNOSIS_UUID = &quot;8d4918b0-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String FINDING_UUID = &quot;8d491a9a-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String ANATOMY_UUID = &quot;8d491c7a-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String QUESTION_UUID = &quot;8d491e50-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String LABSET_UUID = &quot;8d492026-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String MEDSET_UUID = &quot;8d4923b4-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String CONVSET_UUID = &quot;8d492594-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String MISC_UUID = &quot;8d492774-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String SYMPTOM_UUID = &quot;8d492954-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String SYMPTOM_FINDING_UUID = &quot;8d492b2a-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String SPECIMEN_UUID = &quot;8d492d0a-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String MISC_ORDER_UUID = &quot;8d492ee0-c2cc-11de-8d13-0010c6dffd0f&quot;;
+&nbsp;	
+&nbsp;	public static final String ORDER_SET_UUID = &quot;baa7a1b8-a1ba-11e0-9616-705ab6a580e0&quot;;
+&nbsp;	
+&nbsp;	public static final String FREQUENCY_UUID = &quot;8e071bfe-520c-44c0-a89b-538e9129b42a&quot;;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@DocumentId
+&nbsp;	private Integer conceptClassId;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptClass() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public ConceptClass(Integer conceptClassId) {</b>
+<b class="fc">&nbsp;		this.conceptClassId = conceptClassId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	public Integer getConceptClassId() {
+<b class="fc">&nbsp;		return this.conceptClassId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConceptClassId(Integer conceptClassId) {
+<b class="fc">&nbsp;		this.conceptClassId = conceptClassId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptClassId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptClassId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

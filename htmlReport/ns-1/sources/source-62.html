@@ -1,0 +1,333 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Program</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Program (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Program</td>
+<td class="coverageStat">
+  <span class="percent">
+    85%
+  </span>
+  <span class="absValue">
+    (17/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (33/42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Program$HibernateProxy$yXocVdLc</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    85%
+  </span>
+  <span class="absValue">
+    (17/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (33/42)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.annotation.AllowDirectAccess;
+&nbsp;
+&nbsp;/**
+&nbsp; * Program
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class Program extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 3214567L;
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Properties
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	private Integer programId;
+&nbsp;	
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Represents the possible outcomes for this program. The concept should have answers or a
+&nbsp;	 * memberSet.
+&nbsp;	 */
+&nbsp;	private Concept outcomesConcept;
+&nbsp;	
+<b class="fc">&nbsp;	@AllowDirectAccess</b>
+&nbsp;	private Set&lt;ProgramWorkflow&gt; allWorkflows = new HashSet&lt;&gt;();
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Constructors
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/** Default Constructor */
+<b class="fc">&nbsp;	public Program() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** Constructor with id */
+<b class="fc">&nbsp;	public Program(Integer programId) {</b>
+<b class="fc">&nbsp;		setProgramId(programId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor with name
+&nbsp;	 *
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+<b class="fc">&nbsp;	public Program(String name) {</b>
+<b class="fc">&nbsp;		setName(name);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Instance methods
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a new {@link ProgramWorkflow} to this Program
+&nbsp;	 *
+&nbsp;	 * @param workflow - the {@link ProgramWorkflow} to add
+&nbsp;	 */
+&nbsp;	public void addWorkflow(ProgramWorkflow workflow) {
+<b class="fc">&nbsp;		workflow.setProgram(this);</b>
+<b class="fc">&nbsp;		getAllWorkflows().add(workflow);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a {@link ProgramWorkflow} from this Program
+&nbsp;	 *
+&nbsp;	 * @param workflow - the {@link ProgramWorkflow} to remove
+&nbsp;	 */
+&nbsp;	public void removeWorkflow(ProgramWorkflow workflow) {
+<b class="nc">&nbsp;		if (getAllWorkflows().contains(workflow)) {</b>
+<b class="nc">&nbsp;			getAllWorkflows().remove(workflow);</b>
+<b class="nc">&nbsp;			workflow.setProgram(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Retires a {@link ProgramWorkflow}
+&nbsp;	 *
+&nbsp;	 * @param workflow - the {@link ProgramWorkflow} to retire
+&nbsp;	 */
+&nbsp;	public void retireWorkflow(ProgramWorkflow workflow) {
+<b class="nc">&nbsp;		workflow.setRetired(true);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns a {@link ProgramWorkflow} whose {@link Concept} has any {@link ConceptName} that
+&nbsp;	 * matches the given &lt;code&gt;name&lt;/code&gt;
+&nbsp;	 *
+&nbsp;	 * @param name the {@link ProgramWorkflow} name, in any {@link Locale}
+&nbsp;	 * @return a {@link ProgramWorkflow} which has the passed &lt;code&gt;name&lt;/code&gt; in any
+&nbsp;	 *         {@link Locale}
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getWorkflowByName(String name) {
+<b class="fc">&nbsp;		for (ProgramWorkflow pw : getAllWorkflows()) {</b>
+<b class="fc">&nbsp;			if (pw.getConcept().isNamed(name)) {</b>
+<b class="fc">&nbsp;				return pw;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** @see Object#toString() */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;Program(id=&quot; + getProgramId() + &quot;, concept=&quot; + getConcept() + &quot;, workflows=&quot; + getWorkflows() + &quot;)&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Property Access
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getOutcomesConcept() {
+<b class="fc">&nbsp;		return outcomesConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setOutcomesConcept(Concept concept) {
+<b class="fc">&nbsp;		this.outcomesConcept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getProgramId() {
+<b class="fc">&nbsp;		return programId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setProgramId(Integer programId) {
+<b class="fc">&nbsp;		this.programId = programId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get only the non-retired workflows
+&nbsp;	 *
+&nbsp;	 * @return Returns a Set&amp;lt;ProgramWorkflow&amp;gt; of all non-retired workflows
+&nbsp;	 */
+&nbsp;	public Set&lt;ProgramWorkflow&gt; getWorkflows() {
+<b class="fc">&nbsp;		Set&lt;ProgramWorkflow&gt; ret = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;		for (ProgramWorkflow workflow : getAllWorkflows()) {</b>
+<b class="fc">&nbsp;			if (!workflow.getRetired()) {</b>
+<b class="fc">&nbsp;				ret.add(workflow);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the workflow with the specified ID
+&nbsp;	 *
+&nbsp;	 * @return the workflow matching the given id or null if none found
+&nbsp;	 * @since 1.6
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getWorkflow(Integer programWorkflowId) {
+<b class="fc">&nbsp;		if (getWorkflows() != null) {</b>
+<b class="fc">&nbsp;			for (ProgramWorkflow wf : getWorkflows()) {</b>
+<b class="fc">&nbsp;				if (wf.getId().equals(programWorkflowId)) {</b>
+<b class="fc">&nbsp;					return wf;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all workflows...including the retired ones
+&nbsp;	 *
+&nbsp;	 * @return Returns a Set&amp;lt;ProgramWorkflow&amp;gt; of all workflows
+&nbsp;	 */
+&nbsp;	public Set&lt;ProgramWorkflow&gt; getAllWorkflows() {
+<b class="fc">&nbsp;		if (allWorkflows == null) {</b>
+<b class="nc">&nbsp;			allWorkflows = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return allWorkflows;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setAllWorkflows(Set&lt;ProgramWorkflow&gt; allWorkflows) {
+<b class="fc">&nbsp;		this.allWorkflows = allWorkflows;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+&nbsp;		
+<b class="fc">&nbsp;		return getProgramId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setProgramId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

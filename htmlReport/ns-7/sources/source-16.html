@@ -1,0 +1,201 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProviderDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: ProviderDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ProviderDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.Provider;
+&nbsp;import org.openmrs.ProviderAttribute;
+&nbsp;import org.openmrs.ProviderAttributeType;
+&nbsp;import org.openmrs.api.ProviderService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Data Access function for Provider
+&nbsp; * 
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;public interface ProviderDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets all Providers
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired - whether or not to include retired Provider
+&nbsp;	 */
+&nbsp;	List&lt;Provider&gt; getAllProviders(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Saves/Updates a given Provider
+&nbsp;	 */
+&nbsp;	public Provider saveProvider(Provider provider);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * deletes an exisiting Provider
+&nbsp;	 */
+&nbsp;	public void deleteProvider(Provider provider);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param id
+&nbsp;	 * @return Provider gets the Provider based on id
+&nbsp;	 */
+&nbsp;	public Provider getProvider(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return Provider gets the Provider based on uuid
+&nbsp;	 */
+&nbsp;	
+&nbsp;	public Provider getProviderByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProvidersByPerson( Person, boolean )
+&nbsp;	 */
+&nbsp;	public Collection&lt;Provider&gt; getProvidersByPerson(Person person, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param name
+&nbsp;	 * @param serializedAttributeValues
+&nbsp;	 * @param start
+&nbsp;	 * @param length
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return List of Providers
+&nbsp;	 */
+&nbsp;	public List&lt;Provider&gt; getProviders(String name, Map&lt;ProviderAttributeType, String&gt; serializedAttributeValues,
+&nbsp;	        Integer start, Integer length, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param name
+&nbsp;	 * @param includeRetired
+&nbsp;	 * @return Count of providers satisfying the given query
+&nbsp;	 */
+&nbsp;	public Long getCountOfProviders(String name, boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getAllProviderAttributeTypes(boolean)
+&nbsp;	 * @see ProviderService#getAllProviderAttributeTypes()
+&nbsp;	 */
+&nbsp;	List&lt;ProviderAttributeType&gt; getAllProviderAttributeTypes(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProviderAttributeType(Integer)
+&nbsp;	 */
+&nbsp;	ProviderAttributeType getProviderAttributeType(Integer providerAttributeTypeId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProviderAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	ProviderAttributeType getProviderAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProviderAttributeTypeByName(String)
+&nbsp;	 */
+&nbsp;	ProviderAttributeType getProviderAttributeTypeByName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#saveProviderAttributeType(ProviderAttributeType)
+&nbsp;	 */
+&nbsp;	ProviderAttributeType saveProviderAttributeType(ProviderAttributeType providerAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#purgeProviderAttributeType(ProviderAttributeType)
+&nbsp;	 */
+&nbsp;	void deleteProviderAttributeType(ProviderAttributeType providerAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProviderAttribute(Integer)
+&nbsp;	 */
+&nbsp;	
+&nbsp;	ProviderAttribute getProviderAttribute(Integer providerAttributeID);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProviderAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	ProviderAttribute getProviderAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#isProviderIdentifierUnique(Provider)
+&nbsp;	 */
+&nbsp;	public boolean isProviderIdentifierUnique(Provider provider) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see ProviderService#getProviderByIdentifier(String)
+&nbsp;	 */
+&nbsp;	public Provider getProviderByIdentifier(String identifier);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

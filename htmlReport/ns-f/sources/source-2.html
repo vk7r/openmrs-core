@@ -1,0 +1,154 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ListPart</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.collection</a>
+</div>
+
+<h1>Coverage Summary for Class: ListPart (org.openmrs.collection)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ListPart</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.collection;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * It is a wrapper for a partial list, which stores additional info about the current part and the
+&nbsp; * whole.
+&nbsp; * 
+&nbsp; * @since 1.11
+&nbsp; */
+&nbsp;public class ListPart&lt;E&gt; extends CollectionPart&lt;E&gt; {
+&nbsp;	
+&nbsp;	private final List&lt;E&gt; list;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param list
+&nbsp;	 * @param firstElement
+&nbsp;	 * @param maxElements
+&nbsp;	 * @param totalElements
+&nbsp;	 */
+&nbsp;	public ListPart(List&lt;E&gt; list, Long firstElement, Long maxElements, Long totalElements, Boolean totalElementsExact) {
+<b class="fc">&nbsp;		super(list, firstElement, maxElements, totalElements, totalElementsExact);</b>
+<b class="fc">&nbsp;		this.list = list;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public Collection&lt;E&gt; getCollection() {
+<b class="nc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;E&gt; getList() {
+<b class="fc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static &lt;T&gt; ListPart&lt;T&gt; newListPart(List&lt;T&gt; list, Long firstElement, Long maxElements, Long totalElements,
+&nbsp;	        Boolean totalElementsExact) {
+<b class="fc">&nbsp;		return new ListPart&lt;&gt;(list, firstElement, maxElements, totalElements, totalElementsExact);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

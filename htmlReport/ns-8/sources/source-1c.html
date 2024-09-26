@@ -1,0 +1,496 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateSerializedObjectDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateSerializedObjectDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateSerializedObjectDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (4/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    6,8%
+  </span>
+  <span class="absValue">
+    (9/133)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Auditable;
+&nbsp;import org.openmrs.OpenmrsData;
+&nbsp;import org.openmrs.OpenmrsMetadata;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.SerializedObject;
+&nbsp;import org.openmrs.api.db.SerializedObjectDAO;
+&nbsp;import org.openmrs.serialization.OpenmrsSerializer;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.ExceptionUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate specific database access methods for serialized objects
+&nbsp; */
+&nbsp;public class HibernateSerializedObjectDAO implements SerializedObjectDAO {
+&nbsp;	
+&nbsp;	private static HibernateSerializedObjectDAO instance;
+&nbsp;	
+&nbsp;	//********* PROPERTIES **********
+&nbsp;	
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+&nbsp;	private List&lt;Class&lt;? extends OpenmrsObject&gt;&gt; supportedTypes;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Private Constructor to support a singleton instance
+&nbsp;	 */
+<b class="fc">&nbsp;	private HibernateSerializedObjectDAO() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Singleton Factory method
+&nbsp;	 * 
+&nbsp;	 * @return a singleton instance of this class
+&nbsp;	 */
+&nbsp;	public static HibernateSerializedObjectDAO getInstance() {
+<b class="fc">&nbsp;		if (instance == null) {</b>
+<b class="fc">&nbsp;			instance = new HibernateSerializedObjectDAO();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return instance;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getSerializedObject(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public SerializedObject getSerializedObject(Integer id) throws DAOException {
+<b class="nc">&nbsp;		if (id != null) {</b>
+<b class="nc">&nbsp;			return sessionFactory.getCurrentSession().get(SerializedObject.class, id);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getObject(Class, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T getObject(Class&lt;T&gt; baseClass, Integer id) throws DAOException {
+<b class="nc">&nbsp;		SerializedObject serializedObject = getSerializedObject(id);</b>
+<b class="nc">&nbsp;		return convertSerializedObject(baseClass, serializedObject);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getSerializedObjectByUuid(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public SerializedObject getSerializedObjectByUuid(String uuid) throws DAOException {
+<b class="nc">&nbsp;		if (uuid != null) {</b>
+<b class="nc">&nbsp;			return HibernateUtil.getUniqueEntityByUUID(sessionFactory, SerializedObject.class, uuid);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getObjectByUuid(Class, String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T getObjectByUuid(Class&lt;T&gt; baseClass, String uuid) throws DAOException {
+<b class="nc">&nbsp;		SerializedObject o = getSerializedObjectByUuid(uuid);</b>
+<b class="nc">&nbsp;		if (o != null) {</b>
+<b class="nc">&nbsp;			return convertSerializedObject(baseClass, o);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getAllSerializedObjectsByName(Class, String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;SerializedObject&gt; getAllSerializedObjectsByName(Class&lt;?&gt; type, String name, boolean exactMatchOnly)
+&nbsp;		throws DAOException {
+&nbsp;
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;SerializedObject&gt; cq = cb.createQuery(SerializedObject.class);</b>
+<b class="nc">&nbsp;		Root&lt;SerializedObject&gt; root = cq.from(SerializedObject.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		Predicate predicateForType = cb.or(</b>
+<b class="nc">&nbsp;			cb.equal(root.get(&quot;type&quot;), type.getName()), </b>
+<b class="nc">&nbsp;			cb.equal(root.get(&quot;subtype&quot;), type.getName())</b>
+&nbsp;		);
+&nbsp;		
+&nbsp;		Predicate predicateForName;
+<b class="nc">&nbsp;		if (exactMatchOnly) {</b>
+<b class="nc">&nbsp;			predicateForName = cb.equal(root.get(&quot;name&quot;), name);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			predicateForName = cb.like(cb.lower(root.get(&quot;name&quot;)), MatchMode.ANYWHERE.toLowerCasePattern(name));</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		cq.where(predicateForType, predicateForName);</b>
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getAllObjectsByName(Class, String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsMetadata&gt; List&lt;T&gt; getAllObjectsByName(Class&lt;T&gt; type, String name, boolean exactMatchOnly)
+&nbsp;	        throws DAOException {
+<b class="nc">&nbsp;		List&lt;T&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		List&lt;SerializedObject&gt; objects = getAllSerializedObjectsByName(type, name, exactMatchOnly);</b>
+<b class="nc">&nbsp;		for (SerializedObject serializedObject : objects) {</b>
+<b class="nc">&nbsp;			ret.add(convertSerializedObject(type, serializedObject));</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getAllObjects(Class, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;SerializedObject&gt; getAllSerializedObjects(Class&lt;?&gt; type, boolean includeRetired) {
+<b class="nc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="nc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="nc">&nbsp;		CriteriaQuery&lt;SerializedObject&gt; cq = cb.createQuery(SerializedObject.class);</b>
+<b class="nc">&nbsp;		Root&lt;SerializedObject&gt; root = cq.from(SerializedObject.class);</b>
+&nbsp;
+<b class="nc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		predicates.add(cb.or(</b>
+<b class="nc">&nbsp;			cb.equal(root.get(&quot;type&quot;), type.getName()),</b>
+<b class="nc">&nbsp;			cb.equal(root.get(&quot;subtype&quot;), type.getName())</b>
+&nbsp;		));
+&nbsp;		
+<b class="nc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		cq.where(predicates.toArray(new Predicate[]{}));</b>
+&nbsp;
+<b class="nc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getAllObjects(Class, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsObject&gt; List&lt;T&gt; getAllObjects(Class&lt;T&gt; type, boolean includeRetired) throws DAOException {
+<b class="nc">&nbsp;		List&lt;T&gt; ret = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		List&lt;SerializedObject&gt; objects = getAllSerializedObjects(type, includeRetired);</b>
+<b class="nc">&nbsp;		for (SerializedObject serializedObject : objects) {</b>
+<b class="nc">&nbsp;			ret.add(convertSerializedObject(type, serializedObject));</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getAllObjects(Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsObject&gt; List&lt;T&gt; getAllObjects(Class&lt;T&gt; type) throws DAOException {
+<b class="nc">&nbsp;		return getAllObjects(type, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#saveObject(OpenmrsObject)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T saveObject(T object) throws DAOException {
+<b class="nc">&nbsp;		return saveObject(object, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#saveObject(OpenmrsObject, OpenmrsSerializer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T saveObject(T object, OpenmrsSerializer serializer) throws DAOException {
+&nbsp;		
+<b class="nc">&nbsp;		Class&lt;? extends OpenmrsObject&gt; baseType = getRegisteredTypeForObject(object);</b>
+<b class="nc">&nbsp;		if (baseType == null) {</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;SerializedObjectDAO does not support saving objects of type &lt;&quot; + object.getClass() + &quot;&gt;&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		SerializedObject serializedObject = getSerializedObject(object.getId());</b>
+<b class="nc">&nbsp;		if (serializedObject == null) {</b>
+<b class="nc">&nbsp;			serializedObject = new SerializedObject();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (serializer == null) {</b>
+<b class="nc">&nbsp;			serializer = getSerializer(serializedObject);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (object instanceof Auditable) {</b>
+<b class="nc">&nbsp;			Auditable auditableObj = (Auditable) object;</b>
+<b class="nc">&nbsp;			if (auditableObj.getCreator() == null) {</b>
+<b class="nc">&nbsp;				auditableObj.setCreator(Context.getAuthenticatedUser());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			serializedObject.setCreator(auditableObj.getCreator());</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (auditableObj.getDateCreated() == null) {</b>
+<b class="nc">&nbsp;				auditableObj.setDateCreated(new Date());</b>
+&nbsp;			}
+<b class="nc">&nbsp;			serializedObject.setDateCreated(auditableObj.getDateCreated());</b>
+<b class="nc">&nbsp;			serializedObject.setChangedBy(auditableObj.getChangedBy());</b>
+<b class="nc">&nbsp;			serializedObject.setDateChanged(auditableObj.getDateChanged());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		String data;
+&nbsp;		try {
+<b class="nc">&nbsp;			data = serializer.serialize(object);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SerializationException e) {</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Unable to save object &lt;&quot; + object + &quot;&gt; because serialization failed.&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		serializedObject.setUuid(object.getUuid());</b>
+<b class="nc">&nbsp;		serializedObject.setType(baseType.getName());</b>
+<b class="nc">&nbsp;		serializedObject.setSubtype(object.getClass().getName());</b>
+<b class="nc">&nbsp;		serializedObject.setSerializationClass(serializer.getClass());</b>
+<b class="nc">&nbsp;		serializedObject.setSerializedData(data);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (object instanceof OpenmrsMetadata) {</b>
+<b class="nc">&nbsp;			OpenmrsMetadata metaObj = (OpenmrsMetadata) object;</b>
+<b class="nc">&nbsp;			serializedObject.setName(metaObj.getName());</b>
+<b class="nc">&nbsp;			serializedObject.setDescription(metaObj.getDescription());</b>
+<b class="nc">&nbsp;			serializedObject.setRetired(metaObj.getRetired());</b>
+<b class="nc">&nbsp;			serializedObject.setRetiredBy(metaObj.getRetiredBy());</b>
+<b class="nc">&nbsp;			serializedObject.setDateRetired(metaObj.getDateRetired());</b>
+<b class="nc">&nbsp;			serializedObject.setRetireReason(metaObj.getRetireReason());</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (object instanceof OpenmrsData) {</b>
+<b class="nc">&nbsp;			OpenmrsData dataObj = (OpenmrsData) object;</b>
+<b class="nc">&nbsp;			serializedObject.setRetired(dataObj.getVoided());</b>
+<b class="nc">&nbsp;			serializedObject.setRetiredBy(dataObj.getVoidedBy());</b>
+<b class="nc">&nbsp;			serializedObject.setDateRetired(dataObj.getDateVoided());</b>
+<b class="nc">&nbsp;			serializedObject.setRetireReason(dataObj.getVoidReason());</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(serializedObject);</b>
+&nbsp;		
+<b class="nc">&nbsp;		object.setId(serializedObject.getId());</b>
+<b class="nc">&nbsp;		return object;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#purgeObject(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeObject(Integer id) throws DAOException {
+<b class="nc">&nbsp;		SerializedObject o = getSerializedObject(id);</b>
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().delete(o);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#registerSupportedType(Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void registerSupportedType(Class&lt;? extends OpenmrsObject&gt; clazz) throws DAOException {
+<b class="nc">&nbsp;		if (!getSupportedTypes().contains(clazz)) {</b>
+<b class="nc">&nbsp;			supportedTypes.add(clazz);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#unregisterSupportedType(Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void unregisterSupportedType(Class&lt;? extends OpenmrsObject&gt; clazz) throws DAOException {
+<b class="nc">&nbsp;		getSupportedTypes().remove(clazz);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#getRegisteredTypeForObject(OpenmrsObject)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Class&lt;? extends OpenmrsObject&gt; getRegisteredTypeForObject(OpenmrsObject object) {
+<b class="nc">&nbsp;		for (Class&lt;? extends OpenmrsObject&gt; clazz : getSupportedTypes()) {</b>
+<b class="nc">&nbsp;			if (clazz.isAssignableFrom(object.getClass())) {</b>
+<b class="nc">&nbsp;				return clazz;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see SerializedObjectDAO#convertSerializedObject(Class, SerializedObject)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public &lt;T extends OpenmrsObject&gt; T convertSerializedObject(Class&lt;T&gt; clazz, SerializedObject serializedObject)
+&nbsp;	        throws DAOException {
+<b class="nc">&nbsp;		if (serializedObject == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		OpenmrsSerializer serializer = getSerializer(serializedObject);</b>
+&nbsp;		T obj;
+&nbsp;		try {
+<b class="nc">&nbsp;			Class&lt;?&gt; subtype = Context.loadClass(serializedObject.getSubtype());</b>
+<b class="nc">&nbsp;			obj = (T) serializer.deserialize(serializedObject.getSerializedData(), subtype);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			ExceptionUtil.rethrowAPIAuthenticationException(e);</b>
+<b class="nc">&nbsp;			throw new DAOException(&quot;Unable to deserialize object: &quot; + serializedObject, e);</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		if (obj == null) {</b>
+&nbsp;			// it&#39;s probably impossible to reach this code branch
+<b class="nc">&nbsp;			throw new DAOException(&quot;Unable to deserialize object: &quot; + serializedObject);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		obj.setId(serializedObject.getId());</b>
+<b class="nc">&nbsp;		obj.setUuid(serializedObject.getUuid());</b>
+<b class="nc">&nbsp;		return obj;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Private method for retrieving the Serializer that should be used for the passed
+&nbsp;	 * SerializedObject, defaulting to the default system serializer if none is explicitly set on
+&nbsp;	 * the object
+&nbsp;	 */
+&nbsp;	private OpenmrsSerializer getSerializer(SerializedObject o) {
+<b class="nc">&nbsp;		if (o != null &amp;&amp; o.getSerializationClass() != null) {</b>
+<b class="nc">&nbsp;			return Context.getSerializationService().getSerializer(o.getSerializationClass());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return Context.getSerializationService().getDefaultSerializer();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	//***** Property access *****
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set session factory
+&nbsp;	 * 
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the supportedTypes
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Class&lt;? extends OpenmrsObject&gt;&gt; getSupportedTypes() {
+<b class="nc">&nbsp;		if (supportedTypes == null) {</b>
+<b class="nc">&nbsp;			supportedTypes = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return supportedTypes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param supportedTypes the supportedTypes to set
+&nbsp;	 */
+&nbsp;	public void setSupportedTypes(List&lt;Class&lt;? extends OpenmrsObject&gt;&gt; supportedTypes) {
+<b class="fc">&nbsp;		if (this.supportedTypes == null) {</b>
+<b class="fc">&nbsp;			this.supportedTypes = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (supportedTypes != null) {</b>
+<b class="fc">&nbsp;			this.supportedTypes.addAll(supportedTypes);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

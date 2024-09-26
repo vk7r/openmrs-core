@@ -1,0 +1,730 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptName</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptName (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptName</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,5%
+  </span>
+  <span class="absValue">
+    (44/54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,4%
+  </span>
+  <span class="absValue">
+    (57/81)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptName$HibernateProxy$2UdLWJRu</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    81,5%
+  </span>
+  <span class="absValue">
+    (44/54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,4%
+  </span>
+  <span class="absValue">
+    (57/81)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+&nbsp;import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
+&nbsp;import org.apache.lucene.analysis.standard.StandardFilterFactory;
+&nbsp;import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.hibernate.search.annotations.Analyze;
+&nbsp;import org.hibernate.search.annotations.Analyzer;
+&nbsp;import org.hibernate.search.annotations.AnalyzerDef;
+&nbsp;import org.hibernate.search.annotations.DocumentId;
+&nbsp;import org.hibernate.search.annotations.Field;
+&nbsp;import org.hibernate.search.annotations.FieldBridge;
+&nbsp;import org.hibernate.search.annotations.Indexed;
+&nbsp;import org.hibernate.search.annotations.IndexedEmbedded;
+&nbsp;import org.hibernate.search.annotations.TokenFilterDef;
+&nbsp;import org.hibernate.search.annotations.TokenizerDef;
+&nbsp;import org.openmrs.api.ConceptNameType;
+&nbsp;import org.openmrs.api.db.hibernate.search.bridge.LocaleFieldBridge;
+&nbsp;
+&nbsp;/**
+&nbsp; * ConceptName is the real world term used to express a Concept within the idiom of a particular
+&nbsp; * locale.
+&nbsp; */
+&nbsp;@Indexed
+&nbsp;@AnalyzerDef(
+&nbsp;	name = &quot;ConceptNameAnalyzer&quot;, tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class), filters = {
+&nbsp;        @TokenFilterDef(factory = StandardFilterFactory.class), 
+&nbsp;		@TokenFilterDef(factory = LowerCaseFilterFactory.class), 
+&nbsp;		@TokenFilterDef(factory = ASCIIFoldingFilterFactory.class)
+&nbsp;	})
+&nbsp;@Analyzer(definition = &quot;ConceptNameAnalyzer&quot;)
+&nbsp;@Audited
+&nbsp;public class ConceptName extends BaseOpenmrsObject implements Auditable, Voidable, java.io.Serializable {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 2L;
+&nbsp;	
+&nbsp;	@DocumentId
+&nbsp;	private Integer conceptNameId;
+&nbsp;	
+&nbsp;	@IndexedEmbedded(includeEmbeddedObjectId = true)
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	@Field
+&nbsp;	private String name;
+&nbsp;	
+&nbsp;	@Field(analyze = Analyze.NO)
+&nbsp;	@FieldBridge(impl = LocaleFieldBridge.class)
+&nbsp;	// ABK: upgraded from a plain string to a full locale object
+&nbsp;	private Locale locale; 
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;	
+<b class="fc">&nbsp;	@Field</b>
+<b class="fc">&nbsp;	private Boolean voided = false;</b>
+&nbsp;	
+&nbsp;	private User voidedBy;
+&nbsp;	
+&nbsp;	private Date dateVoided;
+&nbsp;	
+&nbsp;	private String voidReason;
+&nbsp;	
+&nbsp;	private Collection&lt;ConceptNameTag&gt; tags;
+&nbsp;	
+&nbsp;	@Field
+&nbsp;	private ConceptNameType conceptNameType;
+&nbsp;	
+<b class="fc">&nbsp;	@Field</b>
+<b class="fc">&nbsp;	private Boolean localePreferred = false;</b>
+&nbsp;	
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptName() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor to create a ConceptName object by primary key
+&nbsp;	 *
+&nbsp;	 * @param conceptNameId
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptName(Integer conceptNameId) {</b>
+<b class="fc">&nbsp;		this.conceptNameId = conceptNameId;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public ConceptName(String name, Locale locale) {</b>
+<b class="fc">&nbsp;		setName(name);</b>
+<b class="fc">&nbsp;		setLocale(locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptId.
+&nbsp;	 */
+&nbsp;	public Integer getConceptNameId() {
+<b class="fc">&nbsp;		return conceptNameId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptNameId The conceptId to set.
+&nbsp;	 */
+&nbsp;	public void setConceptNameId(Integer conceptNameId) {
+<b class="fc">&nbsp;		this.conceptNameId = conceptNameId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setName(String name) {
+<b class="fc">&nbsp;		if (name != null &amp;&amp; StringUtils.isBlank(name) &amp;&amp; StringUtils.isNotBlank(this.name)</b>
+<b class="nc">&nbsp;		        &amp;&amp; this.getConceptNameType().equals(ConceptNameType.SHORT)) {</b>
+<b class="nc">&nbsp;			this.setVoided(true);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			this.name = name;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Locale getLocale() {
+<b class="fc">&nbsp;		return locale;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setLocale(Locale locale) {
+<b class="fc">&nbsp;		this.locale = locale;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns whether the ConceptName has been voided.
+&nbsp;	 *
+&nbsp;	 * @return true if the ConceptName has been voided, false otherwise.
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getVoided()}
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isVoided() {
+<b class="nc">&nbsp;		return getVoided();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns whether the ConceptName has been voided.
+&nbsp;	 *
+&nbsp;	 * @return true if the ConceptName has been voided, false otherwise.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Boolean getVoided() {
+<b class="fc">&nbsp;		return voided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the voided status of this ConceptName.
+&nbsp;	 *
+&nbsp;	 * @param voided the voided status to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoided(Boolean voided) {
+<b class="fc">&nbsp;		this.voided = voided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the User who voided this ConceptName.
+&nbsp;	 *
+&nbsp;	 * @return the User who voided this ConceptName, or null if not set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getVoidedBy() {
+<b class="fc">&nbsp;		return voidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the User who voided this ConceptName.
+&nbsp;	 *
+&nbsp;	 * @param voidedBy the user who voided this ConceptName.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoidedBy(User voidedBy) {
+<b class="fc">&nbsp;		this.voidedBy = voidedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the Date this ConceptName was voided.
+&nbsp;	 *
+&nbsp;	 * @return the Date this ConceptName was voided.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateVoided() {
+<b class="fc">&nbsp;		return dateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the Data this ConceptName was voided.
+&nbsp;	 *
+&nbsp;	 * @param dateVoided the date the ConceptName was voided.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateVoided(Date dateVoided) {
+<b class="fc">&nbsp;		this.dateVoided = dateVoided;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the reason this ConceptName was voided.
+&nbsp;	 *
+&nbsp;	 * @return the reason this ConceptName was voided
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getVoidReason() {
+<b class="fc">&nbsp;		return voidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the reason this ConceptName was voided.
+&nbsp;	 *
+&nbsp;	 * @param voidReason the reason this ConceptName was voided
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setVoidReason(String voidReason) {
+<b class="fc">&nbsp;		this.voidReason = voidReason;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the tags which have been attached to this ConceptName.
+&nbsp;	 *
+&nbsp;	 * @return the tags.
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptNameTag&gt; getTags() {
+<b class="fc">&nbsp;		return tags;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the tags which are attached to this ConceptName.
+&nbsp;	 *
+&nbsp;	 * @see Concept#setPreferredName(ConceptName)
+&nbsp;	 * @see Concept#setFullySpecifiedName(ConceptName)
+&nbsp;	 * @see Concept#setShortName(ConceptName)
+&nbsp;	 * @param tags the tags to set.
+&nbsp;	 */
+&nbsp;	public void setTags(Collection&lt;ConceptNameTag&gt; tags) {
+<b class="fc">&nbsp;		this.tags = tags;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptNameType
+&nbsp;	 */
+&nbsp;	public ConceptNameType getConceptNameType() {
+<b class="fc">&nbsp;		return this.conceptNameType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptNameType the conceptNameType to set
+&nbsp;	 */
+&nbsp;	public void setConceptNameType(ConceptNameType conceptNameType) {
+<b class="fc">&nbsp;		this.conceptNameType = conceptNameType;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Getter for localePreferred
+&nbsp;	 *
+&nbsp;	 * @return localPreferred
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getLocalePreferred()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isLocalePreferred() {
+<b class="nc">&nbsp;		return getLocalePreferred();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @return true if it is the localePreferred name otherwise false
+&nbsp;	 */
+&nbsp;	public Boolean getLocalePreferred() {
+<b class="fc">&nbsp;		return localePreferred;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param localePreferred the localePreferred to set
+&nbsp;	 */
+&nbsp;	public void setLocalePreferred(Boolean localePreferred) {
+<b class="fc">&nbsp;		this.localePreferred = localePreferred;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a tag to the concept name. If the tag is new (has no existing occurrences) a new
+&nbsp;	 * ConceptNameTag will be created with a blank description.
+&nbsp;	 *
+&nbsp;	 * @see Concept#setPreferredName(ConceptName)
+&nbsp;	 * @see Concept#setFullySpecifiedName(ConceptName)
+&nbsp;	 * @see Concept#setShortName(ConceptName)
+&nbsp;	 * @param tag human-readable text string for the tag
+&nbsp;	 */
+&nbsp;	public void addTag(String tag) {
+<b class="fc">&nbsp;		addTag(tag, &quot;&quot;);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Adds a tag to the concept name. If the tag is new (has no existing occurrences) a new
+&nbsp;	 * ConceptNameTag will be created with the given description.
+&nbsp;	 *
+&nbsp;	 * @see Concept#setPreferredName(ConceptName)
+&nbsp;	 * @see Concept#setFullySpecifiedName(ConceptName)
+&nbsp;	 * @see Concept#setShortName(ConceptName)
+&nbsp;	 * @param tag human-readable text string for the tag
+&nbsp;	 * @param description description of the tag&#39;s purpose
+&nbsp;	 */
+&nbsp;	public void addTag(String tag, String description) {
+<b class="fc">&nbsp;		ConceptNameTag nameTag = new ConceptNameTag(tag, description);</b>
+<b class="fc">&nbsp;		addTag(nameTag);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Attaches a tag to the concept name.
+&nbsp;	 *
+&nbsp;	 * @see Concept#setPreferredName(ConceptName)
+&nbsp;	 * @see Concept#setFullySpecifiedName(ConceptName)
+&nbsp;	 * @see Concept#setShortName(ConceptName)
+&nbsp;	 * @param tag the tag to add
+&nbsp;	 */
+&nbsp;	public void addTag(ConceptNameTag tag) {
+<b class="fc">&nbsp;		if (tags == null) {</b>
+<b class="fc">&nbsp;			tags = new HashSet&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (!tags.contains(tag)) {</b>
+<b class="fc">&nbsp;			tags.add(tag);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Removes a tag from the concept name.
+&nbsp;	 *
+&nbsp;	 * @see Concept#setPreferredName(ConceptName)
+&nbsp;	 * @see Concept#setFullySpecifiedName(ConceptName)
+&nbsp;	 * @see Concept#setShortName(ConceptName)
+&nbsp;	 * @param tag the tag to remove
+&nbsp;	 */
+&nbsp;	public void removeTag(ConceptNameTag tag) {
+<b class="nc">&nbsp;		if (tags.contains(tag)) {</b>
+<b class="nc">&nbsp;			tags.remove(tag);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the name has a particular tag.
+&nbsp;	 *
+&nbsp;	 * @see #isPreferred()
+&nbsp;	 * @see #isFullySpecifiedName()
+&nbsp;	 * @see #isIndexTerm()
+&nbsp;	 * @see #isSynonym()
+&nbsp;	 * @see #isShort()
+&nbsp;	 * @param tagToFind the tag for which to check
+&nbsp;	 * @return true if the tags include the specified tag, false otherwise
+&nbsp;	 */
+&nbsp;	public Boolean hasTag(ConceptNameTag tagToFind) {
+<b class="nc">&nbsp;		return hasTag(tagToFind.getTag());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the name has a particular tag.
+&nbsp;	 *
+&nbsp;	 * @see #isPreferred()
+&nbsp;	 * @see #isFullySpecifiedName()
+&nbsp;	 * @see #isIndexTerm()
+&nbsp;	 * @see #isSynonym()
+&nbsp;	 * @see #isShort()
+&nbsp;	 * @param tagToFind the string of the tag for which to check
+&nbsp;	 * @return true if the tags include the specified tag, false otherwise
+&nbsp;	 */
+&nbsp;	public Boolean hasTag(String tagToFind) {
+<b class="nc">&nbsp;		boolean foundTag = false;</b>
+<b class="nc">&nbsp;		if (tags != null) {</b>
+<b class="nc">&nbsp;			for (ConceptNameTag nameTag : getTags()) {</b>
+<b class="nc">&nbsp;				if (nameTag.getTag().equals(tagToFind)) {</b>
+<b class="nc">&nbsp;					foundTag = true;</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return foundTag;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the name is explicitly marked as preferred in a locale with a matching
+&nbsp;	 * language. E.g &#39;en_US&#39; and &#39;en_UK&#39; for language en
+&nbsp;	 *
+&nbsp;	 * @see #isPreferredForLocale(Locale)
+&nbsp;	 * @param language ISO 639 2-letter code for a language
+&nbsp;	 * @return true if the name is preferred in a locale with a matching language code, otherwise
+&nbsp;	 *         false
+&nbsp;	 */
+&nbsp;	public Boolean isPreferredInLanguage(String language) {
+<b class="nc">&nbsp;		return !StringUtils.isBlank(language) &amp;&amp; this.locale != null &amp;&amp; isPreferred()</b>
+<b class="nc">&nbsp;				&amp;&amp; this.locale.getLanguage().equals(language);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the name is explicitly marked as preferred in a locale with a matching country
+&nbsp;	 * code E.g &#39;fr_RW&#39; and &#39;en_RW&#39; for country RW
+&nbsp;	 *
+&nbsp;	 * @see #isPreferredForLocale(Locale)
+&nbsp;	 * @param country ISO 3166 2-letter code for a country
+&nbsp;	 * @return true if the name is preferred in a locale with a matching country code, otherwise
+&nbsp;	 *         false
+&nbsp;	 */
+&nbsp;	public Boolean isPreferredInCountry(String country) {
+<b class="nc">&nbsp;		return !StringUtils.isBlank(country) &amp;&amp; this.locale != null &amp;&amp; isPreferred()</b>
+<b class="nc">&nbsp;				&amp;&amp; this.locale.getCountry().equals(country);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the name is explicitly marked as preferred for any locale. Note that this
+&nbsp;	 * method is different from {@link #isPreferredForLocale(Locale)} in that it checks if the given
+&nbsp;	 * name is marked as preferred irrespective of the locale in which it is preferred.
+&nbsp;	 *
+&nbsp;	 * @see #isPreferredForLocale(Locale)
+&nbsp;	 */
+&nbsp;	public Boolean isPreferred() {
+<b class="fc">&nbsp;		return getLocalePreferred();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the name is explicitly marked as preferred for the given locale
+&nbsp;	 *
+&nbsp;	 * @param locale the locale in which the name is preferred
+&nbsp;	 * @return true if the name is marked as preferred for the given locale otherwise false.
+&nbsp;	 */
+&nbsp;	public Boolean isPreferredForLocale(Locale locale) {
+<b class="nc">&nbsp;		return getLocalePreferred() &amp;&amp; this.locale.equals(locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks whether the concept name is explicitly marked as fully specified
+&nbsp;	 *
+&nbsp;	 * @return true if the name is marked as &#39;fully specified&#39; otherwise false
+&nbsp;	 * @since Version 1.7
+&nbsp;	 */
+&nbsp;	public Boolean isFullySpecifiedName() {
+<b class="fc">&nbsp;		return ConceptNameType.FULLY_SPECIFIED.equals(getConceptNameType());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for determining whether this is a short name.
+&nbsp;	 *
+&nbsp;	 * @return true if the name is marked as a short name, otherwise false
+&nbsp;	 */
+&nbsp;	public Boolean isShort() {
+<b class="fc">&nbsp;		return ConceptNameType.SHORT.equals(getConceptNameType());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for checking whether this is an index Term.
+&nbsp;	 *
+&nbsp;	 * @return true if the name is marked as an index term, otherwise false
+&nbsp;	 * @since Version 1.7
+&nbsp;	 */
+&nbsp;	public Boolean isIndexTerm() {
+<b class="fc">&nbsp;		return ConceptNameType.INDEX_TERM.equals(getConceptNameType());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for determining whether this is an index Term for a given locale.
+&nbsp;	 *
+&nbsp;	 * @param locale The locale in which this concept name should belong as an index term
+&nbsp;	 * @return true if the name is marked as an index term, otherwise false
+&nbsp;	 */
+&nbsp;	public Boolean isIndexTermInLocale(Locale locale) {
+<b class="nc">&nbsp;		return getConceptNameType() != null &amp;&amp; getConceptNameType().equals(ConceptNameType.INDEX_TERM)</b>
+<b class="nc">&nbsp;		        &amp;&amp; locale.equals(getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for determining whether this is a synonym in a given locale.
+&nbsp;	 *
+&nbsp;	 * @param locale The locale in which this synonym should belong
+&nbsp;	 * @return true if the concept name is marked as a synonym in the given locale, otherwise false
+&nbsp;	 */
+&nbsp;	public Boolean isSynonymInLocale(Locale locale) {
+<b class="nc">&nbsp;		return getConceptNameType() == null &amp;&amp; locale.equals(getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for checking whether this is a a synonym.
+&nbsp;	 *
+&nbsp;	 * @return true if the name is tagged as a synonym, false otherwise
+&nbsp;	 * @since Version 1.7
+&nbsp;	 */
+&nbsp;	public Boolean isSynonym() {
+<b class="fc">&nbsp;		return getConceptNameType() == null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (this.name == null) {</b>
+<b class="nc">&nbsp;			return &quot;ConceptNameId: &quot; + this.conceptNameId;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return this.name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptNameId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="fc">&nbsp;		setConceptNameId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the changedBy.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param changedBy The user that changed this object
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the date this object was changed
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged The date this object was changed
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

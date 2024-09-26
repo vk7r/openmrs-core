@@ -1,0 +1,482 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonMergeLogData</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.person</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonMergeLogData (org.openmrs.person)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonMergeLogData</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,5%
+  </span>
+  <span class="absValue">
+    (39/40)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (93/98)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.person;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.api.PatientService;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class is used for communicating to the &lt;code&gt;PatientService&lt;/code&gt; the data that
+&nbsp; * needs to be serialized. This data represents the details of a merge. It is also used for
+&nbsp; * abstracting the serialization outside of the PatientService and to allow storing the
+&nbsp; * deserialized form of the merged data
+&nbsp; *
+&nbsp; * @see PersonMergeLog
+&nbsp; * @see PatientService#mergePatients(org.openmrs.Patient, org.openmrs.Patient)
+&nbsp; * @since 1.9
+&nbsp; */
+<b class="fc">&nbsp;public class PersonMergeLogData {</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of visits moved from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; movedVisits;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of encounters moved from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; movedEncounters;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of patient programs copied from non-preferred to preferred
+&nbsp;	 * (Deprecated in 2.6.8 and 2.7.0+, as we now move programs)
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	private List&lt;String&gt; createdPrograms;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of patient programs moved from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; movedPrograms;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of voided relationships
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; voidedRelationships;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of created relationships
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; createdRelationships;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of observations not contained within any encounter moved from non-preferred to
+&nbsp;	 * preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; movedIndependentObservations;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of orders copied from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; createdOrders;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of identifiers copied from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; createdIdentifiers;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of addresses copied from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; createdAddresses;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of names copied from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; createdNames;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of attributes copied from non-preferred to preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; createdAttributes;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * List of UUIDs of users moved to be associated from non-preferred to be associated to
+&nbsp;	 * preferred
+&nbsp;	 */
+&nbsp;	private List&lt;String&gt; movedUsers;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Value of gender of preferred person as it was before the merge occurred
+&nbsp;	 */
+&nbsp;	private String priorGender;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Value of Date of Birth of preferred person as it was before the merge occurred
+&nbsp;	 */
+&nbsp;	private Date priorDateOfBirth;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Whether the date of birth of preferred person was an estimated value before the merge
+&nbsp;	 * occurred
+&nbsp;	 */
+&nbsp;	private boolean priorDateOfBirthEstimated;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Value of Date of Death of preferred person as it was before the merge occurred
+&nbsp;	 */
+&nbsp;	private Date priorDateOfDeath;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Whether the date of death of preferred person was an estimated value before the merge
+&nbsp;	 * occurred
+&nbsp;	 */
+&nbsp;	private Boolean priorDateOfDeathEstimated;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Value of cause of death of preferred person as it was before the merge occurred
+&nbsp;	 */
+&nbsp;	private String priorCauseOfDeath;
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getMovedVisits() {
+<b class="fc">&nbsp;		return movedVisits;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getMovedEncounters() {
+<b class="fc">&nbsp;		return movedEncounters;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addMovedVisit(String uuid) {
+<b class="fc">&nbsp;		if (movedVisits == null) {</b>
+<b class="fc">&nbsp;			movedVisits = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		movedVisits.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addMovedEncounter(String uuid) {
+<b class="fc">&nbsp;		if (movedEncounters == null) {</b>
+<b class="fc">&nbsp;			movedEncounters = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		movedEncounters.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;String&gt; getCreatedPrograms() {
+<b class="fc">&nbsp;		return createdPrograms;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Deprecated
+&nbsp;	public void addCreatedProgram(String uuid) {
+<b class="nc">&nbsp;		if (createdPrograms == null) {</b>
+<b class="nc">&nbsp;			createdPrograms = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		createdPrograms.add(uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public List&lt;String&gt; getMovedPrograms() {
+<b class="fc">&nbsp;		return movedPrograms;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void addMovedProgram(String uuid) {
+<b class="fc">&nbsp;		if (movedPrograms == null) {</b>
+<b class="fc">&nbsp;			movedPrograms = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		movedPrograms.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getVoidedRelationships() {
+<b class="fc">&nbsp;		return voidedRelationships;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addVoidedRelationship(String uuid) {
+<b class="fc">&nbsp;		if (voidedRelationships == null) {</b>
+<b class="fc">&nbsp;			voidedRelationships = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		voidedRelationships.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getCreatedRelationships() {
+<b class="fc">&nbsp;		return createdRelationships;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addCreatedRelationship(String uuid) {
+<b class="fc">&nbsp;		if (createdRelationships == null) {</b>
+<b class="fc">&nbsp;			createdRelationships = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		createdRelationships.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getMovedIndependentObservations() {
+<b class="fc">&nbsp;		return movedIndependentObservations;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addMovedIndependentObservation(String uuid) {
+<b class="fc">&nbsp;		if (movedIndependentObservations == null) {</b>
+<b class="fc">&nbsp;			movedIndependentObservations = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		movedIndependentObservations.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getCreatedOrders() {
+<b class="fc">&nbsp;		return createdOrders;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addCreatedOrder(String uuid) {
+<b class="fc">&nbsp;		if (createdOrders == null) {</b>
+<b class="fc">&nbsp;			createdOrders = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		createdOrders.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getCreatedIdentifiers() {
+<b class="fc">&nbsp;		return createdIdentifiers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addCreatedIdentifier(String uuid) {
+<b class="fc">&nbsp;		if (createdIdentifiers == null) {</b>
+<b class="fc">&nbsp;			createdIdentifiers = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		createdIdentifiers.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getCreatedAddresses() {
+<b class="fc">&nbsp;		return createdAddresses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addCreatedAddress(String uuid) {
+<b class="fc">&nbsp;		if (createdAddresses == null) {</b>
+<b class="fc">&nbsp;			createdAddresses = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		createdAddresses.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getCreatedNames() {
+<b class="fc">&nbsp;		return createdNames;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addCreatedName(String uuid) {
+<b class="fc">&nbsp;		if (createdNames == null) {</b>
+<b class="fc">&nbsp;			createdNames = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		createdNames.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getCreatedAttributes() {
+<b class="fc">&nbsp;		return createdAttributes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addCreatedAttribute(String uuid) {
+<b class="fc">&nbsp;		if (createdAttributes == null) {</b>
+<b class="fc">&nbsp;			createdAttributes = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		createdAttributes.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public List&lt;String&gt; getMovedUsers() {
+<b class="fc">&nbsp;		return movedUsers;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void addMovedUser(String uuid) {
+<b class="fc">&nbsp;		if (movedUsers == null) {</b>
+<b class="fc">&nbsp;			movedUsers = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		movedUsers.add(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getPriorGender() {
+<b class="fc">&nbsp;		return priorGender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPriorGender(String priorGender) {
+<b class="fc">&nbsp;		this.priorGender = priorGender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getPriorDateOfBirth() {
+<b class="fc">&nbsp;		return priorDateOfBirth;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPriorDateOfBirth(Date priorDateOfBirth) {
+<b class="fc">&nbsp;		this.priorDateOfBirth = priorDateOfBirth;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isPriorDateOfBirthEstimated() {
+<b class="fc">&nbsp;		return priorDateOfBirthEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPriorDateOfBirthEstimated(boolean priorDateOfBirthEstimated) {
+<b class="fc">&nbsp;		this.priorDateOfBirthEstimated = priorDateOfBirthEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Date getPriorDateOfDeath() {
+<b class="fc">&nbsp;		return priorDateOfDeath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPriorDateOfDeath(Date priorDateOfDeath) {
+<b class="fc">&nbsp;		this.priorDateOfDeath = priorDateOfDeath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getPriorDateOfDeathEstimated() {
+<b class="fc">&nbsp;		return priorDateOfDeathEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPriorDateOfDeathEstimated(Boolean priorDateOfDeathEstimated) {
+<b class="fc">&nbsp;		this.priorDateOfDeathEstimated = priorDateOfDeathEstimated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getPriorCauseOfDeath() {
+<b class="fc">&nbsp;		return priorCauseOfDeath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setPriorCauseOfDeath(String uuid) {
+<b class="fc">&nbsp;		this.priorCauseOfDeath = uuid;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Computes a unique hash value representing the object
+&nbsp;	 *
+&nbsp;	 * @return hash value
+&nbsp;	 */
+&nbsp;	public int computeHashValue() {
+<b class="fc">&nbsp;		String str = &quot;&quot;;</b>
+<b class="fc">&nbsp;		if (getCreatedAddresses() != null) {</b>
+<b class="fc">&nbsp;			str += getCreatedAddresses().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getCreatedAttributes() != null) {</b>
+<b class="fc">&nbsp;			str += getCreatedAttributes().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getCreatedIdentifiers() != null) {</b>
+<b class="fc">&nbsp;			str += getCreatedIdentifiers().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getCreatedNames() != null) {</b>
+<b class="fc">&nbsp;			str += getCreatedNames().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getCreatedOrders() != null) {</b>
+<b class="fc">&nbsp;			str += getCreatedOrders().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getCreatedPrograms() != null) {</b>
+<b class="nc">&nbsp;			str += getCreatedPrograms().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getMovedPrograms() != null) {</b>
+<b class="fc">&nbsp;			str += getMovedPrograms().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getCreatedRelationships() != null) {</b>
+<b class="fc">&nbsp;			str += getCreatedRelationships().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getVoidedRelationships() != null) {</b>
+<b class="fc">&nbsp;			str += getVoidedRelationships().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getMovedVisits() != null) {</b>
+<b class="nc">&nbsp;			str += getMovedVisits().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getMovedEncounters() != null) {</b>
+<b class="fc">&nbsp;			str += getMovedEncounters().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getMovedIndependentObservations() != null) {</b>
+<b class="fc">&nbsp;			str += getMovedIndependentObservations().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (getMovedUsers() != null) {</b>
+<b class="fc">&nbsp;			str += getMovedUsers().toString();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		str += getPriorCauseOfDeath();</b>
+<b class="fc">&nbsp;		str += getPriorGender();</b>
+<b class="fc">&nbsp;		str += (getPriorDateOfBirth() != null) ? getPriorDateOfBirth().toString() : getPriorDateOfBirth();</b>
+<b class="fc">&nbsp;		str += (getPriorDateOfBirth() != null) ? getPriorDateOfDeath().toString() : getPriorDateOfDeath();</b>
+<b class="fc">&nbsp;		str += isPriorDateOfBirthEstimated();</b>
+<b class="fc">&nbsp;		return str.hashCode();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

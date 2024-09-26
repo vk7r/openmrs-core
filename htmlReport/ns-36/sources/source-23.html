@@ -1,0 +1,195 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonByNameComparator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonByNameComparator (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonByNameComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (21/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Comparator;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;
+&nbsp;/**
+&nbsp; * A simple person comparator for sorting persons by name. Sorts names based on the following
+&nbsp; * precedence: FamilyName, FamilyName2, GivenName, MiddleName, FamilyNamePrefix, FamilyNameSuffix
+&nbsp; * 
+&nbsp; * @since 1.8
+&nbsp; */
+<b class="fc">&nbsp;public class PersonByNameComparator implements Comparator&lt;Person&gt;, Serializable {</b>
+&nbsp;
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int compare(Person person1, Person person2) {
+&nbsp;		
+<b class="fc">&nbsp;		return comparePersonsByName(person1, person2);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Compares two person objects by name
+&nbsp;	 * 
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return negative if personName for person1 comes before that of person2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return positive if personName for person1 comes after that of person2
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return zero if the givenName middleName and familyName match
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; be case insensitive
+&nbsp;	 * @since 1.8
+&nbsp;	 */
+&nbsp;	public static int comparePersonsByName(Person person1, Person person2) {
+&nbsp;		
+&nbsp;		// test for null cases (sorting them to be last in a list)
+<b class="fc">&nbsp;		if (person1 == null || person1.getPersonName() == null) {</b>
+<b class="nc">&nbsp;			return 1;</b>
+<b class="fc">&nbsp;		} else if (person2 == null || person2.getPersonName() == null) {</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if neither are null, do the actual comparison
+<b class="fc">&nbsp;		PersonName name1 = person1.getPersonName();</b>
+<b class="fc">&nbsp;		PersonName name2 = person2.getPersonName();</b>
+&nbsp;		
+<b class="fc">&nbsp;		int ret = OpenmrsUtil.compareWithNullAsGreatest(name1.getFamilyName() != null ? name1.getFamilyName().toLowerCase()</b>
+<b class="nc">&nbsp;		        : null, name2.getFamilyName() != null ? name2.getFamilyName().toLowerCase() : null);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = OpenmrsUtil.compareWithNullAsGreatest(name1.getFamilyName2() != null ? name1.getFamilyName().toLowerCase()</b>
+<b class="fc">&nbsp;			        : null, name2.getFamilyName2() != null ? name2.getFamilyName2().toLowerCase() : null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = OpenmrsUtil.compareWithNullAsGreatest(name1.getGivenName() != null ? name1.getGivenName().toLowerCase()</b>
+<b class="nc">&nbsp;			        : null, name2.getGivenName() != null ? name2.getGivenName().toLowerCase() : null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = OpenmrsUtil.compareWithNullAsGreatest(name1.getMiddleName() != null ? name1.getMiddleName().toLowerCase()</b>
+<b class="nc">&nbsp;			        : null, name2.getMiddleName() != null ? name2.getMiddleName().toLowerCase() : null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = OpenmrsUtil.compareWithNullAsGreatest(name1.getFamilyNamePrefix() != null ? name1.getFamilyNamePrefix()</b>
+<b class="nc">&nbsp;			        .toLowerCase() : null, name2.getFamilyNamePrefix() != null ? name2.getFamilyNamePrefix().toLowerCase()</b>
+<b class="fc">&nbsp;			        : null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (ret == 0) {</b>
+<b class="fc">&nbsp;			ret = OpenmrsUtil.compareWithNullAsGreatest(name1.getFamilyNameSuffix() != null ? name1.getFamilyNameSuffix()</b>
+<b class="nc">&nbsp;			        .toLowerCase() : null, name2.getFamilyNameSuffix() != null ? name2.getFamilyNameSuffix().toLowerCase()</b>
+<b class="fc">&nbsp;			        : null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return ret;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,416 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormResource</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: FormResource (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FormResource</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,1%
+  </span>
+  <span class="absValue">
+    (27/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,2%
+  </span>
+  <span class="absValue">
+    (40/42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">FormResource$HibernateProxy$E1qktjV9</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    93,1%
+  </span>
+  <span class="absValue">
+    (27/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,2%
+  </span>
+  <span class="absValue">
+    (40/42)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;import org.openmrs.customdatatype.CustomValueDescriptor;
+&nbsp;import org.openmrs.customdatatype.NotYetPersistedException;
+&nbsp;import org.openmrs.customdatatype.SingleCustomValue;
+&nbsp;
+&nbsp;/**
+&nbsp; * A FormResource is meant as a way for modules to add arbitrary information to
+&nbsp; * a Form. FormResources are essentially just key-value pairs. The value is
+&nbsp; * stored as a custom datatype. A Form can have 0-n FormResources but only one
+&nbsp; * FormResource per name per Form.
+&nbsp; *
+&nbsp; * The &lt;i&gt;name&lt;/i&gt; of a resource specifies one of many resources that can be
+&nbsp; * stored for a particular owner. Only one resource for each name will
+&nbsp; * ever be saved.
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class FormResource extends BaseOpenmrsObject implements CustomValueDescriptor, SingleCustomValue&lt;FormResource&gt; {
+&nbsp;
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;
+&nbsp;	private Integer formResourceId;
+&nbsp;	
+&nbsp;	private Form form;
+&nbsp;	
+&nbsp;	private String name;
+&nbsp;	
+&nbsp;	private String valueReference;
+&nbsp;	
+&nbsp;	private String datatypeClassname;
+&nbsp;	
+&nbsp;	private String datatypeConfig;
+&nbsp;	
+&nbsp;	private String preferredHandlerClassname;
+&nbsp;	
+&nbsp;	private String handlerConfig;
+&nbsp;	
+<b class="fc">&nbsp;	private transient boolean dirty = false;</b>
+&nbsp;	
+&nbsp;	private transient Object typedValue;
+&nbsp;	
+&nbsp;	private User changedBy;
+&nbsp;	
+&nbsp;	private Date dateChanged;
+&nbsp;	
+<b class="fc">&nbsp;	public FormResource() {</b>
+&nbsp;		// generic constructor
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a copy of a provided FormResource, ignoring the uuid and id of the original
+&nbsp;	 *
+&nbsp;	 * @param old the original FormResource to be copied
+&nbsp;	 */
+<b class="fc">&nbsp;	public FormResource(FormResource old) {</b>
+<b class="fc">&nbsp;		this.form = old.getForm();</b>
+<b class="fc">&nbsp;		this.name = old.getName();</b>
+<b class="fc">&nbsp;		this.valueReference = old.getValueReference();</b>
+<b class="fc">&nbsp;		this.datatypeClassname = old.getDatatypeClassname();</b>
+<b class="fc">&nbsp;		this.datatypeConfig = old.getDatatypeConfig();</b>
+<b class="fc">&nbsp;		this.preferredHandlerClassname = old.getPreferredHandlerClassname();</b>
+<b class="fc">&nbsp;		this.handlerConfig = old.getHandlerConfig();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getFormResourceId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setFormResourceId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * gets the form
+&nbsp;	 *
+&nbsp;	 * @return the form
+&nbsp;	 */
+&nbsp;	public Form getForm() {
+<b class="fc">&nbsp;		return form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * sets the form
+&nbsp;	 *
+&nbsp;	 * @param form the form
+&nbsp;	 */
+&nbsp;	public void setForm(Form form) {
+<b class="fc">&nbsp;		this.form = form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * gets the form resource id
+&nbsp;	 *
+&nbsp;	 * @return the form resource&#39;s id
+&nbsp;	 */
+&nbsp;	public Integer getFormResourceId() {
+<b class="fc">&nbsp;		return formResourceId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * sets the form resource id
+&nbsp;	 *
+&nbsp;	 * @param formResourceId the form resource&#39;s id
+&nbsp;	 */
+&nbsp;	public void setFormResourceId(Integer formResourceId) {
+<b class="fc">&nbsp;		this.formResourceId = formResourceId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * gets the name of the resource
+&nbsp;	 *
+&nbsp;	 * @return the name of the resource
+&nbsp;	 */
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * sets the name of the resource
+&nbsp;	 *
+&nbsp;	 * @param name the name of the resource
+&nbsp;	 */
+&nbsp;	public void setName(String name) {
+<b class="fc">&nbsp;		this.name = name;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getDatatypeClassname()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDatatypeClassname() {
+<b class="fc">&nbsp;		return datatypeClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param datatypeClassname the datatypeClassname to set
+&nbsp;	 */
+&nbsp;	public void setDatatypeClassname(String datatypeClassname) {
+<b class="fc">&nbsp;		this.datatypeClassname = datatypeClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getDatatypeConfig()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDatatypeConfig() {
+<b class="fc">&nbsp;		return datatypeConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param datatypeConfig the datatypeConfig to set
+&nbsp;	 */
+&nbsp;	public void setDatatypeConfig(String datatypeConfig) {
+<b class="fc">&nbsp;		this.datatypeConfig = datatypeConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getPreferredHandlerClassname()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getPreferredHandlerClassname() {
+<b class="fc">&nbsp;		return preferredHandlerClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param preferredHandlerClassname the preferredHandlerClassname to set
+&nbsp;	 */
+&nbsp;	public void setPreferredHandlerClassname(String preferredHandlerClassname) {
+<b class="fc">&nbsp;		this.preferredHandlerClassname = preferredHandlerClassname;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.CustomValueDescriptor#getHandlerConfig()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getHandlerConfig() {
+<b class="fc">&nbsp;		return handlerConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param handlerConfig the handlerConfig to set
+&nbsp;	 */
+&nbsp;	public void setHandlerConfig(String handlerConfig) {
+<b class="fc">&nbsp;		this.handlerConfig = handlerConfig;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.SingleCustomValue#getDescriptor()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public FormResource getDescriptor() {
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.SingleCustomValue#getValueReference()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getValueReference() {
+<b class="fc">&nbsp;		if (valueReference == null) {</b>
+<b class="fc">&nbsp;			throw new NotYetPersistedException();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return valueReference;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.SingleCustomValue#getValue()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Object getValue(){
+<b class="fc">&nbsp;		if (typedValue == null) {</b>
+<b class="fc">&nbsp;			typedValue = CustomDatatypeUtil.getDatatype(this).fromReferenceString(getValueReference());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return typedValue;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.SingleCustomValue#setValue(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public &lt;T&gt; void setValue(T typedValue)  {
+<b class="fc">&nbsp;		this.typedValue = typedValue;</b>
+<b class="fc">&nbsp;		dirty = true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.SingleCustomValue#setValueReferenceInternal(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setValueReferenceInternal(String valueToPersist)  {
+<b class="fc">&nbsp;		this.valueReference = valueToPersist;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.customdatatype.SingleCustomValue#isDirty()
+&nbsp;	 *
+&nbsp;	 * @deprecated as of 2.0, use {@link #getDirty()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	@Override
+&nbsp;	public boolean isDirty() {
+<b class="fc">&nbsp;		return getDirty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean getDirty() {
+<b class="fc">&nbsp;		return dirty;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the changedBy.
+&nbsp;	 */
+&nbsp;	public User getChangedBy() {
+<b class="fc">&nbsp;		return changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param changedBy The user that changed this object
+&nbsp;	 */
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="fc">&nbsp;		this.changedBy = changedBy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the date this object was changed
+&nbsp;	 */
+&nbsp;	public Date getDateChanged() {
+<b class="fc">&nbsp;		return dateChanged;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateChanged The date this object was changed
+&nbsp;	 */
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="fc">&nbsp;		this.dateChanged = dateChanged;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

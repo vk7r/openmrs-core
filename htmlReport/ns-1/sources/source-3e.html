@@ -1,0 +1,480 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FormField</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: FormField (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FormField</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,2%
+  </span>
+  <span class="absValue">
+    (25/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    79,4%
+  </span>
+  <span class="absValue">
+    (27/34)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">FormField$DefaultComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/44)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">FormField$HibernateProxy$sdkM2j0R</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80,6%
+  </span>
+  <span class="absValue">
+    (25/31)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    34,6%
+  </span>
+  <span class="absValue">
+    (27/78)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Comparator;
+&nbsp;
+&nbsp;import org.codehaus.jackson.annotate.JsonIgnore;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * The FormField object relates/orders the &lt;code&gt;fields&lt;/code&gt; on a &lt;code&gt;form&lt;/code&gt; A form can
+&nbsp; * have many 0 to n fields associated with it in a hierarchical manor. This FormField object governs
+&nbsp; * what/how that takes place
+&nbsp; *
+&nbsp; * @see org.openmrs.Form
+&nbsp; * @see org.openmrs.Field
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class FormField extends BaseChangeableOpenmrsMetadata implements java.io.Serializable, Comparable&lt;FormField&gt; {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 3456L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	
+&nbsp;	protected Integer formFieldId;
+&nbsp;	
+&nbsp;	protected FormField parent;
+&nbsp;	
+&nbsp;	protected Form form;
+&nbsp;	
+&nbsp;	protected Field field;
+&nbsp;	
+&nbsp;	protected Integer fieldNumber;
+&nbsp;	
+&nbsp;	protected String fieldPart;
+&nbsp;	
+&nbsp;	protected Integer pageNumber;
+&nbsp;	
+&nbsp;	protected Integer minOccurs;
+&nbsp;	
+&nbsp;	protected Integer maxOccurs;
+&nbsp;	
+<b class="fc">&nbsp;	protected Boolean required = false;</b>
+&nbsp;	
+&nbsp;	protected Float sortWeight;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public FormField() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public FormField(Integer formFieldId) {</b>
+<b class="fc">&nbsp;		this.formFieldId = formFieldId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the formFieldId.
+&nbsp;	 */
+&nbsp;	public Integer getFormFieldId() {
+<b class="fc">&nbsp;		return formFieldId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param formFieldId The formFieldId to set.
+&nbsp;	 */
+&nbsp;	public void setFormFieldId(Integer formFieldId) {
+<b class="fc">&nbsp;		this.formFieldId = formFieldId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the parent FormField.
+&nbsp;	 */
+&nbsp;	public FormField getParent() {
+<b class="fc">&nbsp;		return parent;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param parent The formField to set as parent.
+&nbsp;	 */
+&nbsp;	public void setParent(FormField parent) {
+<b class="fc">&nbsp;		this.parent = parent;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the form.
+&nbsp;	 */
+&nbsp;	public Form getForm() {
+<b class="fc">&nbsp;		return form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param form The form to set.
+&nbsp;	 */
+&nbsp;	public void setForm(Form form) {
+<b class="fc">&nbsp;		this.form = form;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the field.
+&nbsp;	 */
+&nbsp;	public Field getField() {
+<b class="fc">&nbsp;		return field;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param field The field to set.
+&nbsp;	 */
+&nbsp;	public void setField(Field field) {
+<b class="fc">&nbsp;		this.field = field;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the fieldNumber.
+&nbsp;	 */
+&nbsp;	public Integer getFieldNumber() {
+<b class="fc">&nbsp;		return fieldNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param fieldNumber The fieldNumber to set.
+&nbsp;	 */
+&nbsp;	public void setFieldNumber(Integer fieldNumber) {
+<b class="fc">&nbsp;		this.fieldNumber = fieldNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the fieldPart.
+&nbsp;	 */
+&nbsp;	public String getFieldPart() {
+<b class="fc">&nbsp;		return fieldPart;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param fieldPart The fieldPart to set.
+&nbsp;	 */
+&nbsp;	public void setFieldPart(String fieldPart) {
+<b class="fc">&nbsp;		this.fieldPart = fieldPart;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the pageNumber.
+&nbsp;	 */
+&nbsp;	public Integer getPageNumber() {
+<b class="fc">&nbsp;		return pageNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param pageNumber The pageNumber to set.
+&nbsp;	 */
+&nbsp;	public void setPageNumber(Integer pageNumber) {
+<b class="fc">&nbsp;		this.pageNumber = pageNumber;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the minOccurs.
+&nbsp;	 */
+&nbsp;	public Integer getMinOccurs() {
+<b class="fc">&nbsp;		return minOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param minOccurs The minOccurs to set.
+&nbsp;	 */
+&nbsp;	public void setMinOccurs(Integer minOccurs) {
+<b class="fc">&nbsp;		this.minOccurs = minOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the maxOccurs.
+&nbsp;	 */
+&nbsp;	public Integer getMaxOccurs() {
+<b class="fc">&nbsp;		return maxOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param maxOccurs The maxOccurs to set.
+&nbsp;	 */
+&nbsp;	public void setMaxOccurs(Integer maxOccurs) {
+<b class="fc">&nbsp;		this.maxOccurs = maxOccurs;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the required status.
+&nbsp;	 * 
+&nbsp;	 * @deprecated as of 2.0, use {@link #getRequired()}
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	@JsonIgnore
+&nbsp;	public Boolean isRequired() {
+<b class="fc">&nbsp;		return getRequired();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return same as isRequired()
+&nbsp;	 */
+&nbsp;	public Boolean getRequired() {
+<b class="fc">&nbsp;		return required == null ? Boolean.FALSE : required;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param required The required status to set.
+&nbsp;	 */
+&nbsp;	public void setRequired(Boolean required) {
+<b class="fc">&nbsp;		this.required = required;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the sortWeight.
+&nbsp;	 */
+&nbsp;	public Float getSortWeight() {
+<b class="fc">&nbsp;		return sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param sortWeight The weight to order the formFields on.
+&nbsp;	 */
+&nbsp;	public void setSortWeight(Float sortWeight) {
+<b class="fc">&nbsp;		this.sortWeight = sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		if (formFieldId == null) {</b>
+<b class="nc">&nbsp;			return &quot;null&quot;;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return this.formFieldId.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		return getFormFieldId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setFormFieldId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public int compareTo(FormField other) {
+<b class="nc">&nbsp;		DefaultComparator pnDefaultComparator = new DefaultComparator();</b>
+<b class="nc">&nbsp;		return pnDefaultComparator.compare(this, other);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 Provides a default comparator.
+&nbsp;	 @since 1.12
+&nbsp;	 **/
+<b class="nc">&nbsp;	public static class DefaultComparator implements Comparator&lt;FormField&gt;, Serializable {</b>
+&nbsp;
+&nbsp;		private static final long serialVersionUID = 1L;
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public int compare(FormField ff1, FormField ff2) {
+<b class="nc">&nbsp;			if (ff1.getSortWeight() != null || ff2.getSortWeight() != null) {</b>
+<b class="nc">&nbsp;				if (ff1.getSortWeight() == null) {</b>
+<b class="nc">&nbsp;					return -1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (ff2.getSortWeight() == null) {</b>
+<b class="nc">&nbsp;					return 1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				int c = ff1.getSortWeight().compareTo(ff2.getSortWeight());</b>
+<b class="nc">&nbsp;				if (c != 0) {</b>
+<b class="nc">&nbsp;					return c;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getPageNumber() != null || ff2.getPageNumber() != null) {</b>
+<b class="nc">&nbsp;				if (ff1.getPageNumber() == null) {</b>
+<b class="nc">&nbsp;					return -1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (ff2.getPageNumber() == null) {</b>
+<b class="nc">&nbsp;					return 1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				int c = ff1.getPageNumber().compareTo(ff2.getPageNumber());</b>
+<b class="nc">&nbsp;				if (c != 0) {</b>
+<b class="nc">&nbsp;					return c;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getFieldNumber() != null || ff2.getFieldNumber() != null) {</b>
+<b class="nc">&nbsp;				if (ff1.getFieldNumber() == null) {</b>
+<b class="nc">&nbsp;					return -1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (ff2.getFieldNumber() == null) {</b>
+<b class="nc">&nbsp;					return 1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				int c = ff1.getFieldNumber().compareTo(ff2.getFieldNumber());</b>
+<b class="nc">&nbsp;				if (c != 0) {</b>
+<b class="nc">&nbsp;					return c;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getFieldPart() != null || ff2.getFieldPart() != null) {</b>
+<b class="nc">&nbsp;				if (ff1.getFieldPart() == null) {</b>
+<b class="nc">&nbsp;					return -1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (ff2.getFieldPart() == null) {</b>
+<b class="nc">&nbsp;					return 1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				int c = ff1.getFieldPart().compareTo(ff2.getFieldPart());</b>
+<b class="nc">&nbsp;				if (c != 0) {</b>
+<b class="nc">&nbsp;					return c;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getField() != null &amp;&amp; ff2.getField() != null) {</b>
+<b class="nc">&nbsp;				int c = ff1.getField().getName().compareTo(ff2.getField().getName());</b>
+<b class="nc">&nbsp;				if (c != 0) {</b>
+<b class="nc">&nbsp;					return c;</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getFormFieldId() == null &amp;&amp; ff2.getFormFieldId() != null) {</b>
+<b class="nc">&nbsp;				return -1;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getFormFieldId() != null &amp;&amp; ff2.getFormFieldId() == null) {</b>
+<b class="nc">&nbsp;				return 1;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			if (ff1.getFormFieldId() == null &amp;&amp; ff2.getFormFieldId() == null) {</b>
+<b class="nc">&nbsp;				return 1;</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			return ff1.getFormFieldId().compareTo(ff2.getFormFieldId());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

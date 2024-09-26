@@ -1,0 +1,272 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LocationDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db</a>
+</div>
+
+<h1>Coverage Summary for Class: LocationDAO (org.openmrs.api.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LocationDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.LocationAttribute;
+&nbsp;import org.openmrs.LocationAttributeType;
+&nbsp;import org.openmrs.LocationTag;
+&nbsp;import org.openmrs.api.LocationService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Location-related database functions
+&nbsp; */
+&nbsp;public interface LocationDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the Hibernate SessionFactory to connect to the database.
+&nbsp;	 * 
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create or update a location.
+&nbsp;	 * 
+&nbsp;	 * @param location &lt;code&gt;Location&lt;/code&gt; to save
+&nbsp;	 * @return the saved &lt;code&gt;Location&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public Location saveLocation(Location location);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a location by locationId
+&nbsp;	 * 
+&nbsp;	 * @param locationId Internal &lt;code&gt;Integer&lt;/code&gt; identifier of the &lt;code&gt;Location&lt;/code&gt; to get
+&nbsp;	 * @return the requested &lt;code&gt;Location&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public Location getLocation(Integer locationId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a location by name
+&nbsp;	 * 
+&nbsp;	 * @param name String name of the &lt;code&gt;Location&lt;/code&gt; to get
+&nbsp;	 * @return the requested &lt;code&gt;Location&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public Location getLocation(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all locations
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include retired locations as well?
+&nbsp;	 * @return &lt;code&gt;List&amp;lt;Location&amp;gt;&lt;/code&gt; object of all &lt;code&gt;Location&lt;/code&gt;s, possibly including
+&nbsp;	 *         retired locations
+&nbsp;	 */
+&nbsp;	public List&lt;Location&gt; getAllLocations(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the locations matching the specified arguments
+&nbsp;	 *
+&nbsp;	 * @param nameFragment is the string used to search for locations
+&nbsp;	 * @param parent only return children of this parent
+&nbsp;	 * @param serializedAttributeValues the serialized attribute values
+&nbsp;	 * @param includeRetired specifies if retired locations should also be returned
+&nbsp;	 * @param start the beginning index
+&nbsp;	 * @param length the number of matching locations to return
+&nbsp;	 * @return the list of locations
+&nbsp;	 */
+&nbsp;	public List&lt;Location&gt; getLocations(String nameFragment, Location parent,
+&nbsp;	        Map&lt;LocationAttributeType, String&gt; serializedAttributeValues, boolean includeRetired, Integer start,
+&nbsp;	        Integer length) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove the location from the database.
+&nbsp;	 * 
+&nbsp;	 * @param location &lt;code&gt;Location&lt;/code&gt; object to delete
+&nbsp;	 */
+&nbsp;	public void deleteLocation(Location location);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create or update a location tag.
+&nbsp;	 * 
+&nbsp;	 * @param tag
+&nbsp;	 * @return the saved &lt;code&gt;LocationTag&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public LocationTag saveLocationTag(LocationTag tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a location tag by &lt;code&gt;locationTagId&lt;/code&gt;
+&nbsp;	 * 
+&nbsp;	 * @param locationTagId Internal &lt;code&gt;Integer&lt;/code&gt; identifier of the tag to get
+&nbsp;	 * @return the requested &lt;code&gt;LocationTag&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public LocationTag getLocationTag(Integer locationTagId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get a location tag by name
+&nbsp;	 * 
+&nbsp;	 * @param tag String representation of the &lt;code&gt;LocationTag&lt;/code&gt; to get
+&nbsp;	 * @return the requested &lt;code&gt;LocationTag&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public LocationTag getLocationTagByName(String tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all location tags
+&nbsp;	 * 
+&nbsp;	 * @param includeRetired boolean - include retired tags as well?
+&nbsp;	 * @return List&amp;lt;LocationTag&amp;gt; object with all &lt;code&gt;LocationTag&lt;/code&gt;s, possibly included
+&nbsp;	 *         retired ones
+&nbsp;	 */
+&nbsp;	public List&lt;LocationTag&gt; getAllLocationTags(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all location tags with matching names.
+&nbsp;	 * 
+&nbsp;	 * @param search name to search
+&nbsp;	 * @return List&amp;lt;LocationTag&amp;gt; with all matching &lt;code&gt;LocationTags&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	public List&lt;LocationTag&gt; getLocationTags(String search);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove the location tag from the database.
+&nbsp;	 * 
+&nbsp;	 * @param tag The &lt;code&gt;LocationTag&lt;/code&gt; to delete
+&nbsp;	 */
+&nbsp;	public void deleteLocationTag(LocationTag tag);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid the uuid to look for
+&nbsp;	 * @return location matching uuid
+&nbsp;	 */
+&nbsp;	public Location getLocationByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param uuid
+&nbsp;	 * @return location tag or null
+&nbsp;	 */
+&nbsp;	public LocationTag getLocationTagByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.LocationService#getCountOfLocations(String, Boolean)
+&nbsp;	 */
+&nbsp;	public Long getCountOfLocations(String nameFragment, Boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#getRootLocations(boolean)
+&nbsp;	 */
+&nbsp;	public List&lt;Location&gt; getRootLocations(boolean includeRetired);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#getAllLocationAttributeTypes()
+&nbsp;	 */
+&nbsp;	public List&lt;LocationAttributeType&gt; getAllLocationAttributeTypes();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#getLocationAttributeType(Integer)
+&nbsp;	 */
+&nbsp;	public LocationAttributeType getLocationAttributeType(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#getLocationAttributeTypeByUuid(String)
+&nbsp;	 */
+&nbsp;	public LocationAttributeType getLocationAttributeTypeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#saveLocationAttributeType(LocationAttributeType)
+&nbsp;	 */
+&nbsp;	public LocationAttributeType saveLocationAttributeType(LocationAttributeType locationAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#purgeLocationAttributeType(LocationAttributeType)
+&nbsp;	 */
+&nbsp;	public void deleteLocationAttributeType(LocationAttributeType locationAttributeType);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#getLocationAttributeByUuid(String)
+&nbsp;	 */
+&nbsp;	public LocationAttribute getLocationAttributeByUuid(String uuid);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see LocationService#getLocationAttributeTypeByName(String)
+&nbsp;	 */
+&nbsp;	public LocationAttributeType getLocationAttributeTypeByName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get locations that have all the location tags specified.
+&nbsp;	 *
+&nbsp;	 * @param locationTagIdList
+&nbsp;	 * @return list of locations
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get locations having all tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return empty list when no location has the given tags
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; ignore null values in location tag list
+&nbsp;	 */
+&nbsp;	List&lt;Location&gt; getLocationsHavingAllTags(List&lt;LocationTag&gt; locationTagIdList);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

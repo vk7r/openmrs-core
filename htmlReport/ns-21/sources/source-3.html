@@ -1,0 +1,314 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MessageSourceServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.messagesource.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: MessageSourceServiceImpl (org.openmrs.messagesource.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MessageSourceServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,1%
+  </span>
+  <span class="absValue">
+    (8/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,4%
+  </span>
+  <span class="absValue">
+    (13/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.messagesource.impl;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.messagesource.MessageSourceService;
+&nbsp;import org.openmrs.messagesource.MutableMessageSource;
+&nbsp;import org.openmrs.messagesource.PresentationMessage;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.context.MessageSource;
+&nbsp;import org.springframework.context.MessageSourceResolvable;
+&nbsp;import org.springframework.context.NoSuchMessageException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Extensible implementation of the MessageSourceService, which relies on injected implementations
+&nbsp; * of MutableMessageSource to actually provide the services. The sub-services are loaded by special
+&nbsp; * BeanPostProcessor handling, which looks for beans named For example:
+&nbsp; * ResourceBundleMessageSourceService can be specified in the applicationContext-service.xml file to
+&nbsp; * use the usual .properties files to provide messages.
+&nbsp; */
+<b class="fc">&nbsp;public class MessageSourceServiceImpl implements MessageSourceService {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MessageSourceServiceImpl.class);</b>
+&nbsp;	
+<b class="fc">&nbsp;	private Set&lt;MutableMessageSource&gt; availableMessageSources = new HashSet&lt;&gt;();</b>
+&nbsp;	
+&nbsp;	private MutableMessageSource activeMessageSource;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MessageSourceService#getMessage(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getMessage(String s) {
+<b class="fc">&nbsp;		return Context.getMessageSourceService().getMessage(s, null, Context.getLocale());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the message source service which is currently providing services.
+&nbsp;	 * 
+&nbsp;	 * @return the activeMessageSource
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public MutableMessageSource getActiveMessageSource() {
+<b class="fc">&nbsp;		return activeMessageSource;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets the message source service which will actually provide services.
+&nbsp;	 * 
+&nbsp;	 * @param activeMessageSource the activeMessageSourceService to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setActiveMessageSource(MutableMessageSource activeMessageSource) {
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Setting activeMessageSource: &quot; + activeMessageSource);</b>
+&nbsp;		
+<b class="fc">&nbsp;		this.activeMessageSource = activeMessageSource;</b>
+<b class="fc">&nbsp;		availableMessageSources.add(activeMessageSource);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the locales which are available from the current message source.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.messagesource.MessageSourceService#getLocales()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;Locale&gt; getLocales() {
+<b class="fc">&nbsp;		return activeMessageSource.getLocales();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns all available messages.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.messagesource.MessageSourceService#getPresentations()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;PresentationMessage&gt; getPresentations() {
+<b class="nc">&nbsp;		return activeMessageSource.getPresentations();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.context.MessageSource#getMessage(org.springframework.context.MessageSourceResolvable,
+&nbsp;	 *      java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getMessage(MessageSourceResolvable resolvable, Locale locale) {
+<b class="fc">&nbsp;		if((resolvable.getCodes()[0]).equals((activeMessageSource.getMessage(resolvable, locale)))){</b>
+<b class="fc">&nbsp;			return (resolvable.getCodes()[(resolvable.getCodes().length) - 1]);</b>
+&nbsp;		}
+&nbsp;		else{
+<b class="nc">&nbsp;			return activeMessageSource.getMessage(resolvable, locale);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.context.MessageSource#getMessage(java.lang.String,
+&nbsp;	 *      java.lang.Object[], java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(code)) {</b>
+<b class="nc">&nbsp;			return StringUtils.EMPTY;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return activeMessageSource.getMessage(code, args, code, locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.context.MessageSource#getMessage(java.lang.String,
+&nbsp;	 *      java.lang.Object[], java.lang.String, java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+<b class="nc">&nbsp;		if (StringUtils.isBlank(code) &amp;&amp; StringUtils.isBlank(defaultMessage)) {</b>
+<b class="nc">&nbsp;			return StringUtils.EMPTY;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return activeMessageSource.getMessage(code, args, defaultMessage, locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#addPresentation(org.openmrs.messagesource.PresentationMessage)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void addPresentation(PresentationMessage message) {
+<b class="nc">&nbsp;		activeMessageSource.addPresentation(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#addPresentation(org.openmrs.messagesource.PresentationMessage)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void removePresentation(PresentationMessage message) {
+<b class="nc">&nbsp;		activeMessageSource.removePresentation(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the availableMessageSources
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Set&lt;MutableMessageSource&gt; getMessageSources() {
+<b class="nc">&nbsp;		return availableMessageSources;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param availableMessageSources the availableMessageSources to set
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setMessageSources(Set&lt;MutableMessageSource&gt; availableMessageSources) {
+<b class="nc">&nbsp;		this.availableMessageSources.addAll(availableMessageSources);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Merges messages from another message source into the active (current) message source.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#merge(MutableMessageSource, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void merge(MutableMessageSource fromSource, boolean overwrite) {
+<b class="nc">&nbsp;		activeMessageSource.merge(fromSource, overwrite);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#getPresentation(java.lang.String,
+&nbsp;	 *      java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PresentationMessage getPresentation(String key, Locale forLocale) {
+<b class="nc">&nbsp;		return activeMessageSource.getPresentation(key, forLocale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.messagesource.MutableMessageSource#getPresentationsInLocale(java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;PresentationMessage&gt; getPresentationsInLocale(Locale locale) {
+<b class="nc">&nbsp;		return activeMessageSource.getPresentationsInLocale(locale);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.context.HierarchicalMessageSource#getParentMessageSource()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public MessageSource getParentMessageSource() {
+<b class="nc">&nbsp;		return activeMessageSource.getParentMessageSource();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.context.HierarchicalMessageSource#setParentMessageSource(org.springframework.context.MessageSource)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setParentMessageSource(MessageSource parent) {
+<b class="nc">&nbsp;		activeMessageSource.setParentMessageSource(parent);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProgramValidatorChangeSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: ProgramValidatorChangeSet (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProgramValidatorChangeSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5,5%
+  </span>
+  <span class="absValue">
+    (3/55)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.util.DatabaseUpdater;
+&nbsp;import org.openmrs.util.DatabaseUtil;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.jvm.JdbcConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;
+&nbsp;/**
+&nbsp; * This change set is executed in conjunction with a change made to Patient Programs which
+&nbsp; * automatically will complete a Patient Program if a Workflow within that Program transitions to a
+&nbsp; * state marked as final. It is intended to warn administrators when they upgrade that they should
+&nbsp; * carefully review any States marked as final, particularly those also marked as initial
+&nbsp; */
+<b class="fc">&nbsp;public class ProgramValidatorChangeSet implements CustomTaskChange {</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see CustomTaskChange#execute(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+<b class="nc">&nbsp;		Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();</b>
+<b class="nc">&nbsp;		List&lt;String&gt; messages = new ArrayList&lt;&gt;();</b>
+&nbsp;		
+&nbsp;		// Warn if any states are configured as both initial and terminal
+<b class="nc">&nbsp;		StringBuilder message = new StringBuilder();</b>
+<b class="nc">&nbsp;		message.append(&quot;Starting now, when you transition a patient into a state that is configured as terminal, &quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;then that whole program enrollment will be marked as completed.&lt;br/&gt;&quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;Please check that programs, workflows, and states are configured.&lt;br/&gt;&quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;This check will highlight two things: &quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;&lt;ul&gt;&lt;li&gt;states that are marked as both initial and terminal &quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;(if you start someone in that state their program enrollment will be instantly closed)&lt;/li&gt;&quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;&lt;li&gt;workflows that have no initial states (because you don&#39;t have a state to start people in)&lt;/li&gt;&quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;&lt;/ul&gt;&lt;br/&gt;&quot;);</b>
+<b class="nc">&nbsp;		message.append(&quot;The following states are configured as both initial and terminal:&lt;br/&gt;&quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		StringBuilder query = new StringBuilder();</b>
+<b class="nc">&nbsp;		query.append(&quot; select 	s.concept_id, min(n.name) as name &quot;);</b>
+<b class="nc">&nbsp;		query.append(&quot; from 	program_workflow_state s, concept_name n &quot;);</b>
+<b class="nc">&nbsp;		query.append(&quot; where 	s.concept_id = n.concept_id and initial = &#39;1&#39; and terminal = &#39;1&#39; &quot;);</b>
+<b class="nc">&nbsp;		query.append(&quot; group by s.concept_id &quot;);</b>
+<b class="nc">&nbsp;		List&lt;List&lt;Object&gt;&gt; results = DatabaseUtil.executeSQL(conn, query.toString(), true);</b>
+<b class="nc">&nbsp;		if (results.isEmpty()) {</b>
+<b class="nc">&nbsp;			message.append(&quot;None found.&quot;);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			for (List&lt;Object&gt; row : results) {</b>
+<b class="nc">&nbsp;				message.append(row.get(1).toString()).append(&quot;&lt;br/&gt;&quot;);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Warn if any workflows have no initial states
+<b class="nc">&nbsp;		message.append(&quot;&lt;br/&gt;The following workflows have no initial states...&lt;br/&gt;&quot;);</b>
+<b class="nc">&nbsp;		query = new StringBuilder();</b>
+<b class="nc">&nbsp;		query.append(&quot; select 		w.concept_id, s.initial, count(*) as num &quot;);</b>
+<b class="nc">&nbsp;		query.append(&quot; from			program_workflow w, program_workflow_state s &quot;);</b>
+<b class="nc">&nbsp;		query.append(&quot; where		w.program_workflow_id = s.program_workflow_id &quot;);</b>
+<b class="nc">&nbsp;		query.append(&quot; group by 	w.concept_id, s.initial &quot;);</b>
+&nbsp;		
+<b class="nc">&nbsp;		results = DatabaseUtil.executeSQL(conn, query.toString(), true);</b>
+<b class="nc">&nbsp;		List&lt;Integer&gt; missingInitial = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		for (List&lt;Object&gt; row : results) {</b>
+<b class="nc">&nbsp;			missingInitial.add(Integer.valueOf(row.get(0).toString()));</b>
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		for (List&lt;Object&gt; row : results) {</b>
+<b class="nc">&nbsp;			Integer conceptId = Integer.valueOf(row.get(0).toString());</b>
+<b class="nc">&nbsp;			boolean isInitial = &quot;1&quot;.equals(row.get(1).toString());</b>
+<b class="nc">&nbsp;			int num = Integer.parseInt(row.get(2).toString());</b>
+<b class="nc">&nbsp;			if (isInitial &amp;&amp; num &gt; 0) {</b>
+<b class="nc">&nbsp;				missingInitial.remove(conceptId);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		if (missingInitial.isEmpty()) {</b>
+<b class="nc">&nbsp;			message.append(&quot;None found.&quot;);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			for (Integer conceptId : missingInitial) {</b>
+<b class="nc">&nbsp;				String sql = &quot;select min(name) from concept_name where concept_id = &quot; + conceptId;</b>
+<b class="nc">&nbsp;				String name = DatabaseUtil.executeSQL(conn, sql, true).get(0).get(0).toString();</b>
+<b class="nc">&nbsp;				message.append(name).append(&quot;&lt;br/&gt;&quot;);</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		messages.add(message.toString());</b>
+&nbsp;		
+<b class="nc">&nbsp;		DatabaseUpdater.reportUpdateWarnings(messages);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Finished validating programs&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor fo) {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database db) {
+<b class="nc">&nbsp;		return new ValidationErrors();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

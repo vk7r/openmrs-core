@@ -1,0 +1,238 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SchedulerService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler</a>
+</div>
+
+<h1>Coverage Summary for Class: SchedulerService (org.openmrs.scheduler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SchedulerService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.SortedMap;
+&nbsp;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.util.OpenmrsMemento;
+&nbsp;
+&nbsp;/**
+&nbsp; * Defines methods required to schedule a task.
+&nbsp; */
+&nbsp;public interface SchedulerService extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Checks the status of a scheduled task.
+&nbsp;	 * 
+&nbsp;	 * @param id
+&nbsp;	 * @return the &lt;code&gt;String&lt;/code&gt; status of the task with the given identifier
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public String getStatus(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Start all tasks that are scheduled to run on startup.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public void onStartup();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Stop all tasks and clean up the scheduler instance.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public void onShutdown();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Cancel a scheduled task.
+&nbsp;	 * 
+&nbsp;	 * @param task the &lt;code&gt;TaskDefinition&lt;/code&gt; for the task to cancel
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public void shutdownTask(TaskDefinition task) throws SchedulerException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Start a scheduled task as specified in a TaskDefinition.
+&nbsp;	 * 
+&nbsp;	 * @param task TaskDefinition to start
+&nbsp;	 * @return the started &lt;code&gt;Task&lt;/code&gt;, or null if there was a problem instantiating or
+&nbsp;	 *         scheduling the task
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public Task scheduleTask(TaskDefinition task) throws SchedulerException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Stop and start a scheduled task.
+&nbsp;	 * 
+&nbsp;	 * @param task the &lt;code&gt;TaskDefinition&lt;/code&gt; to reschedule
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public Task rescheduleTask(TaskDefinition task) throws SchedulerException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Loop over all currently started tasks and cycle them. This should be done after the
+&nbsp;	 * classloader has been changed (e.g. during module start/stop)
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public void rescheduleAllTasks() throws SchedulerException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get scheduled tasks.
+&nbsp;	 * 
+&nbsp;	 * @return all scheduled tasks
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public Collection&lt;TaskDefinition&gt; getScheduledTasks();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the list of tasks that are available to be scheduled. Eventually, these should go in the
+&nbsp;	 * database.
+&nbsp;	 * 
+&nbsp;	 * @return all available tasks
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public Collection&lt;TaskDefinition&gt; getRegisteredTasks();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the task with the given identifier.
+&nbsp;	 * 
+&nbsp;	 * @param id the identifier of the task
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public TaskDefinition getTask(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 2.4.0
+&nbsp;	 * 
+&nbsp;	 * Get the task with the given uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid the unique identifier of the task
+&nbsp;	 */
+&nbsp;	@Authorized({ &quot;Manage Scheduler&quot; })
+&nbsp;	public TaskDefinition getTaskByUuid(String uuid);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get the task with the given name.
+&nbsp;	 * 
+&nbsp;	 * @param name name of the task
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public TaskDefinition getTaskByName(String name);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete the task with the given identifier.
+&nbsp;	 * 
+&nbsp;	 * @param id the identifier of the task
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	public void deleteTask(Integer id);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create the given task
+&nbsp;	 *
+&nbsp;	 * @param task the task to be created
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save task to the database
+&nbsp;	 */
+&nbsp;	@Authorized( { &quot;Manage Scheduler&quot; })
+&nbsp;	@Logging(ignore = true)
+&nbsp;	public void saveTaskDefinition(TaskDefinition task);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return SchedulerConstants
+&nbsp;	 * 
+&nbsp;	 * @return SortedMap&amp;lt;String, String&amp;gt;
+&nbsp;	 */
+&nbsp;	public SortedMap&lt;String, String&gt; getSystemVariables();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the state of the scheduler service to Memento
+&nbsp;	 * 
+&nbsp;	 * @return OpenmrsMemento that contains data about this serive.
+&nbsp;	 */
+&nbsp;	public OpenmrsMemento saveToMemento();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Restore the scheduler service to state defined by Memento
+&nbsp;	 * 
+&nbsp;	 * @param memento
+&nbsp;	 */
+&nbsp;	public void restoreFromMemento(OpenmrsMemento memento);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Schedules a task for execution if not already running
+&nbsp;	 * @param taskDef
+&nbsp;	 * @since 1.10
+&nbsp;	 */
+&nbsp;	public void scheduleIfNotRunning(TaskDefinition taskDef);
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

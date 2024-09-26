@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LogicDataSource</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.logic.datasource</a>
+</div>
+
+<h1>Coverage Summary for Class: LogicDataSource (org.openmrs.logic.datasource)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LogicDataSource</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.logic.datasource;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.logic.LogicContext;
+&nbsp;import org.openmrs.logic.LogicCriteria;
+&nbsp;import org.openmrs.logic.LogicException;
+&nbsp;import org.openmrs.logic.result.Result;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides data to the logic service engine. Each data source is responsible for exposing a set of
+&nbsp; * keys to the logic service and delivering results to the logic service engine upon request.
+&nbsp; * Requests to the data source reference the evaluation context, a patient cohort, and criteria.
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;Context.&lt;/strong&gt; The evaluation context (org.openmrs.logic.LogicContext) defines the
+&nbsp; * index date and any global parameters. All criteria should be applied as if the current date is
+&nbsp; * the index date, allowing for retrospective queries.&lt;/li&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;Cohort.&lt;/strong&gt; The list of patients for which results should be returned&lt;/li&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;Criteria.&lt;/strong&gt; A chain of criteria to be applied to the results, passed to the
+&nbsp; * data source, since each data source knows how to apply these criteria in the most efficient
+&nbsp; * matter.&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * Keys (and their subsequent results) work best if they are well documented and maximize the re-use
+&nbsp; * of data. For example, consider a data source that has access to a historical listing of pharmacy
+&nbsp; * visits for patients. For each visit to the name of the pharmacy, the date of the visit and the
+&nbsp; * number of prescriptions filled at that visit are known. You might want to make a key for each
+&nbsp; * attribute, e.g.
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;pharmacy&lt;/strong&gt; &amp;mdash; returns a text result with the name of the pharmacy&lt;/li&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;visit date&lt;/strong&gt; &amp;mdash; returns a date result with the date of the pharmacy visit
+&nbsp; * &lt;/li&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;number of prescriptions&lt;/strong&gt; &amp;mdash; returns a numeric result with the number of
+&nbsp; * prescriptions filled&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * A consumer of the logic service could then use
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * Context.getLogicService().eval(myPatient, &amp;quot;@pharmacy visit.pharmacy&amp;quot;);
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * to get a list of the names of pharamacies visited by the patient. However, this limits the ways
+&nbsp; * we can use the result. On the other hand, consider defining the key:
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;&lt;strong&gt;visit&lt;/strong&gt; &amp;mdash; returns a text result with the result date equal to the
+&nbsp; * pharmacy visit date, the text value equal to the name of the pharmacy, and the numeric result
+&nbsp; * overloaded with the number of prescriptions filled at the pharmacy visit.
+&nbsp; * &lt;/ul&gt;
+&nbsp; * Now a consumer of the logic service can use the same result in several different ways:
+&nbsp; * 
+&nbsp; * &lt;pre&gt;
+&nbsp; * 
+&nbsp; * Result result = Context.getLogicService().eval(myPatient, &amp;quot;@pharmacy visit.visit&amp;quot;);
+&nbsp; * 
+&nbsp; * Result lastVisit = result.latest();
+&nbsp; * 
+&nbsp; * Date dateOfVisit = result.getResultDate();
+&nbsp; * 
+&nbsp; * String pharmacy = result.toString();
+&nbsp; * 
+&nbsp; * int numberOfPrescriptions = result.toNumber();
+&nbsp; * &lt;/pre&gt;
+&nbsp; * 
+&nbsp; * One way to approach the design of a new data service is to avoid thinking of the individual
+&nbsp; * attributes, but rather think about turning the data into the fewest number of observations (a key
+&nbsp; * for each) filled with as much data as possible. Remember that you can overload values within
+&nbsp; * results; however, such overloading should aim to be as intuitive as possible and well documented.
+&nbsp; * New logic data sources should be documented on the &lt;a
+&nbsp; * href=&quot;http://openmrs.org/wiki/Logic_Data_Sources&quot;&gt;OpenMRS wiki&lt;/a&gt;, including a description of
+&nbsp; * the keys available from the data source as well as the characteristics of the result returned for
+&nbsp; * each key.
+&nbsp; */
+&nbsp;public interface LogicDataSource {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The name by which this data source should be registered when it is loaded.
+&nbsp;	 * Implementations should override this like
+&nbsp;	 *     public static final String NAME = &quot;person&quot;;
+&nbsp;	 */
+&nbsp;	public static String NAME = &quot;org.openmrs.logic.LogicDataSource.name&quot;;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Extracts data from the data source. Actually, this function only checks for cached data and
+&nbsp;	 * forwards all non-cached requests to its subclass(es).
+&nbsp;	 * 
+&nbsp;	 * @param context the current logic context
+&nbsp;	 * @param patients Cohort of Patient(s) for whom to perform the queries
+&nbsp;	 * @param criteria &lt;code&gt;LogicCriteria&lt;/code&gt; identifying which data is to be extracted
+&nbsp;	 * @return &lt;code&gt;Map&lt;/code&gt; of results for each patient, grouped by requested data element
+&nbsp;	 */
+&nbsp;	public Map&lt;Integer, Result&gt; read(LogicContext context, Cohort patients, LogicCriteria criteria) throws LogicException;
+&nbsp;	
+&nbsp;	public abstract Collection&lt;String&gt; getKeys();
+&nbsp;	
+&nbsp;	public boolean hasKey(String key);
+&nbsp;	
+&nbsp;	public abstract int getDefaultTTL();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

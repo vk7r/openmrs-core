@@ -1,0 +1,407 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HL7Util</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7</a>
+</div>
+
+<h1>Coverage Summary for Class: HL7Util (org.openmrs.hl7)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HL7Util</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,2%
+  </span>
+  <span class="absValue">
+    (70/97)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import ca.uhn.hl7v2.HL7Exception;
+&nbsp;
+&nbsp;/**
+&nbsp; * HL7-related utilities
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public class HL7Util {
+&nbsp;	
+&nbsp;	private HL7Util() {
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HL7Util.class);</b>
+&nbsp;	
+&nbsp;	// Date and time format parsers
+&nbsp;	private static final String TIMESTAMP_FORMAT = &quot;yyyyMMddHHmmss.SSSZ&quot;;
+&nbsp;	
+&nbsp;	private static final String TIME_FORMAT = &quot;HHmmss.SSSZ&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	public static final String LOCAL_TIMEZONE_OFFSET = new SimpleDateFormat(&quot;Z&quot;).format(new Date());</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts an HL7 timestamp into a java.util.Date object. HL7 timestamps can be created with
+&nbsp;	 * varying levels of precision &amp;mdash; e.g., just the year or just the year and month, etc.
+&nbsp;	 * Since java.util.Date cannot store a partial value, we fill in defaults like January, 01 at
+&nbsp;	 * midnight within the current timezone.
+&nbsp;	 *
+&nbsp;	 * @param s HL7 timestamp to be parsed
+&nbsp;	 * @return Date object
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 78
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 1978
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 19784
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 197804
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 197841
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 19780411
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 197804116
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 1978041106
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 19780411065
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 197804110615
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 1978041106153
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 19780411061538
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 19780411061538.1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 19780411061538.12
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 19780411061538.123
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 19780411061538.1234
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 197804110615-5
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 197804110615-05
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 197804110615-0200
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not flub dst with 20091225123000
+&nbsp;	 */
+&nbsp;	public static Date parseHL7Timestamp(String s) throws HL7Exception {
+&nbsp;		
+&nbsp;		// HL7 dates must at least contain year and cannot exceed 24 bytes
+<b class="fc">&nbsp;		if (s == null || s.length() &lt; 4 || s.length() &gt; 24) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Invalid date &#39;&quot; + s + &quot;&#39;&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		StringBuilder dateString = new StringBuilder();</b>
+<b class="fc">&nbsp;		dateString.append(s.substring(0, 4)); // year</b>
+<b class="fc">&nbsp;		if (s.length() &gt;= 6) {</b>
+<b class="fc">&nbsp;			dateString.append(s.substring(4, 6)); // month</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			dateString.append(&quot;01&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 8) {</b>
+<b class="fc">&nbsp;			dateString.append(s.substring(6, 8)); //day</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			dateString.append(&quot;01&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Parse timezone (optional in HL7 format)
+&nbsp;		String timeZoneOffset;
+&nbsp;		try {
+<b class="fc">&nbsp;			Date parsedDay = new SimpleDateFormat(&quot;yyyyMMdd&quot;).parse(s.substring(0, 8));</b>
+<b class="fc">&nbsp;			timeZoneOffset = getTimeZoneOffset(s, parsedDay);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ParseException e) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Error parsing date: &#39;&quot; + s.substring(0, 8) + &quot;&#39; for time zone offset&#39;&quot; + s + &quot;&#39;&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		s = s.replace(timeZoneOffset, &quot;&quot;); // remove the timezone from the string</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (s.length() &gt;= 10) {</b>
+<b class="fc">&nbsp;			dateString.append(s.substring(8, 10)); // hour</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;00&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 12) {</b>
+<b class="fc">&nbsp;			dateString.append(s.substring(10, 12)); // minute</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;00&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 14) {</b>
+<b class="fc">&nbsp;			dateString.append(s.substring(12, 14)); // seconds</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;00&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 15 &amp;&amp; s.charAt(14) != &#39;.&#39;) {</b>
+&nbsp;			// decimal point
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Invalid date format &#39;&quot; + s + &quot;&#39;&quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 16) {</b>
+<b class="nc">&nbsp;			dateString.append(s.substring(15, 16)); // tenths</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;0&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 17) {</b>
+<b class="nc">&nbsp;			dateString.append(s.substring(16, 17)); // hundredths</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;0&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 18) {</b>
+<b class="nc">&nbsp;			dateString.append(s.subSequence(17, 18)); // milliseconds</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			dateString.append(&quot;0&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		dateString.append(timeZoneOffset);</b>
+&nbsp;		
+&nbsp;		Date date;
+&nbsp;		try {
+<b class="fc">&nbsp;			date = new SimpleDateFormat(TIMESTAMP_FORMAT).parse(dateString.toString());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ParseException e) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Error parsing date &#39;&quot; + s + &quot;&#39;&quot;);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return date;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the timezone string for this given fullString. If fullString contains a + or - sign, the
+&nbsp;	 * strings after those are considered to be the timezone. &lt;br&gt;
+&nbsp;	 * &lt;br&gt;
+&nbsp;	 * If the fullString does not contain a timezone, the timezone is determined from the server&#39;s
+&nbsp;	 * timezone on the &quot;givenDate&quot;. (givenDate is needed to account for daylight savings time.)
+&nbsp;	 *
+&nbsp;	 * @param fullString the hl7 string being parsed
+&nbsp;	 * @param givenDate the date that should be used if no timezone exists on the fullString
+&nbsp;	 * @return a string like +0500 or -0500 for the timezone
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return timezone string if exists in given string
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return timezone for givenDate and not the current date
+&nbsp;	 */
+&nbsp;	protected static String getTimeZoneOffset(String fullString, Date givenDate) {
+&nbsp;		// Parse timezone (optional in HL7 format)
+&nbsp;		String timeZoneOffset;
+<b class="fc">&nbsp;		int tzPlus = fullString.indexOf(&#39;+&#39;);</b>
+<b class="fc">&nbsp;		int tzMinus = fullString.indexOf(&#39;-&#39;);</b>
+<b class="fc">&nbsp;		boolean timeZoneFlag = (tzPlus &gt; 0 || tzMinus &gt; 0);</b>
+<b class="fc">&nbsp;		if (timeZoneFlag) {</b>
+&nbsp;			int tzIndex;
+<b class="fc">&nbsp;			if (tzPlus &gt; 0) {</b>
+<b class="fc">&nbsp;				tzIndex = tzPlus;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				tzIndex = tzMinus;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			timeZoneOffset = fullString.substring(tzIndex);</b>
+<b class="fc">&nbsp;			if (timeZoneOffset.length() != 5) {</b>
+<b class="nc">&nbsp;				log.error(&quot;Invalid timestamp because its too short: &quot; + timeZoneOffset);</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;		} else {</b>
+&nbsp;			//set default timezone offset from the current day
+<b class="fc">&nbsp;			Calendar cal = Calendar.getInstance();</b>
+<b class="fc">&nbsp;			cal.setTime(givenDate);</b>
+<b class="fc">&nbsp;			timeZoneOffset = new SimpleDateFormat(&quot;Z&quot;).format(cal.getTime());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return timeZoneOffset;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method for parsing HL7 dates (treated just like a timestamp with only year,
+&nbsp;	 * month, and day specified)
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.hl7.HL7Util#parseHL7Timestamp(String)
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	public static Date parseHL7Date(String s) throws HL7Exception {
+<b class="fc">&nbsp;		return parseHL7Timestamp(s);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Converts an HL7 time into a java.util.Date object. Since the java.util.Date object cannot
+&nbsp;	 * store just the time, the date will remain at the epoch (e.g., January 1, 1970). Time more
+&nbsp;	 * precise than microseconds is ignored.
+&nbsp;	 *
+&nbsp;	 * @param s HL7 time to be converted
+&nbsp;	 * @return Date object set to time specified by HL7
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on 197804110615
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 0615
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 061538
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 061538.1
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 061538.12
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 061538.123
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 061538.1234
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; handle 061538-0300
+&nbsp;	 */
+&nbsp;	public static Date parseHL7Time(String s) throws HL7Exception {
+&nbsp;		
+<b class="fc">&nbsp;		String timeZoneOffset = getTimeZoneOffset(s, new Date());</b>
+<b class="fc">&nbsp;		s = s.replace(timeZoneOffset, &quot;&quot;); // remove the timezone from the string</b>
+&nbsp;		
+<b class="fc">&nbsp;		StringBuilder timeString = new StringBuilder();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (s.length() &lt; 2 || s.length() &gt; 16) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Invalid time format &#39;&quot; + s + &quot;&#39;&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		timeString.append(s.substring(0, 2)); // hour</b>
+<b class="fc">&nbsp;		if (s.length() &gt;= 4) {</b>
+<b class="fc">&nbsp;			timeString.append(s.substring(2, 4)); // minute</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			timeString.append(&quot;00&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 6) {</b>
+<b class="nc">&nbsp;			timeString.append(s.substring(4, 6)); // seconds</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			timeString.append(&quot;00&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 7 &amp;&amp; s.charAt(6) != &#39;.&#39;) {</b>
+&nbsp;			// decimal point
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Invalid time format &#39;&quot; + s + &quot;&#39;&quot;);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			timeString.append(&quot;.&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 8) {</b>
+<b class="nc">&nbsp;			timeString.append(s.substring(7, 8)); // tenths</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			timeString.append(&quot;0&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 9) {</b>
+<b class="nc">&nbsp;			timeString.append(s.substring(8, 9)); // hundredths</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			timeString.append(&quot;0&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (s.length() &gt;= 10) {</b>
+<b class="nc">&nbsp;			timeString.append(s.subSequence(9, 10)); // milliseconds</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			timeString.append(&quot;0&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Parse timezone (optional in HL7 format)
+<b class="fc">&nbsp;		timeString.append(timeZoneOffset);</b>
+&nbsp;		
+&nbsp;		Date date;
+&nbsp;		try {
+<b class="fc">&nbsp;			date = new SimpleDateFormat(TIME_FORMAT).parse(timeString.toString());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ParseException e) {</b>
+<b class="nc">&nbsp;			throw new HL7Exception(&quot;Invalid time format: &#39;&quot; + s + &quot;&#39; [&quot; + timeString + &quot;]&quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return date;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets the destination directory for hl7 archives.
+&nbsp;	 *
+&nbsp;	 * @return The destination directory for the hl7 in archive
+&nbsp;	 */
+&nbsp;	public static File getHl7ArchivesDirectory() throws APIException {
+<b class="nc">&nbsp;		String archiveDir = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_HL7_ARCHIVE_DIRECTORY);
+&nbsp;		
+<b class="nc">&nbsp;		if (StringUtils.isBlank(archiveDir)) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Invalid value for global property &#39;&quot; + OpenmrsConstants.GLOBAL_PROPERTY_HL7_ARCHIVE_DIRECTORY</b>
+&nbsp;			        + &quot;&#39;, trying to set a default one&quot;);
+<b class="nc">&nbsp;			archiveDir = HL7Constants.HL7_ARCHIVE_DIRECTORY_NAME;</b>
+&nbsp;			
+<b class="nc">&nbsp;			log.debug(&quot;Using &#39;&quot; + archiveDir</b>
+&nbsp;			        + &quot;&#39; in the application data directory as the root directory for hl7_in_archives&quot;);
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return OpenmrsUtil.getDirectoryInApplicationDataDirectory(archiveDir);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,307 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SimpleDosingInstructions</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: SimpleDosingInstructions (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SimpleDosingInstructions</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,2%
+  </span>
+  <span class="absValue">
+    (12/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    39,7%
+  </span>
+  <span class="absValue">
+    (29/73)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 1.10
+&nbsp; */
+<b class="fc">&nbsp;public class SimpleDosingInstructions extends BaseDosingInstructions {</b>
+&nbsp;	
+&nbsp;	private Double dose;
+&nbsp;	
+&nbsp;	private Concept doseUnits;
+&nbsp;	
+&nbsp;	private Concept route;
+&nbsp;	
+&nbsp;	private OrderFrequency frequency;
+&nbsp;	
+&nbsp;	private Integer duration;
+&nbsp;	
+&nbsp;	private Concept durationUnits;
+&nbsp;	
+&nbsp;	private Boolean asNeeded;
+&nbsp;	
+&nbsp;	private String asNeededCondition;
+&nbsp;	
+&nbsp;	private String administrationInstructions;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see DosingInstructions#getDosingInstructionsAsString(java.util.Locale)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getDosingInstructionsAsString(Locale locale) {
+<b class="nc">&nbsp;		StringBuilder dosingInstructions = new StringBuilder();</b>
+<b class="nc">&nbsp;		dosingInstructions.append(this.dose);</b>
+<b class="nc">&nbsp;		dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;		dosingInstructions.append(this.doseUnits.getName(locale).getName());</b>
+<b class="nc">&nbsp;		dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;		dosingInstructions.append(this.route.getName(locale).getName());</b>
+<b class="nc">&nbsp;		dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;		dosingInstructions.append(this.frequency);</b>
+<b class="nc">&nbsp;		if (duration != null) {</b>
+<b class="nc">&nbsp;			dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;			dosingInstructions.append(this.duration);</b>
+<b class="nc">&nbsp;			dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;			dosingInstructions.append(this.durationUnits.getName(locale).getName());</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (this.asNeeded) {</b>
+<b class="nc">&nbsp;			dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;			dosingInstructions.append(&quot;PRN&quot;);</b>
+<b class="nc">&nbsp;			if (this.asNeededCondition != null) {</b>
+<b class="nc">&nbsp;				dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;				dosingInstructions.append(this.asNeededCondition);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		if (this.administrationInstructions != null) {</b>
+<b class="nc">&nbsp;			dosingInstructions.append(&quot; &quot;);</b>
+<b class="nc">&nbsp;			dosingInstructions.append(this.administrationInstructions);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return dosingInstructions.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see DosingInstructions#setDosingInstructions(DrugOrder)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDosingInstructions(DrugOrder order) {
+<b class="nc">&nbsp;		order.setDosingType(this.getClass());</b>
+<b class="nc">&nbsp;		order.setDose(this.dose);</b>
+<b class="nc">&nbsp;		order.setDoseUnits(this.doseUnits);</b>
+<b class="nc">&nbsp;		order.setRoute(this.route);</b>
+<b class="nc">&nbsp;		order.setFrequency(this.frequency);</b>
+<b class="nc">&nbsp;		order.setDuration(this.duration);</b>
+<b class="nc">&nbsp;		order.setDurationUnits(this.durationUnits);</b>
+<b class="nc">&nbsp;		order.setAsNeeded(this.asNeeded);</b>
+<b class="nc">&nbsp;		order.setAsNeededCondition(this.asNeededCondition);</b>
+<b class="nc">&nbsp;		order.setDosingInstructions(this.administrationInstructions);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see DosingInstructions#getDosingInstructions(DrugOrder)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public DosingInstructions getDosingInstructions(DrugOrder order) {
+<b class="fc">&nbsp;		if (!order.getDosingType().equals(this.getClass())) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;DrugOrder.error.dosingTypeIsMismatched&quot;, new Object[] { this.getClass().getName(),</b>
+<b class="nc">&nbsp;			        order.getDosingType() });</b>
+&nbsp;		}
+<b class="fc">&nbsp;		SimpleDosingInstructions simpleDosingInstructions = new SimpleDosingInstructions();</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setDose(order.getDose());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setDoseUnits(order.getDoseUnits());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setRoute(order.getRoute());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setFrequency(order.getFrequency());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setDuration(order.getDuration());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setDurationUnits(order.getDurationUnits());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setAsNeeded(order.getAsNeeded());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setAsNeededCondition(order.getAsNeededCondition());</b>
+<b class="fc">&nbsp;		simpleDosingInstructions.setAdministrationInstructions(order.getDosingInstructions());</b>
+<b class="fc">&nbsp;		return simpleDosingInstructions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see DosingInstructions#validate(DrugOrder, org.springframework.validation.Errors)
+&nbsp;	 * @param order
+&nbsp;	 * @param errors
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; reject a duration unit with a mapping of an invalid type
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(DrugOrder order, Errors errors) {
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;dose&quot;, &quot;DrugOrder.error.doseIsNullForDosingTypeSimple&quot;);</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;doseUnits&quot;, &quot;DrugOrder.error.doseUnitsIsNullForDosingTypeSimple&quot;);</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;route&quot;, &quot;DrugOrder.error.routeIsNullForDosingTypeSimple&quot;);</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;frequency&quot;, &quot;DrugOrder.error.frequencyIsNullForDosingTypeSimple&quot;);</b>
+<b class="fc">&nbsp;		if (order.getAutoExpireDate() == null &amp;&amp; order.getDurationUnits() != null</b>
+<b class="fc">&nbsp;		        &amp;&amp; Duration.getCode(order.getDurationUnits()) == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;durationUnits&quot;, &quot;DrugOrder.error.durationUnitsNotMappedToSnomedCtDurationCode&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Double getDose() {
+<b class="nc">&nbsp;		return dose;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDose(Double dose) {
+<b class="fc">&nbsp;		this.dose = dose;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getDoseUnits() {
+<b class="nc">&nbsp;		return doseUnits;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDoseUnits(Concept doseUnits) {
+<b class="fc">&nbsp;		this.doseUnits = doseUnits;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getRoute() {
+<b class="nc">&nbsp;		return route;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setRoute(Concept route) {
+<b class="fc">&nbsp;		this.route = route;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public OrderFrequency getFrequency() {
+<b class="nc">&nbsp;		return frequency;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setFrequency(OrderFrequency frequency) {
+<b class="fc">&nbsp;		this.frequency = frequency;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Integer getDuration() {
+<b class="nc">&nbsp;		return duration;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDuration(Integer duration) {
+<b class="fc">&nbsp;		this.duration = duration;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Concept getDurationUnits() {
+<b class="nc">&nbsp;		return durationUnits;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setDurationUnits(Concept durationUnits) {
+<b class="fc">&nbsp;		this.durationUnits = durationUnits;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Boolean getAsNeeded() {
+<b class="nc">&nbsp;		return asNeeded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setAsNeeded(Boolean asNeeded) {
+<b class="fc">&nbsp;		this.asNeeded = asNeeded;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getAsNeededCondition() {
+<b class="nc">&nbsp;		return asNeededCondition;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setAsNeededCondition(String asNeededCondition) {
+<b class="fc">&nbsp;		this.asNeededCondition = asNeededCondition;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getAdministrationInstructions() {
+<b class="nc">&nbsp;		return administrationInstructions;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setAdministrationInstructions(String administrationInstructions) {
+<b class="fc">&nbsp;		this.administrationInstructions = administrationInstructions;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

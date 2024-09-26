@@ -1,0 +1,408 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MessageServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: MessageServiceImpl (org.openmrs.notification.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MessageServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    56,5%
+  </span>
+  <span class="absValue">
+    (13/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41%
+  </span>
+  <span class="absValue">
+    (25/61)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification.impl;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.TemplateDAO;
+&nbsp;import org.openmrs.notification.Message;
+&nbsp;import org.openmrs.notification.MessageException;
+&nbsp;import org.openmrs.notification.MessagePreparator;
+&nbsp;import org.openmrs.notification.MessageSender;
+&nbsp;import org.openmrs.notification.MessageService;
+&nbsp;import org.openmrs.notification.Template;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;@Transactional
+&nbsp;public class MessageServiceImpl implements MessageService {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MessageServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	private TemplateDAO templateDAO;
+&nbsp;	
+&nbsp;	private MessageSender messageSender; // Delivers message 
+&nbsp;	
+&nbsp;	private MessagePreparator messagePreparator; // Prepares message for delivery 
+&nbsp;	
+&nbsp;	public void setTemplateDAO(TemplateDAO dao) {
+<b class="fc">&nbsp;		this.templateDAO = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Public constructor Required for use with spring&#39;s method injection. Be careful because this
+&nbsp;	 * class requires a DAO Context in order to work properly. Please set the DAO context
+&nbsp;	 */
+<b class="fc">&nbsp;	public MessageServiceImpl() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the message preparator.
+&nbsp;	 *
+&nbsp;	 * @param messagePreparator
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setMessagePreparator(MessagePreparator messagePreparator) {
+<b class="fc">&nbsp;		this.messagePreparator = messagePreparator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public MessagePreparator getMessagePreparator() {
+<b class="fc">&nbsp;		return this.messagePreparator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Set the message sender.
+&nbsp;	 *
+&nbsp;	 * @param messageSender
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setMessageSender(MessageSender messageSender) {
+<b class="fc">&nbsp;		this.messageSender = messageSender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public MessageSender getMessageSender() {
+<b class="fc">&nbsp;		return this.messageSender;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send the message. All send calls go through this method.
+&nbsp;	 *
+&nbsp;	 * @param message the Message to be sent
+&nbsp;	 * @see org.openmrs.notification.MessageService#sendMessage(org.openmrs.notification.Message)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(Message message) throws MessageException {
+&nbsp;		try {
+<b class="fc">&nbsp;			messageSender.send(message);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (Exception e) {</b>
+<b class="fc">&nbsp;			log.error(&quot;Message could not be sent due to &quot; + e.getMessage(), e);</b>
+<b class="fc">&nbsp;			throw new MessageException(e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a message object with the given parts.
+&nbsp;	 *
+&nbsp;	 * @param recipients the recipients of the message
+&nbsp;	 * @param sender the send of the message
+&nbsp;	 * @param subject the subject of the message
+&nbsp;	 * @param content the content or body of the message
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message createMessage(String recipients, String sender, String subject, String content) throws MessageException {
+<b class="fc">&nbsp;		return Context.getMessageService().createMessage(recipients, sender, subject, content, null, null, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a message object with the given parts.
+&nbsp;	 *
+&nbsp;	 * @param sender the send of the message
+&nbsp;	 * @param subject the subject of the message
+&nbsp;	 * @param content the content or body of the message
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message createMessage(String sender, String subject, String content) throws MessageException {
+<b class="fc">&nbsp;		return Context.getMessageService().createMessage(null, sender, subject, content);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Create a message object with the given parts.
+&nbsp;	 *
+&nbsp;	 * @param subject the subject of the message
+&nbsp;	 * @param content the content or body of the message
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message createMessage(String subject, String content) throws MessageException {
+<b class="fc">&nbsp;		return Context.getMessageService().createMessage(null, null, subject, content);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.MessageService#createMessage(java.lang.String,
+&nbsp;	 *      java.lang.String, java.lang.String, java.lang.String, java.lang.String,
+&nbsp;	 *      java.lang.String, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message createMessage(String recipients, String sender, String subject, String content, String attachment,
+&nbsp;	        String attachmentContentType, String attachmentFileName) throws MessageException {
+<b class="fc">&nbsp;		Message message = new Message();</b>
+<b class="fc">&nbsp;		message.setRecipients(recipients);</b>
+<b class="fc">&nbsp;		message.setSender(sender);</b>
+<b class="fc">&nbsp;		message.setContent(content);</b>
+<b class="fc">&nbsp;		message.setSubject(subject);</b>
+<b class="fc">&nbsp;		message.setAttachment(attachment);</b>
+<b class="fc">&nbsp;		message.setAttachmentContentType(attachmentContentType);</b>
+<b class="fc">&nbsp;		message.setAttachmentFileName(attachmentFileName);</b>
+<b class="fc">&nbsp;		return message;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send a message using the given parameters. This is a convenience method so that the client
+&nbsp;	 * does not need to create its own Message object.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(String recipients, String sender, String subject, String content) throws MessageException {
+<b class="fc">&nbsp;		Message message = createMessage(recipients, sender, subject, content);</b>
+<b class="fc">&nbsp;		Context.getMessageService().sendMessage(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send a message to a user that is identified by the given identifier.
+&nbsp;	 *
+&nbsp;	 * @param message &lt;code&gt;Message&lt;/code&gt; to be sent
+&nbsp;	 * @param recipientId Integer identifier of user (recipient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(Message message, Integer recipientId) throws MessageException {
+<b class="nc">&nbsp;		log.debug(&quot;Sending message to user with user id &quot; + recipientId);</b>
+<b class="nc">&nbsp;		User user = Context.getUserService().getUser(recipientId);</b>
+<b class="nc">&nbsp;		message.addRecipient(user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS));</b>
+<b class="nc">&nbsp;		Context.getMessageService().sendMessage(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send message to a single user.
+&nbsp;	 *
+&nbsp;	 * @param message the &lt;code&gt;Message&lt;/code&gt; to be sent
+&nbsp;	 * @param user the recipient of the message
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(Message message, User user) throws MessageException {
+<b class="nc">&nbsp;		log.debug(&quot;Sending message to user &quot; + user);</b>
+<b class="nc">&nbsp;		String address = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);</b>
+<b class="nc">&nbsp;		if (address != null) {</b>
+<b class="nc">&nbsp;			message.addRecipient(address);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		Context.getMessageService().sendMessage(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send message to a collection of recipients.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(Message message, Collection&lt;User&gt; users) throws MessageException {
+<b class="nc">&nbsp;		log.debug(&quot;Sending message to users &quot; + users);</b>
+<b class="nc">&nbsp;		for (User user : users) {</b>
+<b class="nc">&nbsp;			String address = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);</b>
+<b class="nc">&nbsp;			if (address != null) {</b>
+<b class="nc">&nbsp;				message.addRecipient(address);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+<b class="nc">&nbsp;		Context.getMessageService().sendMessage(message);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Send a message to a group of users identified by their role.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(Message message, String roleName) throws MessageException {
+<b class="nc">&nbsp;		log.debug(&quot;Sending message to role with name &quot; + roleName);</b>
+<b class="nc">&nbsp;		Role role = Context.getUserService().getRole(roleName);</b>
+<b class="nc">&nbsp;		Context.getMessageService().sendMessage(message, role);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;         * Sends a message to a group of users identifier by their role.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void sendMessage(Message message, Role role) throws MessageException {
+<b class="nc">&nbsp;		log.debug(&quot;Sending message to role &quot; + role);</b>
+<b class="nc">&nbsp;		log.debug(&quot;User Service : &quot; + Context.getUserService());</b>
+&nbsp;		
+<b class="nc">&nbsp;		List&lt;Role&gt; roles = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;		roles.add(role);</b>
+&nbsp;		
+<b class="nc">&nbsp;		Collection&lt;User&gt; users = Context.getUserService().getUsers(null, roles, false);</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Sending message &quot; + message + &quot; to &quot; + users);</b>
+<b class="nc">&nbsp;		Context.getMessageService().sendMessage(message, users);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Prepare a message given the template. The template should be populated with all necessary
+&nbsp;	 * data including the variable name-value pairs
+&nbsp;	 *
+&nbsp;	 * @param template the given &lt;code&gt;Template&lt;/code&gt;
+&nbsp;	 * @return the prepared &lt;code&gt;Message&lt;/code&gt;
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Message prepareMessage(Template template) throws MessageException {
+<b class="nc">&nbsp;		return messagePreparator.prepare(template);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Prepare a message based on a template and data used for variable substitution within template.
+&nbsp;	 *
+&nbsp;	 * @param templateName name of the template to be used
+&nbsp;	 * @param data mapping used for variable substitution within template
+&nbsp;	 * @return the prepared Message
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Message prepareMessage(String templateName, Map data) throws MessageException {
+&nbsp;		try {
+<b class="nc">&nbsp;			Template template = (Template) getTemplatesByName(templateName).get(0);</b>
+<b class="nc">&nbsp;			template.setData(data);</b>
+<b class="nc">&nbsp;			return Context.getMessageService().prepareMessage(template);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			throw new MessageException(&quot;Could not prepare message with template &quot; + templateName, e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all templates in the database.
+&nbsp;	 *
+&nbsp;	 * @return list of Templates
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List getAllTemplates() throws MessageException {
+<b class="nc">&nbsp;		return templateDAO.getTemplates();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get template by identifier.
+&nbsp;	 *
+&nbsp;	 * @param id template identifier
+&nbsp;	 * @return Template
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Template getTemplate(Integer id) throws MessageException {
+<b class="nc">&nbsp;		return templateDAO.getTemplate(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get templates by name.
+&nbsp;	 *
+&nbsp;	 * @param name the name of the template
+&nbsp;	 * @return list of Templates
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List getTemplatesByName(String name) throws MessageException {
+<b class="nc">&nbsp;		return templateDAO.getTemplatesByName(name);</b>
+&nbsp;	}	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

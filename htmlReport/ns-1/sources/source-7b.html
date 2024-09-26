@@ -1,0 +1,137 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DosingInstructions</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: DosingInstructions (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">DosingInstructions</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;
+&nbsp;/**
+&nbsp; * The instructions for different drug prescriptions can vary greatly. Implementations of this class
+&nbsp; * represent different ways to code those instructions. For example the simple dosing implementation
+&nbsp; * covers a common case like &quot;X dose, with Y frequency, for Z duration&quot; whereas a different
+&nbsp; * implementation would cover
+&nbsp; * &quot;200mg for the first week, then up to 400mg for the rest of the prescription&quot;. Implementations of
+&nbsp; * this class should store their data in the appropriate fields on the DrugOrder and Order object.
+&nbsp; * In some cases they could store JSON in the dosing instructions field. &lt;br&gt;
+&nbsp; * NOTE: Any class that implements this interface should have a default constructor.
+&nbsp; * 
+&nbsp; * @since 1.10
+&nbsp; */
+&nbsp;public interface DosingInstructions {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get human-readable version of dosing instructions for a particular locale All dosing
+&nbsp;	 * instructions can be localized, so the result, especially any free text may remain in the
+&nbsp;	 * original language. In general, it&#39;s expect that most implementations will write orders in a
+&nbsp;	 * single language and then want to translate instructions to the patient&#39;s preferred language
+&nbsp;	 * when printing orders for the patient. In all other cases, it will want to call this method
+&nbsp;	 * with the user&#39;s locale (i.e., &lt;tt&gt;context.getLocale()&lt;/tt&gt;).
+&nbsp;	 * 
+&nbsp;	 * @return localized drug instructions string
+&nbsp;	 */
+&nbsp;	public String getDosingInstructionsAsString(Locale locale);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Serialize dosing instructions into order
+&nbsp;	 * 
+&nbsp;	 * @param order DrugOrder to set dosing instructions
+&nbsp;	 */
+&nbsp;	public void setDosingInstructions(DrugOrder order);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get dosing instructions from order
+&nbsp;	 * 
+&nbsp;	 * @param order DrugOrder to get dosing instructions
+&nbsp;	 * @return DosingInstructions created from DrugOrder
+&nbsp;	 * @throws APIException if dosing type of passing order is not matched with dosing type of
+&nbsp;	 *             implementing dosing instruction
+&nbsp;	 */
+&nbsp;	public DosingInstructions getDosingInstructions(DrugOrder order);
+&nbsp;	
+&nbsp;	public void validate(DrugOrder order, Errors errors);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Implementations of this interface may be able to infer the auto-expiration date from other
+&nbsp;	 * fields on the DrugOrder.  If the expiration date cannot be determined, then this method
+&nbsp;	 * may return null (i.e., null means duration of order is unknown).
+&nbsp;	 */
+&nbsp;	public Date getAutoExpireDate(DrugOrder order);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

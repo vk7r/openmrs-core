@@ -1,0 +1,323 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientProgramValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientProgramValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientProgramValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,1%
+  </span>
+  <span class="absValue">
+    (78/82)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.PatientState;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.messagesource.MessageSourceService;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class validates a {@link PatientProgram} object
+&nbsp; *
+&nbsp; * @since 1.9
+&nbsp; */
+&nbsp;@Handler(supports = { PatientProgram.class }, order = 50)
+<b class="fc">&nbsp;public class PatientProgramValidator implements Validator {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PatientProgramValidator.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		return PatientProgram.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates the given PatientProgram.
+&nbsp;	 *
+&nbsp;	 * @param obj The patient program to validate.
+&nbsp;	 * @param errors Errors
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if obj is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the patient field is blank
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if there is more than one patientState with the same states and startDates
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if there is more than one state with a null start date in the same workflow
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if the start date of the first patient state in the work flow is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if any patient state has an end date before its start date
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if the program property is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if any patient states overlap each other in the same work flow
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a patientState has an invalid work flow state
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a patient program has duplicate states in the same work flow
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a patient is in multiple states in the same work flow
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a enrolled date is in future at the date it set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a completion date is in future at the date it set
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a patient program has an enroll date after its completion
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if a patient is in multiple states in different work flows
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass for a valid program
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass for patient states that have the same start dates in the same work flow
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) {
+<b class="fc">&nbsp;		log.debug(&quot;{}.validate...&quot;, this.getClass().getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (obj == null) {</b>
+<b class="fc">&nbsp;			throw new IllegalArgumentException(&quot;The parameter obj should not be null&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		MessageSourceService mss = Context.getMessageSourceService();</b>
+<b class="fc">&nbsp;		PatientProgram patientProgram = (PatientProgram) obj;</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;patient&quot;, &quot;error.required&quot;,</b>
+<b class="fc">&nbsp;		    new Object[] { mss.getMessage(&quot;general.patient&quot;) });</b>
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;program&quot;, &quot;error.required&quot;,</b>
+<b class="fc">&nbsp;		    new Object[] { mss.getMessage(&quot;Program.program&quot;) });</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (errors.hasErrors()) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmpty(errors, &quot;dateEnrolled&quot;, &quot;error.patientProgram.enrolledDateEmpty&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Date today = new Date();</b>
+<b class="fc">&nbsp;		if (patientProgram.getDateEnrolled() != null &amp;&amp; today.before(patientProgram.getDateEnrolled())) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;dateEnrolled&quot;, &quot;error.patientProgram.enrolledDateDateCannotBeInFuture&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (patientProgram.getDateCompleted() != null &amp;&amp; today.before(patientProgram.getDateCompleted())) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;dateCompleted&quot;, &quot;error.patientProgram.completionDateCannotBeInFuture&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if enrollment or complete date of program is in future or complete date has come before enroll date we should throw error
+<b class="fc">&nbsp;		if (patientProgram.getDateEnrolled() != null</b>
+<b class="fc">&nbsp;		        &amp;&amp; OpenmrsUtil.compareWithNullAsLatest(patientProgram.getDateCompleted(), patientProgram.getDateEnrolled()) &lt; 0) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;dateCompleted&quot;, &quot;error.patientProgram.enrolledDateShouldBeBeforecompletionDate&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Set&lt;ProgramWorkflow&gt; workFlows = patientProgram.getProgram().getWorkflows();</b>
+&nbsp;		//Patient state validation is specific to a work flow
+<b class="fc">&nbsp;		for (ProgramWorkflow workFlow : workFlows) {</b>
+<b class="fc">&nbsp;			Set&lt;PatientState&gt; patientStates = patientProgram.getStates();</b>
+<b class="fc">&nbsp;			if (patientStates != null) {</b>
+&nbsp;				//Set to store to keep track of unique valid state and start date combinations
+<b class="fc">&nbsp;				Set&lt;String&gt; statesAndStartDates = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;				PatientState latestState = null;</b>
+<b class="fc">&nbsp;				boolean foundCurrentPatientState = false;</b>
+<b class="fc">&nbsp;				boolean foundStateWithNullStartDate = false;</b>
+<b class="fc">&nbsp;				for (PatientState patientState : patientStates) {</b>
+<b class="fc">&nbsp;					if (patientState.getVoided()) {</b>
+<b class="fc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					String missingRequiredFieldCode = null;</b>
+&nbsp;					//only the initial state can have a null start date
+<b class="fc">&nbsp;					if (patientState.getStartDate() == null) {</b>
+<b class="fc">&nbsp;						if (foundStateWithNullStartDate) {</b>
+<b class="fc">&nbsp;							missingRequiredFieldCode = &quot;general.dateStart&quot;;</b>
+&nbsp;						} else {
+<b class="fc">&nbsp;							foundStateWithNullStartDate = true;</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else if (patientState.getState() == null) {</b>
+<b class="fc">&nbsp;						missingRequiredFieldCode = &quot;State.state&quot;;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (missingRequiredFieldCode != null) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;states&quot;, &quot;PatientState.error.requiredField&quot;, new Object[] { mss</b>
+<b class="fc">&nbsp;						        .getMessage(missingRequiredFieldCode) }, null);</b>
+&nbsp;						return;
+&nbsp;					}
+&nbsp;					
+&nbsp;					//state should belong to one of the workflows in the program
+&nbsp;					// note that we are iterating over getAllWorkflows() here because we want to include
+&nbsp;					// retired workflows, and the workflows variable does not include retired workflows
+<b class="fc">&nbsp;					boolean isValidPatientState = false;</b>
+<b class="fc">&nbsp;					for (ProgramWorkflow wf : patientProgram.getProgram().getAllWorkflows()) {</b>
+<b class="fc">&nbsp;						if (wf.getStates().contains(patientState.getState())) {</b>
+<b class="fc">&nbsp;							isValidPatientState = true;</b>
+<b class="fc">&nbsp;							break;</b>
+&nbsp;						}
+<b class="fc">&nbsp;					}</b>
+&nbsp;					
+<b class="fc">&nbsp;					if (!isValidPatientState) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;states&quot;, &quot;PatientState.error.invalidPatientState&quot;,</b>
+&nbsp;						    new Object[] { patientState }, null);
+&nbsp;						return;
+&nbsp;					}
+&nbsp;					
+&nbsp;					//will validate it with other states in its workflow
+<b class="fc">&nbsp;					if (!patientState.getState().getProgramWorkflow().equals(workFlow)) {</b>
+<b class="fc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (OpenmrsUtil.compareWithNullAsLatest(patientState.getEndDate(), patientState.getStartDate()) &lt; 0) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;states&quot;, &quot;PatientState.error.endDateCannotBeBeforeStartDate&quot;);</b>
+&nbsp;						return;
+<b class="fc">&nbsp;					} else if (statesAndStartDates.contains(patientState.getState().getUuid() + &quot;&quot;</b>
+<b class="fc">&nbsp;					        + patientState.getStartDate())) {</b>
+&nbsp;						// we already have a patient state with the same work flow state and start date
+<b class="fc">&nbsp;						errors.rejectValue(&quot;states&quot;, &quot;PatientState.error.duplicatePatientStates&quot;);</b>
+&nbsp;						return;
+&nbsp;					}
+&nbsp;					
+&nbsp;					//Ensure that the patient is only in one state at a given time
+<b class="fc">&nbsp;					if (!foundCurrentPatientState &amp;&amp; patientState.getEndDate() == null) {</b>
+<b class="fc">&nbsp;						foundCurrentPatientState = true;</b>
+<b class="fc">&nbsp;					} else if (foundCurrentPatientState &amp;&amp; patientState.getEndDate() == null) {</b>
+<b class="fc">&nbsp;						errors.rejectValue(&quot;states&quot;, &quot;PatientProgram.error.cannotBeInMultipleStates&quot;);</b>
+&nbsp;						return;
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (latestState == null) {</b>
+<b class="fc">&nbsp;						latestState = patientState;</b>
+&nbsp;					} else {
+<b class="fc">&nbsp;						if (patientState.compareTo(latestState) &gt; 0) {</b>
+&nbsp;							//patient should have already left this state since it is older
+<b class="fc">&nbsp;							if (latestState.getEndDate() == null) {</b>
+<b class="nc">&nbsp;								errors.rejectValue(&quot;states&quot;, &quot;PatientProgram.error.cannotBeInMultipleStates&quot;);</b>
+&nbsp;								return;
+<b class="fc">&nbsp;							} else if (OpenmrsUtil.compareWithNullAsEarliest(patientState.getStartDate(), latestState</b>
+<b class="fc">&nbsp;							        .getEndDate()) &lt; 0) {</b>
+&nbsp;								//current state was started before a previous state was ended
+<b class="nc">&nbsp;								errors.rejectValue(&quot;states&quot;, &quot;PatientProgram.error.foundOverlappingStates&quot;, new Object[] {</b>
+<b class="nc">&nbsp;								        patientState.getStartDate(), latestState.getEndDate() }, null);</b>
+&nbsp;								return;
+&nbsp;							}
+<b class="fc">&nbsp;							latestState = patientState;</b>
+<b class="fc">&nbsp;						} else if (patientState.compareTo(latestState) &lt; 0) {</b>
+&nbsp;							//patient should have already left this state since it is older
+<b class="fc">&nbsp;							if (patientState.getEndDate() == null) {</b>
+<b class="nc">&nbsp;								errors.rejectValue(&quot;states&quot;, &quot;PatientProgram.error.cannotBeInMultipleStates&quot;);</b>
+&nbsp;								return;
+<b class="fc">&nbsp;							} else if (OpenmrsUtil.compareWithNullAsEarliest(latestState.getStartDate(), patientState</b>
+<b class="fc">&nbsp;							        .getEndDate()) &lt; 0) {</b>
+&nbsp;								//latest state was started before a previous state was ended
+<b class="fc">&nbsp;								errors.rejectValue(&quot;states&quot;, &quot;PatientProgram.error.foundOverlappingStates&quot;);</b>
+&nbsp;								return;
+&nbsp;							}
+&nbsp;						}
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					statesAndStartDates.add(patientState.getState().getUuid() + &quot;&quot; + patientState.getStartDate());</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;voidReason&quot;);</b>
+&nbsp;		//
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

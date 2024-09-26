@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SchedulerDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler.db</a>
+</div>
+
+<h1>Coverage Summary for Class: SchedulerDAO (org.openmrs.scheduler.db)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SchedulerDAO</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler.db;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.scheduler.TaskDefinition;
+&nbsp;
+&nbsp;/**
+&nbsp; * Scheduler-related database methods.
+&nbsp; * 
+&nbsp; * @version 1.0
+&nbsp; */
+&nbsp;public interface SchedulerDAO {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Creates a new task.
+&nbsp;	 * 
+&nbsp;	 * @param taskDefinition task to be created
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void createTask(TaskDefinition taskDefinition) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get task by internal identifier
+&nbsp;	 * 
+&nbsp;	 * @param taskId internal task identifier
+&nbsp;	 * @return task with given internal identifier
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public TaskDefinition getTask(Integer taskId) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.scheduler.SchedulerService#getTaskByUuid(java.lang.String)
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public TaskDefinition getTaskByUuid(String uuid) throws DAOException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Update task
+&nbsp;	 * 
+&nbsp;	 * @param task to be updated
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void updateTask(TaskDefinition task) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all tasks in the database
+&nbsp;	 * 
+&nbsp;	 * @return &lt;code&gt;List&amp;lt;TaskDefinition&amp;gt;&lt;/code&gt; of all tasks
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public List&lt;TaskDefinition&gt; getTasks() throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete task from database.
+&nbsp;	 * 
+&nbsp;	 * @param task task to be deleted
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteTask(TaskDefinition task) throws DAOException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Delete task from database.
+&nbsp;	 * 
+&nbsp;	 * @param taskId identifier of task to be deleted
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public void deleteTask(Integer taskId) throws DAOException;
+&nbsp;	
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get task by public name.
+&nbsp;	 * 
+&nbsp;	 * @param name public task name
+&nbsp;	 * @return task with given public name
+&nbsp;	 * @throws DAOException
+&nbsp;	 */
+&nbsp;	public TaskDefinition getTaskByName(String name) throws DAOException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

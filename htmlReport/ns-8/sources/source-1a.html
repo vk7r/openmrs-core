@@ -1,0 +1,614 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HibernateProgramWorkflowDAO</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.db.hibernate</a>
+</div>
+
+<h1>Coverage Summary for Class: HibernateProgramWorkflowDAO (org.openmrs.api.db.hibernate)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HibernateProgramWorkflowDAO</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,9%
+  </span>
+  <span class="absValue">
+    (34/37)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    79,3%
+  </span>
+  <span class="absValue">
+    (119/150)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.db.hibernate;
+&nbsp;
+&nbsp;import javax.persistence.Query;
+&nbsp;import javax.persistence.criteria.CriteriaBuilder;
+&nbsp;import javax.persistence.criteria.CriteriaQuery;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import javax.persistence.criteria.Root;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;
+&nbsp;import org.hibernate.Session;
+&nbsp;import org.hibernate.SessionFactory;
+&nbsp;import org.hibernate.FlushMode;
+&nbsp;import org.hibernate.type.StandardBasicTypes;
+&nbsp;import org.openmrs.Cohort;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.ConceptStateConversion;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.PatientProgramAttribute;
+&nbsp;import org.openmrs.PatientState;
+&nbsp;import org.openmrs.Program;
+&nbsp;import org.openmrs.ProgramAttributeType;
+&nbsp;import org.openmrs.ProgramWorkflow;
+&nbsp;import org.openmrs.ProgramWorkflowState;
+&nbsp;import org.openmrs.api.db.DAOException;
+&nbsp;import org.openmrs.api.db.ProgramWorkflowDAO;
+&nbsp;import org.openmrs.customdatatype.CustomDatatypeUtil;
+&nbsp;
+&nbsp;/**
+&nbsp; * Hibernate specific ProgramWorkflow related functions.&lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This class should not be used directly. All calls should go through the
+&nbsp; * {@link org.openmrs.api.ProgramWorkflowService} methods.
+&nbsp; *
+&nbsp; * @see org.openmrs.api.db.ProgramWorkflowDAO
+&nbsp; * @see org.openmrs.api.ProgramWorkflowService
+&nbsp; */
+&nbsp;public class HibernateProgramWorkflowDAO implements ProgramWorkflowDAO {
+&nbsp;	
+&nbsp;	private SessionFactory sessionFactory;
+&nbsp;	
+<b class="fc">&nbsp;	public HibernateProgramWorkflowDAO() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Hibernate Session Factory
+&nbsp;	 *
+&nbsp;	 * @param sessionFactory
+&nbsp;	 */
+&nbsp;	public void setSessionFactory(SessionFactory sessionFactory) {
+<b class="fc">&nbsp;		this.sessionFactory = sessionFactory;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PROGRAM
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#saveProgram(org.openmrs.Program)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Program saveProgram(Program program) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(program);</b>
+<b class="fc">&nbsp;		return program;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgram(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Program getProgram(Integer programId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(Program.class, programId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getAllPrograms(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Program&gt; getAllPrograms(boolean includeRetired) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Program&gt; cq = cb.createQuery(Program.class);</b>
+<b class="fc">&nbsp;		Root&lt;Program&gt; root = cq.from(Program.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="nc">&nbsp;			cq.where(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramsByName(String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Program&gt; getProgramsByName(String programName, boolean includeRetired) {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Program&gt; cq = cb.createQuery(Program.class);</b>
+<b class="fc">&nbsp;		Root&lt;Program&gt; root = cq.from(Program.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		predicates.add(cb.equal(root.get(&quot;name&quot;), programName));</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!includeRetired) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;retired&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.and(predicates.toArray(new Predicate[]{})));</b>
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#findPrograms(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Program&gt; findPrograms(String nameFragment) throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;Program&gt; cq = cb.createQuery(Program.class);</b>
+<b class="fc">&nbsp;		Root&lt;Program&gt; root = cq.from(Program.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		Predicate nameLike = cb.like(cb.lower(root.get(&quot;name&quot;)), MatchMode.ANYWHERE.toLowerCasePattern(nameFragment));</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(nameLike).orderBy(cb.asc(root.get(&quot;name&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#deleteProgram(org.openmrs.Program)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteProgram(Program program) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(program);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// **************************
+&nbsp;	// PATIENT PROGRAM
+&nbsp;	// **************************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#savePatientProgram(org.openmrs.PatientProgram)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientProgram savePatientProgram(PatientProgram patientProgram) throws DAOException {
+<b class="fc">&nbsp;                CustomDatatypeUtil.saveAttributesIfNecessary(patientProgram);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (patientProgram.getPatientProgramId() == null) {</b>
+<b class="fc">&nbsp;			sessionFactory.getCurrentSession().save(patientProgram);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			sessionFactory.getCurrentSession().merge(patientProgram);</b>
+&nbsp;		}
+&nbsp;                
+<b class="fc">&nbsp;		return patientProgram;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getPatientProgram(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientProgram getPatientProgram(Integer patientProgramId) throws DAOException {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(PatientProgram.class, patientProgramId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getPatientPrograms(Patient, Program, Date, Date,
+&nbsp;	 *      Date, Date, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Patient patient, Program program, Date minEnrollmentDate,
+&nbsp;												   Date maxEnrollmentDate, Date minCompletionDate, Date maxCompletionDate, boolean includeVoided)
+&nbsp;		throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;PatientProgram&gt; cq = cb.createQuery(PatientProgram.class);</b>
+<b class="fc">&nbsp;		Root&lt;PatientProgram&gt; root = cq.from(PatientProgram.class);</b>
+&nbsp;		
+<b class="fc">&nbsp;		List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (patient != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.equal(root.get(&quot;patient&quot;), patient));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (program != null) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.equal(root.get(&quot;program&quot;), program));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (minEnrollmentDate != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.greaterThanOrEqualTo(root.get(&quot;dateEnrolled&quot;), minEnrollmentDate));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (maxEnrollmentDate != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.lessThanOrEqualTo(root.get(&quot;dateEnrolled&quot;), maxEnrollmentDate));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (minCompletionDate != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.or(</b>
+<b class="nc">&nbsp;				cb.isNull(root.get(&quot;dateCompleted&quot;)),</b>
+<b class="nc">&nbsp;				cb.greaterThanOrEqualTo(root.get(&quot;dateCompleted&quot;), minCompletionDate)</b>
+&nbsp;			));
+&nbsp;		}
+<b class="fc">&nbsp;		if (maxCompletionDate != null) {</b>
+<b class="nc">&nbsp;			predicates.add(cb.lessThanOrEqualTo(root.get(&quot;dateCompleted&quot;), maxCompletionDate));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (!includeVoided) {</b>
+<b class="fc">&nbsp;			predicates.add(cb.isFalse(root.get(&quot;voided&quot;)));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.and(predicates.toArray(new Predicate[]{})))</b>
+<b class="fc">&nbsp;			.orderBy(cb.asc(root.get(&quot;dateEnrolled&quot;)));</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getPatientPrograms(org.openmrs.Cohort,
+&nbsp;	 *      java.util.Collection)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	public List&lt;PatientProgram&gt; getPatientPrograms(Cohort cohort, Collection&lt;Program&gt; programs) {
+<b class="fc">&nbsp;		String hql = &quot;from PatientProgram &quot;;</b>
+<b class="fc">&nbsp;		if (cohort != null || programs != null) {</b>
+<b class="fc">&nbsp;			hql += &quot;where &quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (cohort != null) {</b>
+<b class="fc">&nbsp;			hql += &quot;patient.patientId in (:patientIds) &quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (programs != null) {</b>
+<b class="fc">&nbsp;			if (cohort != null) {</b>
+<b class="fc">&nbsp;				hql += &quot;and &quot;;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			hql += &quot; program in (:programs)&quot;;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		hql += &quot; order by patient.patientId, dateEnrolled&quot;;</b>
+<b class="fc">&nbsp;		Query query = sessionFactory.getCurrentSession().createQuery(hql);</b>
+<b class="fc">&nbsp;		if (cohort != null) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;patientIds&quot;, cohort.getMemberIds());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (programs != null) {</b>
+<b class="fc">&nbsp;			query.setParameter(&quot;programs&quot;, programs);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return query.getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#deletePatientProgram(org.openmrs.PatientProgram)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deletePatientProgram(PatientProgram patientProgram) throws DAOException {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(patientProgram);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#saveConceptStateConversion(org.openmrs.ConceptStateConversion)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptStateConversion saveConceptStateConversion(ConceptStateConversion csc) throws DAOException {
+<b class="fc">&nbsp;		if (csc.getConceptStateConversionId() == null) {</b>
+<b class="fc">&nbsp;			sessionFactory.getCurrentSession().save(csc);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			sessionFactory.getCurrentSession().merge(csc);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return csc;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getAllConceptStateConversions()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;ConceptStateConversion&gt; getAllConceptStateConversions() throws DAOException {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;ConceptStateConversion&gt; cq = cb.createQuery(ConceptStateConversion.class);</b>
+<b class="fc">&nbsp;		cq.from(ConceptStateConversion.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getConceptStateConversion(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptStateConversion getConceptStateConversion(Integer conceptStateConversionId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(ConceptStateConversion.class,</b>
+&nbsp;		    conceptStateConversionId);
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#deleteConceptStateConversion(org.openmrs.ConceptStateConversion)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void deleteConceptStateConversion(ConceptStateConversion csc) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(csc);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getConceptStateConversion(org.openmrs.ProgramWorkflow,
+&nbsp;	 *      org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptStateConversion getConceptStateConversion(ProgramWorkflow workflow, Concept trigger) {
+<b class="fc">&nbsp;		if (workflow == null || trigger == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;ConceptStateConversion&gt; cq = cb.createQuery(ConceptStateConversion.class);</b>
+<b class="fc">&nbsp;		Root&lt;ConceptStateConversion&gt; root = cq.from(ConceptStateConversion.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		cq.where(cb.and(</b>
+<b class="fc">&nbsp;			cb.equal(root.get(&quot;programWorkflow&quot;), workflow),</b>
+<b class="fc">&nbsp;			cb.equal(root.get(&quot;concept&quot;), trigger)</b>
+&nbsp;		));
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).uniqueResult();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getConceptStateConversionByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ConceptStateConversion getConceptStateConversionByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, ConceptStateConversion.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getPatientProgramByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientProgram getPatientProgramByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, PatientProgram.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Program getProgramByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, Program.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getState(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProgramWorkflowState getState(Integer stateId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(ProgramWorkflowState.class, stateId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getStateByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProgramWorkflowState getStateByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, ProgramWorkflowState.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public PatientState getPatientStateByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, PatientState.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getWorkflow(Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProgramWorkflow getWorkflow(Integer workflowId) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(ProgramWorkflow.class, workflowId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getWorkflowByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ProgramWorkflow getWorkflowByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, ProgramWorkflow.class, uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;Program&gt; getProgramsByConcept(Concept concept) {
+<b class="fc">&nbsp;		String pq = &quot;select distinct p from Program p where p.concept = :concept&quot;;</b>
+<b class="fc">&nbsp;		Query pquery = sessionFactory.getCurrentSession().createQuery(pq);</b>
+<b class="fc">&nbsp;		pquery.setParameter(&quot;concept&quot;, concept);</b>
+<b class="fc">&nbsp;		return pquery.getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramWorkflowsByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;ProgramWorkflow&gt; getProgramWorkflowsByConcept(Concept concept) {
+<b class="fc">&nbsp;		String wq = &quot;select distinct w from ProgramWorkflow w where w.concept = :concept&quot;;</b>
+<b class="fc">&nbsp;		Query wquery = sessionFactory.getCurrentSession().createQuery(wq);</b>
+<b class="fc">&nbsp;		wquery.setParameter(&quot;concept&quot;, concept);</b>
+<b class="fc">&nbsp;		return wquery.getResultList();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramWorkflowStatesByConcept(org.openmrs.Concept)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public List&lt;ProgramWorkflowState&gt; getProgramWorkflowStatesByConcept(Concept concept) {
+<b class="fc">&nbsp;		String sq = &quot;select distinct s from ProgramWorkflowState s where s.concept = :concept&quot;;</b>
+<b class="fc">&nbsp;		Query squery = sessionFactory.getCurrentSession().createQuery(sq);</b>
+<b class="fc">&nbsp;		squery.setParameter(&quot;concept&quot;, concept);</b>
+<b class="fc">&nbsp;		return squery.getResultList();</b>
+&nbsp;	}
+&nbsp;        
+&nbsp;	@Override
+&nbsp;	public List&lt;ProgramAttributeType&gt; getAllProgramAttributeTypes() {
+<b class="fc">&nbsp;		Session session = sessionFactory.getCurrentSession();</b>
+<b class="fc">&nbsp;		CriteriaBuilder cb = session.getCriteriaBuilder();</b>
+<b class="fc">&nbsp;		CriteriaQuery&lt;ProgramAttributeType&gt; cq = cb.createQuery(ProgramAttributeType.class);</b>
+<b class="fc">&nbsp;		cq.from(ProgramAttributeType.class);</b>
+&nbsp;
+<b class="fc">&nbsp;		return session.createQuery(cq).getResultList();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public ProgramAttributeType getProgramAttributeType(Integer id) {
+<b class="fc">&nbsp;		return sessionFactory.getCurrentSession().get(ProgramAttributeType.class, id);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public ProgramAttributeType getProgramAttributeTypeByUuid(String uuid) {
+<b class="fc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, ProgramAttributeType.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public ProgramAttributeType saveProgramAttributeType(ProgramAttributeType programAttributeType) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().saveOrUpdate(programAttributeType);</b>
+<b class="fc">&nbsp;		return programAttributeType;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public PatientProgramAttribute getPatientProgramAttributeByUuid(String uuid) {
+<b class="nc">&nbsp;		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, PatientProgramAttribute.class, uuid);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void purgeProgramAttributeType(ProgramAttributeType type) {
+<b class="fc">&nbsp;		sessionFactory.getCurrentSession().delete(type);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public List&lt;PatientProgram&gt; getPatientProgramByAttributeNameAndValue(String attributeName, String attributeValue) {
+<b class="nc">&nbsp;		FlushMode flushMode = sessionFactory.getCurrentSession().getHibernateFlushMode();</b>
+<b class="nc">&nbsp;		sessionFactory.getCurrentSession().setHibernateFlushMode(FlushMode.MANUAL);</b>
+&nbsp;		Query query;
+&nbsp;		try {
+<b class="nc">&nbsp;			query = sessionFactory.getCurrentSession().createQuery(</b>
+&nbsp;					&quot;SELECT pp FROM patient_program pp &quot; +
+&nbsp;							&quot;INNER JOIN pp.attributes attr &quot; +
+&nbsp;							&quot;INNER JOIN attr.attributeType attr_type &quot; +
+&nbsp;							&quot;WHERE attr.valueReference = :attributeValue &quot; +
+&nbsp;							&quot;AND attr_type.name = :attributeName &quot; +
+&nbsp;							&quot;AND pp.voided = 0&quot;)
+<b class="nc">&nbsp;					.setParameter(&quot;attributeName&quot;, attributeName)</b>
+<b class="nc">&nbsp;					.setParameter(&quot;attributeValue&quot;, attributeValue);</b>
+<b class="nc">&nbsp;			return query.getResultList();</b>
+&nbsp;		} finally {
+<b class="nc">&nbsp;			sessionFactory.getCurrentSession().setHibernateFlushMode(flushMode);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Map&lt;Object, Object&gt; getPatientProgramAttributeByAttributeName(List&lt;Integer&gt; patientIds, String attributeName) {
+<b class="nc">&nbsp;		Map&lt;Object, Object&gt; patientProgramAttributes = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;		if (patientIds.isEmpty() || attributeName == null) {</b>
+<b class="nc">&nbsp;			return patientProgramAttributes;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		String commaSeperatedPatientIds = StringUtils.join(patientIds, &quot;,&quot;);</b>
+<b class="nc">&nbsp;		List&lt;Object&gt; list = sessionFactory.getCurrentSession().createSQLQuery(</b>
+&nbsp;				&quot;SELECT p.patient_id as person_id, &quot; +
+&nbsp;						&quot; concat(&#39;{&#39;,group_concat(DISTINCT (coalesce(concat(&#39;\&quot;&#39;,ppt.name,&#39;\&quot;:\&quot;&#39;, COALESCE (cn.name, ppa.value_reference),&#39;\&quot;&#39;))) SEPARATOR &#39;,&#39;),&#39;}&#39;) AS patientProgramAttributeValue  &quot; +
+&nbsp;						&quot; from patient p &quot; +
+&nbsp;						&quot; join patient_program pp on p.patient_id = pp.patient_id and p.patient_id in (&quot; + commaSeperatedPatientIds + &quot;)&quot; +
+&nbsp;						&quot; join patient_program_attribute ppa on pp.patient_program_id = ppa.patient_program_id and ppa.voided=0&quot; +
+&nbsp;						&quot; join program_attribute_type ppt on ppa.attribute_type_id = ppt.program_attribute_type_id and ppt.name =&#39;&quot; + attributeName + &quot;&#39; &quot;+
+&nbsp;						&quot; LEFT OUTER JOIN concept_name cn on ppa.value_reference = cn.concept_id and cn.concept_name_type= &#39;FULLY_SPECIFIED&#39; and cn.voided=0 and ppt.datatype like &#39;%ConceptDataType%&#39;&quot; +
+&nbsp;						&quot; group by p.patient_id&quot;)
+<b class="nc">&nbsp;				.addScalar(&quot;person_id&quot;, StandardBasicTypes.INTEGER)</b>
+<b class="nc">&nbsp;				.addScalar(&quot;patientProgramAttributeValue&quot;, StandardBasicTypes.STRING)</b>
+<b class="nc">&nbsp;				.list();</b>
+&nbsp;
+<b class="nc">&nbsp;		for (Object o : list) {</b>
+<b class="nc">&nbsp;			Object[] arr = (Object[]) o;</b>
+<b class="nc">&nbsp;			patientProgramAttributes.put(arr[0], arr[1]);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;
+<b class="nc">&nbsp;		return patientProgramAttributes;</b>
+&nbsp;
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

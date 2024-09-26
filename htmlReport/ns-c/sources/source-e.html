@@ -1,0 +1,238 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OpenmrsObjectSaveHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.handler</a>
+</div>
+
+<h1>Coverage Summary for Class: OpenmrsObjectSaveHandler (org.openmrs.api.handler)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OpenmrsObjectSaveHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (27/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.handler;
+&nbsp;
+&nbsp;import java.beans.PropertyDescriptor;
+&nbsp;import java.lang.reflect.InvocationTargetException;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import org.apache.commons.beanutils.PropertyUtils;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.OpenmrsObject;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.Voidable;
+&nbsp;import org.openmrs.annotation.AllowEmptyStrings;
+&nbsp;import org.openmrs.annotation.AllowLeadingOrTrailingWhitespace;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.aop.RequiredDataAdvice;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class deals with any object that implements {@link OpenmrsObject}. When an
+&nbsp; * {@link OpenmrsObject} is saved (via a save* method in a service), this handler is automatically
+&nbsp; * called by the {@link RequiredDataAdvice} AOP class. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * This class sets the uuid property on the given OpenmrsObject to a randomly generated &lt;a
+&nbsp; * href=&quot;http://wikipedia.org/wiki/UUID&quot;&gt;UUID&lt;/a&gt; if it is non-null.
+&nbsp; *
+&nbsp; * @see RequiredDataHandler
+&nbsp; * @see SaveHandler
+&nbsp; * @since 1.5
+&nbsp; */
+&nbsp;@Handler(supports = OpenmrsObject.class)
+<b class="fc">&nbsp;public class OpenmrsObjectSaveHandler implements SaveHandler&lt;OpenmrsObject&gt; {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(OpenmrsObjectSaveHandler.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This sets the uuid property on the given OpenmrsObject if it is non-null.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.api.handler.RequiredDataHandler#handle(org.openmrs.OpenmrsObject,
+&nbsp;	 *      org.openmrs.User, java.util.Date, java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set empty string properties to null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not set empty string properties to null for AllowEmptyStrings annotation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not trim empty strings for AllowLeadingOrTrailingWhitespace annotation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; trim strings without AllowLeadingOrTrailingWhitespace annotation
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; trim empty strings for AllowEmptyStrings annotation
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void handle(OpenmrsObject openmrsObject, User creator, Date dateCreated, String reason) {
+<b class="fc">&nbsp;		if (openmrsObject.getUuid() == null) {</b>
+<b class="fc">&nbsp;			openmrsObject.setUuid(UUID.randomUUID().toString());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//Set all empty string properties, that do not have the AllowEmptyStrings annotation, to null.
+&nbsp;		//And also trim leading and trailing white space for properties that do not have the
+&nbsp;		//AllowLeadingOrTrailingWhitespace annotation.
+<b class="fc">&nbsp;		PropertyDescriptor[] properties = PropertyUtils.getPropertyDescriptors(openmrsObject);</b>
+<b class="fc">&nbsp;		for (PropertyDescriptor property : properties) {</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (property.getPropertyType() == null) {</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// Ignore properties that don&#39;t have a getter (e.g. GlobalProperty.valueReferenceInternal) or
+&nbsp;			// don&#39;t have a setter (e.g. Patient.familyName)
+<b class="fc">&nbsp;			if (property.getWriteMethod() == null || property.getReadMethod() == null) {</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			// Ignore properties that have a deprecated getter or setter
+<b class="fc">&nbsp;			if (property.getWriteMethod().getAnnotation(Deprecated.class) != null</b>
+<b class="fc">&nbsp;			        || property.getReadMethod().getAnnotation(Deprecated.class) != null) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			//We are dealing with only strings
+&nbsp;            //TODO We shouldn&#39;t be doing this for all immutable types and fields
+<b class="fc">&nbsp;			if (openmrsObject instanceof Obs ||!property.getPropertyType().equals(String.class)) {</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;			try {
+<b class="fc">&nbsp;				Object value = PropertyUtils.getProperty(openmrsObject, property.getName());</b>
+<b class="fc">&nbsp;				if (value == null) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				Object valueBeforeTrim = value;</b>
+<b class="fc">&nbsp;				if (property.getWriteMethod().getAnnotation(AllowLeadingOrTrailingWhitespace.class) == null) {</b>
+<b class="fc">&nbsp;					value = ((String) value).trim();</b>
+&nbsp;					
+&nbsp;					//If we have actually trimmed any space, set the trimmed value.
+<b class="fc">&nbsp;					if (!valueBeforeTrim.equals(value)) {</b>
+<b class="fc">&nbsp;						PropertyUtils.setProperty(openmrsObject, property.getName(), value);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;				
+&nbsp;				//Check if user is interested in setting empty strings to null
+<b class="fc">&nbsp;				if (property.getWriteMethod().getAnnotation(AllowEmptyStrings.class) != null) {</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				
+<b class="fc">&nbsp;				if (&quot;&quot;.equals(value) &amp;&amp; !(openmrsObject instanceof Voidable &amp;&amp; ((Voidable) openmrsObject).getVoided())) {</b>
+&nbsp;					//Set to null only if object is not already voided
+<b class="fc">&nbsp;					PropertyUtils.setProperty(openmrsObject, property.getName(), null);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (UnsupportedOperationException ex) {</b>
+&nbsp;				// there is no need to log this. These should be (mostly) silently skipped over 
+<b class="nc">&nbsp;				if (log.isInfoEnabled()) {</b>
+<b class="nc">&nbsp;					log.info(&quot;The property &quot; + property.getName() + &quot; is no longer supported and should be ignored.&quot;, ex);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (InvocationTargetException ex) {</b>
+<b class="nc">&nbsp;				if (log.isWarnEnabled()) {</b>
+<b class="nc">&nbsp;					log.warn(&quot;Failed to access property &quot; + property.getName() + &quot;; accessor threw exception.&quot;, ex);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;			catch (Exception ex) {</b>
+<b class="nc">&nbsp;				throw new APIException(&quot;failed.change.property.value&quot;, new Object[] { property.getName() }, ex);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,363 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptAnswer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptAnswer (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptAnswer</td>
+<td class="coverageStat">
+  <span class="percent">
+    76%
+  </span>
+  <span class="absValue">
+    (19/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68,6%
+  </span>
+  <span class="absValue">
+    (24/35)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptAnswer$HibernateProxy$33oVyVzq</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    76%
+  </span>
+  <span class="absValue">
+    (19/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68,6%
+  </span>
+  <span class="absValue">
+    (24/35)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class represents one option for an answer to a question type of {@link Concept}. The link to
+&nbsp; * the parent question Concept is stored in {@link #getConcept()} and the answer this object is
+&nbsp; * representing is stored in {@link #getAnswerConcept()}.
+&nbsp; *
+&nbsp; * @see Concept#getAnswers()
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptAnswer extends BaseOpenmrsObject implements Auditable, java.io.Serializable, Comparable&lt;ConceptAnswer&gt; {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 3744L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	private Integer conceptAnswerId;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The question concept that this object is answering
+&nbsp;	 */
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The answer to the question
+&nbsp;	 */
+&nbsp;	private Concept answerConcept;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * The {@link Drug} answer to the question. This can be null if this does not represent a drug
+&nbsp;	 * type of answer
+&nbsp;	 */
+&nbsp;	private Drug answerDrug;
+&nbsp;	
+&nbsp;	private User creator;
+&nbsp;	
+&nbsp;	private Date dateCreated;
+&nbsp;	
+&nbsp;	private Double sortWeight;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public ConceptAnswer() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** constructor with id */
+<b class="fc">&nbsp;	public ConceptAnswer(Integer conceptAnswerId) {</b>
+<b class="fc">&nbsp;		this.conceptAnswerId = conceptAnswerId;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public ConceptAnswer(Concept answerConcept) {</b>
+<b class="fc">&nbsp;		this.answerConcept = answerConcept;</b>
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	public ConceptAnswer(Concept answerConcept, Drug d) {</b>
+<b class="nc">&nbsp;		this.answerConcept = answerConcept;</b>
+<b class="nc">&nbsp;		this.answerDrug = d;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the answerConcept.
+&nbsp;	 */
+&nbsp;	public Concept getAnswerConcept() {
+<b class="fc">&nbsp;		return answerConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param answerConcept The answerConcept to set.
+&nbsp;	 */
+&nbsp;	public void setAnswerConcept(Concept answerConcept) {
+<b class="fc">&nbsp;		this.answerConcept = answerConcept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the answerDrug.
+&nbsp;	 */
+&nbsp;	public Drug getAnswerDrug() {
+<b class="fc">&nbsp;		return answerDrug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param answerDrug The answerDrug to set.
+&nbsp;	 */
+&nbsp;	public void setAnswerDrug(Drug answerDrug) {
+<b class="fc">&nbsp;		this.answerDrug = answerDrug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the concept.
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept The concept to set.
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptAnswerId.
+&nbsp;	 */
+&nbsp;	public Integer getConceptAnswerId() {
+<b class="fc">&nbsp;		return conceptAnswerId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptAnswerId The conceptAnswerId to set.
+&nbsp;	 */
+&nbsp;	public void setConceptAnswerId(Integer conceptAnswerId) {
+<b class="fc">&nbsp;		this.conceptAnswerId = conceptAnswerId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the creator.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getCreator() {
+<b class="fc">&nbsp;		return creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param creator The creator to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setCreator(User creator) {
+<b class="fc">&nbsp;		this.creator = creator;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the dateCreated.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateCreated() {
+<b class="fc">&nbsp;		return dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param dateCreated The dateCreated to set.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateCreated(Date dateCreated) {
+<b class="fc">&nbsp;		this.dateCreated = dateCreated;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptAnswerId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptAnswerId(id);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used. Always returns null.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.Auditable#getChangedBy()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public User getChangedBy() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used. Always returns null.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.Auditable#getDateChanged()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Date getDateChanged() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.Auditable#setChangedBy(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setChangedBy(User changedBy) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Not currently used.
+&nbsp;	 *
+&nbsp;	 * @see org.openmrs.Auditable#setDateChanged(java.util.Date)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setDateChanged(Date dateChanged) {
+<b class="nc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the sortWeight.
+&nbsp;	 */
+&nbsp;	public Double getSortWeight() {
+<b class="fc">&nbsp;		return sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param sortWeight The sortWeight to set.
+&nbsp;	 */
+&nbsp;	public void setSortWeight(Double sortWeight) {
+<b class="fc">&nbsp;		this.sortWeight = sortWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+&nbsp;	 * Note: this comparator imposes orderings that are inconsistent with equals.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;squid:S1210&quot;)
+&nbsp;	public int compareTo(ConceptAnswer ca) {
+<b class="fc">&nbsp;		if ((getSortWeight() == null) &amp;&amp; (ca.getSortWeight() != null)) {</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if ((getSortWeight() != null) &amp;&amp; (ca.getSortWeight() == null)) {</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if ((getSortWeight() == null) &amp;&amp; (ca.getSortWeight() == null)) {</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return (getSortWeight() &lt; ca.getSortWeight()) ? -1 : (getSortWeight() &gt; ca.getSortWeight()) ? 1 : 0;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

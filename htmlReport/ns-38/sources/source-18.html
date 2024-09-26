@@ -1,0 +1,184 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FieldValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.validator</a>
+</div>
+
+<h1>Coverage Summary for Class: FieldValidator (org.openmrs.validator)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FieldValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.validator;
+&nbsp;
+&nbsp;import org.openmrs.Field;
+&nbsp;import org.openmrs.annotation.Handler;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.validation.Errors;
+&nbsp;import org.springframework.validation.ValidationUtils;
+&nbsp;import org.springframework.validation.Validator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Validator for {@link Field} class
+&nbsp; *
+&nbsp; * @since 1.10
+&nbsp; */
+&nbsp;@Handler(supports = { Field.class }, order = 50)
+<b class="fc">&nbsp;public class FieldValidator implements Validator {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(FieldValidator.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns whether or not this validator supports validating a given class.
+&nbsp;	 *
+&nbsp;	 * @param c The class to check for support.
+&nbsp;	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean supports(Class&lt;?&gt; c) {
+<b class="fc">&nbsp;		log.debug(&quot;{}.supports: {}&quot;, this.getClass().getName(), c.getName());</b>
+<b class="fc">&nbsp;		return Field.class.isAssignableFrom(c);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Validates the given Field. 
+&nbsp;	 * Ensures that the field name is present and valid
+&nbsp;	 *
+&nbsp;	 * @param obj The Field to validate.
+&nbsp;	 * @param errors Errors
+&nbsp;	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+&nbsp;	 *      org.springframework.validation.Errors)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if field name is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if field name is empty
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if field name is all whitespace
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if selectMultiple is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if retired is null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass if name is ok and fieldType, selectMultiple, and retired are non-null
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; pass validation if field lengths are correct
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail validation if field lengths are not correct
+&nbsp;	 * should not fail if fieldType is null
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void validate(Object obj, Errors errors) throws APIException {
+<b class="fc">&nbsp;		log.debug(&quot;{}.validate...&quot;, this.getClass().getName());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (obj == null || !(obj instanceof Field)) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;The parameter obj should not be null and must be of type &quot; + Field.class);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Field field = (Field) obj;</b>
+&nbsp;		
+<b class="fc">&nbsp;		ValidationUtils.rejectIfEmptyOrWhitespace(errors, &quot;name&quot;, &quot;error.null&quot;, &quot;Field name is required&quot;);</b>
+<b class="fc">&nbsp;		if (field.getSelectMultiple() == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;selectMultiple&quot;, &quot;error.general&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (field.getRetired() == null) {</b>
+<b class="fc">&nbsp;			errors.rejectValue(&quot;retired&quot;, &quot;error.general&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		ValidateUtil.validateFieldLengths(errors, obj.getClass(), &quot;name&quot;, &quot;tableName&quot;, &quot;attributeName&quot;, &quot;retireReason&quot;);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,303 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrderType</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: OrderType (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrderType</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,2%
+  </span>
+  <span class="absValue">
+    (13/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,4%
+  </span>
+  <span class="absValue">
+    (17/26)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OrderType$HibernateProxy$jNb7TFdk</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    81,2%
+  </span>
+  <span class="absValue">
+    (13/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,4%
+  </span>
+  <span class="absValue">
+    (17/26)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;import org.openmrs.annotation.Independent;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;
+&nbsp;/**
+&nbsp; * OrderTypes are used to classify different types of Orders e.g to distinguish between Serology and
+&nbsp; * Radiology TestOrders
+&nbsp; *
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class OrderType extends BaseChangeableOpenmrsMetadata {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 23232L;
+&nbsp;	
+&nbsp;	public static final String DRUG_ORDER_TYPE_UUID = &quot;131168f4-15f5-102d-96e4-000c29c2a5d7&quot;;
+&nbsp;	
+&nbsp;	public static final String TEST_ORDER_TYPE_UUID = &quot;52a447d3-a64a-11e3-9aeb-50e549534c5e&quot;;
+&nbsp;	
+&nbsp;	public static final String REFERRAL_ORDER_TYPE_UUID = &quot;f1b63696-2b6c-11ec-8d3d-0242ac130003&quot;;
+&nbsp;	
+&nbsp;	private Integer orderTypeId;
+&nbsp;	
+&nbsp;	private String javaClassName;
+&nbsp;	
+&nbsp;	private OrderType parent;
+&nbsp;	
+&nbsp;	@Independent
+&nbsp;	private Collection&lt;ConceptClass&gt; conceptClasses;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public OrderType() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Constructor with ID
+&nbsp;	 * 
+&nbsp;	 * @param orderTypeId the ID of the {@link org.openmrs.OrderType}
+&nbsp;	 */
+<b class="nc">&nbsp;	public OrderType(Integer orderTypeId) {</b>
+<b class="nc">&nbsp;		this.orderTypeId = orderTypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor that takes in the elements required to save this OrderType to the
+&nbsp;	 * database
+&nbsp;	 * 
+&nbsp;	 * @param name The name of this order Type
+&nbsp;	 * @param description A short description about this order type
+&nbsp;	 * @param javaClassName The fully qualified java class name
+&nbsp;	 */
+<b class="nc">&nbsp;	public OrderType(String name, String description, String javaClassName) {</b>
+<b class="nc">&nbsp;		setName(name);</b>
+<b class="nc">&nbsp;		setDescription(description);</b>
+<b class="nc">&nbsp;		setJavaClassName(javaClassName);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the orderTypeId.
+&nbsp;	 */
+&nbsp;	public Integer getOrderTypeId() {
+<b class="fc">&nbsp;		return orderTypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param orderTypeId The orderTypeId to set.
+&nbsp;	 */
+&nbsp;	public void setOrderTypeId(Integer orderTypeId) {
+<b class="fc">&nbsp;		this.orderTypeId = orderTypeId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getOrderTypeId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setOrderTypeId(id);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the Java className as String
+&nbsp;	 */
+&nbsp;	public String getJavaClassName() {
+<b class="fc">&nbsp;		return javaClassName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param javaClassName The Java class to set as String
+&nbsp;	 */
+&nbsp;	public void setJavaClassName(String javaClassName) {
+<b class="fc">&nbsp;		this.javaClassName = javaClassName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the {@link org.openmrs.OrderType}
+&nbsp;	 */
+&nbsp;	public OrderType getParent() {
+<b class="fc">&nbsp;		return parent;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param parent The {@link org.openmrs.OrderType} to set
+&nbsp;	 */
+&nbsp;	public void setParent(OrderType parent) {
+<b class="fc">&nbsp;		this.parent = parent;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Get the {@link org.openmrs.ConceptClass}es
+&nbsp;	 */
+&nbsp;	public Collection&lt;ConceptClass&gt; getConceptClasses() {
+<b class="fc">&nbsp;		if (conceptClasses == null) {</b>
+<b class="fc">&nbsp;			conceptClasses = new LinkedHashSet&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return conceptClasses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptClasses the collection containing the {@link org.openmrs.ConceptClass}es
+&nbsp;	 */
+&nbsp;	public void setConceptClasses(Collection&lt;ConceptClass&gt; conceptClasses) {
+<b class="fc">&nbsp;		this.conceptClasses = conceptClasses;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that returns a {@link java.lang.Class} object for the associated
+&nbsp;	 * javaClassName
+&nbsp;	 * 
+&nbsp;	 * @return The Java class as {@link java.lang.Class}
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	public Class getJavaClass() {
+&nbsp;		try {
+<b class="fc">&nbsp;			return Context.loadClass(javaClassName);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassNotFoundException e) {</b>
+&nbsp;			//re throw as a runtime exception
+<b class="nc">&nbsp;			throw new APIException(&quot;OrderType.failed.load.class&quot;, new Object[] { javaClassName }, e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience method that adds the specified concept class
+&nbsp;	 * 
+&nbsp;	 * @param conceptClass the ConceptClass to add
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add the specified concept class
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not add a duplicate concept class
+&nbsp;	 */
+&nbsp;	public void addConceptClass(ConceptClass conceptClass) {
+<b class="fc">&nbsp;		getConceptClasses().add(conceptClass);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.BaseOpenmrsObject#toString()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		if (StringUtils.isNotBlank(getName())) {</b>
+<b class="fc">&nbsp;			return getName();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return super.toString();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

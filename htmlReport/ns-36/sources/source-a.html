@@ -1,0 +1,289 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DoubleRange</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: DoubleRange (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DoubleRange</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,6%
+  </span>
+  <span class="absValue">
+    (39/44)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.builder.HashCodeBuilder;
+&nbsp;
+&nbsp;/**
+&nbsp; * Represents a bounded or unbounded numeric range. By default the range is closed (ake inclusive)
+&nbsp; * on the low end and open (aka exclusive) on the high end: mathematically &quot;[low, high)&quot;. (I&#39;m not
+&nbsp; * using the similarly-named class from Apache commons because it doesn&#39;t implement comparable, and
+&nbsp; * because it only allows inclusive bounds.)
+&nbsp; */
+&nbsp;public class DoubleRange implements Comparable&lt;DoubleRange&gt; {
+&nbsp;	
+&nbsp;	private Double low;
+&nbsp;	
+&nbsp;	private Double high;
+&nbsp;	
+<b class="fc">&nbsp;	private boolean closedLow = true; //TODO: add setters and getters for these</b>
+&nbsp;	
+<b class="fc">&nbsp;	private boolean closedHigh = false;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null low and high if accessors are not called
+&nbsp;	 */
+<b class="fc">&nbsp;	public DoubleRange() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return infinite low and high if called with null parameters
+&nbsp;	 */
+<b class="fc">&nbsp;	public DoubleRange(Double low, Double high) {</b>
+<b class="fc">&nbsp;		this.low = low == null ? new Double(Double.NEGATIVE_INFINITY) : low;</b>
+<b class="fc">&nbsp;		this.high = high == null ? new Double(Double.POSITIVE_INFINITY) : high;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the high.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return correct value of high if it high was set previously
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return positive infinity if high was not set previously
+&nbsp;	 */
+&nbsp;	public Double getHigh() {
+<b class="fc">&nbsp;		return high;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param high The high to set.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set high to positive infinity on null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cause low to have the set value
+&nbsp;	 */
+&nbsp;	public void setHigh(Double high) {
+<b class="fc">&nbsp;		this.high = high == null ? new Double(Double.POSITIVE_INFINITY) : high;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the low.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return correct value of low if low was set previously
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return negative infinity if low was not set previously
+&nbsp;	 */
+&nbsp;	public Double getLow() {
+<b class="fc">&nbsp;		return low;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param low The low to set.
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set low to negative infinity on null parameter
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; cause low to have the set value
+&nbsp;	 */
+&nbsp;	public void setLow(Double low) {
+<b class="fc">&nbsp;		this.low = low == null ? new Double(Double.NEGATIVE_INFINITY) : low;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * first sorts according to low-bound (ascending) then according to high-bound (descending)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return plus 1 if this low is greater than other low
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return minus one if this low is lower than other low
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return plus one if both lows are equal but other high is greater than this high
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return minus one if both lows are equal but other high is less than this high
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return zero if both lows and both highs are equal
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return 1 if this range is wider than other range
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int compareTo(DoubleRange other) {
+<b class="fc">&nbsp;		int temp = low.compareTo(other.low);</b>
+<b class="fc">&nbsp;		if (temp == 0) {</b>
+<b class="fc">&nbsp;			temp = other.high.compareTo(high);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return temp;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * BUG: this method should return false if both ends of the range are null.
+&nbsp;	 * It currently returns true in this case.
+&nbsp;	 *
+&nbsp;	 * checks whether a double is in this range
+&nbsp;	 * @param 	d the Double to check for in this range
+&nbsp;	 * @return  true if d is in this range, false otherwise
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if parameter is in range
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if parameter is not in range
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if parameter is equal to high
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return true if parameter is equal to low
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if parameter is lower than low
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return false if both low and high are null
+&nbsp;	 */
+&nbsp;	public boolean contains(double d) {
+<b class="fc">&nbsp;		if (low != null) {</b>
+<b class="fc">&nbsp;			if (closedLow) {</b>
+<b class="fc">&nbsp;				if (d &lt; low) {</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			} else {
+&nbsp;				//unreachable code as closedLow is never set to false anywhere
+<b class="nc">&nbsp;				if (d &lt;= low) {</b>
+<b class="nc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		if (high != null) {</b>
+<b class="fc">&nbsp;			if (closedHigh) {</b>
+&nbsp;				//unreachable code as closedHigh is never set to true anywhere
+<b class="nc">&nbsp;				return d &lt;= high;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				return d &lt; high;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 *
+&nbsp;	 * @return a String representation of the DoubleRange
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; print the range if high and low are not null and not infinite
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; print empty high if high is infinite
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; print empty low if low is infinite
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; print empty string if low and high are infinite
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		StringBuilder ret = new StringBuilder();</b>
+<b class="fc">&nbsp;		if (low != null &amp;&amp; low != Double.NEGATIVE_INFINITY) {</b>
+<b class="fc">&nbsp;			ret.append(&quot;&gt;&quot;);</b>
+<b class="fc">&nbsp;			if (closedLow) {</b>
+<b class="fc">&nbsp;				ret.append(&quot;=&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			ret.append(&quot; &quot;).append(Format.format(low));</b>
+<b class="fc">&nbsp;			if (high != null &amp;&amp; high != Double.NEGATIVE_INFINITY) {</b>
+&nbsp;				//BUG: should not append this if high is also infinite
+<b class="fc">&nbsp;				ret.append(&quot; and &quot;);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		if (high != null &amp;&amp; high != Double.POSITIVE_INFINITY) {</b>
+<b class="fc">&nbsp;			ret.append(&quot;&lt;&quot;);</b>
+<b class="fc">&nbsp;			if (closedHigh) {</b>
+<b class="nc">&nbsp;				ret.append(&quot;=&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			ret.append(&quot; &quot;).append(Format.format(high));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return ret.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object o) {
+<b class="fc">&nbsp;		if (o instanceof DoubleRange) {</b>
+<b class="fc">&nbsp;			DoubleRange other = (DoubleRange) o;</b>
+<b class="fc">&nbsp;			return low.equals(other.low) &amp;&amp; high.equals(other.high);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return the same hashCode for objects representing the same interval
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		return new HashCodeBuilder().append(low).append(high).build();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

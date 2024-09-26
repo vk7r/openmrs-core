@@ -1,0 +1,249 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptStateConversion</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptStateConversion (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptStateConversion</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConceptStateConversion$HibernateProxy$Zv9dyZ6T</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;/**
+&nbsp; * ConceptStateConversion
+&nbsp; */
+&nbsp;@Audited
+&nbsp;public class ConceptStateConversion extends BaseOpenmrsObject {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 3214511L;
+&nbsp;
+&nbsp;	// ******************
+&nbsp;	// Properties
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	private Integer conceptStateConversionId;
+&nbsp;	
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	private ProgramWorkflow programWorkflow;
+&nbsp;	
+&nbsp;	private ProgramWorkflowState programWorkflowState;
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Constructors
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/** Default Constructor */
+<b class="fc">&nbsp;	public ConceptStateConversion() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/** Constructor with id */
+<b class="nc">&nbsp;	public ConceptStateConversion(Integer conceptStateConversionId) {</b>
+<b class="nc">&nbsp;		setConceptStateConversionId(conceptStateConversionId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Instance methods
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/** @see Object#toString() */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		return &quot;ConceptStateConversion: Concept[&quot; + concept + &quot;] results in State [&quot; + programWorkflowState</b>
+&nbsp;		        + &quot;] for workflow [&quot; + programWorkflow + &quot;]&quot;;
+&nbsp;	}
+&nbsp;	
+&nbsp;	// ******************
+&nbsp;	// Property Access
+&nbsp;	// ******************
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the concept.
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept The concept to set.
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="fc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the conceptStateConversionId.
+&nbsp;	 */
+&nbsp;	public Integer getConceptStateConversionId() {
+<b class="fc">&nbsp;		return conceptStateConversionId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptStateConversionId The conceptStateConversionId to set.
+&nbsp;	 */
+&nbsp;	public void setConceptStateConversionId(Integer conceptStateConversionId) {
+<b class="fc">&nbsp;		this.conceptStateConversionId = conceptStateConversionId;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the programWorkflow.
+&nbsp;	 */
+&nbsp;	public ProgramWorkflow getProgramWorkflow() {
+<b class="fc">&nbsp;		return programWorkflow;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param programWorkflow The programWorkflow to set.
+&nbsp;	 */
+&nbsp;	public void setProgramWorkflow(ProgramWorkflow programWorkflow) {
+<b class="fc">&nbsp;		this.programWorkflow = programWorkflow;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the programWorkflowState.
+&nbsp;	 */
+&nbsp;	public ProgramWorkflowState getProgramWorkflowState() {
+<b class="fc">&nbsp;		return programWorkflowState;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param programWorkflowState The programWorkflowState to set.
+&nbsp;	 */
+&nbsp;	public void setProgramWorkflowState(ProgramWorkflowState programWorkflowState) {
+<b class="fc">&nbsp;		this.programWorkflowState = programWorkflowState;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="fc">&nbsp;		return getConceptStateConversionId();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		setConceptStateConversionId(id);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,149 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BasicAuthenticated</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.context</a>
+</div>
+
+<h1>Coverage Summary for Class: BasicAuthenticated (org.openmrs.api.context)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BasicAuthenticated</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (2/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.context;
+&nbsp;
+&nbsp;import org.openmrs.User;
+&nbsp;
+&nbsp;/**
+&nbsp; * A basic implementation of {@link Authenticated} that contains the necessary elements for an OpenMRS authentication.
+&nbsp; * 
+&nbsp; * @since 2.3.0
+&nbsp; */
+&nbsp;public class BasicAuthenticated implements Authenticated {
+&nbsp;	
+&nbsp;	private User user;
+&nbsp;	
+&nbsp;	private String authenticationScheme;
+&nbsp;	
+<b class="fc">&nbsp;	public BasicAuthenticated(User user, String authenticationScheme) {</b>
+<b class="fc">&nbsp;		this.user = user;</b>
+<b class="fc">&nbsp;		this.authenticationScheme = authenticationScheme;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String getAuthenticationScheme() {
+<b class="nc">&nbsp;		return this.authenticationScheme;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setAuthenticationScheme(String authenticationScheme) {
+<b class="nc">&nbsp;		this.authenticationScheme = authenticationScheme;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public User getUser() {
+<b class="fc">&nbsp;		return this.user;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setUser(User user) {
+<b class="nc">&nbsp;		this.user = user;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

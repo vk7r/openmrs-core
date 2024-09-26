@@ -1,0 +1,589 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HL7Service</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.hl7</a>
+</div>
+
+<h1>Coverage Summary for Class: HL7Service (org.openmrs.hl7)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">HL7Service</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.hl7;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.annotation.Logging;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.OpenmrsService;
+&nbsp;import org.openmrs.hl7.db.HL7DAO;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;import ca.uhn.hl7v2.HL7Exception;
+&nbsp;import ca.uhn.hl7v2.model.Message;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.CX;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.PL;
+&nbsp;import ca.uhn.hl7v2.model.v25.datatype.XCN;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.NK1;
+&nbsp;import ca.uhn.hl7v2.model.v25.segment.PID;
+&nbsp;
+&nbsp;/**
+&nbsp; * OpenMRS HL7 API
+&nbsp; */
+&nbsp;public interface HL7Service extends OpenmrsService {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Auto generated method comment
+&nbsp;	 * 
+&nbsp;	 * @param dao
+&nbsp;	 */
+&nbsp;	public void setHL7DAO(HL7DAO dao);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given &lt;code&gt;hl7Source&lt;/code&gt; to the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7Source the source to save
+&nbsp;	 * @return the saved source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PRIV_UPDATE_HL7_SOURCE)
+&nbsp;	public HL7Source saveHL7Source(HL7Source hl7Source) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Auto generated method comment
+&nbsp;	 * 
+&nbsp;	 * @param hl7SourceId
+&nbsp;	 * @return &lt;code&gt;HL7Source&lt;/code&gt;object for given identifier
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_SOURCE)
+&nbsp;	public HL7Source getHL7Source(Integer hl7SourceId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the hl7 source object from the database that has the given name
+&nbsp;	 * 
+&nbsp;	 * @param name string to &#39;search&#39; on
+&nbsp;	 * @return hl7 source object
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_SOURCE)
+&nbsp;	public HL7Source getHL7SourceByName(String name) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all of the hl7 source objects from the database. This includes retired ones
+&nbsp;	 * 
+&nbsp;	 * @return list of hl7 source objects
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_SOURCE)
+&nbsp;	public List&lt;HL7Source&gt; getAllHL7Sources() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Mark the given &lt;code&gt;hl7Source&lt;/code&gt; as no longer active
+&nbsp;	 * 
+&nbsp;	 * @param hl7Source the source to retire
+&nbsp;	 * @return the retired source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PRIV_UPDATE_HL7_SOURCE)
+&nbsp;	public HL7Source retireHL7Source(HL7Source hl7Source) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove the source from the database. This should only be used in rare cases. See
+&nbsp;	 * {@link #retireHL7Source(HL7Source)}
+&nbsp;	 * 
+&nbsp;	 * @param hl7Source
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PRIV_PURGE_HL7_SOURCE)
+&nbsp;	public void purgeHL7Source(HL7Source hl7Source) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given &lt;code&gt;hl7InQueue&lt;/code&gt; to the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7InQueue the queue item to save
+&nbsp;	 * @return the saved queue item
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; add generated uuid if uuid is null
+&nbsp;	 */
+&nbsp;	@Authorized(value = { PrivilegeConstants.PRIV_UPDATE_HL7_IN_QUEUE, PrivilegeConstants.PRIV_ADD_HL7_IN_QUEUE }, requireAll = false)
+&nbsp;	public HL7InQueue saveHL7InQueue(HL7InQueue hl7InQueue) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the hl7 queue item with the given primary key id
+&nbsp;	 * 
+&nbsp;	 * @param hl7InQueueId the id to search on
+&nbsp;	 * @return the desired hl7InQueue object or null if none found
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public HL7InQueue getHL7InQueue(Integer hl7InQueueId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the hl7 queue item with the given uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the HL7InQueue or &lt;code&gt;null&lt;/code&gt;
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public HL7InQueue getHL7InQueueByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of all hl7 in queues in the database
+&nbsp;	 * 
+&nbsp;	 * @return all hl7 queue items
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public List&lt;HL7InQueue&gt; getAllHL7InQueues() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of all hl7 in queues based on batch settings and a query string
+&nbsp;	 * 
+&nbsp;	 * @param start beginning index
+&nbsp;	 * @param length size of the batch
+&nbsp;	 * @param messageState status of the HL7InQueue message
+&nbsp;	 * @param query search string
+&nbsp;	 * @return all matching hl7 queue items within batch window
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public List&lt;HL7InQueue&gt; getHL7InQueueBatch(int start, int length, int messageState, String query) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * the total count of all HL7InQueue objects in the database
+&nbsp;	 * 
+&nbsp;	 * @param messageState HL7InQueue status
+&nbsp;	 * @param query search string
+&nbsp;	 * @return the count of matching HL7InQueue items
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public Integer countHL7InQueue(int messageState, String query) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of all hl7 in errors based on batch settings and a query string
+&nbsp;	 * 
+&nbsp;	 * @param start beginning index
+&nbsp;	 * @param length size of the batch
+&nbsp;	 * @param query search string
+&nbsp;	 * @return all matching hl7 queue items within batch window
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public List&lt;HL7InError&gt; getHL7InErrorBatch(int start, int length, String query) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * the total count of all HL7InError objects in the database
+&nbsp;	 * 
+&nbsp;	 * @param query search string
+&nbsp;	 * @return the count of matching HL7InError items
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public Integer countHL7InError(String query) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Return a list of all hl7 in archives based on batch settings and a query string
+&nbsp;	 * 
+&nbsp;	 * @param start beginning index
+&nbsp;	 * @param length size of the batch
+&nbsp;	 * @param messageState status of the HL7InArchive message
+&nbsp;	 * @param query search string
+&nbsp;	 * @return all matching hl7 archive items within batch window
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
+&nbsp;	public List&lt;HL7InArchive&gt; getHL7InArchiveBatch(int start, int length, int messageState, String query)
+&nbsp;	        throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * the total count of all HL7InArchive objects in the database
+&nbsp;	 * 
+&nbsp;	 * @param messageState status of the HL7InArchive message
+&nbsp;	 * @param query search string
+&nbsp;	 * @return the count of matching HL7InArchive items
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
+&nbsp;	public Integer countHL7InArchive(int messageState, String query) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the first queue item in the database
+&nbsp;	 * 
+&nbsp;	 * @return the first queue item
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public HL7InQueue getNextHL7InQueue() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely delete the hl7 in queue item from the database.
+&nbsp;	 * 
+&nbsp;	 * @param hl7InQueue
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PRIV_PURGE_HL7_IN_QUEUE)
+&nbsp;	public void purgeHL7InQueue(HL7InQueue hl7InQueue);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given hl7 in archive to the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7InArchive the archive to save
+&nbsp;	 * @return the saved archive item
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(value = { PrivilegeConstants.PRIV_UPDATE_HL7_IN_ARCHIVE, PrivilegeConstants.PRIV_ADD_HL7_IN_ARCHIVE }, requireAll = false)
+&nbsp;	public HL7InArchive saveHL7InArchive(HL7InArchive hl7InArchive) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get the archive item with the given id, If hl7 archives were moved to the file system, you
+&nbsp;	 * can&#39;t do a look up by hl7ArchiveId, instead call
+&nbsp;	 * {@link HL7Service#getHL7InArchiveByUuid(String)}
+&nbsp;	 * 
+&nbsp;	 * @param hl7InArchiveId the id to search on
+&nbsp;	 * @return the matching archive item
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
+&nbsp;	public HL7InArchive getHL7InArchive(Integer hl7InArchiveId);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the archive item with the given uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid to search on
+&nbsp;	 * @return the archive with the matching uuid if any found
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since Version 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
+&nbsp;	public HL7InArchive getHL7InArchiveByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * If hl7 migration has been run and the state matches that of processed items, the method
+&nbsp;	 * returns a list of all archives in the file system, for any other state , it returns an empty
+&nbsp;	 * list, this is because all archives would have a status of &#39;processed&#39; after migration and all
+&nbsp;	 * deleted archives moved back into the queue with a status of &#39;deleted&#39; otherwise it returns
+&nbsp;	 * archives with a matching state if migration hasn&#39;t yet been run.
+&nbsp;	 * 
+&nbsp;	 * @return list of archive items that match the state
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.5
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
+&nbsp;	public List&lt;HL7InArchive&gt; getHL7InArchiveByState(Integer state) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the queue items given a state (deleted, error, pending, processing, processed).
+&nbsp;	 * 
+&nbsp;	 * @return list of hl7 queue items that match the given state
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.7
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_QUEUE)
+&nbsp;	public List&lt;HL7InQueue&gt; getHL7InQueueByState(Integer state) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all archive hl7 queue items from the database
+&nbsp;	 * 
+&nbsp;	 * @return list of archive items
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
+&nbsp;	public List&lt;HL7InArchive&gt; getAllHL7InArchives() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely delete the hl7 in archive item from the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7InArchive the archived item to delete
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PRIV_PURGE_HL7_IN_ARCHIVE)
+&nbsp;	public void purgeHL7InArchive(HL7InArchive hl7InArchive) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the given error item to the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7InError the item to save
+&nbsp;	 * @return the saved item
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(value = { PrivilegeConstants.PRIV_UPDATE_HL7_IN_EXCEPTION, PrivilegeConstants.PRIV_ADD_HL7_IN_EXCEPTION }, requireAll = false)
+&nbsp;	public HL7InError saveHL7InError(HL7InError hl7InError) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the error item with the given id
+&nbsp;	 * 
+&nbsp;	 * @param hl7InErrorId the id to search on
+&nbsp;	 * @return the matching error item
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_EXCEPTION)
+&nbsp;	public HL7InError getHL7InError(Integer hl7InErrorId) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the error item with the given uuid
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the HL7InError or &lt;code&gt;null&lt;/code&gt;
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_EXCEPTION)
+&nbsp;	public HL7InError getHL7InErrorByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get all &lt;code&gt;HL7InError&lt;/code&gt; items from the database
+&nbsp;	 * 
+&nbsp;	 * @return a List&amp;lt;HL7InError&amp;gt; object with all &lt;code&gt;HL7InError&lt;/code&gt; items from the database
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.GET_HL7_IN_EXCEPTION)
+&nbsp;	public List&lt;HL7InError&gt; getAllHL7InErrors() throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Completely remove this error item from the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7InError the item to remove
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.PRIV_PURGE_HL7_IN_EXCEPTION)
+&nbsp;	public void purgeHL7InError(HL7InError hl7InError) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param xcn HL7 component of data type XCN (extended composite ID number and name for persons)
+&nbsp;	 *            (see HL7 2.5 manual Ch.2A.86)
+&nbsp;	 * @return Internal ID # of the specified user, or null if that user can&#39;t be found or is
+&nbsp;	 *         ambiguous
+&nbsp;	 */
+&nbsp;	public Integer resolveUserId(XCN xcn) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param xcn HL7 component of data type XCN (extended composite ID number and name for persons)
+&nbsp;	 *            (see HL7 2.5 manual Ch.2A.86)
+&nbsp;	 * @return Internal ID # of the specified person, or null if that person can&#39;t be found or is
+&nbsp;	 *         ambiguous
+&nbsp;	 */
+&nbsp;	public Integer resolvePersonId(XCN xcn) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Resolves location from person location object, and if location id is specified then returns
+&nbsp;	 * correspond internal identifier of the specified location. If only location_name is specified,
+&nbsp;	 * it tries to return location internal identifier by given name
+&nbsp;	 * 
+&nbsp;	 * @param pl HL7 component of data type PL (person location) (see Ch 2.A.53)
+&nbsp;	 * @return internal identifier of the specified location, or null if it is not found or
+&nbsp;	 *         ambiguous
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return internal identifier of location if only location name is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return internal identifier of location if only location id is specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if location id and name are incorrect
+&nbsp;	 */
+&nbsp;	public Integer resolveLocationId(PL pl) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param pid A PID segment of an hl7 message
+&nbsp;	 * @return The internal id number of the Patient described by the PID segment, or null if the
+&nbsp;	 *         patient is not found or if the PID segment is ambiguous
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 */
+&nbsp;	public Integer resolvePatientId(PID pid) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * determines a person (or patient) based on identifiers from a CX array, as found in a PID or
+&nbsp;	 * NK1 segment; the first resolving identifier in the list wins
+&nbsp;	 * 
+&nbsp;	 * @param identifiers CX identifier list from an identifier (either PID or NK1)
+&nbsp;	 * @return The internal id number of a Person based on one of the given identifiers, or null if
+&nbsp;	 *         the Person is not found
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find a person based on a patient identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find a person based on a UUID
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find a person based on the internal person ID
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no person is found
+&nbsp;	 */
+&nbsp;	public Person resolvePersonFromIdentifiers(CX[] identifiers) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Clean up the current memory consumption
+&nbsp;	 */
+&nbsp;	public void garbageCollect();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Process the given {@link HL7InQueue} item. &lt;br&gt;
+&nbsp;	 * If an error occurs while processing, a new {@link HL7InError} is created and saved. &lt;br&gt;
+&nbsp;	 * If no error occurs, a new {@link HL7InArchive} is created and saved.&lt;br&gt;
+&nbsp;	 * The given {@link HL7InQueue} is removed from the hl7 in queue table regardless of success or
+&nbsp;	 * failure of the processing.
+&nbsp;	 * 
+&nbsp;	 * @param inQueue the {@link HL7InQueue} to parse and save all encounters/obs to the db
+&nbsp;	 * @return the processed {@link HL7InQueue}
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create HL7InArchive after successful parsing
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; create HL7InError after failed parsing
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if given inQueue is already marked as processing
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse oru r01 message using overridden parser provided by a module
+&nbsp;	 */
+&nbsp;	public HL7InQueue processHL7InQueue(HL7InQueue inQueue) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parses the given string and returns the resulting {@link Message}
+&nbsp;	 * 
+&nbsp;	 * @param hl7String the hl7 string to parse and save
+&nbsp;	 * @return the {@link Message} that the given hl7 string represents
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * @see #processHL7InQueue(HL7InQueue)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse the given string into Message
+&nbsp;	 */
+&nbsp;	@Logging(ignoreAllArgumentValues = true)
+&nbsp;	public Message parseHL7String(String hl7String) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Parses the given {@link Message} and saves the resulting content to the database
+&nbsp;	 * 
+&nbsp;	 * @param hl7Message the {@link Message} to process and save to the db.
+&nbsp;	 * @return the processed message
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * @see #processHL7InQueue(HL7InQueue)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; save hl7Message to the database
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; parse message type supplied by module
+&nbsp;	 */
+&nbsp;	public Message processHL7Message(Message hl7Message) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Method is called by the archives migration thread to transfer hl7 in archives from the
+&nbsp;	 * hl7_in_archives database table to the file system
+&nbsp;	 * 
+&nbsp;	 * @param progressStatusMap the map holding the number of archives transferred and failed
+&nbsp;	 *            transfers
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized(requireAll = true, value = { PrivilegeConstants.GET_HL7_IN_ARCHIVE, PrivilegeConstants.PRIV_PURGE_HL7_IN_ARCHIVE,
+&nbsp;			PrivilegeConstants.PRIV_ADD_HL7_IN_QUEUE })
+&nbsp;	public void migrateHl7InArchivesToFileSystem(Map&lt;String, Integer&gt; progressStatusMap) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * finds a UUID from an array of identifiers
+&nbsp;	 * 
+&nbsp;	 * @param identifiers
+&nbsp;	 * @return the UUID or null
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return null if no UUID found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; find a UUID in any position of the array
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if multiple similar UUIDs exist in identifiers
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; not fail if no assigning authority is found
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if multiple different UUIDs exist in identifiers
+&nbsp;	 */
+&nbsp;	public String getUuidFromIdentifiers(CX[] identifiers) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * creates a Person from information held in an NK1 segment; if valid PatientIdentifiers exist,
+&nbsp;	 * a Patient will be created and returned
+&nbsp;	 * 
+&nbsp;	 * @param nk1 the NK1 segment with person information
+&nbsp;	 * @return the newly formed (but not saved) person
+&nbsp;	 * @throws HL7Exception
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a saved new person
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; return a Patient if valid patient identifiers exist
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if a person with the same UUID exists
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail on an invalid gender
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if no gender specified
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail if no birthdate specified
+&nbsp;	 */
+&nbsp;	public Person createPersonFromNK1(NK1 nk1) throws HL7Exception;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Loads data for a list of HL7 archives from the filesystem
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 * @throws APIException
+&nbsp;	 * @param archives
+&nbsp;	 */
+&nbsp;	public void loadHL7InArchiveData(List&lt;HL7InArchive&gt; archives) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Loads HL7 data from the filesystem for an archived HL7InArchive
+&nbsp;	 * 
+&nbsp;	 * @since 1.7
+&nbsp;	 * @throws APIException
+&nbsp;	 * @param archive
+&nbsp;	 */
+&nbsp;	public void loadHL7InArchiveData(HL7InArchive archive) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get {@link HL7QueueItem} with the given uuid.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * It calls {@link #getHL7InQueueByUuid(String)}, {@link #getHL7InArchiveByUuid(String)} and
+&nbsp;	 * {@link #getHL7InErrorByUuid(String)} consecutively and returns the first non-null result.
+&nbsp;	 * 
+&nbsp;	 * @param uuid
+&nbsp;	 * @return the queue item or &lt;code&gt;null&lt;/code&gt;
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 1.9
+&nbsp;	 */
+&nbsp;	public HL7QueueItem getHl7QueueItemByUuid(String uuid) throws APIException;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

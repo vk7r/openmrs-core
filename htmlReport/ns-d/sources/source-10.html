@@ -1,0 +1,1743 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PatientServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientServiceImpl (org.openmrs.api.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,7%
+  </span>
+  <span class="absValue">
+    (78/86)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,6%
+  </span>
+  <span class="absValue">
+    (546/616)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api.impl;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.UUID;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import org.apache.commons.lang3.StringUtils;
+&nbsp;import org.openmrs.Allergen;
+&nbsp;import org.openmrs.Allergies;
+&nbsp;import org.openmrs.Allergy;
+&nbsp;import org.openmrs.BaseOpenmrsMetadata;
+&nbsp;import org.openmrs.Concept;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Location;
+&nbsp;import org.openmrs.Obs;
+&nbsp;import org.openmrs.Order;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.PatientIdentifier;
+&nbsp;import org.openmrs.PatientIdentifierType;
+&nbsp;import org.openmrs.PatientProgram;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.PersonAddress;
+&nbsp;import org.openmrs.PersonAttribute;
+&nbsp;import org.openmrs.PersonName;
+&nbsp;import org.openmrs.Relationship;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.Visit;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.BlankIdentifierException;
+&nbsp;import org.openmrs.api.DuplicateIdentifierException;
+&nbsp;import org.openmrs.api.EncounterService;
+&nbsp;import org.openmrs.api.InsufficientIdentifiersException;
+&nbsp;import org.openmrs.api.MissingRequiredIdentifierException;
+&nbsp;import org.openmrs.api.ObsService;
+&nbsp;import org.openmrs.api.PatientIdentifierException;
+&nbsp;import org.openmrs.api.PatientIdentifierTypeLockedException;
+&nbsp;import org.openmrs.api.PatientService;
+&nbsp;import org.openmrs.api.PersonService;
+&nbsp;import org.openmrs.api.ProgramWorkflowService;
+&nbsp;import org.openmrs.api.UserService;
+&nbsp;import org.openmrs.api.VisitService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.db.PatientDAO;
+&nbsp;import org.openmrs.api.db.hibernate.HibernateUtil;
+&nbsp;import org.openmrs.parameter.EncounterSearchCriteria;
+&nbsp;import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
+&nbsp;import org.openmrs.patient.IdentifierValidator;
+&nbsp;import org.openmrs.patient.impl.LuhnIdentifierValidator;
+&nbsp;import org.openmrs.person.PersonMergeLog;
+&nbsp;import org.openmrs.person.PersonMergeLogData;
+&nbsp;import org.openmrs.serialization.SerializationException;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;import org.openmrs.validator.PatientIdentifierValidator;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Default implementation of the patient service. This class should not be used on its own. The
+&nbsp; * current OpenMRS implementation should be fetched from the Context via
+&nbsp; * &lt;code&gt;Context.getPatientService()&lt;/code&gt;
+&nbsp; * 
+&nbsp; * @see org.openmrs.api.context.Context
+&nbsp; * @see org.openmrs.api.PatientService
+&nbsp; * @see org.openmrs.api.PersonService
+&nbsp; */
+&nbsp;@Transactional
+<b class="fc">&nbsp;public class PatientServiceImpl extends BaseOpenmrsService implements PatientService {</b>
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(PatientServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	private PatientDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * PatientIdentifierValidators registered through spring&#39;s applicationContext-service.xml
+&nbsp;	 */
+<b class="fc">&nbsp;	private static Map&lt;Class&lt;? extends IdentifierValidator&gt;, IdentifierValidator&gt; identifierValidators = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#setPatientDAO(org.openmrs.api.db.PatientDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setPatientDAO(PatientDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Clean up after this class. Set the static var to null so that the classloader can reclaim the
+&nbsp;	 * space.
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.api.impl.BaseOpenmrsService#onShutdown()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void onShutdown() {
+<b class="nc">&nbsp;		setIdentifierValidators(null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#savePatient(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Patient savePatient(Patient patient) throws APIException {
+<b class="fc">&nbsp;		requireAppropriatePatientModificationPrivilege(patient);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!patient.getVoided() &amp;&amp; patient.getIdentifiers().size() == 1) {</b>
+<b class="fc">&nbsp;			patient.getPatientIdentifier().setPreferred(true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!patient.getVoided()) {</b>
+<b class="fc">&nbsp;			checkPatientIdentifiers(patient);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setPreferredPatientIdentifier(patient);</b>
+<b class="fc">&nbsp;		setPreferredPatientName(patient);</b>
+<b class="fc">&nbsp;		setPreferredPatientAddress(patient);</b>
+&nbsp;
+<b class="fc">&nbsp;		return dao.savePatient(patient);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void requireAppropriatePatientModificationPrivilege(Patient patient) {
+<b class="fc">&nbsp;		if (patient.getPatientId() == null) {</b>
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.ADD_PATIENTS);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.EDIT_PATIENTS);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (patient.getVoided()) {</b>
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.DELETE_PATIENTS);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setPreferredPatientIdentifier(Patient patient) {
+<b class="fc">&nbsp;		PatientIdentifier preferredIdentifier = null;</b>
+<b class="fc">&nbsp;		PatientIdentifier possiblePreferredId = patient.getPatientIdentifier();</b>
+<b class="fc">&nbsp;		if (possiblePreferredId != null &amp;&amp; possiblePreferredId.getPreferred() &amp;&amp; !possiblePreferredId.getVoided()) {</b>
+<b class="fc">&nbsp;			preferredIdentifier = possiblePreferredId;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (PatientIdentifier id : patient.getIdentifiers()) {</b>
+<b class="fc">&nbsp;			if (preferredIdentifier == null &amp;&amp; !id.getVoided()) {</b>
+<b class="fc">&nbsp;				id.setPreferred(true);</b>
+<b class="fc">&nbsp;				preferredIdentifier = id;</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!id.equals(preferredIdentifier)) {</b>
+<b class="fc">&nbsp;				id.setPreferred(false);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setPreferredPatientName(Patient patient) {
+<b class="fc">&nbsp;		PersonName preferredName = null;</b>
+<b class="fc">&nbsp;		PersonName possiblePreferredName = patient.getPersonName();</b>
+<b class="fc">&nbsp;		if (possiblePreferredName != null &amp;&amp; possiblePreferredName.getPreferred() &amp;&amp; !possiblePreferredName.getVoided()) {</b>
+<b class="fc">&nbsp;			preferredName = possiblePreferredName;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (PersonName name : patient.getNames()) {</b>
+<b class="fc">&nbsp;			if (preferredName == null &amp;&amp; !name.getVoided()) {</b>
+<b class="fc">&nbsp;				name.setPreferred(true);</b>
+<b class="fc">&nbsp;				preferredName = name;</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!name.equals(preferredName)) {</b>
+<b class="fc">&nbsp;				name.setPreferred(false);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void setPreferredPatientAddress(Patient patient) {
+<b class="fc">&nbsp;		PersonAddress preferredAddress = null;</b>
+<b class="fc">&nbsp;		PersonAddress possiblePreferredAddress = patient.getPersonAddress();</b>
+<b class="fc">&nbsp;		if (possiblePreferredAddress != null &amp;&amp; possiblePreferredAddress.getPreferred()</b>
+<b class="fc">&nbsp;				&amp;&amp; !possiblePreferredAddress.getVoided()) {</b>
+<b class="fc">&nbsp;			preferredAddress = possiblePreferredAddress;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (PersonAddress address : patient.getAddresses()) {</b>
+<b class="fc">&nbsp;			if (preferredAddress == null &amp;&amp; !address.getVoided()) {</b>
+<b class="fc">&nbsp;				address.setPreferred(true);</b>
+<b class="fc">&nbsp;				preferredAddress = address;</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!address.equals(preferredAddress)) {</b>
+<b class="fc">&nbsp;				address.setPreferred(false);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatient(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Patient getPatient(Integer patientId) throws APIException {
+<b class="fc">&nbsp;		return dao.getPatient(patientId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Patient getPatientOrPromotePerson(Integer patientOrPersonId) {
+<b class="fc">&nbsp;		Person person = Context.getPersonService().getPerson(patientOrPersonId);</b>
+<b class="fc">&nbsp;		if (person == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		person = HibernateUtil.getRealObjectFromProxy(person);</b>
+<b class="fc">&nbsp;		if (person instanceof Patient) {</b>
+<b class="nc">&nbsp;			return (Patient)person;</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			return new Patient(person);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllPatients()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getAllPatients() throws APIException {
+<b class="fc">&nbsp;		return Context.getPatientService().getAllPatients(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllPatients(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getAllPatients(boolean includeVoided) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllPatients(includeVoided);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatients(java.lang.String, java.lang.String,
+&nbsp;	 *      java.util.List, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	// TODO - search for usage with non-empty list of patient identifier types
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getPatients(String name, String identifier, List&lt;PatientIdentifierType&gt; identifierTypes,
+&nbsp;	        boolean matchIdentifierExactly) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPatientService().getPatients(name, identifier, identifierTypes, matchIdentifierExactly, 0, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#checkPatientIdentifiers(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public void checkPatientIdentifiers(Patient patient) throws PatientIdentifierException {
+&nbsp;		// check patient has at least one identifier
+<b class="fc">&nbsp;		if (!patient.getVoided() &amp;&amp; patient.getActiveIdentifiers().isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new InsufficientIdentifiersException(&quot;At least one nonvoided Patient Identifier is required&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		final List&lt;PatientIdentifier&gt; patientIdentifiers = new ArrayList&lt;&gt;(patient.getIdentifiers());</b>
+&nbsp;
+<b class="fc">&nbsp;		final Set&lt;String&gt; uniqueIdentifiers = new HashSet&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		patientIdentifiers.stream()</b>
+<b class="fc">&nbsp;			.filter(pi -&gt; !pi.getVoided())</b>
+<b class="fc">&nbsp;			.forEach(pi -&gt; {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					PatientIdentifierValidator.validateIdentifier(pi);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				catch (BlankIdentifierException bie) {</b>
+<b class="fc">&nbsp;					patient.removeIdentifier(pi);</b>
+<b class="fc">&nbsp;					throw bie;</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;
+&nbsp;				// check this patient for duplicate identifiers+identifierType
+<b class="fc">&nbsp;				String compareString = pi.getIdentifier() + &quot; id type #: &quot; + pi.getIdentifierType().getPatientIdentifierTypeId();</b>
+<b class="fc">&nbsp;				if(! uniqueIdentifiers.add(compareString)) {</b>
+<b class="fc">&nbsp;					throw new DuplicateIdentifierException(&quot;This patient has two identical identifiers of type &quot;</b>
+&nbsp;							+ compareString, pi);
+&nbsp;				}
+&nbsp;			});
+&nbsp;
+<b class="fc">&nbsp;		checkForMissingRequiredIdentifiers(patientIdentifiers);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	private void checkForMissingRequiredIdentifiers(List&lt;PatientIdentifier&gt; patientIdentifiers) {
+<b class="fc">&nbsp;		final Set&lt;PatientIdentifierType&gt; patientIdentifierTypes =</b>
+<b class="fc">&nbsp;				patientIdentifiers.stream()</b>
+<b class="fc">&nbsp;						.map(PatientIdentifier::getIdentifierType)</b>
+<b class="fc">&nbsp;						.collect(Collectors.toSet());</b>
+&nbsp;
+<b class="fc">&nbsp;		final List&lt;PatientIdentifierType&gt; requiredTypes = this.getPatientIdentifierTypes(null, null, true, null);</b>
+<b class="fc">&nbsp;		final Set&lt;String&gt; missingRequiredTypeNames =</b>
+<b class="fc">&nbsp;				requiredTypes.stream()</b>
+<b class="fc">&nbsp;						.filter(requiredType -&gt; !patientIdentifierTypes.contains(requiredType))</b>
+<b class="fc">&nbsp;						.map(BaseOpenmrsMetadata::getName)</b>
+<b class="fc">&nbsp;						.collect(Collectors.toSet());</b>
+&nbsp;
+<b class="fc">&nbsp;		if(! missingRequiredTypeNames.isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new MissingRequiredIdentifierException(</b>
+<b class="fc">&nbsp;					&quot;Patient is missing the following required identifier(s): &quot; + String.join(&quot;, &quot;, missingRequiredTypeNames));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#voidPatient(org.openmrs.Patient, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Patient voidPatient(Patient patient, String reason) throws APIException {
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// patient and patientidentifier attributes taken care of by the BaseVoidHandler
+&nbsp;		//call the DAO layer directly to avoid any further AOP around save*
+<b class="fc">&nbsp;		return dao.savePatient(patient);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#unvoidPatient(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Patient unvoidPatient(Patient patient) throws APIException {
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// patient and patientidentifier attributes taken care of by the BaseUnvoidHandler
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPatientService().savePatient(patient);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#purgePatient(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePatient(Patient patient) throws APIException {
+<b class="fc">&nbsp;		dao.deletePatient(patient);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// patient identifier section
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifiers(java.lang.String, java.util.List,
+&nbsp;	 *      java.util.List, java.util.List, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PatientIdentifier&gt; getPatientIdentifiers(String identifier,
+&nbsp;	        List&lt;PatientIdentifierType&gt; patientIdentifierTypes, List&lt;Location&gt; locations, List&lt;Patient&gt; patients,
+&nbsp;	        Boolean isPreferred) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patientIdentifierTypes == null) {</b>
+<b class="fc">&nbsp;			patientIdentifierTypes = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (locations == null) {</b>
+<b class="fc">&nbsp;			locations = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (patients == null) {</b>
+<b class="fc">&nbsp;			patients = new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getPatientIdentifiers(identifier, patientIdentifierTypes, locations, patients, isPreferred);</b>
+&nbsp;	}
+&nbsp;	// end patient identifier section
+&nbsp;	
+&nbsp;	// patient identifier _type_ section
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.api.PatientService#savePatientIdentifierType(org.openmrs.PatientIdentifierType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientIdentifierType savePatientIdentifierType(PatientIdentifierType patientIdentifierType) throws APIException {
+<b class="fc">&nbsp;		checkIfPatientIdentifierTypesAreLocked();</b>
+<b class="fc">&nbsp;		return dao.savePatientIdentifierType(patientIdentifierType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllPatientIdentifierTypes()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PatientIdentifierType&gt; getAllPatientIdentifierTypes() throws APIException {
+<b class="fc">&nbsp;		return Context.getPatientService().getAllPatientIdentifierTypes(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllPatientIdentifierTypes(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PatientIdentifierType&gt; getAllPatientIdentifierTypes(boolean includeRetired) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllPatientIdentifierTypes(includeRetired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifierTypes(java.lang.String,
+&nbsp;	 *      java.lang.String, java.lang.Boolean, java.lang.Boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;PatientIdentifierType&gt; getPatientIdentifierTypes(String name, String format, Boolean required,
+&nbsp;	        Boolean hasCheckDigit) throws APIException {
+<b class="fc">&nbsp;		List&lt;PatientIdentifierType&gt; patientIdentifierTypes = dao.getPatientIdentifierTypes(name, format, required, hasCheckDigit);</b>
+<b class="fc">&nbsp;		if (patientIdentifierTypes == null) {</b>
+<b class="fc">&nbsp;			return new ArrayList&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return patientIdentifierTypes;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifierType(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientIdentifierType getPatientIdentifierType(Integer patientIdentifierTypeId) throws APIException {
+<b class="fc">&nbsp;		return dao.getPatientIdentifierType(patientIdentifierTypeId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifierTypeByName(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientIdentifierType getPatientIdentifierTypeByName(String name) throws APIException {
+<b class="fc">&nbsp;		List&lt;PatientIdentifierType&gt; types = getPatientIdentifierTypes(name, null, null, null);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!types.isEmpty()) {</b>
+<b class="fc">&nbsp;			return types.get(0);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#retirePatientIdentifierType(org.openmrs.PatientIdentifierType,
+&nbsp;	 *      String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientIdentifierType retirePatientIdentifierType(PatientIdentifierType patientIdentifierType, String reason)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		checkIfPatientIdentifierTypesAreLocked();</b>
+<b class="fc">&nbsp;		if (reason == null || reason.length() &lt; 1) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Patient.identifier.retire.reason&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		patientIdentifierType.setRetired(true);</b>
+<b class="fc">&nbsp;		patientIdentifierType.setRetiredBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		patientIdentifierType.setDateRetired(new Date());</b>
+<b class="fc">&nbsp;		patientIdentifierType.setRetireReason(reason);</b>
+<b class="fc">&nbsp;		return Context.getPatientService().savePatientIdentifierType(patientIdentifierType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#unretirePatientIdentifierType(org.openmrs.PatientIdentifierType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientIdentifierType unretirePatientIdentifierType(PatientIdentifierType patientIdentifierType)
+&nbsp;	        throws APIException {
+<b class="fc">&nbsp;		checkIfPatientIdentifierTypesAreLocked();</b>
+<b class="fc">&nbsp;		patientIdentifierType.setRetired(false);</b>
+<b class="fc">&nbsp;		patientIdentifierType.setRetiredBy(null);</b>
+<b class="fc">&nbsp;		patientIdentifierType.setDateRetired(null);</b>
+<b class="fc">&nbsp;		patientIdentifierType.setRetireReason(null);</b>
+<b class="fc">&nbsp;		return Context.getPatientService().savePatientIdentifierType(patientIdentifierType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#purgePatientIdentifierType(org.openmrs.PatientIdentifierType)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePatientIdentifierType(PatientIdentifierType patientIdentifierType) throws APIException {
+<b class="fc">&nbsp;		checkIfPatientIdentifierTypesAreLocked();</b>
+<b class="fc">&nbsp;		dao.deletePatientIdentifierType(patientIdentifierType);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// end patient identifier _type_ section
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatients(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getPatients(String query) throws APIException {
+<b class="fc">&nbsp;		return Context.getPatientService().getPatients(query, 0, null);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This default implementation simply looks at the OpenMRS internal id (patient_id). If the id
+&nbsp;	 * is null, assume this patient isn&#39;t found. If the patient_id is not null, try and find that id
+&nbsp;	 * in the database
+&nbsp;	 * 
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientByExample(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Patient getPatientByExample(Patient patientToMatch) throws APIException {
+<b class="fc">&nbsp;		if (patientToMatch == null || patientToMatch.getPatientId() == null) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getPatientService().getPatient(patientToMatch.getPatientId());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getDuplicatePatientsByAttributes(java.util.List)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getDuplicatePatientsByAttributes(List&lt;String&gt; attributes) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (attributes == null || attributes.isEmpty()) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Patient.no.attribute&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getDuplicatePatientsByAttributes(attributes);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * generate a relationship hash for use in mergePatients; follows the convention:
+&nbsp;	 * [relationshipType][A|B][relativeId]
+&nbsp;	 * 
+&nbsp;	 * @param rel relationship under consideration
+&nbsp;	 * @param primary the focus of the hash
+&nbsp;	 * @return hash depicting relevant information to avoid duplicates
+&nbsp;	 */
+&nbsp;	private String relationshipHash(Relationship rel, Person primary) {
+<b class="fc">&nbsp;		boolean isA = rel.getPersonA().equals(primary);</b>
+<b class="fc">&nbsp;		return rel.getRelationshipType().getRelationshipTypeId().toString() + (isA ? &quot;A&quot; : &quot;B&quot;)</b>
+<b class="fc">&nbsp;		        + (isA ? rel.getPersonB().getPersonId().toString() : rel.getPersonA().getPersonId().toString());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * 1) Moves object (encounters/obs) pointing to &lt;code&gt;nonPreferred&lt;/code&gt; to
+&nbsp;	 * &lt;code&gt;preferred&lt;/code&gt; 2) Copies data (gender/birthdate/names/ids/etc) from
+&nbsp;	 * &lt;code&gt;nonPreferred&lt;/code&gt; to &lt;code&gt;preferred&lt;/code&gt; iff the data is missing or null in
+&nbsp;	 * &lt;code&gt;preferred&lt;/code&gt; 3) &lt;code&gt;notPreferred&lt;/code&gt; is marked as voided
+&nbsp;	 * 
+&nbsp;	 * @param preferred
+&nbsp;	 * @param notPreferred
+&nbsp;	 * @throws APIException
+&nbsp;	 * @see org.openmrs.api.PatientService#mergePatients(org.openmrs.Patient, org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void mergePatients(Patient preferred, Patient notPreferred) throws APIException, SerializationException {
+<b class="fc">&nbsp;		log.debug(&quot;Merging patients: (preferred)&quot; + preferred.getPatientId() + &quot;, (notPreferred) &quot;</b>
+<b class="fc">&nbsp;		        + notPreferred.getPatientId());</b>
+<b class="fc">&nbsp;		if (preferred.getPatientId().equals(notPreferred.getPatientId())) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Merge operation cancelled: Cannot merge user&quot; + preferred.getPatientId() + &quot; to self&quot;);</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Patient.merge.cancelled&quot;, new Object[] { preferred.getPatientId() });</b>
+&nbsp;		}
+<b class="fc">&nbsp;		requireNoActiveOrderOfSameType(preferred,notPreferred);</b>
+<b class="fc">&nbsp;		PersonMergeLogData mergedData = new PersonMergeLogData();</b>
+<b class="fc">&nbsp;		mergeVisits(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeEncounters(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeProgramEnrolments(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeRelationships(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeObservationsNotContainedInEncounters(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeIdentifiers(preferred, notPreferred, mergedData);</b>
+&nbsp;		
+<b class="fc">&nbsp;		mergeNames(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeAddresses(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergePersonAttributes(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeGenderInformation(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeDateOfBirth(preferred, notPreferred, mergedData);</b>
+<b class="fc">&nbsp;		mergeDateOfDeath(preferred, notPreferred, mergedData);</b>
+&nbsp;		
+&nbsp;		// void the non preferred patient
+<b class="fc">&nbsp;		Context.getPatientService().voidPatient(notPreferred, &quot;Merged with patient #&quot; + preferred.getPatientId());</b>
+&nbsp;		
+&nbsp;		// void the person associated with not preferred patient
+<b class="fc">&nbsp;		Context.getPersonService().voidPerson(notPreferred,</b>
+<b class="fc">&nbsp;		    &quot;The patient corresponding to this person has been voided and Merged with patient #&quot; + preferred.getPatientId());</b>
+&nbsp;		
+&nbsp;		// associate the Users associated with the not preferred person, to the preferred person.
+<b class="fc">&nbsp;		changeUserAssociations(preferred, notPreferred, mergedData);</b>
+&nbsp;		
+&nbsp;		// Save the newly update preferred patient
+&nbsp;		// This must be called _after_ voiding the nonPreferred patient so that
+&nbsp;		//  a &quot;Duplicate Identifier&quot; error doesn&#39;t pop up.
+<b class="fc">&nbsp;		savePatient(preferred);</b>
+&nbsp;		
+&nbsp;		//save the person merge log
+<b class="fc">&nbsp;		PersonMergeLog personMergeLog = new PersonMergeLog();</b>
+<b class="fc">&nbsp;		personMergeLog.setWinner(preferred);</b>
+<b class="fc">&nbsp;		personMergeLog.setLoser(notPreferred);</b>
+<b class="fc">&nbsp;		personMergeLog.setPersonMergeLogData(mergedData);</b>
+<b class="fc">&nbsp;		Context.getPersonService().savePersonMergeLog(personMergeLog);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void requireNoActiveOrderOfSameType(Patient patient1, Patient patient2) {
+<b class="fc">&nbsp;		String messageKey = &quot;Patient.merge.cannotHaveSameTypeActiveOrders&quot;;</b>
+<b class="fc">&nbsp;		List&lt;Order&gt; ordersByPatient1 = Context.getOrderService().getAllOrdersByPatient(patient1);</b>
+<b class="fc">&nbsp;		List&lt;Order&gt; ordersByPatient2 = Context.getOrderService().getAllOrdersByPatient(patient2);</b>
+<b class="fc">&nbsp;		ordersByPatient1.forEach((Order order1) -&gt; ordersByPatient2.forEach((Order order2) -&gt; {</b>
+<b class="fc">&nbsp;			if (order1.isActive() &amp;&amp; order2.isActive() &amp;&amp; order1.getOrderType().equals(order2.getOrderType())) {</b>
+<b class="fc">&nbsp;				Object[] parameters = { patient1.getPatientId(), patient2.getPatientId(), order1.getOrderType() };</b>
+<b class="fc">&nbsp;				String message = Context.getMessageSourceService().getMessage(messageKey, parameters,</b>
+<b class="fc">&nbsp;						Context.getLocale());</b>
+<b class="fc">&nbsp;				log.debug(message);</b>
+<b class="fc">&nbsp;				throw new APIException(message);</b>
+&nbsp;			}
+&nbsp;		}));
+&nbsp;	}
+&nbsp;
+&nbsp;	private void mergeProgramEnrolments(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// copy all program enrollments
+<b class="fc">&nbsp;		ProgramWorkflowService programService = Context.getProgramWorkflowService();</b>
+<b class="fc">&nbsp;		for (PatientProgram pp : programService.getPatientPrograms(notPreferred, null, null, null, null, null, false)) {</b>
+<b class="fc">&nbsp;			if (!pp.getVoided()) {</b>
+<b class="fc">&nbsp;				pp.setPatient(preferred);</b>
+<b class="fc">&nbsp;				log.debug(&quot;Moving patientProgram {} to {}&quot;, pp.getPatientProgramId(), preferred.getPatientId());</b>
+<b class="fc">&nbsp;				PatientProgram persisted = programService.savePatientProgram(pp);</b>
+<b class="fc">&nbsp;				mergedData.addMovedProgram(persisted.getUuid());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeVisits(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// move all visits, including voided ones (encounters will be handled below)
+&nbsp;		//TODO: this should be a copy, not a move
+&nbsp;		
+<b class="fc">&nbsp;		VisitService visitService = Context.getVisitService();</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Visit visit : visitService.getVisitsByPatient(notPreferred, true, true)) {</b>
+<b class="fc">&nbsp;			log.debug(&quot;Merging visit {} to {}&quot;, visit.getVisitId(), preferred.getPatientId());</b>
+<b class="fc">&nbsp;			visit.setPatient(preferred);</b>
+<b class="fc">&nbsp;			Visit persisted = visitService.saveVisit(visit);</b>
+<b class="fc">&nbsp;			mergedData.addMovedVisit(persisted.getUuid());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeEncounters(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// change all encounters. This will cascade to obs and orders contained in those encounters
+&nbsp;		// TODO: this should be a copy, not a move
+<b class="fc">&nbsp;		EncounterService es = Context.getEncounterService();</b>
+&nbsp;
+<b class="fc">&nbsp;		EncounterSearchCriteria notPreferredPatientEncounterSearchCriteria = new EncounterSearchCriteriaBuilder()</b>
+<b class="fc">&nbsp;				.setIncludeVoided(true)</b>
+<b class="fc">&nbsp;				.setPatient(notPreferred)</b>
+<b class="fc">&nbsp;				.createEncounterSearchCriteria();</b>
+<b class="fc">&nbsp;		for (Encounter e : es.getEncounters(notPreferredPatientEncounterSearchCriteria)) {</b>
+<b class="fc">&nbsp;			e.setPatient(preferred);</b>
+<b class="fc">&nbsp;			log.debug(&quot;Merging encounter &quot; + e.getEncounterId() + &quot; to &quot; + preferred.getPatientId());</b>
+<b class="fc">&nbsp;			Encounter persisted = es.saveEncounter(e);</b>
+<b class="fc">&nbsp;			mergedData.addMovedEncounter(persisted.getUuid());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeRelationships(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// copy all relationships
+<b class="fc">&nbsp;		PersonService personService = Context.getPersonService();</b>
+<b class="fc">&nbsp;		Set&lt;String&gt; existingRelationships = new HashSet&lt;&gt;();</b>
+&nbsp;		// fill in the existing relationships with hashes
+<b class="fc">&nbsp;		for (Relationship rel : personService.getRelationshipsByPerson(preferred)) {</b>
+<b class="fc">&nbsp;			existingRelationships.add(relationshipHash(rel, preferred));</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		// iterate over notPreferred&#39;s relationships and only copy them if they are needed
+<b class="fc">&nbsp;		for (Relationship rel : personService.getRelationshipsByPerson(notPreferred)) {</b>
+<b class="fc">&nbsp;			if (!rel.getVoided()) {</b>
+<b class="fc">&nbsp;				boolean personAisPreferred = rel.getPersonA().equals(preferred);</b>
+<b class="fc">&nbsp;				boolean personAisNotPreferred = rel.getPersonA().equals(notPreferred);</b>
+<b class="fc">&nbsp;				boolean personBisPreferred = rel.getPersonB().equals(preferred);</b>
+<b class="fc">&nbsp;				boolean personBisNotPreferred = rel.getPersonB().equals(notPreferred);</b>
+<b class="fc">&nbsp;				String relHash = relationshipHash(rel, notPreferred);</b>
+&nbsp;				
+<b class="fc">&nbsp;				if ((personAisPreferred &amp;&amp; personBisNotPreferred) || (personBisPreferred &amp;&amp; personAisNotPreferred)) {</b>
+&nbsp;					// void this relationship if it&#39;s between the preferred and notPreferred patients
+<b class="fc">&nbsp;					personService.voidRelationship(rel, &quot;person &quot; + (personAisNotPreferred ? &quot;A&quot; : &quot;B&quot;)</b>
+<b class="fc">&nbsp;					        + &quot; was merged to person &quot; + (personAisPreferred ? &quot;A&quot; : &quot;B&quot;));</b>
+<b class="fc">&nbsp;				} else if (existingRelationships.contains(relHash)) {</b>
+&nbsp;					// void this relationship if it already exists between preferred and the other side
+<b class="fc">&nbsp;					personService.voidRelationship(rel, &quot;person &quot; + (personAisNotPreferred ? &quot;A&quot; : &quot;B&quot;)</b>
+&nbsp;					        + &quot; was merged and a relationship already exists&quot;);
+&nbsp;				} else {
+&nbsp;					// copy this relationship and replace notPreferred with preferred
+<b class="fc">&nbsp;					Relationship tmpRel = rel.copy();</b>
+<b class="fc">&nbsp;					if (personAisNotPreferred) {</b>
+<b class="fc">&nbsp;						tmpRel.setPersonA(preferred);</b>
+&nbsp;					}
+<b class="fc">&nbsp;					if (personBisNotPreferred) {</b>
+<b class="fc">&nbsp;						tmpRel.setPersonB(preferred);</b>
+&nbsp;					}
+<b class="fc">&nbsp;					log.debug(&quot;Copying relationship &quot; + rel.getRelationshipId() + &quot; to &quot; + preferred.getPatientId());</b>
+<b class="fc">&nbsp;					Relationship persisted = personService.saveRelationship(tmpRel);</b>
+<b class="fc">&nbsp;					mergedData.addCreatedRelationship(persisted.getUuid());</b>
+&nbsp;					// void the existing relationship to the notPreferred
+<b class="fc">&nbsp;					personService.voidRelationship(rel, &quot;person &quot; + (personAisNotPreferred ? &quot;A&quot; : &quot;B&quot;)</b>
+<b class="fc">&nbsp;					        + &quot; was merged, relationship copied to #&quot; + tmpRel.getRelationshipId());</b>
+&nbsp;					// add the relationship hash to existing relationships
+<b class="fc">&nbsp;					existingRelationships.add(relHash);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				mergedData.addVoidedRelationship(rel.getUuid());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeObservationsNotContainedInEncounters(Patient preferred, Patient notPreferred,
+&nbsp;	        PersonMergeLogData mergedData) {
+&nbsp;		// move all obs that weren&#39;t contained in encounters
+&nbsp;		// TODO: this should be a copy, not a move
+<b class="fc">&nbsp;		ObsService obsService = Context.getObsService();</b>
+<b class="fc">&nbsp;		for (Obs obs : obsService.getObservationsByPerson(notPreferred)) {</b>
+<b class="fc">&nbsp;			if (obs.getEncounter() == null &amp;&amp; !obs.getVoided()) {</b>
+<b class="fc">&nbsp;				obs.setPerson(preferred);</b>
+<b class="fc">&nbsp;				Obs persisted = obsService.saveObs(obs, &quot;Merged from patient #&quot; + notPreferred.getPatientId());</b>
+<b class="fc">&nbsp;				mergedData.addMovedIndependentObservation(persisted.getUuid());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeIdentifiers(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// move all identifiers
+&nbsp;		// (must be done after all calls to services above so hbm doesn&#39;t try to save things prematurely (hacky)
+<b class="fc">&nbsp;		for (PatientIdentifier pi : notPreferred.getActiveIdentifiers()) {</b>
+<b class="fc">&nbsp;			PatientIdentifier tmpIdentifier = new PatientIdentifier();</b>
+<b class="fc">&nbsp;			tmpIdentifier.setIdentifier(pi.getIdentifier());</b>
+<b class="fc">&nbsp;			tmpIdentifier.setIdentifierType(pi.getIdentifierType());</b>
+<b class="fc">&nbsp;			tmpIdentifier.setLocation(pi.getLocation());</b>
+<b class="fc">&nbsp;			tmpIdentifier.setPatient(preferred);</b>
+<b class="fc">&nbsp;			boolean found = false;</b>
+<b class="fc">&nbsp;			for (PatientIdentifier preferredIdentifier : preferred.getIdentifiers()) {</b>
+<b class="fc">&nbsp;				if (preferredIdentifier.getIdentifier() != null</b>
+<b class="fc">&nbsp;				        &amp;&amp; preferredIdentifier.getIdentifier().equals(tmpIdentifier.getIdentifier())</b>
+<b class="fc">&nbsp;				        &amp;&amp; preferredIdentifier.getIdentifierType() != null</b>
+<b class="fc">&nbsp;				        &amp;&amp; preferredIdentifier.getIdentifierType().equals(tmpIdentifier.getIdentifierType())) {</b>
+<b class="fc">&nbsp;					found = true;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			if (!found) {</b>
+<b class="fc">&nbsp;				tmpIdentifier.setIdentifierType(pi.getIdentifierType());</b>
+<b class="fc">&nbsp;				tmpIdentifier.setCreator(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;				tmpIdentifier.setDateCreated(new Date());</b>
+<b class="fc">&nbsp;				tmpIdentifier.setVoided(false);</b>
+<b class="fc">&nbsp;				tmpIdentifier.setVoidedBy(null);</b>
+<b class="fc">&nbsp;				tmpIdentifier.setVoidReason(null);</b>
+<b class="fc">&nbsp;				tmpIdentifier.setUuid(UUID.randomUUID().toString());</b>
+&nbsp;				// we don&#39;t want to change the preferred identifier of the preferred patient
+<b class="fc">&nbsp;				tmpIdentifier.setPreferred(false);</b>
+<b class="fc">&nbsp;				preferred.addIdentifier(tmpIdentifier);</b>
+<b class="fc">&nbsp;				mergedData.addCreatedIdentifier(tmpIdentifier.getUuid());</b>
+<b class="fc">&nbsp;				log.debug(&quot;Merging identifier &quot; + tmpIdentifier.getIdentifier() + &quot; to &quot; + preferred.getPatientId());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeDateOfDeath(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+<b class="fc">&nbsp;		mergedData.setPriorDateOfDeath(preferred.getDeathDate());</b>
+<b class="fc">&nbsp;		if (preferred.getDeathDate() == null) {</b>
+<b class="fc">&nbsp;			preferred.setDeathDate(notPreferred.getDeathDate());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (preferred.getCauseOfDeath() != null) {</b>
+<b class="fc">&nbsp;			mergedData.setPriorCauseOfDeath(preferred.getCauseOfDeath().getUuid());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (preferred.getCauseOfDeath() == null) {</b>
+<b class="fc">&nbsp;			preferred.setCauseOfDeath(notPreferred.getCauseOfDeath());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeDateOfBirth(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+<b class="fc">&nbsp;		mergedData.setPriorDateOfBirth(preferred.getBirthdate());</b>
+<b class="fc">&nbsp;		mergedData.setPriorDateOfBirthEstimated(preferred.getBirthdateEstimated());</b>
+<b class="fc">&nbsp;		if (preferred.getBirthdate() == null || (preferred.getBirthdateEstimated() &amp;&amp; !notPreferred.getBirthdateEstimated())) {</b>
+<b class="fc">&nbsp;			preferred.setBirthdate(notPreferred.getBirthdate());</b>
+<b class="fc">&nbsp;			preferred.setBirthdateEstimated(notPreferred.getBirthdateEstimated());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergePersonAttributes(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// copy person attributes
+<b class="fc">&nbsp;		for (PersonAttribute attr : notPreferred.getAttributes()) {</b>
+<b class="fc">&nbsp;			if (!attr.getVoided()) {</b>
+<b class="nc">&nbsp;				PersonAttribute tmpAttr = attr.copy();</b>
+<b class="nc">&nbsp;				tmpAttr.setPerson(null);</b>
+<b class="nc">&nbsp;				tmpAttr.setUuid(UUID.randomUUID().toString());</b>
+<b class="nc">&nbsp;				preferred.addAttribute(tmpAttr);</b>
+<b class="nc">&nbsp;				mergedData.addCreatedAttribute(tmpAttr.getUuid());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeGenderInformation(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// move all other patient info
+<b class="fc">&nbsp;		mergedData.setPriorGender(preferred.getGender());</b>
+<b class="fc">&nbsp;		if (!&quot;M&quot;.equals(preferred.getGender()) &amp;&amp; !&quot;F&quot;.equals(preferred.getGender())) {</b>
+<b class="nc">&nbsp;			preferred.setGender(notPreferred.getGender());</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeNames(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData) {
+&nbsp;		// move all names
+&nbsp;		// (must be done after all calls to services above so hbm doesn&#39;t try to save things prematurely (hacky)
+<b class="fc">&nbsp;		for (PersonName newName : notPreferred.getNames()) {</b>
+<b class="fc">&nbsp;			boolean containsName = false;</b>
+<b class="fc">&nbsp;			for (PersonName currentName : preferred.getNames()) {</b>
+<b class="fc">&nbsp;				containsName = currentName.equalsContent(newName);</b>
+<b class="fc">&nbsp;				if (containsName) {</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			if (!containsName) {</b>
+<b class="fc">&nbsp;				PersonName tmpName = constructTemporaryName(newName);</b>
+<b class="fc">&nbsp;				preferred.addName(tmpName);</b>
+<b class="fc">&nbsp;				mergedData.addCreatedName(tmpName.getUuid());</b>
+<b class="fc">&nbsp;				log.debug(&quot;Merging name &quot; + newName.getGivenName() + &quot; to &quot; + preferred.getPatientId());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private PersonName constructTemporaryName(PersonName newName) {
+<b class="fc">&nbsp;		PersonName tmpName = PersonName.newInstance(newName);</b>
+<b class="fc">&nbsp;		tmpName.setPersonNameId(null);</b>
+<b class="fc">&nbsp;		tmpName.setVoided(false);</b>
+<b class="fc">&nbsp;		tmpName.setVoidedBy(null);</b>
+<b class="fc">&nbsp;		tmpName.setVoidReason(null);</b>
+&nbsp;		// we don&#39;t want to change the preferred name of the preferred patient
+<b class="fc">&nbsp;		tmpName.setPreferred(false);</b>
+<b class="fc">&nbsp;		tmpName.setUuid(UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;		return tmpName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private void mergeAddresses(Patient preferred, Patient notPreferred, PersonMergeLogData mergedData)
+&nbsp;	        throws SerializationException {
+&nbsp;		// move all addresses
+&nbsp;		// (must be done after all calls to services above so hbm doesn&#39;t try to save things prematurely (hacky)
+<b class="fc">&nbsp;		for (PersonAddress newAddress : notPreferred.getAddresses()) {</b>
+<b class="fc">&nbsp;			boolean containsAddress = false;</b>
+<b class="fc">&nbsp;			for (PersonAddress currentAddress : preferred.getAddresses()) {</b>
+<b class="fc">&nbsp;				containsAddress = currentAddress.equalsContent(newAddress);</b>
+<b class="fc">&nbsp;				if (containsAddress) {</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;			if (!containsAddress) {</b>
+<b class="fc">&nbsp;				PersonAddress tmpAddress = (PersonAddress) newAddress.clone();</b>
+<b class="fc">&nbsp;				tmpAddress.setPersonAddressId(null);</b>
+<b class="fc">&nbsp;				tmpAddress.setVoided(false);</b>
+<b class="fc">&nbsp;				tmpAddress.setVoidedBy(null);</b>
+<b class="fc">&nbsp;				tmpAddress.setVoidReason(null);</b>
+<b class="fc">&nbsp;				tmpAddress.setPreferred(false); // addresses from non-preferred patient shouldn&#39;t be marked as preferred</b>
+<b class="fc">&nbsp;				tmpAddress.setUuid(UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;				preferred.addAddress(tmpAddress);</b>
+<b class="fc">&nbsp;				mergedData.addCreatedAddress(tmpAddress.getUuid());</b>
+<b class="fc">&nbsp;				log.debug(&quot;Merging address &quot; + newAddress.getPersonAddressId() + &quot; to &quot; + preferred.getPatientId());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// copy person attributes
+<b class="fc">&nbsp;		for (PersonAttribute attr : notPreferred.getAttributes()) {</b>
+<b class="fc">&nbsp;			if (!attr.getVoided()) {</b>
+<b class="fc">&nbsp;				PersonAttribute tmpAttr = attr.copy();</b>
+<b class="fc">&nbsp;				tmpAttr.setPerson(null);</b>
+<b class="fc">&nbsp;				tmpAttr.setUuid(UUID.randomUUID().toString());</b>
+<b class="fc">&nbsp;				preferred.addAttribute(tmpAttr);</b>
+<b class="fc">&nbsp;				mergedData.addCreatedAttribute(tmpAttr.getUuid());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// move all other patient info
+<b class="fc">&nbsp;		mergedData.setPriorGender(preferred.getGender());</b>
+<b class="fc">&nbsp;		if (!&quot;M&quot;.equals(preferred.getGender()) &amp;&amp; !&quot;F&quot;.equals(preferred.getGender())) {</b>
+<b class="nc">&nbsp;			preferred.setGender(notPreferred.getGender());</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		mergedData.setPriorDateOfBirth(preferred.getBirthdate());</b>
+<b class="fc">&nbsp;		mergedData.setPriorDateOfBirthEstimated(preferred.getBirthdateEstimated());</b>
+<b class="fc">&nbsp;		if (preferred.getBirthdate() == null || (preferred.getBirthdateEstimated() &amp;&amp; !notPreferred.getBirthdateEstimated())) {</b>
+<b class="fc">&nbsp;			preferred.setBirthdate(notPreferred.getBirthdate());</b>
+<b class="fc">&nbsp;			preferred.setBirthdateEstimated(notPreferred.getBirthdateEstimated());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		mergedData.setPriorDateOfDeathEstimated(preferred.getDeathdateEstimated());</b>
+<b class="fc">&nbsp;		if (preferred.getDeathdateEstimated() == null) {</b>
+<b class="fc">&nbsp;			preferred.setDeathdateEstimated(notPreferred.getDeathdateEstimated());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		mergedData.setPriorDateOfDeath(preferred.getDeathDate());</b>
+<b class="fc">&nbsp;		if (preferred.getDeathDate() == null) {</b>
+<b class="fc">&nbsp;			preferred.setDeathDate(notPreferred.getDeathDate());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (preferred.getCauseOfDeath() != null) {</b>
+<b class="fc">&nbsp;			mergedData.setPriorCauseOfDeath(preferred.getCauseOfDeath().getUuid());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (preferred.getCauseOfDeath() == null) {</b>
+<b class="fc">&nbsp;			preferred.setCauseOfDeath(notPreferred.getCauseOfDeath());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// void the non preferred patient
+<b class="fc">&nbsp;		Context.getPatientService().voidPatient(notPreferred, &quot;Merged with patient #&quot; + preferred.getPatientId());</b>
+&nbsp;		
+&nbsp;		// void the person associated with not preferred patient
+<b class="fc">&nbsp;		Context.getPersonService().voidPerson(notPreferred,</b>
+<b class="fc">&nbsp;		    &quot;The patient corresponding to this person has been voided and Merged with patient #&quot; + preferred.getPatientId());</b>
+&nbsp;		
+&nbsp;		// associate the Users associated with the not preferred person, to the preferred person.
+<b class="fc">&nbsp;		changeUserAssociations(preferred, notPreferred, mergedData);</b>
+&nbsp;		
+&nbsp;		// Save the newly update preferred patient
+&nbsp;		// This must be called _after_ voiding the nonPreferred patient so that
+&nbsp;		//  a &quot;Duplicate Identifier&quot; error doesn&#39;t pop up.
+<b class="fc">&nbsp;		savePatient(preferred);</b>
+&nbsp;		
+&nbsp;		//save the person merge log
+<b class="fc">&nbsp;		PersonMergeLog personMergeLog = new PersonMergeLog();</b>
+<b class="fc">&nbsp;		personMergeLog.setWinner(preferred);</b>
+<b class="fc">&nbsp;		personMergeLog.setLoser(notPreferred);</b>
+<b class="fc">&nbsp;		personMergeLog.setPersonMergeLogData(mergedData);</b>
+<b class="fc">&nbsp;		Context.getPersonService().savePersonMergeLog(personMergeLog);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Change user associations for notPreferred to preferred person.
+&nbsp;	 * 
+&nbsp;	 * @param preferred
+&nbsp;	 * @param notPreferred
+&nbsp;	 * @param mergedData a patient merge audit data object to update
+&nbsp;	 * @see PatientServiceImpl#mergePatients(Patient, Patient)
+&nbsp;	 */
+&nbsp;	private void changeUserAssociations(Patient preferred, Person notPreferred, PersonMergeLogData mergedData) {
+<b class="fc">&nbsp;		UserService userService = Context.getUserService();</b>
+<b class="fc">&nbsp;		List&lt;User&gt; users = userService.getUsersByPerson(notPreferred, true);</b>
+<b class="fc">&nbsp;		for (User user : users) {</b>
+<b class="fc">&nbsp;			user.setPerson(preferred);</b>
+<b class="fc">&nbsp;			User persisted = userService.saveUser(user);</b>
+<b class="fc">&nbsp;			if (mergedData != null) {</b>
+<b class="fc">&nbsp;				mergedData.addMovedUser(persisted.getUuid());</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is the way to establish that a patient has left the care center. This API call is
+&nbsp;	 * responsible for:
+&nbsp;	 * &lt;ol&gt;
+&nbsp;	 * &lt;li&gt;Closing workflow statuses&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;Terminating programs&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;Discontinuing orders&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;Flagging patient table&lt;/li&gt;
+&nbsp;	 * &lt;li&gt;Creating any relevant observations about the patient (if applicable)&lt;/li&gt;
+&nbsp;	 * &lt;/ol&gt;
+&nbsp;	 * 
+&nbsp;	 * @param patient - the patient who has exited care
+&nbsp;	 * @param dateExited - the declared date/time of the patient&#39;s exit
+&nbsp;	 * @param reasonForExit - the concept that corresponds with why the patient has been declared as
+&nbsp;	 *            exited
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	public void exitFromCare(Patient patient, Date dateExited, Concept reasonForExit) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.invalid.care&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (dateExited == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.no.valid.dateExited&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (reasonForExit == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.no.valid.reasonForExit&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// need to create an observation to represent this (otherwise how
+&nbsp;		// will we know?)
+<b class="fc">&nbsp;		saveReasonForExitObs(patient, dateExited, reasonForExit);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * TODO: Patients should actually be allowed to exit multiple times
+&nbsp;	 * 
+&nbsp;	 * @param patient
+&nbsp;	 * @param exitDate
+&nbsp;	 * @param cause
+&nbsp;	 */
+&nbsp;	private void saveReasonForExitObs(Patient patient, Date exitDate, Concept cause) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (exitDate == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.exit.date.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (cause == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.cause.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// need to make sure there is an Obs that represents the patient&#39;s
+&nbsp;		// exit
+<b class="fc">&nbsp;		log.debug(&quot;Patient is exiting, so let&#39;s make sure there&#39;s an Obs for it&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		String codProp = Context.getAdministrationService().getGlobalProperty(&quot;concept.reasonExitedCare&quot;);</b>
+<b class="fc">&nbsp;		Concept reasonForExit = Context.getConceptService().getConcept(codProp);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (reasonForExit != null) {</b>
+<b class="fc">&nbsp;			List&lt;Obs&gt; obssExit = Context.getObsService().getObservationsByPersonAndConcept(patient, reasonForExit);</b>
+<b class="fc">&nbsp;			if (obssExit != null) {</b>
+<b class="fc">&nbsp;				if (obssExit.size() &gt; 1) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Multiple reasons for exit (&quot; + obssExit.size() + &quot;)?  Shouldn&#39;t be...&quot;);</b>
+&nbsp;				} else {
+&nbsp;					Obs obsExit;
+<b class="fc">&nbsp;					if (obssExit.size() == 1) {</b>
+&nbsp;						// already has a reason for exit - let&#39;s edit it.
+<b class="nc">&nbsp;						log.debug(&quot;Already has a reason for exit, so changing it&quot;);</b>
+&nbsp;						
+<b class="nc">&nbsp;						obsExit = obssExit.iterator().next();</b>
+&nbsp;						
+&nbsp;					} else {
+&nbsp;						// no reason for exit obs yet, so let&#39;s make one
+<b class="fc">&nbsp;						log.debug(&quot;No reason for exit yet, let&#39;s create one.&quot;);</b>
+&nbsp;						
+<b class="fc">&nbsp;						obsExit = new Obs();</b>
+<b class="fc">&nbsp;						obsExit.setPerson(patient);</b>
+<b class="fc">&nbsp;						obsExit.setConcept(reasonForExit);</b>
+&nbsp;						
+<b class="fc">&nbsp;						Location loc = Context.getLocationService().getDefaultLocation();</b>
+&nbsp;						
+<b class="fc">&nbsp;						if (loc != null) {</b>
+<b class="fc">&nbsp;							obsExit.setLocation(loc);</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							log.error(&quot;Could not find a suitable location for which to create this new Obs&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (obsExit != null) {</b>
+&nbsp;						// put the right concept and (maybe) text in this
+&nbsp;						// obs
+<b class="fc">&nbsp;						obsExit.setValueCoded(cause);</b>
+<b class="fc">&nbsp;						obsExit.setValueCodedName(cause.getName()); // ABKTODO: presume current locale?</b>
+<b class="fc">&nbsp;						obsExit.setObsDatetime(exitDate);</b>
+<b class="fc">&nbsp;						Context.getObsService().saveObs(obsExit, &quot;updated by PatientService.saveReasonForExit&quot;);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Reason for exit is null - should not have gotten here without throwing an error on the form.&quot;);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * This is the way to establish that a patient has died. In addition to exiting the patient from
+&nbsp;	 * care (see above), this method will also set the appropriate patient characteristics to
+&nbsp;	 * indicate that they have died, when they died, etc.
+&nbsp;	 * 
+&nbsp;	 * @param patient - the patient who has died
+&nbsp;	 * @param dateDied - the declared date/time of the patient&#39;s death
+&nbsp;	 * @param causeOfDeath - the concept that corresponds with the reason the patient died
+&nbsp;	 * @param otherReason - in case the causeOfDeath is &#39;other&#39;, a place to store more info
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void processDeath(Patient patient, Date dateDied, Concept causeOfDeath, String otherReason) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patient != null &amp;&amp; dateDied != null &amp;&amp; causeOfDeath != null) {</b>
+&nbsp;			// set appropriate patient characteristics
+<b class="fc">&nbsp;			patient.setDead(true);</b>
+<b class="fc">&nbsp;			patient.setDeathDate(dateDied);</b>
+<b class="fc">&nbsp;			patient.setCauseOfDeath(causeOfDeath);</b>
+<b class="fc">&nbsp;			this.savePatient(patient);</b>
+<b class="fc">&nbsp;			saveCauseOfDeathObs(patient, dateDied, causeOfDeath, otherReason);</b>
+&nbsp;			
+&nbsp;			// exit from program
+&nbsp;			// first, need to get Concept for &quot;Patient Died&quot;
+<b class="fc">&nbsp;			String strPatientDied = Context.getAdministrationService().getGlobalProperty(&quot;concept.patientDied&quot;);</b>
+<b class="fc">&nbsp;			Concept conceptPatientDied = Context.getConceptService().getConcept(strPatientDied);</b>
+&nbsp;			
+<b class="fc">&nbsp;			if (conceptPatientDied == null) {</b>
+<b class="nc">&nbsp;				log.debug(&quot;ConceptPatientDied is null&quot;);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			exitFromCare(patient, dateDied, conceptPatientDied);</b>
+&nbsp;			
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (patient == null) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;Patient.invalid.dead&quot;, (Object[]) null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (dateDied == null) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;Patient.no.valid.dateDied&quot;, (Object[]) null);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (causeOfDeath == null) {</b>
+<b class="fc">&nbsp;				throw new APIException(&quot;Patient.no.valid.causeOfDeath&quot;, (Object[]) null);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#saveCauseOfDeathObs(org.openmrs.Patient, java.util.Date,
+&nbsp;	 *      org.openmrs.Concept, java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void saveCauseOfDeathObs(Patient patient, Date deathDate, Concept cause, String otherReason) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (deathDate == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.death.date.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (cause == null) {</b>
+<b class="nc">&nbsp;			throw new APIException(&quot;Patient.cause.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (!patient.getDead()) {</b>
+<b class="nc">&nbsp;			patient.setDead(true);</b>
+<b class="nc">&nbsp;			patient.setDeathDate(deathDate);</b>
+<b class="nc">&nbsp;			patient.setCauseOfDeath(cause);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		log.debug(&quot;Patient is dead, so let&#39;s make sure there&#39;s an Obs for it&quot;);</b>
+&nbsp;		// need to make sure there is an Obs that represents the patient&#39;s
+&nbsp;		// cause of death, if applicable
+&nbsp;		
+<b class="fc">&nbsp;		String codProp = Context.getAdministrationService().getGlobalProperty(&quot;concept.causeOfDeath&quot;);</b>
+&nbsp;		
+<b class="fc">&nbsp;		Concept causeOfDeath = Context.getConceptService().getConcept(codProp);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (causeOfDeath != null) {</b>
+<b class="fc">&nbsp;			List&lt;Obs&gt; obssDeath = Context.getObsService().getObservationsByPersonAndConcept(patient, causeOfDeath);</b>
+<b class="fc">&nbsp;			if (obssDeath != null) {</b>
+<b class="fc">&nbsp;				if (obssDeath.size() &gt; 1) {</b>
+<b class="nc">&nbsp;					log.error(&quot;Multiple causes of death (&quot; + obssDeath.size() + &quot;)?  Shouldn&#39;t be...&quot;);</b>
+&nbsp;				} else {
+&nbsp;					Obs obsDeath;
+<b class="fc">&nbsp;					if (obssDeath.size() == 1) {</b>
+&nbsp;						// already has a cause of death - let&#39;s edit it.
+<b class="nc">&nbsp;						log.debug(&quot;Already has a cause of death, so changing it&quot;);</b>
+&nbsp;						
+<b class="nc">&nbsp;						obsDeath = obssDeath.iterator().next();</b>
+&nbsp;						
+&nbsp;					} else {
+&nbsp;						// no cause of death obs yet, so let&#39;s make one
+<b class="fc">&nbsp;						log.debug(&quot;No cause of death yet, let&#39;s create one.&quot;);</b>
+&nbsp;						
+<b class="fc">&nbsp;						obsDeath = new Obs();</b>
+<b class="fc">&nbsp;						obsDeath.setPerson(patient);</b>
+<b class="fc">&nbsp;						obsDeath.setConcept(causeOfDeath);</b>
+<b class="fc">&nbsp;						Location location = Context.getLocationService().getDefaultLocation();</b>
+<b class="fc">&nbsp;						if (location != null) {</b>
+<b class="fc">&nbsp;							obsDeath.setLocation(location);</b>
+&nbsp;						} else {
+<b class="nc">&nbsp;							log.error(&quot;Could not find a suitable location for which to create this new Obs&quot;);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;					
+&nbsp;					// put the right concept and (maybe) text in this obs
+<b class="fc">&nbsp;					Concept currCause = patient.getCauseOfDeath();</b>
+<b class="fc">&nbsp;					if (currCause == null) {</b>
+&nbsp;						// set to NONE
+<b class="nc">&nbsp;						log.debug(&quot;Current cause is null, attempting to set to NONE&quot;);</b>
+<b class="nc">&nbsp;						String noneConcept = Context.getAdministrationService().getGlobalProperty(&quot;concept.none&quot;);</b>
+<b class="nc">&nbsp;						currCause = Context.getConceptService().getConcept(noneConcept);</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					if (currCause != null) {</b>
+<b class="fc">&nbsp;						log.debug(&quot;Current cause is not null, setting to value_coded&quot;);</b>
+<b class="fc">&nbsp;						obsDeath.setValueCoded(currCause);</b>
+<b class="fc">&nbsp;						obsDeath.setValueCodedName(currCause.getName()); // ABKTODO: presume current locale?</b>
+&nbsp;						
+<b class="fc">&nbsp;						Date dateDeath = patient.getDeathDate();</b>
+<b class="fc">&nbsp;						if (dateDeath == null) {</b>
+<b class="nc">&nbsp;							dateDeath = new Date();</b>
+&nbsp;						}
+<b class="fc">&nbsp;						obsDeath.setObsDatetime(dateDeath);</b>
+&nbsp;						
+&nbsp;						// check if this is an &quot;other&quot; concept - if so, then
+&nbsp;						// we need to add value_text
+<b class="fc">&nbsp;						String otherConcept = Context.getAdministrationService().getGlobalProperty(&quot;concept.otherNonCoded&quot;);</b>
+<b class="fc">&nbsp;						Concept conceptOther = Context.getConceptService().getConcept(otherConcept);</b>
+<b class="fc">&nbsp;						if (conceptOther != null) {</b>
+<b class="fc">&nbsp;							if (conceptOther.equals(currCause)) {</b>
+&nbsp;								// seems like this is an other concept -
+&nbsp;								// let&#39;s try to get the &quot;other&quot; field info
+<b class="nc">&nbsp;								log.debug(&quot;Setting value_text as &quot; + otherReason);</b>
+<b class="nc">&nbsp;								obsDeath.setValueText(otherReason);</b>
+&nbsp;							} else {
+<b class="fc">&nbsp;								log.debug(&quot;New concept is NOT the OTHER concept, so setting to blank&quot;);</b>
+<b class="fc">&nbsp;								obsDeath.setValueText(&quot;&quot;);</b>
+&nbsp;							}
+&nbsp;						} else {
+<b class="nc">&nbsp;							log.debug(&quot;Don&#39;t seem to know about an OTHER concept, so deleting value_text&quot;);</b>
+<b class="nc">&nbsp;							obsDeath.setValueText(&quot;&quot;);</b>
+&nbsp;						}
+&nbsp;						
+<b class="fc">&nbsp;						Context.getObsService().saveObs(obsDeath, &quot;updated by PatientService.saveCauseOfDeathObs&quot;);</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="nc">&nbsp;						log.debug(&quot;Current cause is still null - aborting mission&quot;);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			log.debug(&quot;Cause of death is null - should not have gotten here without throwing an error on the form.&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Patient getPatientByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPatientByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientIdentifier getPatientIdentifierByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPatientIdentifierByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifierTypeByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientIdentifierType getPatientIdentifierTypeByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getPatientIdentifierTypeByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getDefaultIdentifierValidator()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public IdentifierValidator getDefaultIdentifierValidator() {
+<b class="nc">&nbsp;		String defaultPIV = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_PATIENT_IDENTIFIER_VALIDATOR, &quot;&quot;);
+&nbsp;		
+&nbsp;		try {
+<b class="nc">&nbsp;			return identifierValidators.get(Class.forName(defaultPIV));</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassNotFoundException e) {</b>
+<b class="nc">&nbsp;			log.error(&quot;Global Property &quot; + OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_PATIENT_IDENTIFIER_VALIDATOR</b>
+&nbsp;			        + &quot; not set to an actual class.&quot;, e);
+<b class="nc">&nbsp;			return identifierValidators.get(LuhnIdentifierValidator.class);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getIdentifierValidator(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public IdentifierValidator getIdentifierValidator(Class&lt;IdentifierValidator&gt; identifierValidator) {
+<b class="fc">&nbsp;		return identifierValidators.get(identifierValidator);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public Map&lt;Class&lt;? extends IdentifierValidator&gt;, IdentifierValidator&gt; getIdentifierValidators() {
+<b class="fc">&nbsp;		if (identifierValidators == null) {</b>
+<b class="fc">&nbsp;			identifierValidators = new LinkedHashMap&lt;&gt;();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return identifierValidators;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * ADDs identifierValidators, doesn&#39;t replace them
+&nbsp;	 * 
+&nbsp;	 * @param identifierValidators
+&nbsp;	 */
+&nbsp;	public void setIdentifierValidators(Map&lt;Class&lt;? extends IdentifierValidator&gt;, IdentifierValidator&gt; identifierValidators) {
+<b class="fc">&nbsp;		if (identifierValidators == null) {</b>
+<b class="nc">&nbsp;			PatientServiceImpl.setStaticIdentifierValidators(null);</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="fc">&nbsp;		for (Map.Entry&lt;Class&lt;? extends IdentifierValidator&gt;, IdentifierValidator&gt; entry : identifierValidators.entrySet()) {</b>
+<b class="fc">&nbsp;			getIdentifierValidators().put(entry.getKey(), entry.getValue());</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Sets identifierValidators using static method
+&nbsp;	 *
+&nbsp;	 * @param currentIdentifierValidators
+&nbsp;	 */
+&nbsp;	private static void setStaticIdentifierValidators(
+&nbsp;	        Map&lt;Class&lt;? extends IdentifierValidator&gt;, IdentifierValidator&gt; currentIdentifierValidators) {
+<b class="nc">&nbsp;		PatientServiceImpl.identifierValidators = currentIdentifierValidators;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllIdentifierValidators()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Collection&lt;IdentifierValidator&gt; getAllIdentifierValidators() {
+<b class="fc">&nbsp;		return identifierValidators.values();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getIdentifierValidator(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public IdentifierValidator getIdentifierValidator(String pivClassName) {
+<b class="fc">&nbsp;		if (StringUtils.isBlank(pivClassName)) {</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		try {
+<b class="fc">&nbsp;			return getIdentifierValidator((Class&lt;IdentifierValidator&gt;) Context.loadClass(pivClassName));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		catch (ClassNotFoundException e) {</b>
+<b class="fc">&nbsp;			throw new PatientIdentifierException(&quot;Could not find patient identifier validator &quot; + pivClassName, e);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#isIdentifierInUseByAnotherPatient(org.openmrs.PatientIdentifier)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public boolean isIdentifierInUseByAnotherPatient(PatientIdentifier patientIdentifier) {
+<b class="fc">&nbsp;		return dao.isIdentifierInUseByAnotherPatient(patientIdentifier);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getPatientIdentifier(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public PatientIdentifier getPatientIdentifier(Integer patientIdentifierId) throws APIException {
+<b class="fc">&nbsp;		return dao.getPatientIdentifier(patientIdentifierId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#voidPatientIdentifier(org.openmrs.PatientIdentifier,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientIdentifier voidPatientIdentifier(PatientIdentifier patientIdentifier, String reason) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if (patientIdentifier == null || StringUtils.isBlank(reason)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Patient.identifier.cannot.be.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return Context.getPatientService().savePatientIdentifier(patientIdentifier);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#mergePatients(org.openmrs.Patient, java.util.List)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void mergePatients(Patient preferred, List&lt;Patient&gt; notPreferred) throws APIException, SerializationException {
+&nbsp;		
+<b class="fc">&nbsp;		for (Patient nonPreferred : notPreferred) {</b>
+<b class="fc">&nbsp;			mergePatients(preferred, nonPreferred);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#savePatientIdentifier(org.openmrs.PatientIdentifier)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public PatientIdentifier savePatientIdentifier(PatientIdentifier patientIdentifier) throws APIException {
+&nbsp;		//if the argument or the following required fields are not specified
+<b class="fc">&nbsp;		PatientIdentifierType.LocationBehavior locationBehavior = null;</b>
+<b class="fc">&nbsp;		if (patientIdentifier != null) {</b>
+<b class="fc">&nbsp;			locationBehavior = patientIdentifier.getIdentifierType().getLocationBehavior();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (patientIdentifier == null</b>
+<b class="fc">&nbsp;		        || patientIdentifier.getPatient() == null</b>
+<b class="fc">&nbsp;		        || patientIdentifier.getIdentifierType() == null</b>
+<b class="fc">&nbsp;		        || StringUtils.isBlank(patientIdentifier.getIdentifier())</b>
+<b class="nc">&nbsp;		        || (locationBehavior == PatientIdentifierType.LocationBehavior.REQUIRED &amp;&amp; patientIdentifier.getLocation() == null)) {</b>
+<b class="fc">&nbsp;			throw new APIException(&quot;Patient.identifier.null&quot;, (Object[]) null);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (patientIdentifier.getPatientIdentifierId() == null) {</b>
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.ADD_PATIENT_IDENTIFIERS);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			Context.requirePrivilege(PrivilegeConstants.EDIT_PATIENT_IDENTIFIERS);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.savePatientIdentifier(patientIdentifier);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#purgePatientIdentifier(org.openmrs.PatientIdentifier)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgePatientIdentifier(PatientIdentifier patientIdentifier) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		dao.deletePatientIdentifier(patientIdentifier);</b>
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllergies(org.openmrs.Patient)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Allergies getAllergies(Patient patient) {
+<b class="fc">&nbsp;		if (patient == null) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;An existing (NOT NULL) patient is required to get allergies&quot;);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		Allergies allergies = new Allergies();</b>
+<b class="fc">&nbsp;		List&lt;Allergy&gt; allergyList = dao.getAllergies(patient);</b>
+<b class="fc">&nbsp;		if (!allergyList.isEmpty()) {</b>
+<b class="fc">&nbsp;			allergies.addAll(allergyList);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			String status = dao.getAllergyStatus(patient);</b>
+<b class="fc">&nbsp;			if (Allergies.NO_KNOWN_ALLERGIES.equals(status)) {</b>
+<b class="fc">&nbsp;				allergies.confirmNoKnownAllergies();</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return allergies;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#setAllergies(org.openmrs.Patient,
+&nbsp;	 *      org.openmrs.Allergies)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Allergies setAllergies(Patient patient, Allergies allergies) {
+&nbsp;		//NOTE We neither delete nor edit allergies. We instead void them.
+&nbsp;		//Because we shield the API users from this business logic,
+&nbsp;		//we end up with the complicated code below. :)
+&nbsp;		
+&nbsp;		//get the current allergies as stored in the database
+<b class="fc">&nbsp;		List&lt;Allergy&gt; dbAllergyList = getAllergies(patient);</b>
+<b class="fc">&nbsp;		for (Allergy originalAllergy : dbAllergyList) {</b>
+&nbsp;			//check if we still have each allergy, else it has just been deleted
+<b class="fc">&nbsp;			if (allergies.contains(originalAllergy)) {</b>
+&nbsp;				//we still have this allergy, check if it has been edited/changed
+<b class="fc">&nbsp;				Allergy potentiallyEditedAllergy = allergies.getAllergy(originalAllergy.getAllergyId());</b>
+<b class="fc">&nbsp;				if (!potentiallyEditedAllergy.hasSameValues(originalAllergy)) {</b>
+&nbsp;					//allergy has been edited, so void it and create a new one with the current values
+<b class="fc">&nbsp;					Allergy newAllergy = new Allergy();</b>
+&nbsp;					try {
+&nbsp;						//remove the edited allergy from our current list, and void id
+<b class="fc">&nbsp;						allergies.remove(potentiallyEditedAllergy);</b>
+&nbsp;						
+&nbsp;						//copy values from edited allergy, and add it to the current list
+<b class="fc">&nbsp;						newAllergy.copy(potentiallyEditedAllergy);</b>
+<b class="fc">&nbsp;						allergies.add(newAllergy);</b>
+&nbsp;						
+&nbsp;						//we void its original values, as came from the database, 
+&nbsp;						//instead the current ones which have just been copied 
+&nbsp;						//into the new allergy we have just created above
+<b class="fc">&nbsp;						voidAllergy(originalAllergy);</b>
+&nbsp;					}
+<b class="nc">&nbsp;					catch (Exception ex) {</b>
+<b class="nc">&nbsp;						throw new APIException(&quot;Failed to copy edited values&quot;, ex);</b>
+<b class="fc">&nbsp;					}</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				continue;
+&nbsp;			}
+&nbsp;			
+&nbsp;			//void the allergy that has been deleted
+<b class="fc">&nbsp;			voidAllergy(originalAllergy);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (Allergy allergy : allergies) {</b>
+<b class="fc">&nbsp;			if (allergy.getAllergyId() == null &amp;&amp; allergy.getAllergen().getCodedAllergen() == null</b>
+<b class="fc">&nbsp;			        &amp;&amp; StringUtils.isNotBlank(allergy.getAllergen().getNonCodedAllergen())) {</b>
+&nbsp;				
+<b class="fc">&nbsp;				Concept otherNonCoded = Context.getConceptService().getConceptByUuid(Allergen.getOtherNonCodedConceptUuid());</b>
+<b class="fc">&nbsp;				if (otherNonCoded == null) {</b>
+<b class="nc">&nbsp;					throw new APIException(&quot;Can&#39;t find concept with uuid:&quot; + Allergen.getOtherNonCodedConceptUuid());</b>
+&nbsp;				}
+<b class="fc">&nbsp;				allergy.getAllergen().setCodedAllergen(otherNonCoded);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveAllergies(patient, allergies);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Voids a given allergy
+&nbsp;	 * 
+&nbsp;	 * @param allergy the allergy to void
+&nbsp;	 */
+&nbsp;	private void voidAllergy(Allergy allergy) {
+<b class="fc">&nbsp;		allergy.setVoided(true);</b>
+<b class="fc">&nbsp;		allergy.setVoidedBy(Context.getAuthenticatedUser());</b>
+<b class="fc">&nbsp;		allergy.setDateVoided(new Date());</b>
+<b class="fc">&nbsp;		allergy.setVoidReason(&quot;Voided by API&quot;);</b>
+<b class="fc">&nbsp;		dao.saveAllergy(allergy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllergy(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Allergy getAllergy(Integer allergyId) throws APIException {
+<b class="nc">&nbsp;		return dao.getAllergy(allergyId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#getAllergyByUuid(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Allergy getAllergyByUuid(String uuid) throws APIException {
+<b class="fc">&nbsp;		return dao.getAllergyByUuid(uuid);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#saveAllergy(org.openmrs.Allergy)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void saveAllergy(Allergy allergy) throws APIException {
+&nbsp;
+<b class="fc">&nbsp;		dao.saveAllergy(allergy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#removeAllergy(org.openmrs.Allergy,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void removeAllergy(Allergy allergy, String reason) throws APIException {
+<b class="nc">&nbsp;		voidAllergy(allergy, reason);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.api.PatientService#voidAllergy(org.openmrs.Allergy,
+&nbsp;	 *      java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void voidAllergy(Allergy allergy, String reason) throws APIException {
+&nbsp;
+<b class="nc">&nbsp;		allergy.setVoided(true);</b>
+<b class="nc">&nbsp;		allergy.setVoidedBy(Context.getAuthenticatedUser());</b>
+<b class="nc">&nbsp;		allergy.setDateVoided(new Date());</b>
+<b class="nc">&nbsp;		allergy.setVoidReason(reason);</b>
+<b class="nc">&nbsp;		dao.saveAllergy(allergy);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getCountOfPatients(String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getCountOfPatients(String query) {
+<b class="fc">&nbsp;		int count = 0;</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(query)) {</b>
+<b class="nc">&nbsp;			return count;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return OpenmrsUtil.convertToInteger(dao.getCountOfPatients(query));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getCountOfPatients(String, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Integer getCountOfPatients(String query, boolean includeVoided) {
+<b class="nc">&nbsp;		int count = 0;</b>
+<b class="nc">&nbsp;		if (StringUtils.isBlank(query)) {</b>
+<b class="nc">&nbsp;			return count;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return OpenmrsUtil.convertToInteger(dao.getCountOfPatients(query, includeVoided));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getPatients(String, Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getPatients(String query, Integer start, Integer length) throws APIException {
+<b class="fc">&nbsp;		List&lt;Patient&gt; patients = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;		if (StringUtils.isBlank(query)) {</b>
+<b class="nc">&nbsp;			return patients;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.getPatients(query, start, length);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getPatients(String, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getPatients(String query, boolean includeVoided, Integer start, Integer length) throws APIException {
+<b class="nc">&nbsp;		if (StringUtils.isBlank(query)) {</b>
+<b class="nc">&nbsp;			return Collections.emptyList();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return dao.getPatients(query, includeVoided, start, length);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getPatients(String, String, List, boolean, Integer, Integer)
+&nbsp;	 */
+&nbsp;	// TODO - search for usage with non-empty list of patient identifier types - not used
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Patient&gt; getPatients(String name, String identifier, List&lt;PatientIdentifierType&gt; identifierTypes,
+&nbsp;	        boolean matchIdentifierExactly, Integer start, Integer length) throws APIException {
+&nbsp;		
+<b class="fc">&nbsp;		if(identifierTypes == null) {</b>
+<b class="fc">&nbsp;			return dao.getPatients(name != null ? name : identifier, start, length);</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			return dao.getPatients(name != null ? name : identifier, identifierTypes, matchIdentifierExactly, start, length);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see PatientService#checkIfPatientIdentifierTypesAreLocked()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void checkIfPatientIdentifierTypesAreLocked() {
+<b class="fc">&nbsp;		String locked = Context.getAdministrationService().getGlobalProperty(</b>
+&nbsp;		    OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_IDENTIFIER_TYPES_LOCKED, &quot;false&quot;);
+<b class="fc">&nbsp;		if (&quot;true&quot;.equalsIgnoreCase(locked)) {</b>
+<b class="fc">&nbsp;			throw new PatientIdentifierTypeLockedException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see PatientService#getPatientIdentifiersByPatientProgram(org.openmrs.PatientProgram)
+&nbsp;	 */
+&nbsp;	public List&lt;PatientIdentifier&gt; getPatientIdentifiersByPatientProgram(PatientProgram patientProgram) {
+<b class="fc">&nbsp;		return dao.getPatientIdentifierByProgram(patientProgram);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

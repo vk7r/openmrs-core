@@ -1,0 +1,106 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > RoleConstants</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: RoleConstants (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RoleConstants</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import org.openmrs.annotation.AddOnStartup;
+&nbsp;
+&nbsp;/**
+&nbsp; * Contains all role names and their descriptions. Some of role names may be marked with
+&nbsp; * AddOnStartup annotation.
+&nbsp; * 
+&nbsp; * @see org.openmrs.annotation.AddOnStartup
+&nbsp; * @since 1.8
+&nbsp; */
+&nbsp;public class RoleConstants {
+&nbsp;
+&nbsp;	private RoleConstants() {
+&nbsp;	}
+&nbsp;
+&nbsp;	@AddOnStartup(description = &quot;Assigned to Administrators of OpenMRS. Gives additional access to change core aspects of the system.&quot;)
+&nbsp;	public static final String SUPERUSER = &quot;System Developer&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Privileges for non-authenticated users.&quot;)
+&nbsp;	public static final String ANONYMOUS = &quot;Anonymous&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;Privileges gained once authentication has been established.&quot;)
+&nbsp;	public static final String AUTHENTICATED = &quot;Authenticated&quot;;
+&nbsp;	
+&nbsp;	@AddOnStartup(description = &quot;All users with the &#39;Provider&#39; role will appear as options in the default Infopath &quot;)
+&nbsp;	public static final String PROVIDER = &quot;Provider&quot;;
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,389 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SourceMySqldiffFile</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util.databasechange</a>
+</div>
+
+<h1>Coverage Summary for Class: SourceMySqldiffFile (org.openmrs.util.databasechange)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SourceMySqldiffFile</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (5/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7,5%
+  </span>
+  <span class="absValue">
+    (7/93)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util.databasechange;
+&nbsp;
+&nbsp;import liquibase.change.custom.CustomTaskChange;
+&nbsp;import liquibase.database.Database;
+&nbsp;import liquibase.database.DatabaseConnection;
+&nbsp;import liquibase.exception.CustomChangeException;
+&nbsp;import liquibase.exception.DatabaseException;
+&nbsp;import liquibase.exception.SetupException;
+&nbsp;import liquibase.exception.ValidationErrors;
+&nbsp;import liquibase.resource.InputStreamList;
+&nbsp;import liquibase.resource.ResourceAccessor;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.liquibase.OpenmrsClassLoaderResourceAccessor;
+&nbsp;import org.openmrs.util.OpenmrsClassLoader;
+&nbsp;import org.openmrs.util.OpenmrsConstants;
+&nbsp;import org.openmrs.util.OpenmrsUtil;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.File;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.Reader;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Properties;
+&nbsp;
+&nbsp;/**
+&nbsp; * Executes (aka &quot;source&quot;s) the given file on the current database. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * Expects parameter: &quot;sqlFile&quot; : name of file on classpath to source on mysql
+&nbsp; */
+<b class="fc">&nbsp;public class SourceMySqldiffFile implements CustomTaskChange {</b>
+&nbsp;	
+&nbsp;	public static final String CONNECTION_USERNAME = &quot;connection.username&quot;;
+&nbsp;	
+&nbsp;	public static final String CONNECTION_PASSWORD = &quot;connection.password&quot;;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(SourceMySqldiffFile.class);</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Absolute path and name of file to source
+&nbsp;	 */
+<b class="fc">&nbsp;	private String sqlFile = null;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private ResourceAccessor fileOpener = null;</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Does the work of executing the file on mysql
+&nbsp;	 *
+&nbsp;	 * @see liquibase.change.custom.CustomTaskChange#execute(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void execute(Database database) throws CustomChangeException {
+&nbsp;		
+<b class="nc">&nbsp;		Properties runtimeProperties = Context.getRuntimeProperties();</b>
+&nbsp;		
+<b class="nc">&nbsp;		String username = runtimeProperties.getProperty(CONNECTION_USERNAME);</b>
+<b class="nc">&nbsp;		String password = runtimeProperties.getProperty(CONNECTION_PASSWORD);</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (username == null) {</b>
+<b class="nc">&nbsp;			username = System.getProperty(CONNECTION_USERNAME);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (password == null) {</b>
+<b class="nc">&nbsp;			password = System.getProperty(CONNECTION_PASSWORD);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// if we&#39;re in a &quot;generate sql file&quot; mode, quit early
+<b class="nc">&nbsp;		if (username == null || password == null) {</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		DatabaseConnection connection = database.getConnection();</b>
+&nbsp;		
+&nbsp;		// copy the file from the classpath to a real file
+<b class="nc">&nbsp;		File tmpOutputFile = null;</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			tmpOutputFile = File.createTempFile(sqlFile, &quot;tmp&quot;);</b>
+&nbsp;			
+<b class="nc">&nbsp;			fileOpener = new OpenmrsClassLoaderResourceAccessor(OpenmrsClassLoader.getInstance());</b>
+<b class="nc">&nbsp;			try (InputStreamList sqlFileInputStream = fileOpener.openStreams(null, sqlFile);</b>
+<b class="nc">&nbsp;			     OutputStream outputStream = new FileOutputStream(tmpOutputFile)) {</b>
+<b class="nc">&nbsp;				if (sqlFileInputStream != null &amp;&amp; !sqlFileInputStream.isEmpty()) {</b>
+<b class="nc">&nbsp;					OpenmrsUtil.copyFile(sqlFileInputStream.iterator().next(), outputStream);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException e) {</b>
+<b class="nc">&nbsp;			if (tmpOutputFile != null) {</b>
+<b class="nc">&nbsp;				throw new CustomChangeException(&quot;Unable to copy &quot; + sqlFile + &quot; to file: &quot; + tmpOutputFile.getAbsolutePath(),</b>
+&nbsp;				        e);
+&nbsp;			} else {
+<b class="nc">&nbsp;				throw new CustomChangeException(&quot;Unable to copy &quot; + sqlFile, e);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// build the mysql command line string
+<b class="nc">&nbsp;		List&lt;String&gt; commands = new ArrayList&lt;&gt;();</b>
+&nbsp;		String databaseName;
+&nbsp;		try {
+<b class="nc">&nbsp;			commands.add(&quot;mysql&quot;);</b>
+<b class="nc">&nbsp;			commands.add(&quot;-u&quot; + username);</b>
+<b class="nc">&nbsp;			commands.add(&quot;-p&quot; + password);</b>
+<b class="nc">&nbsp;			String path = tmpOutputFile.getAbsolutePath();</b>
+<b class="nc">&nbsp;			if (!OpenmrsConstants.UNIX_BASED_OPERATING_SYSTEM) {</b>
+&nbsp;				// windows hacks
+<b class="nc">&nbsp;				path = fixWindowsPathHack(path);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			commands.add(&quot;-esource &quot; + path);</b>
+<b class="nc">&nbsp;			databaseName = connection.getCatalog();</b>
+<b class="nc">&nbsp;			commands.add(databaseName);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (DatabaseException e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Unable to generate command string for file: &quot; + sqlFile, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+&nbsp;		// to be used in error messages if this fails
+<b class="nc">&nbsp;		String errorCommand = &quot;\&quot;mysql -u&quot; + username + &quot; -p -e\&quot;source &quot; + tmpOutputFile.getAbsolutePath() + &quot;\&quot;&quot;</b>
+&nbsp;		        + databaseName;
+&nbsp;		
+&nbsp;		// run the command line string
+<b class="nc">&nbsp;		StringBuilder output = new StringBuilder();</b>
+<b class="nc">&nbsp;		Integer exitValue = -1; // default to a non-zero exit value in case of exceptions</b>
+&nbsp;		try {
+<b class="nc">&nbsp;			exitValue = execCmd(tmpOutputFile.getParentFile(), commands.toArray(new String[] {}), output);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IOException io) {</b>
+<b class="nc">&nbsp;			if (io.getMessage().endsWith(&quot;not found&quot;)) {</b>
+<b class="nc">&nbsp;				throw new CustomChangeException(</b>
+<b class="nc">&nbsp;				        &quot;Unable to run command: &quot; + commands.get(0)</b>
+&nbsp;				                + &quot;.  Make sure that it is on the PATH and then restart your server and try again. &quot;
+&nbsp;				                + &quot; Or run &quot; + errorCommand + &quot; at the command line with the appropriate full mysql path&quot;,
+&nbsp;				        io);
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;Error while executing command: &#39;&quot; + commands.get(0) + &quot;&#39;&quot;, e);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Exec called: &quot; + Collections.singletonList(commands));</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (exitValue != 0) {</b>
+<b class="nc">&nbsp;			log.error(&quot;There was an error while running the &quot; + commands.get(0) + &quot; command.  Command output: &quot;</b>
+<b class="nc">&nbsp;			        + output.toString());</b>
+<b class="nc">&nbsp;			throw new CustomChangeException(&quot;There was an error while running the &quot; + commands.get(0)</b>
+&nbsp;			        + &quot; command. See your server&#39;s error log for the full error output. As an alternative, you&quot;
+&nbsp;			        + &quot; can run this command manually on your database to skip over this error.  Run this at the command line &quot;
+&nbsp;			        + errorCommand + &quot;  &quot;);
+&nbsp;		} else {
+&nbsp;			// a normal exit value
+<b class="nc">&nbsp;			log.debug(&quot;Output of exec: &quot; + output);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * A hacky way to get rid of the spaces in the java exec call because mysql and java are not
+&nbsp;	 * communicating well
+&nbsp;	 *
+&nbsp;	 * @param path
+&nbsp;	 * @return
+&nbsp;	 */
+&nbsp;	private String fixWindowsPathHack(String path) {
+<b class="nc">&nbsp;		StringBuilder returnedPath = new StringBuilder();</b>
+<b class="nc">&nbsp;		path = path.replace(&quot;\\&quot;, &quot;/&quot;); // so java doesn&#39;t freak out with windows backslashes</b>
+<b class="nc">&nbsp;		for (String pathPart : path.split(&quot;/&quot;)) {</b>
+<b class="nc">&nbsp;			if (pathPart.contains(&quot; &quot;)) {</b>
+&nbsp;				// shorten to the first 6 characters uppercased
+<b class="nc">&nbsp;				pathPart = pathPart.substring(0, 6).toUpperCase();</b>
+&nbsp;				// add in the tilda and assume the first one (very hacky part)
+<b class="nc">&nbsp;				pathPart = pathPart + &quot;~1&quot;;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			returnedPath.append(pathPart).append(&quot;/&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		returnedPath.deleteCharAt(returnedPath.length() - 1);</b>
+<b class="nc">&nbsp;		return returnedPath.toString();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param cmdWithArguments
+&nbsp;	 * @param wd
+&nbsp;	 * @param out
+&nbsp;	 * @return process exit value
+&nbsp;	 */
+&nbsp;	private Integer execCmd(File wd, String[] cmdWithArguments, StringBuilder out) throws Exception {
+<b class="nc">&nbsp;		log.debug(&quot;executing command: &quot; + Arrays.toString(cmdWithArguments));</b>
+&nbsp;		
+&nbsp;		Integer exitValue;
+&nbsp;		
+&nbsp;		// Needed to add support for working directory because of a linux
+&nbsp;		// file system permission issue.
+&nbsp;		
+<b class="nc">&nbsp;		if (!OpenmrsConstants.UNIX_BASED_OPERATING_SYSTEM) {</b>
+<b class="nc">&nbsp;			wd = null;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		Process p = (wd != null) ? Runtime.getRuntime().exec(cmdWithArguments, null, wd)</b>
+<b class="nc">&nbsp;		        : Runtime.getRuntime().exec(cmdWithArguments);</b>
+&nbsp;		
+<b class="nc">&nbsp;		out.append(&quot;Normal cmd output:\n&quot;);</b>
+<b class="nc">&nbsp;		Reader reader = new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8);</b>
+<b class="nc">&nbsp;		BufferedReader input = new BufferedReader(reader);</b>
+&nbsp;		int readChar;
+<b class="nc">&nbsp;		while ((readChar = input.read()) != -1) {</b>
+<b class="nc">&nbsp;			out.append((char) readChar);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		input.close();</b>
+<b class="nc">&nbsp;		reader.close();</b>
+&nbsp;		
+<b class="nc">&nbsp;		out.append(&quot;ErrorStream cmd output:\n&quot;);</b>
+<b class="nc">&nbsp;		reader = new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8);</b>
+<b class="nc">&nbsp;		input = new BufferedReader(reader);</b>
+<b class="nc">&nbsp;		while ((readChar = input.read()) != -1) {</b>
+<b class="nc">&nbsp;			out.append((char) readChar);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		input.close();</b>
+<b class="nc">&nbsp;		reader.close();</b>
+&nbsp;		
+<b class="nc">&nbsp;		exitValue = p.waitFor();</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;Process exit value: &quot; + exitValue);</b>
+&nbsp;		
+<b class="nc">&nbsp;		log.debug(&quot;execCmd output: \n&quot; + out.toString());</b>
+&nbsp;		
+<b class="nc">&nbsp;		return exitValue;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#getConfirmationMessage()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getConfirmationMessage() {
+<b class="nc">&nbsp;		return &quot;Finished executing &quot; + sqlFile + &quot; on database&quot;;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setFileOpener(ResourceAccessor)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setFileOpener(ResourceAccessor fileOpener) {
+<b class="fc">&nbsp;		this.fileOpener = fileOpener;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Get the values of the parameters passed in and set them to the local variables on this class.
+&nbsp;	 *
+&nbsp;	 * @see liquibase.change.custom.CustomChange#setUp()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setUp() throws SetupException {
+&nbsp;		
+<b class="fc">&nbsp;	}</b>
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see liquibase.change.custom.CustomChange#validate(liquibase.database.Database)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public ValidationErrors validate(Database database) {
+<b class="nc">&nbsp;		return new ValidationErrors();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param sqlFile the sqlFile to set
+&nbsp;	 */
+&nbsp;	public void setSqlFile(String sqlFile) {
+<b class="fc">&nbsp;		this.sqlFile = sqlFile;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

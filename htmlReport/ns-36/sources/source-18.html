@@ -1,0 +1,162 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MemoryLeakUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: MemoryLeakUtil (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MemoryLeakUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.lang.reflect.Field;
+&nbsp;import java.util.Timer;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility functions to clean up causes of memory leakages.
+&nbsp; */
+&nbsp;public class MemoryLeakUtil {
+&nbsp;	
+&nbsp;	private MemoryLeakUtil() {
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(MemoryLeakUtil.class);</b>
+&nbsp;	
+&nbsp;	//http://bugs.mysql.com/bug.php?id=36565
+&nbsp;	public static void shutdownMysqlCancellationTimer() {
+&nbsp;		try {
+<b class="nc">&nbsp;			ClassLoader myClassLoader = MemoryLeakUtil.class.getClassLoader();</b>
+<b class="nc">&nbsp;			Class&lt;?&gt; clazz = Class.forName(&quot;com.mysql.jdbc.ConnectionImpl&quot;, false, myClassLoader);</b>
+&nbsp;			
+<b class="nc">&nbsp;			if (!(clazz.getClassLoader() == myClassLoader)) {</b>
+<b class="nc">&nbsp;				log.info(&quot;MySQL ConnectionImpl was loaded with another ClassLoader: (&quot; + clazz.getClassLoader()</b>
+&nbsp;				        + &quot;): cancelling anyway&quot;);
+&nbsp;			} else {
+<b class="nc">&nbsp;				log.info(&quot;MySQL ConnectionImpl was loaded with the WebappClassLoader: cancelling the Timer&quot;);</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			Field f = clazz.getDeclaredField(&quot;cancelTimer&quot;);</b>
+<b class="nc">&nbsp;			f.setAccessible(true);</b>
+<b class="nc">&nbsp;			Timer timer = (Timer) f.get(null);</b>
+<b class="nc">&nbsp;			timer.cancel();</b>
+<b class="nc">&nbsp;			log.info(&quot;completed timer cancellation&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (ClassNotFoundException | NoSuchFieldException cnfe) {</b>
+&nbsp;			// Ignore
+<b class="nc">&nbsp;			log.error(&quot;Cannot cancel&quot;, cnfe);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (SecurityException se) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Failed to shut-down MySQL Statement Cancellation Timer due to a SecurityException&quot;, se);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (IllegalAccessException iae) {</b>
+<b class="nc">&nbsp;			log.info(&quot;Failed to shut-down MySQL Statement Cancellation Timer due to an IllegalAccessException&quot;, iae);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

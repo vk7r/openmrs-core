@@ -1,0 +1,209 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LuhnIdentifierValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.patient.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: LuhnIdentifierValidator (org.openmrs.patient.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LuhnIdentifierValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.patient.impl;
+&nbsp;
+&nbsp;import org.openmrs.patient.UnallowedIdentifierException;
+&nbsp;
+&nbsp;/**
+&nbsp; * A IdentifierValidator based on the Regenstrief Institute&#39;s version of the Luhn Algorithm.
+&nbsp; */
+<b class="fc">&nbsp;public class LuhnIdentifierValidator extends BaseHyphenatedIdentifierValidator {</b>
+&nbsp;	
+&nbsp;	private static final String ALLOWED_CHARS = &quot;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_&quot;;
+&nbsp;	
+&nbsp;	private static final String LUHN_NAME = &quot;Luhn CheckDigit Validator&quot;;
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	protected int getCheckDigit(String undecoratedIdentifier) {
+&nbsp;		//		 remove leading or trailing whitespace, convert to uppercase
+<b class="fc">&nbsp;		String trimmedUppercaseUndecoratedIdentifier = undecoratedIdentifier.trim().toUpperCase();</b>
+&nbsp;		
+&nbsp;		// this will privatebe a running total
+<b class="fc">&nbsp;		int sum = 0;</b>
+&nbsp;		
+&nbsp;		// loop through digits from right to left
+<b class="fc">&nbsp;		for (int i = 0; i &lt; trimmedUppercaseUndecoratedIdentifier.length(); i++) {</b>
+&nbsp;			
+&nbsp;			// set ch to &quot;current&quot; character to be processed
+<b class="fc">&nbsp;			char ch = trimmedUppercaseUndecoratedIdentifier.charAt(trimmedUppercaseUndecoratedIdentifier.length() - i - 1);</b>
+&nbsp;			
+&nbsp;			// our &quot;digit&quot; is calculated using ASCII value - 48
+<b class="fc">&nbsp;			int digit = (int) ch - 48;</b>
+&nbsp;			
+&nbsp;			// weight will be the current digit&#39;s contribution to
+&nbsp;			// the running total
+&nbsp;			int weight;
+<b class="fc">&nbsp;			if (i % 2 == 0) {</b>
+&nbsp;				
+&nbsp;				// for alternating digits starting with the rightmost, we
+&nbsp;				// use our formula this is the same as multiplying x 2 and
+&nbsp;				// adding digits together for values 0 to 9. Using the
+&nbsp;				// following formula allows us to gracefully calculate a
+&nbsp;				// weight for non-numeric &quot;digits&quot; as well (from their
+&nbsp;				// ASCII value - 48).
+<b class="fc">&nbsp;				weight = (2 * digit) - (digit / 5) * 9;</b>
+&nbsp;				
+&nbsp;			} else {
+&nbsp;				
+&nbsp;				// even-positioned digits just contribute their ascii
+&nbsp;				// value minus 48
+<b class="fc">&nbsp;				weight = digit;</b>
+&nbsp;				
+&nbsp;			}
+&nbsp;			
+&nbsp;			// keep a running total of weights
+<b class="fc">&nbsp;			sum += weight;</b>
+&nbsp;			
+&nbsp;		}
+&nbsp;		
+&nbsp;		// avoid sum less than 10 (if characters below &quot;0&quot; allowed,
+&nbsp;		// this could happen)
+<b class="fc">&nbsp;		sum = Math.abs(sum) + 10;</b>
+&nbsp;		
+&nbsp;		// check digit is amount needed to reach next number
+&nbsp;		// divisible by ten
+<b class="fc">&nbsp;		return (10 - (sum % 10)) % 10;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.patient.IdentifierValidator#getName()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getName() {
+<b class="fc">&nbsp;		return LUHN_NAME;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.patient.IdentifierValidator#getAllowedCharacters()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAllowedCharacters() {
+<b class="fc">&nbsp;		return ALLOWED_CHARS;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.patient.IdentifierValidator#getValidIdentifier(java.lang.String)
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; get valid identifier
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; fail with invalid identifiers
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getValidIdentifier(String undecoratedIdentifier) throws UnallowedIdentifierException {
+&nbsp;		
+<b class="fc">&nbsp;		checkAllowedIdentifier(undecoratedIdentifier);</b>
+&nbsp;		
+<b class="fc">&nbsp;		int checkDigit = getCheckDigit(undecoratedIdentifier);</b>
+&nbsp;
+<b class="fc">&nbsp;		return undecoratedIdentifier + &quot;-&quot; + checkDigit;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

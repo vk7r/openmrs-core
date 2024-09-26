@@ -1,0 +1,259 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConceptSearchResult</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: ConceptSearchResult (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConceptSearchResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    38,5%
+  </span>
+  <span class="absValue">
+    (5/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25,8%
+  </span>
+  <span class="absValue">
+    (8/31)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;/**
+&nbsp; * An Object of this class represents a search result returned when searching for concepts, it holds
+&nbsp; * extra metadata about the matched concept(s).
+&nbsp; *
+&nbsp; * @since 1.8
+&nbsp; */
+&nbsp;public class ConceptSearchResult {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 6394792520635644989L;
+&nbsp;	
+&nbsp;	// the matching concept that was found
+&nbsp;	private Concept concept;
+&nbsp;	
+&nbsp;	// the actual conceptName that was matching a given word in the search
+&nbsp;	private ConceptName conceptName;
+&nbsp;	
+&nbsp;	// the word in the search string that was matched against the conceptNameHit
+&nbsp;	private String word;
+&nbsp;	
+<b class="fc">&nbsp;	private Double transientWeight = 0.0;</b>
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="nc">&nbsp;	public ConceptSearchResult() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor
+&nbsp;	 *
+&nbsp;	 * @param word the single word that will be matched to search terms
+&nbsp;	 * @param concept the concept that is being matched to
+&nbsp;	 * @param conceptName the specific name that will be matched
+&nbsp;	 */
+<b class="fc">&nbsp;	public ConceptSearchResult(String word, Concept concept, ConceptName conceptName) {</b>
+<b class="fc">&nbsp;		this.concept = concept;</b>
+<b class="fc">&nbsp;		this.conceptName = conceptName;</b>
+<b class="fc">&nbsp;		this.word = word;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Convenience constructor that takes in a weight too
+&nbsp;	 *
+&nbsp;	 * @param word the single word that will be matched to search terms
+&nbsp;	 * @param concept the concept that is being matched to
+&nbsp;	 * @param conceptName the specific name that will be matched
+&nbsp;	 * @param transientWeight the weight for this conceptSearchResult
+&nbsp;	 */
+<b class="nc">&nbsp;	public ConceptSearchResult(String word, Concept concept, ConceptName conceptName, Double transientWeight) {</b>
+<b class="nc">&nbsp;		this.concept = concept;</b>
+<b class="nc">&nbsp;		this.conceptName = conceptName;</b>
+<b class="nc">&nbsp;		this.word = word;</b>
+<b class="nc">&nbsp;		if (transientWeight != null) {</b>
+<b class="nc">&nbsp;			this.transientWeight = transientWeight;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the concept
+&nbsp;	 */
+&nbsp;	public Concept getConcept() {
+<b class="fc">&nbsp;		return concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param concept the concept to set
+&nbsp;	 */
+&nbsp;	public void setConcept(Concept concept) {
+<b class="nc">&nbsp;		this.concept = concept;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the conceptName
+&nbsp;	 */
+&nbsp;	public ConceptName getConceptName() {
+<b class="fc">&nbsp;		return conceptName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param conceptName the conceptName to set
+&nbsp;	 */
+&nbsp;	public void setConceptName(ConceptName conceptName) {
+<b class="nc">&nbsp;		this.conceptName = conceptName;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return the word
+&nbsp;	 */
+&nbsp;	public String getWord() {
+<b class="fc">&nbsp;		return word;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param word the word to set
+&nbsp;	 */
+&nbsp;	public void setWord(String word) {
+<b class="nc">&nbsp;		this.word = word;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Getter for transientWeight
+&nbsp;	 *
+&nbsp;	 * @return transient weight
+&nbsp;	 */
+&nbsp;	public Double getTransientWeight() {
+<b class="nc">&nbsp;		return transientWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Setter transientWeight
+&nbsp;	 *
+&nbsp;	 * @param transientWeight
+&nbsp;	 */
+&nbsp;	public void setTransientWeight(Double transientWeight) {
+<b class="nc">&nbsp;		this.transientWeight = transientWeight;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#equals(java.lang.Object)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object obj) {
+<b class="nc">&nbsp;		if (this == obj) {</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (!(obj instanceof ConceptSearchResult)) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		ConceptSearchResult other = (ConceptSearchResult) obj;</b>
+<b class="nc">&nbsp;		if (getConcept() == null) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return getConcept().equals(other.getConcept());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.lang.Object#hashCode()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		if (getConcept() == null) {</b>
+<b class="nc">&nbsp;			return super.hashCode();</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return getConcept().hashCode();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

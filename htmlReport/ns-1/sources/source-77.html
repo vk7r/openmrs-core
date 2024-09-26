@@ -1,0 +1,132 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Attributable</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: Attributable (org.openmrs)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Attributable</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Classes marked with this interface are able to be special values for a PersonAttribute.
+&nbsp; */
+&nbsp;public interface Attributable&lt;E&gt; {
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Deserialize the given string into a full object
+&nbsp;	 * 
+&nbsp;	 * @param s String to deserialize
+&nbsp;	 * @return hydrated object
+&nbsp;	 */
+&nbsp;	public E hydrate(String s);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Turn the current object into an identifying string that can be retrieved later
+&nbsp;	 * 
+&nbsp;	 * @return String representing this object (Usually an identifier or primary key)
+&nbsp;	 */
+&nbsp;	public String serialize();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Find all possible values of this object. For example, if this object is a Location, the
+&nbsp;	 * database is delved into and all Location objects should be returned
+&nbsp;	 * 
+&nbsp;	 * @return List of objects that can be assigned
+&nbsp;	 * @deprecated Data provided by this method can be better achieved from 
+&nbsp;	 * appropriate service at point of use.
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;E&gt; getPossibleValues();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Search for possible values of this object using the given search string
+&nbsp;	 * 
+&nbsp;	 * @param searchText String to search on
+&nbsp;	 * @return List of possible objects that can be assigned
+&nbsp;	 * @deprecated Data provided by this method can be better achieved from 
+&nbsp;	 * appropriate service at point of use.
+&nbsp;	 */
+&nbsp;	@Deprecated
+&nbsp;	public List&lt;E&gt; findPossibleValues(String searchText);
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a descriptive String used for display purposes This is meant as an alternative to using
+&nbsp;	 * the toString() to display this object to a user
+&nbsp;	 * 
+&nbsp;	 * @return String acceptable to display on a page
+&nbsp;	 */
+&nbsp;	public String getDisplayString();
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

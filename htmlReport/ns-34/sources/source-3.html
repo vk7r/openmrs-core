@@ -1,0 +1,201 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > TimerSchedulerTask</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.scheduler.timer</a>
+</div>
+
+<h1>Coverage Summary for Class: TimerSchedulerTask (org.openmrs.scheduler.timer)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TimerSchedulerTask</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45,8%
+  </span>
+  <span class="absValue">
+    (11/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.scheduler.timer;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.TimerTask;
+&nbsp;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.Daemon;
+&nbsp;import org.openmrs.scheduler.SchedulerService;
+&nbsp;import org.openmrs.scheduler.SchedulerUtil;
+&nbsp;import org.openmrs.scheduler.Task;
+&nbsp;import org.openmrs.scheduler.TaskDefinition;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;public class TimerSchedulerTask extends TimerTask {
+&nbsp;	
+&nbsp;	/** The task that will be executed by the JDK timer. */
+&nbsp;	private Task task;
+&nbsp;	
+&nbsp;	/** Logger */
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(TimerSchedulerTask.class);</b>
+&nbsp;	
+&nbsp;	/** * Public constructor */
+<b class="fc">&nbsp;	public TimerSchedulerTask(Task task) {</b>
+<b class="fc">&nbsp;		this.task = task;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * * Executes the action to be performed by this timer task.
+&nbsp;	 * 
+&nbsp;	 * @see java.util.TimerTask#run()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void run() {
+&nbsp;		try {
+<b class="fc">&nbsp;			Daemon.executeScheduledTask(task);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception t) {</b>
+&nbsp;			// Fix #862: IllegalStateException: Timer already cancelled.
+&nbsp;			// Suppress error in order to keep the scheduler&#39;s Timer from completely failing.
+<b class="nc">&nbsp;			log.error(</b>
+<b class="nc">&nbsp;			    &quot;FATAL ERROR: Task [&quot; + task.getClass() + &quot;] failed due to exception [&quot; + t.getClass().getName() + &quot;]&quot;, t);</b>
+<b class="nc">&nbsp;			SchedulerUtil.sendSchedulerError(t);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Save the last execution time in the TaskDefinition
+&nbsp;	 */
+&nbsp;	private static void saveLastExecutionTime(Task task) {
+&nbsp;		TaskDefinition taskDefinition;
+&nbsp;		try {
+&nbsp;			// We re-get the task definition in case the copy set during the
+&nbsp;			// task initialization has become stale.  NOTE: If a task does not
+&nbsp;			// extend the abstract class AbstractTask, then it&#39;s possible the
+&nbsp;			// developer did not actually set the TaskDefintion on the Task.
+&nbsp;			// Therefore we might get an NPE below.
+<b class="fc">&nbsp;			if (task.getTaskDefinition() != null) {</b>
+<b class="nc">&nbsp;				SchedulerService schedulerService = Context.getSchedulerService();</b>
+<b class="nc">&nbsp;				taskDefinition = task.getTaskDefinition();</b>
+<b class="nc">&nbsp;				taskDefinition.setLastExecutionTime(new Date());</b>
+<b class="nc">&nbsp;				schedulerService.saveTaskDefinition(taskDefinition);</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				log.warn(&quot;Unable to save the last execution time for task. Task.taskDefinition is null in &quot;</b>
+<b class="fc">&nbsp;				        + task.getClass());</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Unable to save the last execution time for task &quot;, e);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Shutdown the timer task and invoke the task&#39;s shutdown() callback method.
+&nbsp;	 */
+&nbsp;	public void shutdown() {
+<b class="nc">&nbsp;		super.cancel();</b>
+<b class="nc">&nbsp;		task.shutdown();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Executes the given task.
+&nbsp;	 */
+&nbsp;	public static void execute(Task task) {
+<b class="fc">&nbsp;		task.execute();</b>
+<b class="fc">&nbsp;		saveLastExecutionTime(task);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

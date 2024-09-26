@@ -1,0 +1,312 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AlertServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.notification.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: AlertServiceImpl (org.openmrs.notification.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AlertServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58,3%
+  </span>
+  <span class="absValue">
+    (7/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75,5%
+  </span>
+  <span class="absValue">
+    (37/49)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.notification.impl;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import org.openmrs.Role;
+&nbsp;import org.openmrs.User;
+&nbsp;import org.openmrs.api.APIException;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.openmrs.api.context.Daemon;
+&nbsp;import org.openmrs.api.impl.BaseOpenmrsService;
+&nbsp;import org.openmrs.notification.Alert;
+&nbsp;import org.openmrs.notification.AlertRecipient;
+&nbsp;import org.openmrs.notification.AlertService;
+&nbsp;import org.openmrs.notification.db.AlertDAO;
+&nbsp;import org.openmrs.util.RoleConstants;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class should not be instantiated by itself.
+&nbsp; *
+&nbsp; * @see org.openmrs.notification.AlertService
+&nbsp; */
+&nbsp;@Transactional
+&nbsp;public class AlertServiceImpl extends BaseOpenmrsService implements Serializable, AlertService {
+&nbsp;	
+&nbsp;	private static final long serialVersionUID = 564561231321112365L;
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(AlertServiceImpl.class);</b>
+&nbsp;	
+&nbsp;	private AlertDAO dao;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Default constructor
+&nbsp;	 */
+<b class="fc">&nbsp;	public AlertServiceImpl() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#setAlertDAO(org.openmrs.notification.db.AlertDAO)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAlertDAO(AlertDAO dao) {
+<b class="fc">&nbsp;		this.dao = dao;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#saveAlert(org.openmrs.notification.Alert)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Alert saveAlert(Alert alert) throws APIException {
+<b class="fc">&nbsp;		log.debug(&quot;Create a alert &quot; + alert);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (alert.getCreator() == null) {</b>
+<b class="fc">&nbsp;			alert.setCreator(Context.getAuthenticatedUser());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (alert.getDateCreated() == null) {</b>
+<b class="fc">&nbsp;			alert.setDateCreated(new Date());</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (alert.getAlertId() != null) {</b>
+<b class="nc">&nbsp;			alert.setChangedBy(Context.getAuthenticatedUser());</b>
+<b class="nc">&nbsp;			alert.setDateChanged(new Date());</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Make sure all recipients are assigned to this alert
+<b class="fc">&nbsp;		if (alert.getRecipients() != null) {</b>
+<b class="fc">&nbsp;			for (AlertRecipient recipient : alert.getRecipients()) {</b>
+<b class="fc">&nbsp;				if (!alert.equals(recipient.getAlert())) {</b>
+<b class="nc">&nbsp;					recipient.setAlert(alert);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return dao.saveAlert(alert);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#getAlert(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public Alert getAlert(Integer alertId) throws APIException {
+<b class="nc">&nbsp;		return dao.getAlert(alertId);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#purgeAlert(org.openmrs.notification.Alert)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void purgeAlert(Alert alert) throws APIException {
+<b class="nc">&nbsp;		dao.deleteAlert(alert);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#getAllActiveAlerts(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Alert&gt; getAllActiveAlerts(User user) throws APIException {
+<b class="nc">&nbsp;		log.debug(&quot;Getting all active alerts for user &quot; + user);</b>
+<b class="nc">&nbsp;		return Context.getAlertService().getAlerts(user, true, false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#getAlertsByUser(org.openmrs.User)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Alert&gt; getAlertsByUser(User user) throws APIException {
+<b class="fc">&nbsp;		log.debug(&quot;Getting unread alerts for user &quot; + user);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (user == null) {</b>
+<b class="fc">&nbsp;			if (Context.isAuthenticated()) {</b>
+<b class="fc">&nbsp;				user = Context.getAuthenticatedUser();</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				user = new User();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return Context.getAlertService().getAlerts(user, false, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#getAlerts(org.openmrs.User, boolean, boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Alert&gt; getAlerts(User user, boolean includeRead, boolean includeExpired) throws APIException {
+<b class="fc">&nbsp;		log.debug(&quot;Getting alerts for user &quot; + user + &quot; read? &quot; + includeRead + &quot; expired? &quot; + includeExpired);</b>
+<b class="fc">&nbsp;		return dao.getAlerts(user, includeRead, includeExpired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#getAllAlerts()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Alert&gt; getAllAlerts() throws APIException {
+<b class="nc">&nbsp;		log.debug(&quot;Getting alerts for all users&quot;);</b>
+<b class="nc">&nbsp;		return Context.getAlertService().getAllAlerts(false);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#getAllAlerts(boolean)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	@Transactional(readOnly = true)
+&nbsp;	public List&lt;Alert&gt; getAllAlerts(boolean includeExpired) throws APIException {
+<b class="nc">&nbsp;		log.debug(&quot;Getting alerts for all users&quot;);</b>
+<b class="nc">&nbsp;		return dao.getAllAlerts(includeExpired);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see org.openmrs.notification.AlertService#notifySuperUsers(String, Exception, Object...)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void notifySuperUsers(String messageCode, Exception cause, Object... messageArguments) {
+&nbsp;		
+&nbsp;		// Generate an internationalized error message with the beginning of the stack trace from cause added onto the end
+<b class="fc">&nbsp;		String message = Context.getMessageSourceService().getMessage(messageCode, messageArguments, Context.getLocale());</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (cause != null) {</b>
+<b class="fc">&nbsp;			StringBuilder stackTrace = new StringBuilder();</b>
+&nbsp;			// get the first two lines of the stack trace ( no more can fit in the alert text )
+&nbsp;			
+<b class="fc">&nbsp;			for (StackTraceElement traceElement : cause.getStackTrace()) {</b>
+<b class="fc">&nbsp;				stackTrace.append(traceElement);</b>
+<b class="fc">&nbsp;				stackTrace.append(&quot;\n&quot;);</b>
+<b class="fc">&nbsp;				if (stackTrace.length() &gt;= Alert.TEXT_MAX_LENGTH) {</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			message = message + &quot;:&quot; + stackTrace;</b>
+&nbsp;			
+&nbsp;			//limit message to Alert.TEXT_MAX_LENGTH
+<b class="fc">&nbsp;			message = message.substring(0, Math.min(message.length(), Alert.TEXT_MAX_LENGTH));</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		//Send an alert to all administrators
+<b class="fc">&nbsp;		Alert alert = new Alert(message, Context.getUserService().getUsersByRole(new Role(RoleConstants.SUPERUSER)));</b>
+&nbsp;		
+&nbsp;		// Set the alert so that if any administrator &#39;reads&#39; it it will be marked as read for everyone who received it
+<b class="fc">&nbsp;		alert.setSatisfiedByAny(true);</b>
+&nbsp;		
+&nbsp;		//If there is not user creator for the alert ( because it is being created at start-up )create a user
+<b class="fc">&nbsp;		if (alert.getCreator() == null) { </b>
+<b class="fc">&nbsp;			User daemonUser = Context.getUserService().getUserByUuid(Daemon.getDaemonUserUuid());</b>
+<b class="fc">&nbsp;			alert.setCreator(daemonUser);</b>
+&nbsp;		} 
+&nbsp;		
+&nbsp;		// save the alert to send it to all administrators
+<b class="fc">&nbsp;		Context.getAlertService().saveAlert(alert);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

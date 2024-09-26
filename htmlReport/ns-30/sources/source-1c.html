@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PersonEditor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.propertyeditor</a>
+</div>
+
+<h1>Coverage Summary for Class: PersonEditor (org.openmrs.propertyeditor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PersonEditor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.propertyeditor;
+&nbsp;
+&nbsp;import java.beans.PropertyEditorSupport;
+&nbsp;
+&nbsp;import org.openmrs.Person;
+&nbsp;import org.openmrs.api.PersonService;
+&nbsp;import org.openmrs.api.context.Context;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;/**
+&nbsp; * Allows for serializing/deserializing a Person object to a string so that Spring knows how to pass
+&nbsp; * a Person back and forth through an html form or other medium. &lt;br&gt;
+&nbsp; * &lt;br&gt;
+&nbsp; * In version 1.9, added ability for this to also retrieve Person objects by uuid
+&nbsp; *
+&nbsp; * @see Person
+&nbsp; */
+<b class="fc">&nbsp;public class PersonEditor extends PropertyEditorSupport {</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set using id
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; set using uuid
+&nbsp;	 *
+&nbsp;	 * @see java.beans.PropertyEditorSupport#setAsText(java.lang.String)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setAsText(String text) throws IllegalArgumentException {
+<b class="fc">&nbsp;		PersonService ps = Context.getPersonService();</b>
+<b class="fc">&nbsp;		if (StringUtils.hasText(text)) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				Integer personId = Integer.valueOf(text);</b>
+<b class="fc">&nbsp;				setValue(ps.getPerson(personId));</b>
+&nbsp;			}
+<b class="fc">&nbsp;			catch (NumberFormatException e) {</b>
+<b class="fc">&nbsp;				Person person = ps.getPersonByUuid(text);</b>
+<b class="fc">&nbsp;				setValue(person);</b>
+<b class="fc">&nbsp;				if (person == null) {</b>
+<b class="fc">&nbsp;					throw new IllegalArgumentException(&quot;Failed to find person for value [&quot; + text + &quot;]&quot;);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			setValue(null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @see java.beans.PropertyEditorSupport#getAsText()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String getAsText() {
+<b class="fc">&nbsp;		Person t = (Person) getValue();</b>
+<b class="fc">&nbsp;		if (t == null) {</b>
+<b class="fc">&nbsp;			return &quot;&quot;;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return (t.getPersonId() == null) ? &quot;&quot; : t.getPersonId().toString();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

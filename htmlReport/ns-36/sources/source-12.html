@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HttpClient</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.util</a>
+</div>
+
+<h1>Coverage Summary for Class: HttpClient (org.openmrs.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HttpClient</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67,7%
+  </span>
+  <span class="absValue">
+    (42/62)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.util;
+&nbsp;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.io.OutputStreamWriter;
+&nbsp;import java.io.UnsupportedEncodingException;
+&nbsp;import java.net.HttpURLConnection;
+&nbsp;import java.net.MalformedURLException;
+&nbsp;import java.net.URL;
+&nbsp;import java.net.URLEncoder;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;
+&nbsp;/**
+&nbsp; * This class supports doing an HTTP post to a URL. (It replaces the OpenmrsUtil.postToUrl method, allowing us to
+&nbsp; * mock http calls in unit tests.)
+&nbsp; */
+&nbsp;public class HttpClient {
+&nbsp;	
+<b class="fc">&nbsp;	private static final Logger log = LoggerFactory.getLogger(HttpClient.class);</b>
+&nbsp;	
+&nbsp;	private HttpUrl url;
+&nbsp;	
+&nbsp;	public HttpClient(String url) throws MalformedURLException {
+<b class="fc">&nbsp;		this(new HttpUrl(url));</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public HttpClient(HttpUrl url) {</b>
+<b class="fc">&nbsp;		this.url = url;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public String post(Map&lt;String, String&gt; parameters) {
+<b class="fc">&nbsp;		OutputStreamWriter wr = null;</b>
+<b class="fc">&nbsp;		BufferedReader rd = null;</b>
+<b class="fc">&nbsp;		String response = &quot;&quot;;</b>
+&nbsp;
+&nbsp;		try {
+<b class="fc">&nbsp;			StringBuilder data = constructData(parameters);</b>
+&nbsp;
+&nbsp;			// Send the data
+<b class="fc">&nbsp;			HttpURLConnection connection = url.openConnection();</b>
+<b class="fc">&nbsp;			connection.setDoOutput(true);</b>
+<b class="fc">&nbsp;			connection.setDoInput(true);</b>
+<b class="fc">&nbsp;			connection.setRequestMethod(&quot;POST&quot;);</b>
+<b class="fc">&nbsp;			connection.setRequestProperty(&quot;Content-Length&quot;, String.valueOf(data.length()));</b>
+<b class="fc">&nbsp;			connection.setRequestProperty(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			wr = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);</b>
+<b class="fc">&nbsp;			wr.write(data.toString());</b>
+<b class="fc">&nbsp;			wr.flush();</b>
+<b class="fc">&nbsp;			wr.close();</b>
+&nbsp;			
+&nbsp;			// only handle a single redirection, don&#39;t want to get 
+&nbsp;			// caught in a redirection loop.
+<b class="fc">&nbsp;			boolean redirect = false;</b>
+<b class="fc">&nbsp;			int status = connection.getResponseCode();</b>
+<b class="fc">&nbsp;			if (status == HttpURLConnection.HTTP_MOVED_TEMP</b>
+&nbsp;					|| status == HttpURLConnection.HTTP_MOVED_PERM
+&nbsp;						|| status == HttpURLConnection.HTTP_SEE_OTHER) {
+<b class="nc">&nbsp;				redirect = true;</b>
+&nbsp;			}
+&nbsp;		
+<b class="fc">&nbsp;			if (redirect) {</b>
+&nbsp;
+&nbsp;				// get redirect url from &quot;location&quot; header field
+<b class="nc">&nbsp;				String newUrl = connection.getHeaderField(&quot;Location&quot;);</b>
+<b class="nc">&nbsp;				connection = (HttpURLConnection)new URL(newUrl).openConnection();</b>
+&nbsp;
+<b class="nc">&nbsp;				log.info(&quot;Redirection to : &quot; + newUrl);</b>
+&nbsp;
+&nbsp;				// reset connection options &amp; data
+<b class="nc">&nbsp;				connection.setDoOutput(true);</b>
+<b class="nc">&nbsp;				connection.setDoInput(true);</b>
+<b class="nc">&nbsp;				connection.setRequestMethod(&quot;POST&quot;);</b>
+<b class="nc">&nbsp;				connection.setRequestProperty(&quot;Content-Length&quot;, String.valueOf(data.length()));</b>
+<b class="nc">&nbsp;				connection.setRequestProperty(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded&quot;);</b>
+&nbsp;											
+<b class="nc">&nbsp;				wr = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);</b>
+<b class="nc">&nbsp;				wr.write(data.toString());</b>
+<b class="nc">&nbsp;				wr.flush();</b>
+<b class="nc">&nbsp;				wr.close();</b>
+&nbsp;			}
+&nbsp;		
+&nbsp;			// Get the response
+<b class="fc">&nbsp;			rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));</b>
+&nbsp;			String line;
+<b class="fc">&nbsp;			while ((line = rd.readLine()) != null) {</b>
+<b class="fc">&nbsp;				response = String.format(&quot;%s%s%n&quot;, response, line);</b>
+&nbsp;			}
+&nbsp;			
+&nbsp;		}
+<b class="nc">&nbsp;		catch (Exception e) {</b>
+<b class="nc">&nbsp;			log.warn(&quot;Exception while posting to : &quot; + this.url, e);</b>
+<b class="nc">&nbsp;			log.warn(&quot;Reponse from server was: &quot; + response);</b>
+&nbsp;		}
+&nbsp;		finally {
+<b class="fc">&nbsp;			if (wr != null) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					wr.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) { /* pass */</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (rd != null) {</b>
+&nbsp;				try {
+<b class="fc">&nbsp;					rd.close();</b>
+&nbsp;				}
+<b class="nc">&nbsp;				catch (Exception e) { /* pass */</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		return response;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private StringBuilder constructData(Map&lt;String, String&gt; parameters) throws UnsupportedEncodingException {
+<b class="fc">&nbsp;		StringBuilder data = new StringBuilder();</b>
+<b class="fc">&nbsp;		for (Map.Entry&lt;String, String&gt; entry : parameters.entrySet()) {</b>
+<b class="fc">&nbsp;			if (isInvalidPostVariable(entry)) {</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			data.append(&quot;&amp;&quot;); // only append this if its _not_ the first</b>
+&nbsp;			// datum
+&nbsp;			
+&nbsp;			// finally, setup the actual post string
+<b class="fc">&nbsp;			data.append(URLEncoder.encode(entry.getKey(), &quot;UTF-8&quot;));</b>
+<b class="fc">&nbsp;			data.append(&quot;=&quot;);</b>
+<b class="fc">&nbsp;			data.append(URLEncoder.encode(entry.getValue(), &quot;UTF-8&quot;));</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		return data;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean isInvalidPostVariable(Map.Entry&lt;String, String&gt; entry) {
+<b class="fc">&nbsp;		return entry.getKey() == null || entry.getValue() == null;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

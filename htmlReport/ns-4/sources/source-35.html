@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConditionService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs.api</a>
+</div>
+
+<h1>Coverage Summary for Class: ConditionService (org.openmrs.api)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ConditionService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs.api;
+&nbsp;
+&nbsp;import org.openmrs.Condition;
+&nbsp;import org.openmrs.Encounter;
+&nbsp;import org.openmrs.Patient;
+&nbsp;import org.openmrs.annotation.Authorized;
+&nbsp;import org.openmrs.util.PrivilegeConstants;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * This interface defines methods for condition objects.
+&nbsp; *
+&nbsp; * @since 2.2
+&nbsp; */
+&nbsp;public interface ConditionService extends OpenmrsService {
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a condition based on the uuid
+&nbsp;	 *
+&nbsp;	 * @param uuid - uuid of the condition to be returned
+&nbsp;	 * @throws APIException   
+&nbsp;	 * @return the condition
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONDITIONS })
+&nbsp;	Condition getConditionByUuid(String uuid) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets a patient&#39;s active conditions
+&nbsp;	 *
+&nbsp;	 * @param patient - the patient to retrieve conditions for
+&nbsp;	 * @throws APIException   
+&nbsp;	 * @return a list of the patient&#39;s active conditions
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONDITIONS })
+&nbsp;	List&lt;Condition&gt; getActiveConditions(Patient patient) throws APIException;
+&nbsp;
+&nbsp;    /**
+&nbsp;	 * Gets all conditions i.e both active and inactive conditions, associated with a patient
+&nbsp;	 *
+&nbsp;	 * @param patient - the patient to retrieve conditions for
+&nbsp;	 * @throws APIException   
+&nbsp;	 * @return a list of the patient&#39;s conditions
+&nbsp;	 * @since 2.2.1
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONDITIONS })
+&nbsp;	List&lt;Condition&gt; getAllConditions(Patient patient) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets all conditions(not voided) of an encounter.
+&nbsp;	 * 
+&nbsp;	 * @param encounter - the encounter to retrieve conditions for
+&nbsp;	 * @return a list of encounter&#39;s conditions
+&nbsp;	 * @throws APIException
+&nbsp;	 * @since 2.4.0, 2.3.1
+&nbsp;	 */
+&nbsp;	List&lt;Condition&gt; getConditionsByEncounter(Encounter encounter) throws APIException;
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Gets a condition by id
+&nbsp;	 *
+&nbsp;	 * @param conditionId the id of the Condition to retrieve
+&nbsp;	 * @return the Condition with the given id, or null if none exists
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.GET_CONDITIONS })
+&nbsp;	Condition getCondition(Integer conditionId) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Saves a condition
+&nbsp;	 *
+&nbsp;	 * @param condition - the condition to be saved
+&nbsp;	 * @throws APIException
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_CONDITIONS })
+&nbsp;	Condition saveCondition(Condition condition) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Voids a condition
+&nbsp;	 *
+&nbsp;	 * @param condition the condition to be voided
+&nbsp;	 * @param voidReason the reason for voiding the condition
+&nbsp;	 * @throws APIException if an error occurs while voiding the condition
+&nbsp;	 */
+&nbsp;	@Authorized({ PrivilegeConstants.EDIT_CONDITIONS })
+&nbsp;	Condition voidCondition(Condition condition, String voidReason) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Revive a previously voided condition
+&nbsp;	 *
+&nbsp;	 * @param condition Condition to unvoid
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; unset voided bit on given condition
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.EDIT_CONDITIONS)
+&nbsp;	Condition unvoidCondition(Condition condition) throws APIException;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Completely remove a condition from the database. This should typically not be called
+&nbsp;	 * because we don&#39;t want to ever lose data. The data really &lt;i&gt;should&lt;/i&gt; be voided and then it
+&nbsp;	 * is not seen in interface any longer (see #voidCondition(Condition) for that one) If other things link to
+&nbsp;	 * this condition, an error will be thrown.
+&nbsp;	 *
+&nbsp;	 * @param condition
+&nbsp;	 * @throws APIException
+&nbsp;	 * &lt;strong&gt;Should&lt;/strong&gt; delete the given condition from the database
+&nbsp;	 */
+&nbsp;	@Authorized(PrivilegeConstants.DELETE_CONDITIONS)
+&nbsp;	void purgeCondition(Condition condition) throws APIException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>

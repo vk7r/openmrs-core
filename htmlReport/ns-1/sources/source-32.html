@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DrugIngredient</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.openmrs</a>
+</div>
+
+<h1>Coverage Summary for Class: DrugIngredient (org.openmrs)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DrugIngredient</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (2/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (2/11)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DrugIngredient$HibernateProxy$9zKUwFjZ</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (2/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    18,2%
+  </span>
+  <span class="absValue">
+    (2/11)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/**
+&nbsp; * This Source Code Form is subject to the terms of the Mozilla Public License,
+&nbsp; * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+&nbsp; * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+&nbsp; * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+&nbsp; *
+&nbsp; * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+&nbsp; * graphic logo is a trademark of OpenMRS Inc.
+&nbsp; */
+&nbsp;package org.openmrs;
+&nbsp;
+&nbsp;
+&nbsp;import org.hibernate.envers.Audited;
+&nbsp;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.JoinColumn;
+&nbsp;import javax.persistence.ManyToOne;
+&nbsp;import javax.persistence.Table;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;/**
+&nbsp; * DrugIngredient
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;drug_ingredient&quot;)
+&nbsp;@Audited
+&nbsp;public class DrugIngredient extends BaseOpenmrsObject implements Serializable, OpenmrsObject {
+&nbsp;	
+&nbsp;	public static final long serialVersionUID = 94023L;
+&nbsp;	
+&nbsp;	// Fields
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;drug_id&quot;, updatable = false, insertable = false)
+&nbsp;	@Id
+&nbsp;	private Drug drug;
+&nbsp;
+&nbsp;	@ManyToOne
+&nbsp;	@JoinColumn(name = &quot;ingredient_id&quot;, updatable = false, insertable = false)
+&nbsp;	@Id
+&nbsp;	private Concept ingredient;
+&nbsp;
+&nbsp;	@Column(name = &quot;strength&quot;)
+&nbsp;	private Double strength;
+&nbsp;	
+&nbsp;	@JoinColumn(name = &quot;units&quot;, insertable = false, updatable = false)
+&nbsp;	@ManyToOne
+&nbsp;	private Concept units;
+&nbsp;	
+&nbsp;	// Constructors
+&nbsp;	
+&nbsp;	/** default constructor */
+<b class="fc">&nbsp;	public DrugIngredient() {</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Property accessors
+&nbsp;	/**
+&nbsp;	 * @return the drug
+&nbsp;	 */
+&nbsp;	public Drug getDrug() {
+<b class="nc">&nbsp;		return drug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param drug the drug to set
+&nbsp;	 */
+&nbsp;	public void setDrug(Drug drug) {
+<b class="nc">&nbsp;		this.drug = drug;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the ingredient.
+&nbsp;	 */
+&nbsp;	public Concept getIngredient() {
+<b class="fc">&nbsp;		return ingredient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param ingredient The ingredient to set.
+&nbsp;	 */
+&nbsp;	public void setIngredient(Concept ingredient) {
+<b class="nc">&nbsp;		this.ingredient = ingredient;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the strength.
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	public Double getStrength() {
+<b class="nc">&nbsp;		return strength;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param strength The strength to set.
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	public void setStrength(Double strength) {
+<b class="nc">&nbsp;		this.strength = strength;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @return Returns the units.
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	public Concept getUnits() {
+<b class="nc">&nbsp;		return units;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @param units The units to set.
+&nbsp;	 * @since 1.11
+&nbsp;	 */
+&nbsp;	public void setUnits(Concept units) {
+<b class="nc">&nbsp;		this.units = units;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#getId()
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public Integer getId() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * @since 1.5
+&nbsp;	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public void setId(Integer id) {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-09-19 11:27</div>
+</div>
+</body>
+</html>
