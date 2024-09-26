@@ -141,7 +141,7 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 		    defaultString(familyName)).append(defaultString(otherName.getFamilyName2()), defaultString(familyName2)).append(
 		    defaultString(otherName.getFamilyNameSuffix()), defaultString(familyNameSuffix)).isEquals();
 	}
-	
+
 	/**
 	 * Bitwise copy of the personName object. NOTICE: THIS WILL NOT COPY THE PATIENT OBJECT. The
 	 * PersonName.person object in this object AND the cloned object will point at the same person
@@ -153,7 +153,22 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 		if (pn == null) {
 			throw new IllegalArgumentException();
 		}
+
 		PersonName newName = new PersonName(pn.getPersonNameId());
+		copyNameDetails(newName, pn);
+		copyAdditionalDetails(newName, pn);
+		copyDateFields(newName, pn);
+		copyVoidedAndPreferred(newName, pn);
+
+		newName.setPerson(pn.getPerson());
+		newName.setVoidedBy(pn.getVoidedBy());
+		newName.setChangedBy(pn.getChangedBy());
+		newName.setCreator(pn.getCreator());
+
+		return newName;
+	}
+
+	private static void copyNameDetails(PersonName newName, PersonName pn) {
 		if (pn.getGivenName() != null) {
 			newName.setGivenName(String.valueOf(pn.getGivenName()));
 		}
@@ -172,6 +187,9 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 		if (pn.getFamilyNameSuffix() != null) {
 			newName.setFamilyNameSuffix(String.valueOf(pn.getFamilyNameSuffix()));
 		}
+	}
+
+	private static void copyAdditionalDetails(PersonName newName, PersonName pn) {
 		if (pn.getPrefix() != null) {
 			newName.setPrefix(String.valueOf(pn.getPrefix()));
 		}
@@ -181,7 +199,9 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 		if (pn.getVoidReason() != null) {
 			newName.setVoidReason(String.valueOf(pn.getVoidReason()));
 		}
-		
+	}
+
+	private static void copyDateFields(PersonName newName, PersonName pn) {
 		if (pn.getDateChanged() != null) {
 			newName.setDateChanged((Date) pn.getDateChanged().clone());
 		}
@@ -191,21 +211,17 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 		if (pn.getDateVoided() != null) {
 			newName.setDateVoided((Date) pn.getDateVoided().clone());
 		}
-		
+	}
+
+	private static void copyVoidedAndPreferred(PersonName newName, PersonName pn) {
 		if (pn.getPreferred() != null) {
 			newName.setPreferred(pn.getPreferred());
 		}
 		if (pn.getVoided() != null) {
 			newName.setVoided(pn.getVoided());
 		}
-		
-		newName.setPerson(pn.getPerson());
-		newName.setVoidedBy(pn.getVoidedBy());
-		newName.setChangedBy(pn.getChangedBy());
-		newName.setCreator(pn.getCreator());
-		
-		return newName;
 	}
+
 	
 	/**
 	 * @return Returns the degree.
@@ -399,7 +415,7 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
-	
+
 	/**
 	 * Convenience method to get all the names of this PersonName and concatenating them together
 	 * with spaces in between. If any part of {@link #getPrefix()}, {@link #getGivenName()},
@@ -409,57 +425,78 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 	 * <strong>Should</strong> not put spaces around an empty middle name
 	 */
 	public String getFullName() {
-		NameTemplate nameTemplate = null;
-		try {
-			nameTemplate = NameSupport.getInstance().getDefaultLayoutTemplate();
-		}
-		catch (APIException ex) {
-			log.warn("No name layout format set");
-		}
-		
+		NameTemplate nameTemplate = getNameTemplate();
 		if (nameTemplate != null) {
 			return nameTemplate.format(this);
 		}
 
 		List<String> temp = new ArrayList<>();
+		addPrefixIfExists(temp);
+		addGivenNameIfExists(temp);
+		addMiddleNameIfExists(temp);
+
+		if (isLongFormat()) {
+			addLongFormatFamilyNames(temp);
+		} else {
+			addFamilyNameIfExists(temp);
+		}
+
+		return StringUtils.collectionToDelimitedString(temp, " ").trim();
+	}
+
+	private NameTemplate getNameTemplate() {
+		try {
+			return NameSupport.getInstance().getDefaultLayoutTemplate();
+		} catch (APIException ex) {
+			log.warn("No name layout format set");
+			return null;
+		}
+	}
+
+	private void addPrefixIfExists(List<String> temp) {
 		if (StringUtils.hasText(getPrefix())) {
 			temp.add(getPrefix());
 		}
+	}
+
+	private void addGivenNameIfExists(List<String> temp) {
 		if (StringUtils.hasText(getGivenName())) {
 			temp.add(getGivenName());
 		}
+	}
+
+	private void addMiddleNameIfExists(List<String> temp) {
 		if (StringUtils.hasText(getMiddleName())) {
 			temp.add(getMiddleName());
 		}
-		if (OpenmrsConstants.PERSON_NAME_FORMAT_LONG.equals(PersonName.getFormat())) {
-			
-			if (StringUtils.hasText(getFamilyNamePrefix())) {
-				temp.add(getFamilyNamePrefix());
-			}
-			if (StringUtils.hasText(getFamilyName())) {
-				temp.add(getFamilyName());
-			}
-			if (StringUtils.hasText(getFamilyName2())) {
-				temp.add(getFamilyName2());
-			}
-			if (StringUtils.hasText(getFamilyNameSuffix())) {
-				temp.add(getFamilyNameSuffix());
-			}
-			if (StringUtils.hasText(getDegree())) {
-				temp.add(getDegree());
-			}
-		} else {
-			
-			if (StringUtils.hasText(getFamilyName())) {
-				temp.add(getFamilyName());
-			}
-		}
-		
-		String nameString = StringUtils.collectionToDelimitedString(temp, " ");
-		
-		return nameString.trim();
 	}
-	
+
+	private boolean isLongFormat() {
+		return OpenmrsConstants.PERSON_NAME_FORMAT_LONG.equals(PersonName.getFormat());
+	}
+
+	private void addLongFormatFamilyNames(List<String> temp) {
+		if (StringUtils.hasText(getFamilyNamePrefix())) {
+			temp.add(getFamilyNamePrefix());
+		}
+		addFamilyNameIfExists(temp);
+		if (StringUtils.hasText(getFamilyName2())) {
+			temp.add(getFamilyName2());
+		}
+		if (StringUtils.hasText(getFamilyNameSuffix())) {
+			temp.add(getFamilyNameSuffix());
+		}
+		if (StringUtils.hasText(getDegree())) {
+			temp.add(getDegree());
+		}
+	}
+
+	private void addFamilyNameIfExists(List<String> temp) {
+		if (StringUtils.hasText(getFamilyName())) {
+			temp.add(getFamilyName());
+		}
+	}
+
 	/**
 	 * @see java.lang.Object#toString()
 	 */
@@ -526,16 +563,39 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 	public static class DefaultComparator implements Comparator<PersonName>, Serializable {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		@Override
 		public int compare(PersonName pn1, PersonName pn2) {
-			int ret = pn1.getVoided().compareTo(pn2.getVoided());
+			int ret = compareVoided(pn1, pn2);
 			if (ret == 0) {
-				ret = pn2.getPreferred().compareTo(pn1.getPreferred());
+				ret = comparePreferred(pn1, pn2);
 			}
 			if (ret == 0) {
-				ret = OpenmrsUtil.compareWithNullAsGreatest(pn1.getFamilyName(), pn2.getFamilyName());
+				ret = compareFamilyNames(pn1, pn2);
 			}
+			if (ret == 0) {
+				ret = compareDateCreated(pn1, pn2);
+			}
+			
+			// if we've gotten this far, just check all name values. If they are
+			// equal, leave the objects at 0. If not, arbitrarily pick retValue=1
+			// and return that (they are not equal).
+			if (ret == 0 && !pn1.equalsContent(pn2)) {
+				ret = 1;
+			}
+			return ret;
+		}
+
+		private int compareVoided(PersonName pn1, PersonName pn2) {
+			return pn1.getVoided().compareTo(pn2.getVoided());
+		}
+
+		private int comparePreferred(PersonName pn1, PersonName pn2) {
+			return pn2.getPreferred().compareTo(pn1.getPreferred());
+		}
+
+		private int compareFamilyNames(PersonName pn1, PersonName pn2) {
+			int ret = OpenmrsUtil.compareWithNullAsGreatest(pn1.getFamilyName(), pn2.getFamilyName());
 			if (ret == 0) {
 				ret = OpenmrsUtil.compareWithNullAsGreatest(pn1.getFamilyName2(), pn2.getFamilyName2());
 			}
@@ -551,19 +611,16 @@ public class PersonName extends BaseChangeableOpenmrsData implements java.io.Ser
 			if (ret == 0) {
 				ret = OpenmrsUtil.compareWithNullAsGreatest(pn1.getFamilyNameSuffix(), pn2.getFamilyNameSuffix());
 			}
-			if (ret == 0 && pn1.getDateCreated() != null) {
-				ret = OpenmrsUtil.compareWithNullAsLatest(pn1.getDateCreated(), pn2.getDateCreated());
-			}
-			
-			// if we've gotten this far, just check all name values. If they are
-			// equal, leave the objects at 0. If not, arbitrarily pick retValue=1
-			// and return that (they are not equal).
-			if (ret == 0 && !pn1.equalsContent(pn2)) {
-				ret = 1;
-			}
-			
 			return ret;
 		}
+
+		private int compareDateCreated(PersonName pn1, PersonName pn2) {
+			if (pn1.getDateCreated() != null) {
+				return OpenmrsUtil.compareWithNullAsLatest(pn1.getDateCreated(), pn2.getDateCreated());
+			}
+			return 0;
+		}
+
 	}
 	
 }
